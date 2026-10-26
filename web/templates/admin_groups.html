@@ -1,0 +1,26 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.T "nav.groups"}}</h1>
+<p class="meta">{{.T "groups.intro"}}</p>
+{{range $d.Groups}}{{$g := .}}<section class="group">
+  <h2>{{template "icon" "users"}} {{.Name}}</h2>
+  {{if .Subs}}<ul class="list-plain">{{range $i, $sub := .Subs}}<li class="row">
+    <span>{{index $.Data.Users $sub}} <span class="meta">({{$sub}})</span></span>
+    <form method="post" action="/admin/groups"><input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="remove"><input type="hidden" name="group" value="{{$g.Name}}"><input type="hidden" name="sub" value="{{$sub}}">
+    <button class="btn btn-destructive btn-sm" type="submit">{{$.T "settings.remove"}}</button></form>
+  </li>{{end}}</ul>{{else}}<p class="empty">{{$.T "groups.empty"}}</p>{{end}}
+  <form method="post" action="/admin/groups" class="form form-row">
+    <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="add"><input type="hidden" name="group" value="{{.Name}}">
+    <div class="field"><label for="sub-{{.Name}}">{{$.T "settings.person"}}</label>
+      <select id="sub-{{.Name}}" name="sub" class="btn btn-secondary">{{range $sub, $name := $.Data.Users}}<option value="{{$sub}}">{{$name}}</option>{{end}}</select></div>
+    <button class="btn btn-secondary" type="submit">{{$.T "settings.add"}}</button>
+  </form>
+</section>{{else}}<p class="empty">{{.T "groups.none"}}</p>{{end}}
+
+<h2>{{.T "groups.create"}}</h2>
+<form method="post" action="/admin/groups" class="form form-row">
+  <input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="action" value="create">
+  <div class="field"><label for="group">{{.T "groups.name"}}</label><input id="group" name="group" required pattern="[a-z0-9-]+" placeholder="familie"></div>
+  <button class="btn btn-primary" type="submit">{{.T "groups.create"}}</button>
+</form>
+<p class="meta">{{.T "groups.name_hint"}}</p>
+</div>{{end}}

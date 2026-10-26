@@ -41,7 +41,13 @@
   <nav class="sidenav" aria-label="{{.T "nav.spaces"}}">
     <details open>
       <summary>{{.T "nav.menu"}}</summary>
-      {{block "nav" .}}{{end}}
+      {{block "nav" .}}<ul class="navlist">
+        {{range .Nav}}<li><a href="/s/{{.Slug}}"{{if eq $.Here .Slug}} aria-current="page"{{end}}>{{template "icon" .Icon}}<span>{{.Name}}</span></a></li>
+        {{end}}
+      </ul>
+      {{if .Admin}}<ul class="navlist navlist-admin">
+        <li><a href="/admin/groups">{{template "icon" "users"}}<span>{{.T "nav.groups"}}</span></a></li>
+      </ul>{{end}}{{end}}
     </details>
   </nav>
   <main class="main" id="main">

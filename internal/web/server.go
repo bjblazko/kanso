@@ -15,6 +15,7 @@ import (
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/config"
 	"github.com/bjblazko/kanso/internal/i18n"
+	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/users"
 	assets "github.com/bjblazko/kanso/web"
@@ -26,7 +27,8 @@ type Deps struct {
 	Auth  *auth.Auth
 	I18n  *i18n.Bundle
 	Users *users.Store
-	Repo  *store.Repo
+	Repo   *store.Repo
+	Spaces *spaces.Service
 }
 
 // Server renders pages and routes requests.
@@ -57,12 +59,12 @@ func New(d Deps) (*Server, error) {
 	return s, nil
 }
 
-var pageNames = []string{"home", "error", "licenses"}
+var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups"}
 
 func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}
 	for _, name := range pageNames {
-		t, err := template.ParseFS(assets.Files, "templates/layout.html", "templates/"+name+".html")
+		t, err := template.ParseFS(assets.Files, "templates/layout.html", "templates/icons.html", "templates/"+name+".html")
 		if err != nil {
 			return nil, fmt.Errorf("template %s: %w", name, err)
 		}
@@ -102,6 +104,13 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /{$}", s.home)
 	mux.HandleFunc("GET /about/licenses", s.showLicenses)
 	mux.HandleFunc("POST /me/lang", s.setLang)
+	mux.HandleFunc("GET /s/{space}", s.showSpace)
+	mux.HandleFunc("GET /s/{space}/settings", s.spaceSettings)
+	mux.HandleFunc("POST /s/{space}/settings", s.updateSpaceSettings)
+	mux.HandleFunc("GET /admin/spaces/new", s.newSpaceForm)
+	mux.HandleFunc("POST /admin/spaces/new", s.createSpace)
+	mux.HandleFunc("GET /admin/groups", s.groupsPage)
+	mux.HandleFunc("POST /admin/groups", s.updateGroups)
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { s.notFound(w, r) })
 }
 

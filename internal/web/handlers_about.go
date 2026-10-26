@@ -28,10 +28,6 @@ func loadLicenses(static fs.FS) ([]license, error) {
 	return list, yaml.Unmarshal(b, &list)
 }
 
-func (s *Server) home(w http.ResponseWriter, r *http.Request) {
-	s.page(w, r, "home", "", nil)
-}
-
 func (s *Server) showLicenses(w http.ResponseWriter, r *http.Request) {
 	v := s.newView(r, "", s.licenses)
 	v.Title = v.T("licenses.title")

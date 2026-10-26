@@ -4,11 +4,13 @@ package web
 
 import (
 	"bytes"
+	"errors"
 	"log/slog"
 	"net/http"
 
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/i18n"
+	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/users"
 )
 
@@ -20,6 +22,9 @@ type view struct {
 	CSRF  string
 	Query string
 	Data  any
+	Admin bool
+	Nav   []spaces.Space
+	Here  string // slug of the current space, for aria-current
 
 	bundle  *i18n.Bundle
 	version string
@@ -32,10 +37,11 @@ func (v view) T(key string, args ...any) string { return v.bundle.T(v.Lang, key,
 func (v view) Asset(path string) string { return "/static/" + path + "?v=" + v.version }
 
 func (s *Server) newView(r *http.Request, title string, data any) view {
-	u, _ := auth.UserFrom(r.Context())
+	u, p := auth.UserFrom(r.Context())
 	return view{
 		Title: title, Lang: i18n.Negotiate(r.Header.Get("Accept-Language"), u.Lang),
 		User: u, CSRF: auth.CSRFToken(r.Context()), Query: r.URL.Query().Get("q"), Data: data,
+		Admin: p.Admin, Nav: s.Spaces.Visible(p, s.groups()), Here: r.PathValue("space"),
 		bundle: s.I18n, version: s.version,
 	}
 }
@@ -76,3 +82,5 @@ func (s *Server) serverError(w http.ResponseWriter, r *http.Request, err error) 
 	slog.Error("request failed", "path", r.URL.Path, "err", err)
 	s.fail(w, r, http.StatusInternalServerError, "error.generic")
 }
+
+var errBadRequest = errors.New("bad request")

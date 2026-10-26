@@ -1,0 +1,6 @@
+{{define "content"}}<div class="content">
+<h1>{{template "icon" .Data.Space.Icon}} {{.Data.Space.Name}}</h1>
+{{if .Data.Space.Description}}<p class="meta">{{.Data.Space.Description}}</p>{{end}}
+{{block "space-body" .}}<p class="empty">{{.T "space.no_pages"}}</p>{{end}}
+{{if .Data.CanManage}}<div class="actions"><a class="btn btn-secondary" href="/s/{{.Data.Space.Slug}}/settings">{{.T "space.settings"}}</a></div>{{end}}
+</div>{{end}}

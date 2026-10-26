@@ -1,0 +1,16 @@
+{{define "content"}}<div class="content">
+<h1>{{.T "space.create"}}</h1>
+<form method="post" action="/admin/spaces/new" class="form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <div class="field">
+    <label for="name">{{.T "space.name"}}</label>
+    <input id="name" name="name" required maxlength="80" placeholder="{{.T "space.name_example"}}"{{if .Data}} aria-invalid="true" aria-describedby="name-error"{{end}}>
+    {{if .Data}}<span class="hint" id="name-error" data-error>{{.Data}}</span>{{end}}
+  </div>
+  <div class="field">
+    <label for="description">{{.T "space.description"}}</label>
+    <input id="description" name="description" maxlength="200">
+  </div>
+  <div class="actions"><button class="btn btn-primary" type="submit">{{.T "space.create"}}</button></div>
+</form>
+</div>{{end}}

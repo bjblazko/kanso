@@ -1,0 +1,43 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.T "space.settings"}}: {{$d.Space.Name}}</h1>
+{{if $d.Error}}<p class="notice notice-warning" role="alert">{{$d.Error}}</p>{{end}}
+
+<h2>{{.T "settings.members"}}</h2>
+{{if $d.Space.Members}}<ul class="list-plain members">
+{{range $i, $m := $d.Space.Members}}<li class="row">
+  <span>{{if $m.User}}{{index $d.Users $m.User}} <span class="meta">({{$m.User}})</span>{{else}}{{template "icon" "users"}} {{$m.Group}}{{end}}</span>
+  <span class="badge">{{$.T (printf "role.%s" $m.Role)}}</span>
+  <form method="post" action="/s/{{$d.Space.Slug}}/settings">
+    <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="remove"><input type="hidden" name="index" value="{{$i}}">
+    <button class="btn btn-destructive btn-sm" type="submit">{{$.T "settings.remove"}}</button>
+  </form>
+</li>{{end}}</ul>
+{{else}}<p class="empty">{{.T "settings.no_members"}}</p>{{end}}
+
+<form method="post" action="/s/{{$d.Space.Slug}}/settings" class="form form-row">
+  <input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="action" value="add">
+  <div class="field"><label for="kind">{{.T "settings.kind"}}</label>
+    <select id="kind" name="kind" class="btn btn-secondary"><option value="user">{{.T "settings.person"}}</option><option value="group">{{.T "settings.group"}}</option></select></div>
+  <div class="field"><label for="who">{{.T "settings.who"}}</label>
+    <select id="who" name="who" class="btn btn-secondary">
+      <optgroup label="{{.T "settings.people"}}">{{range $sub, $name := $d.Users}}<option value="{{$sub}}">{{$name}}</option>{{end}}</optgroup>
+      <optgroup label="{{.T "settings.groups"}}">{{range $d.Groups}}<option value="{{.}}">{{.}}</option>{{end}}</optgroup>
+    </select></div>
+  <div class="field"><label for="role">{{.T "settings.role"}}</label>
+    <select id="role" name="role" class="btn btn-secondary">{{range $d.Roles}}<option value="{{.}}">{{$.T (printf "role.%s" .)}}</option>{{end}}</select></div>
+  <button class="btn btn-secondary" type="submit">{{.T "settings.add"}}</button>
+</form>
+<p class="meta">{{.T "settings.kind_hint"}}</p>
+
+<h2>{{.T "settings.general"}}</h2>
+<form method="post" action="/s/{{$d.Space.Slug}}/settings" class="form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="action" value="save">
+  <div class="field"><label for="name">{{.T "space.name"}}</label><input id="name" name="name" required maxlength="80" value="{{$d.Space.Name}}"></div>
+  <div class="field"><label for="description">{{.T "space.description"}}</label><input id="description" name="description" maxlength="200" value="{{$d.Space.Description}}"></div>
+  <fieldset class="icons"><legend>{{.T "space.icon"}}</legend>
+    {{range $d.Icons}}<label class="icon-choice"><input type="radio" name="icon" value="{{.}}"{{if eq . $d.Space.Icon}} checked{{end}}>{{template "icon" .}}<span class="visually-hidden">{{$.T (printf "icon.%s" .)}}</span></label>{{end}}
+  </fieldset>
+  <div class="actions"><button class="btn btn-primary" type="submit">{{.T "settings.save"}}</button>
+  <a class="btn btn-quiet" href="/s/{{$d.Space.Slug}}">{{.T "settings.back"}}</a></div>
+</form>
+</div>{{end}}

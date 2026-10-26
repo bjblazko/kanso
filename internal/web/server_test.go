@@ -17,6 +17,7 @@ import (
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/config"
 	"github.com/bjblazko/kanso/internal/i18n"
+	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/users"
 )
@@ -60,7 +61,11 @@ func buildTestDeps(t *testing.T, cfg config.Config) Deps {
 		t.Fatal(err)
 	}
 	bundle, _ := i18n.Load()
-	return Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo}
+	sp, err := spaces.NewService(cfg.DataDir, repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp}
 }
 
 // client signs in through the dev login and returns a client with cookies.
