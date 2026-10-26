@@ -23,10 +23,10 @@ import (
 
 // Deps are the services the web layer uses.
 type Deps struct {
-	Cfg   config.Config
-	Auth  *auth.Auth
-	I18n  *i18n.Bundle
-	Users *users.Store
+	Cfg    config.Config
+	Auth   *auth.Auth
+	I18n   *i18n.Bundle
+	Users  *users.Store
 	Repo   *store.Repo
 	Spaces *spaces.Service
 }
