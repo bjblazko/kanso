@@ -25,4 +25,9 @@ All notable changes to this project are documented here. The format follows
 - Mermaid diagrams: mermaid 12.2.0 vendored without the ELK layout (EPL-2.0) and without source maps, loaded only on pages with diagrams and in the editor; strict security level, labels as plain SVG text.
 - Page history: every version with author and time, differences of the text to the current version, restore as a new version (respects edit locks).
 - Search across titles and texts of all readable spaces: in memory, umlauts match either spelling, last word as prefix, title hits first, plain-text snippets.
+- Deployment guide for Authelia (`docs/deploy-authelia.md`).
+
+### Fixed
+- Design review: button links no longer underlined, navigation folded on phones, neutral checkboxes.
+- ECDSA keys parsed with the non-deprecated standard-library API.
 - Documentation: arc42 architecture, ADRs 000–003, feature descriptions.

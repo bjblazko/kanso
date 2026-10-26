@@ -9,7 +9,10 @@ you can read without Kanso.
 
 ## Status
 
-Early development. Phase 1 (wiki, login, roles) is being built.
+Phase 1 is done: Markdown wiki with spaces, page tree, editor with live
+preview, attachments, Mermaid diagrams, edit locks, history with diff and
+restore, search; sign-in with OpenID Connect; roles per space; German and
+English. Next: notes, tasks (Kanban and Eisenhower), lists, calendars.
 
 ## Run
 
@@ -17,7 +20,8 @@ Requires Go 1.27 and `git` on the `PATH`.
 
 ```sh
 just run          # dev login on http://localhost:8090, data in ./tmp
-just test
+just test         # unit and HTTP tests
+just e2e          # browser tests (Playwright, Chromium + WebKit)
 ```
 
 ## Configuration
@@ -34,10 +38,15 @@ just test
 | `KANSO_ADMIN_GROUP` | Group claim that makes a user admin, default `kanso-admin` |
 | `KANSO_DEV_LOGIN` | `true` enables a password-less test login (loopback only) |
 
+Deployment with Authelia: [docs/deploy-authelia.md](docs/deploy-authelia.md).
+Architecture: [docs/architecture/arc42.md](docs/architecture/arc42.md).
+
 ## Privacy
 
 Kanso sends no telemetry and checks for no updates. It talks only to your
-OIDC provider.
+OIDC provider. It stores the name and e-mail address the provider sends, in
+`users/<id>.yaml` in the data directory, and writes them into the history as
+author of each change. Logs contain errors and request paths, no addresses.
 
 ## License
 

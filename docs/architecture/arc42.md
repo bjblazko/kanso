@@ -65,7 +65,7 @@ services and external calendars. Nothing else leaves the host.
 | `internal/spaces` | Spaces and their members |
 | `internal/wiki` | Page tree, pages, attachments, locks, history |
 | `internal/markdown` | Safe Markdown rendering |
-| `internal/search` | In-memory search |
+| `internal/search` | In-memory search (scans all pages per query) |
 | `internal/web` | HTTP routes, templates, static files |
 | `web/` | Templates, CSS, JS, fonts, vendored Mermaid |
 
@@ -117,6 +117,9 @@ Verified by unit tests (`go test ./...`) and browser end-to-end tests
 - Content stays usable with `git` and a text editor alone.
 
 ## 11. Risks and Technical Debt
+
+- Build with Go ≥ 1.27.3 (GO-2026-6809, `crypto/x509`).
+- 34 unchecked return values in test setup code (golangci-lint errcheck).
 
 - Write throughput is limited by one global lock; fine for a household.
 - `go.yaml.in/yaml/v3` is frozen; move to v4 once it is stable.
