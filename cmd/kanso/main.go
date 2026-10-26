@@ -17,6 +17,7 @@ import (
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/config"
 	"github.com/bjblazko/kanso/internal/i18n"
+	"github.com/bjblazko/kanso/internal/markdown"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/users"
@@ -70,7 +71,7 @@ func buildDeps(cfg config.Config) (web.Deps, error) {
 		return web.Deps{}, err
 	}
 	bundle, err := i18n.Load()
-	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk}, err
+	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, MD: markdown.New()}, err
 }
 
 func buildAuth(cfg config.Config, us *users.Store) (*auth.Auth, error) {

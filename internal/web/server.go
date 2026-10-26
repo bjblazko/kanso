@@ -15,6 +15,7 @@ import (
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/config"
 	"github.com/bjblazko/kanso/internal/i18n"
+	"github.com/bjblazko/kanso/internal/markdown"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/users"
@@ -31,6 +32,7 @@ type Deps struct {
 	Repo   *store.Repo
 	Spaces *spaces.Service
 	Wiki   *wiki.Wiki
+	MD     *markdown.Renderer
 }
 
 // Server renders pages and routes requests.
@@ -122,6 +124,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /s/{space}/new", s.newPageForm)
 	mux.HandleFunc("POST /s/{space}/new", s.createPage)
 	mux.HandleFunc("GET /p/{id}", s.showPage)
+	mux.HandleFunc("POST /api/preview", s.preview)
 	mux.HandleFunc("POST /p/{id}/move", s.movePage)
 	mux.HandleFunc("GET /p/{id}/delete", s.confirmDeletePage)
 	mux.HandleFunc("POST /p/{id}/delete", s.deletePage)

@@ -4,7 +4,7 @@
 </nav>
 <h1>{{$d.Page.Meta.Title}}</h1>
 <p class="meta">{{.T "page.updated_by" $d.Page.Meta.Author}} <time datetime="{{$d.Page.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Page.Meta.Updated.Format "02.01.2006 15:04"}}</time></p>
-<div class="prose">{{if $d.Page.Body}}<pre class="source">{{$d.Page.Body}}</pre>{{else}}<p class="empty">{{.T "page.empty"}}</p>{{end}}</div>
+<div class="prose">{{if $d.Page.Body}}{{$d.HTML}}{{else}}<p class="empty">{{.T "page.empty"}}</p>{{end}}</div>
 
 {{if $d.Children}}<section class="children"><h2>{{.T "page.children"}}</h2>{{template "tree" (treeArgs $d.Children "")}}</section>{{end}}
 

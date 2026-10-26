@@ -4,11 +4,13 @@ package web
 
 import (
 	"errors"
+	"html/template"
 	"net/http"
 	"strconv"
 
 	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/auth"
+	"github.com/bjblazko/kanso/internal/markdown"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/wiki"
 )
@@ -21,6 +23,8 @@ type pageCtx struct {
 	Ancestors []wiki.PageMeta
 	Children  []*wiki.Node
 	Targets   []moveTarget
+	HTML      template.HTML
+	Info      markdown.Info
 }
 
 // CanWrite tells templates whether to offer changes.
@@ -53,6 +57,12 @@ func (s *Server) showPage(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	html, info, err := s.MD.Render([]byte(pc.Page.Body), markdown.PageCtx{PageID: pc.Page.Meta.ID})
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	pc.HTML, pc.Info = html, info
 	pc.Ancestors = s.Wiki.Ancestors(pc.Page.Meta.ID)
 	pc.Children = childrenOf(s.Wiki.Tree(pc.Space.Slug), pc.Page.Meta.ID)
 	if pc.CanWrite() {
@@ -180,4 +190,20 @@ func (s *Server) deletePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/s/"+pc.Space.Slug, http.StatusSeeOther)
+}
+
+// preview renders Markdown for the editor; the caller must be allowed to
+// write the page the text belongs to.
+func (s *Server) preview(w http.ResponseWriter, r *http.Request) {
+	r.SetPathValue("id", r.PostFormValue("page"))
+	if _, ok := s.pageFor(w, r, access.Write); !ok {
+		return
+	}
+	html, _, err := s.MD.Render([]byte(r.PostFormValue("body")), markdown.PageCtx{PageID: r.PathValue("id")})
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(html))
 }

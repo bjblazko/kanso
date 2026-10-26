@@ -101,3 +101,21 @@ p { margin: 0 0 var(--space-4); }
 .children { margin-top: var(--space-8); }
 .more { margin-top: var(--space-6); }
 .more[open] > summary { margin-bottom: var(--space-4); }
+
+/* ---- Rendered Markdown ------------------------------------------------ */
+
+.prose { line-height: 1.6; }
+.prose h1, .prose h2, .prose h3 { margin-top: var(--space-8); }
+.prose ul, .prose ol { padding-left: var(--space-6); margin: 0 0 var(--space-4); }
+.prose li + li { margin-top: var(--space-1); }
+.prose li:has(> input[type="checkbox"]) { list-style: none; margin-left: calc(-1 * var(--space-6)); }
+.prose blockquote { margin: 0 0 var(--space-4); padding-left: var(--space-4); border-left: 1px solid var(--line-strong); color: var(--fg-2); }
+.prose pre { overflow-x: auto; padding: var(--space-3) var(--space-4); background: var(--bg-2); border-radius: var(--radius-md); font-size: var(--text-sm); }
+.prose code { font-family: var(--font-mono); font-size: 0.92em; }
+.prose :not(pre) > code { padding: 1px var(--space-1); background: var(--bg-2); border-radius: var(--radius-sm); }
+.prose pre.mermaid { background: transparent; text-align: center; }
+.prose table { border-collapse: collapse; margin: 0 0 var(--space-4); display: block; overflow-x: auto; }
+.prose th, .prose td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--line); text-align: left; }
+.prose th { font-weight: 600; }
+.prose img { max-width: 100%; height: auto; border-radius: var(--radius-md); }
+.prose hr { border: 0; border-top: 1px solid var(--line); margin: var(--space-8) 0; }
