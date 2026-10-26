@@ -1,0 +1,8 @@
+/kanso
+/dist/
+/.superpowers/
+*.test
+*.out
+.DS_Store
+.idea/
+/tmp/
