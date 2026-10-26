@@ -16,6 +16,7 @@ import (
 	"github.com/bjblazko/kanso/internal/config"
 	"github.com/bjblazko/kanso/internal/i18n"
 	"github.com/bjblazko/kanso/internal/markdown"
+	"github.com/bjblazko/kanso/internal/search"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/users"
@@ -34,6 +35,7 @@ type Deps struct {
 	Wiki   *wiki.Wiki
 	MD     *markdown.Renderer
 	Locks  *wiki.Locks
+	Search *search.Index
 }
 
 // Server renders pages and routes requests.
@@ -64,7 +66,7 @@ func New(d Deps) (*Server, error) {
 	return s, nil
 }
 
-var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision"}
+var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search"}
 
 func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}
@@ -119,6 +121,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /{$}", s.home)
 	mux.HandleFunc("GET /about/licenses", s.showLicenses)
 	mux.HandleFunc("POST /me/lang", s.setLang)
+	mux.HandleFunc("GET /search", s.search)
 	mux.HandleFunc("GET /s/{space}", s.showSpace)
 	mux.HandleFunc("GET /s/{space}/settings", s.spaceSettings)
 	mux.HandleFunc("POST /s/{space}/settings", s.updateSpaceSettings)

@@ -162,3 +162,6 @@ p { margin: 0 0 var(--space-4); }
 .diff-del { background: color-mix(in oklch, var(--warning) 10%, var(--bg)); text-decoration: line-through; text-decoration-color: var(--line-strong); }
 .diff-hunk { height: var(--space-2); background: var(--bg-2); }
 .revision { padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); }
+.results li { padding: var(--space-4) 0; }
+.results a { font-weight: 500; }
+.snippet { margin: var(--space-1) 0 0; color: var(--fg-2); font-size: var(--text-sm); }

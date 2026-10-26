@@ -137,3 +137,11 @@ func TestDiffText(t *testing.T) {
 		t.Errorf("equal texts: %q", same)
 	}
 }
+
+func TestRepoRunsGCInForeground(t *testing.T) {
+	r := newRepo(t)
+	out, err := r.run("config", "--get", "gc.autoDetach")
+	if err != nil || strings.TrimSpace(string(out)) != "false" {
+		t.Errorf("gc.autoDetach = %q, %v", out, err)
+	}
+}

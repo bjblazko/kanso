@@ -54,13 +54,18 @@ func OpenRepo(dir string) (*Repo, error) {
 		return nil, err
 	}
 	r := &Repo{dir: abs}
-	if _, err := os.Stat(filepath.Join(abs, ".git")); err == nil {
-		return r, nil
+	if _, err := os.Stat(filepath.Join(abs, ".git")); err != nil {
+		if err := os.MkdirAll(abs, dirMode); err != nil {
+			return nil, err
+		}
+		if err := r.initialise(); err != nil {
+			return nil, err
+		}
 	}
-	if err := os.MkdirAll(abs, dirMode); err != nil {
-		return nil, err
-	}
-	return r, r.initialise()
+	// Housekeeping runs inside the commit, not detached in the background,
+	// so nothing writes to the repository after a request has finished.
+	_, err = r.run("config", "gc.autoDetach", "false")
+	return r, err
 }
 
 func (r *Repo) initialise() error {

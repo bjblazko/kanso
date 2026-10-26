@@ -73,7 +73,7 @@ func buildTestDeps(t *testing.T, cfg config.Config) Deps {
 		t.Fatal(err)
 	}
 	return Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, MD: markdown.New(),
-		Locks: wiki.NewLocks(5*time.Minute, time.Now)}
+		Locks: wiki.NewLocks(5*time.Minute, time.Now), Search: buildIndex(wk)}
 }
 
 // client signs in through the dev login and returns a client with cookies.

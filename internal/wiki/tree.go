@@ -175,3 +175,14 @@ func (w *Wiki) findByDir(space, dir string) (PageMeta, bool) {
 	}
 	return PageMeta{}, false
 }
+
+// IDs returns the ids of all pages.
+func (w *Wiki) IDs() []string {
+	w.mu.RLock()
+	defer w.mu.RUnlock()
+	ids := make([]string, 0, len(w.index))
+	for id := range w.index {
+		ids = append(ids, id)
+	}
+	return ids
+}
