@@ -1,4 +1,6 @@
-# Hüpattl! Kanso – Design (Brainstorming-Ergebnis)
+# Hüpattl! Kanso – Design
+
+**Status:** freigegeben · **Created:** 2026-10-26 · **Updated:** 2026-10-26
 
 ## Context
 
@@ -41,10 +43,9 @@ systemd + `DynamicUser` + `StateDirectory`, hinter Caddy. Familienkalender heute
 - **Listen, Boards, Tasks**: eine Datei pro Eintrag statt einer großen Datei → keine Sperren nötig,
   wenig Konflikte, Offline-Abgleich pro Eintrag (last-write-wins pro Eintrag + Revision).
 - **Suche**: In-Memory-Index beim Start, aktualisiert beim Speichern (kein externer Index).
-- **Docmost-Import**: einmaliges Kommando `kanso import-docmost`, liest direkt aus Postgres
-  (ProseMirror-JSON → Markdown, Hierarchie, Zeitstempel, Autoren, Anhänge aus dem NAS-Ordner).
-  Fallback: Markdown-ZIP-Export von Docmost. Braucht einen Postgres-Treiber → nur in einem separaten
-  Import-Binary (`cmd/kanso-import`), damit der Server frei davon bleibt; Freigabe nötig.
+- **Docmost-Migration**: nicht Teil des Projekts (Nutzer). Kanso startet normalerweise leer; die
+  eigene Migration wird später einmalig und separat gemacht. Das Spaces/Seiten-Modell orientiert sich
+  grob an Docmost, damit das dann leicht fällt.
 - **Aus Notiz wird …**: Task (Notiz bleibt, verlinkt) oder Wiki-Artikel (Notiz wird verschoben,
   Anhänge wandern mit, Git-Verlauf bleibt via `git mv`).
 - **Task-Ansichten**: ein Task hat `status` (Lane) **und** `urgent`/`important`; Kanban und
@@ -94,24 +95,25 @@ IDs: kurze, zufällige, URL-sichere IDs; Slugs nur für lesbare Ordnernamen bei 
 - Sicherheit: CSP ohne Inline-Skripte, CSRF-Token, alle Pfade gegen Path-Traversal prüfen,
   Anhänge mit `Content-Disposition` und festem Content-Type, Upload-Limits.
 
-## Fremdabhängigkeiten – Kandidaten (jede einzeln zur Freigabe vorlegen)
+## Fremdabhängigkeiten (geprüft 2026-10-26, vom Nutzer einzeln freigegeben)
 
-| Kandidat | Zweck | Alternative ohne Lib |
-|---|---|---|
-| `github.com/yuin/goldmark` (MIT) + Erweiterungen (Tabellen, Tasklisten) | Markdown → HTML | eigener Parser (großer Aufwand, Fehlerquelle) |
-| `mermaid.js` (MIT), lokal, nur bei Bedarf geladen | Diagramme | nur Quelltext anzeigen |
-| `gopkg.in/yaml.v3` (MIT/Apache) | Frontmatter/Config | JSON statt YAML (Stdlib) – prüfen! |
-| Postgres-Treiber `pgx` (MIT), nur im Import-Binary | Docmost-Import | ZIP-Export-Import |
-| IBM Plex (OFL) | Schrift | Systemschrift |
+| Abhängigkeit | Version | Lizenz | Zweck | Auflagen |
+|---|---|---|---|---|
+| `github.com/yuin/goldmark/v2` | v2.1.9 | MIT | Markdown → HTML | rohes HTML aus, Ausgabe zusätzlich sanitizen |
+| `go.yaml.in/yaml/v3` | v3 (frozen, Security-Fixes) | Apache-2.0/MIT | Frontmatter, Konfiguration | auf v4 wechseln, wenn stabil |
+| `mermaid` (ESM-Build) | 12.2.0 | MIT (+ MIT/ISC/BSD/Apache-Abhängigkeiten, DOMPurify unter Apache-2.0 gewählt, robust-predicates Unlicense) | Diagramme, lokal, lazy | **ohne ELK-Chunk** (elkjs = EPL-2.0), Layout fest `dagre` |
+| IBM Plex Sans/Mono | aktuell | OFL-1.1 | Schrift | selbst gehostet, in „Lizenzen und Dank“ |
 
-OIDC, Web-Push (VAPID, RFC 8291 via `crypto/ecdh`, `crypto/hkdf`), iCalendar, Git (CLI): selbst gebaut.
+Abgelehnt: `pgx` (Docmost-Migration ist kein Projektteil). Neue Abhängigkeiten nur nach gleicher Prüfung
+und Freigabe. OIDC, Web-Push (VAPID, RFC 8291 via `crypto/ecdh`, `crypto/hkdf`), iCalendar, Git (CLI):
+selbst gebaut. Alle Lizenztexte kommen in die App („Lizenzen und Dank“) mit Test auf Vollständigkeit.
 
 ## Phasen (je Phase eigener Implementierungsplan via superpowers:writing-plans)
 
 1. **Fundament + Wiki**: Repo-Gerüst (LICENSE Apache-2.0, README, CHANGELOG, `docs/adr/`, CLAUDE.md),
    Auth/OIDC, Rollen/Gruppen, Spaces, Seiten-Baum, Editor Quelltext/Vorschau, Anhänge, Mermaid,
    Sperren, Git-Verlauf + Vergleich, Suche, i18n DE/EN, Design-System.
-2. **Docmost-Import** + Deployment in homelab2 (Flake-Input, Modul, Authelia-Client, Caddy, DNS) und Parallelbetrieb.
+2. **Deployment** in homelab2 (Flake-Input, Modul, Authelia-Client, Caddy, DNS) und Parallelbetrieb zu Docmost.
 3. **Notizen** (privat) → Task / Wiki-Artikel.
 4. **Tasks**: Boards (privat/Gruppe), Kanban + Eisenhower, Fälligkeiten, wiederkehrende Aufgaben.
 5. **Listen**: Einkauf, Wunschlisten (Freigabe, „Ich besorge das“), Links.
@@ -120,7 +122,7 @@ OIDC, Web-Push (VAPID, RFC 8291 via `crypto/ecdh`, `crypto/hkdf`), iCalendar, Gi
 8. **Extras**: Essensplan → Einkauf, Haus-Inventar (Wartung erzeugt Tasks), Kind & Kontakte.
 9. **Kalender extern**: ICS-Abo, CalDAV-Client (iCloud), später CalDAV-Server.
 
-Docmost wird erst abgeschaltet, wenn Phase 2 im Alltag besteht.
+Docmost wird erst abgeschaltet, wenn Kanso im Alltag besteht und die separate Migration gelaufen ist.
 
 ## Verifikation
 
@@ -128,14 +130,5 @@ Docmost wird erst abgeschaltet, wenn Phase 2 im Alltag besteht.
 - Integrationstests mit temporärem Datenordner (Git-Commits, Rechte pro Rolle, Sperren, Path-Traversal).
 - OIDC lokal gegen Authelia-Testinstanz oder Fake-Provider im Test.
 - UI: Review nach huepattl-rams-design (`review.md`), Kontrast-Skript, Zustände leer/Fehler/offline.
-- Docmost-Import: Probelauf gegen Kopie des Dumps, Seiten-/Anhangzahl (46/74) vergleichen, Stichproben.
 - Vor jedem Release/Deploy: huepattl-legal-check (Lizenzliste „Licenses and thanks“ in der App,
   ausgehende Verbindungen, Haftungsausschluss).
-
-## Nächste Schritte nach Freigabe
-
-1. `git init` in `kanso/`, Design als `docs/superpowers/specs/2026-10-26-kanso-design.md` committen.
-2. Dependency-Prüfung der Kandidaten → Freigabe pro Kandidat einholen.
-3. superpowers:writing-plans für Phase 1.
-
-Hinweis: Der Update-Check der huepattl-Skills wurde im Plan-Modus übersprungen (schreibt eine Datei).
