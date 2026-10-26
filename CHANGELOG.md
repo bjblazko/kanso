@@ -8,4 +8,5 @@ All notable changes to this project are documented here. The format follows
 ### Added
 - Repository skeleton, configuration from environment, `/healthz`.
 - Safe file paths, slugs, atomic Markdown documents with YAML frontmatter.
+- Git history for the data directory: commit per change with author, log, show, diff, move.
 - Documentation: arc42 architecture, ADRs 000–003, feature descriptions.

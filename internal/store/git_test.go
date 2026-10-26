@@ -1,0 +1,108 @@
+// SPDX-License-Identifier: Apache-2.0
+
+package store
+
+import (
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+func newRepo(t *testing.T) *Repo {
+	t.Helper()
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not installed")
+	}
+	r, err := OpenRepo(t.TempDir())
+	if err != nil {
+		t.Fatal(err)
+	}
+	return r
+}
+
+func write(t *testing.T, r *Repo, name, content string) {
+	t.Helper()
+	if err := WriteAtomic(filepath.Join(r.Dir(), name), []byte(content)); err != nil {
+		t.Fatal(err)
+	}
+}
+
+var (
+	anna = Author{Name: "Anna", Email: "anna@example.org"}
+	ben  = Author{Name: "Ben", Email: "ben@example.org"}
+)
+
+func TestCommitAndLog(t *testing.T) {
+	r := newRepo(t)
+	write(t, r, "a.md", "old\n")
+	if err := r.Commit(anna, "first", "a.md"); err != nil {
+		t.Fatal(err)
+	}
+	write(t, r, "a.md", "new\n")
+	if err := r.Commit(ben, "second", "a.md"); err != nil {
+		t.Fatal(err)
+	}
+	revs, err := r.Log("a.md", 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(revs) != 2 || revs[0].Author.Name != "Ben" || revs[1].Author.Name != "Anna" {
+		t.Fatalf("log = %+v", revs)
+	}
+	old, err := r.Show(revs[1].Hash, "a.md")
+	if err != nil || string(old) != "old\n" {
+		t.Errorf("show = %q, %v", old, err)
+	}
+	diff, err := r.Diff(revs[1].Hash, revs[0].Hash, "a.md")
+	if err != nil || !strings.Contains(diff, "-old") || !strings.Contains(diff, "+new") {
+		t.Errorf("diff = %q, %v", diff, err)
+	}
+}
+
+func TestCommitWithoutChangesIsNoop(t *testing.T) {
+	r := newRepo(t)
+	write(t, r, "a.md", "x\n")
+	r.Commit(anna, "first", "a.md")
+	if err := r.Commit(anna, "again", "a.md"); err != nil {
+		t.Fatal(err)
+	}
+	revs, _ := r.Log("a.md", 10)
+	if len(revs) != 1 {
+		t.Errorf("revisions = %d", len(revs))
+	}
+}
+
+func TestMoveKeepsHistory(t *testing.T) {
+	r := newRepo(t)
+	write(t, r, "a/index.md", "x\n")
+	r.Commit(anna, "first", "a")
+	if err := r.Move(ben, "a", "b", "move"); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(r.Dir(), "b", "index.md")); err != nil {
+		t.Fatal(err)
+	}
+	revs, _ := r.Log("b/index.md", 10)
+	if len(revs) != 2 {
+		t.Errorf("history after move = %d revisions", len(revs))
+	}
+}
+
+func TestCommitRejectsBadAuthor(t *testing.T) {
+	r := newRepo(t)
+	write(t, r, "a.md", "x\n")
+	for _, a := range []Author{{Name: "A\"B", Email: "a@b"}, {Name: "A\nB", Email: "a@b"}, {Name: "A", Email: "a>b"}} {
+		if err := r.Commit(a, "m", "a.md"); err == nil {
+			t.Errorf("author %+v accepted", a)
+		}
+	}
+}
+
+func TestOpenRepoIsIdempotent(t *testing.T) {
+	r := newRepo(t)
+	if _, err := OpenRepo(r.Dir()); err != nil {
+		t.Fatal(err)
+	}
+}
