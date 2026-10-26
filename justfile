@@ -8,6 +8,10 @@ run:
 test:
     go test ./...
 
+# Browser end-to-end tests (Playwright, Chromium + WebKit)
+e2e:
+    cd e2e && npm ci --no-audit --no-fund && npx playwright install chromium webkit && npx playwright test
+
 lint:
     gofmt -l .
     go vet ./...

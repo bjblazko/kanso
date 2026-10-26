@@ -1,0 +1,11 @@
+{{define "content"}}<div class="content">
+<h1>{{.T "licenses.title"}}</h1>
+<p>{{.T "licenses.intro"}}</p>
+<ul class="list-plain">
+{{range .Data}}<li>
+  <a href="{{.URL}}" rel="noopener">{{.Name}}</a> <span class="meta mono">{{.Version}}</span><br>
+  <span class="meta">{{.Module}} · {{.License}} · <a href="/static/licenses/{{.File}}">{{$.T "licenses.text"}}</a></span>
+</li>{{end}}
+</ul>
+<p class="meta">{{.T "licenses.disclaimer"}}</p>
+</div>{{end}}

@@ -1,0 +1,219 @@
+/*
+ * huepattl-rams-design tokens — web reference implementation.
+ * Copy into the project (e.g. css/tokens.css) and use only var(--…) in
+ * components. Theme: data-theme="light" | "dark" on <html>; without it the
+ * OS preference applies. Fonts: self-host IBM Plex Sans/Mono (OFL) WOFF2
+ * subsets and declare @font-face in the project; the stacks fall back to
+ * system fonts.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Neutrals */
+  --bg:          #F4F4F0;
+  --bg-2:        #EAEAE5;
+  --bg-3:        #DFDFD9;
+  --line:        #D2D3CD;
+  --line-strong: #80817C;
+  --fg-3:        #686A65;
+  --fg-2:        #4A4C4E;
+  --fg:          #1E1F21;
+
+  /* Signals — one meaning each */
+  --accent:      #E85D04;  /* the primary action */
+  --accent-fg:   #1E1F21;
+  --accent-ink:  #B84A00;
+  --confirm:     #2A8C4A;  /* active / confirmed */
+  --confirm-ink: #1A6E37;
+  --time:        #F5AA1C;  /* time passing */
+  --time-ink:    #8A5A00;
+  --warning:     #D62828;  /* needs attention */
+  --warning-ink: #B91C1C;
+
+  /* States */
+  --hover-overlay: color-mix(in srgb, var(--fg) 5%, transparent);
+  --press-overlay: color-mix(in srgb, var(--fg) 10%, transparent);
+  --scrim:         color-mix(in srgb, var(--fg) 40%, transparent);
+  --shadow-float:  0 2px 6px rgb(30 31 33 / 0.10), 0 8px 24px rgb(30 31 33 / 0.10);
+
+  /* Type */
+  --font-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --text-xs:   0.6875rem; /* 11 */
+  --text-sm:   0.8125rem; /* 13 */
+  --text-base: 0.9375rem; /* 15 */
+  --text-md:   1.0625rem; /* 17 */
+  --text-lg:   1.25rem;   /* 20 */
+  --text-xl:   1.625rem;  /* 26 */
+  --text-2xl:  2.125rem;  /* 34 */
+  --text-3xl:  3rem;      /* 48 */
+
+  /* Space (4 px base) */
+  --space-1: 0.25rem;  --space-2: 0.5rem;  --space-3: 0.75rem;
+  --space-4: 1rem;     --space-5: 1.25rem; --space-6: 1.5rem;
+  --space-8: 2rem;     --space-10: 2.5rem; --space-12: 3rem;
+  --space-16: 4rem;    --space-24: 6rem;
+  --gutter: var(--space-6);
+  --container: 75rem;
+  --container-text: 42rem;
+
+  /* Shape */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-full: 999px;
+
+  /* Motion */
+  --dur-quick: 120ms;
+  --dur:       160ms;
+  --dur-slow:  240ms;
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+  --target-min: 44px;
+  --control-h:    2.25rem;  /* 36 px: default button, select, input, segment group */
+  --control-h-sm: 1.875rem; /* 30 px: small variant of the same controls, switches */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #161718; --bg-2: #1E1F21; --bg-3: #28292B;
+    --line: #333538; --line-strong: #6E706C;
+    --fg-3: #9C9E99; --fg-2: #C2C3BE; --fg: #EDEDE8;
+    --accent: #F07A2A; --accent-ink: #F07A2A;
+    --confirm: #3FB765; --confirm-ink: #3FB765;
+    --time-ink: #F5AA1C; --warning: #F0605A; --warning-ink: #F0605A;
+    --hover-overlay: color-mix(in srgb, var(--fg) 8%, transparent);
+    --press-overlay: color-mix(in srgb, var(--fg) 14%, transparent);
+    --scrim: rgb(0 0 0 / 0.6);
+    --shadow-float: 0 2px 6px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.4);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #161718; --bg-2: #1E1F21; --bg-3: #28292B;
+  --line: #333538; --line-strong: #6E706C;
+  --fg-3: #9C9E99; --fg-2: #C2C3BE; --fg: #EDEDE8;
+  --accent: #F07A2A; --accent-ink: #F07A2A;
+  --confirm: #3FB765; --confirm-ink: #3FB765;
+  --time-ink: #F5AA1C; --warning: #F0605A; --warning-ink: #F0605A;
+  --hover-overlay: color-mix(in srgb, var(--fg) 8%, transparent);
+  --press-overlay: color-mix(in srgb, var(--fg) 14%, transparent);
+  --scrim: rgb(0 0 0 / 0.6);
+  --shadow-float: 0 2px 6px rgb(0 0 0 / 0.4), 0 8px 24px rgb(0 0 0 / 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-quick: 0ms; --dur: 0ms; --dur-slow: 0ms; }
+}
+
+/* ---- Base ---------------------------------------------------------- */
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 400 var(--text-base)/1.45 var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+.num, td.num, time { font-variant-numeric: tabular-nums; }
+code, kbd, samp, .mono { font-family: var(--font-mono); }
+
+/* ---- Buttons: primary / secondary / quiet / destructive ------------ */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: var(--space-2);
+  height: var(--control-h);
+  box-sizing: border-box;
+  padding: 0 var(--space-4);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font: 500 var(--text-base)/1 var(--font-sans);
+  --btn-bg: transparent;
+  background-color: var(--btn-bg); color: var(--fg);
+  cursor: pointer;
+  transition: background-color var(--dur-quick) var(--ease);
+}
+.btn-sm { height: var(--control-h-sm); padding: 0 var(--space-3); font-size: var(--text-sm); }
+/* Touch: default controls grow to the 44 px target. Small controls keep their
+   visual height and get an invisible extension to 44 px — growing them makes
+   dense rows heavy and lets controls in adjacent rows touch. */
+@media (pointer: coarse) {
+  .btn { height: var(--target-min); }
+  .btn.btn-sm { height: var(--control-h-sm); }
+  .btn-sm, .seg-sm button, .switch { position: relative; }
+  .btn-sm::after, .seg-sm button::after, .switch::after {
+    content: ""; position: absolute; inset: calc((var(--control-h-sm) - var(--target-min)) / 2) -2px;
+  }
+}
+
+/* A select styled as a button: same box, own arrow, no native look */
+select.btn {
+  appearance: none; -webkit-appearance: none;
+  padding-right: calc(var(--space-3) + 16px);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%234A4C4E' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--space-3) center;
+}
+
+/* Segment group: the border counts inside the control height */
+/* No overflow:hidden (it would clip the touch extension); the outer segments are rounded instead. */
+.seg { display: inline-flex; height: var(--control-h); box-sizing: border-box; border: 1px solid var(--line-strong); border-radius: var(--radius-md); }
+.seg.seg-sm { height: var(--control-h-sm); }
+.seg button { height: 100%; border: 0; padding: 0 var(--space-3); background: var(--bg); color: var(--fg-2); font: 500 var(--text-sm)/1 var(--font-sans); cursor: pointer; }
+.seg button:first-child { border-radius: calc(var(--radius-md) - 1px) 0 0 calc(var(--radius-md) - 1px); }
+.seg button:last-child  { border-radius: 0 calc(var(--radius-md) - 1px) calc(var(--radius-md) - 1px) 0; }
+.seg button + button { border-left: 1px solid var(--line-strong); }
+.seg button[aria-pressed="true"] { background: var(--fg); color: var(--bg); }
+/* Quiet segment group: secondary choices (week/month, list/grid). The strong
+   fill above is only for the choice that drives the screen, e.g. the main view switch. */
+.seg.seg-quiet { border-color: var(--line); }
+.seg.seg-quiet button { background: transparent; color: var(--fg-3); }
+.seg.seg-quiet button + button { border-left-color: var(--line); }
+.seg.seg-quiet button[aria-pressed="true"] { background: var(--bg-3); color: var(--fg); }
+.btn:hover   { background-color: color-mix(in srgb, var(--btn-bg), var(--fg) 5%); }
+.btn:active  { background-color: color-mix(in srgb, var(--btn-bg), var(--fg) 10%); }
+.btn:disabled { opacity: 0.4; pointer-events: none; }
+
+.btn-primary     { --btn-bg: var(--accent); color: var(--accent-fg); }
+.btn-secondary   { --btn-bg: var(--bg); border-color: var(--line-strong); }
+.btn-quiet       { --btn-bg: var(--bg); border-color: var(--line-strong); color: var(--fg-2); }
+.btn-destructive { --btn-bg: var(--bg); border-color: var(--line-strong); color: var(--warning); }
+
+/* ---- Inputs --------------------------------------------------------- */
+
+.field        { display: flex; flex-direction: column; gap: var(--space-1); }
+.field label  { font: 500 var(--text-sm)/1.4 var(--font-sans); color: var(--fg-2); }
+.field input, .field select, .field textarea {
+  font: 400 var(--text-base)/1.45 var(--font-sans);
+  height: var(--control-h);
+  box-sizing: border-box;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--fg);
+}
+.field textarea { height: auto; padding: var(--space-2) var(--space-3); }
+.field .hint             { font-size: var(--text-sm); color: var(--fg-3); }
+.field .hint[data-error] { color: var(--warning); }
+.field [aria-invalid="true"] { border-color: var(--warning); }
+
+/* ---- Badges ---------------------------------------------------------- */
+
+.badge {
+  display: inline-flex; align-items: center; gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  font: 500 var(--text-xs)/1.3 var(--font-sans);
+  letter-spacing: 0.06em; text-transform: uppercase;
+  background: var(--bg-2); color: var(--fg-2);
+}
+.badge-confirm { background: color-mix(in oklch, var(--confirm) 12%, var(--bg)); color: var(--confirm-ink); }
+.badge-warning { background: color-mix(in oklch, var(--warning) 12%, var(--bg)); color: var(--warning-ink); }
+.badge-time    { background: color-mix(in oklch, var(--time) 18%, var(--bg));    color: var(--time-ink); }

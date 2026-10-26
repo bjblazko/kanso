@@ -1,0 +1,54 @@
+{{define "layout"}}<!doctype html>
+<html lang="{{.Lang}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="csrf" content="{{.CSRF}}">
+<title>{{if .Title}}{{.Title}} · {{end}}{{.T "app.name"}}</title>
+<link rel="stylesheet" href="{{.Asset "css/fonts.css"}}">
+<link rel="stylesheet" href="{{.Asset "css/tokens.css"}}">
+<link rel="stylesheet" href="{{.Asset "css/app.css"}}">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/">{{.T "app.name"}}</a>
+  <form class="search" role="search" action="/search" method="get">
+    <label class="visually-hidden" for="q">{{.T "nav.search"}}</label>
+    <input id="q" name="q" type="search" placeholder="{{.T "nav.search"}} …" value="{{.Query}}">
+  </form>
+  <details class="usermenu">
+    <summary class="btn btn-quiet btn-sm">{{.User.Name}}</summary>
+    <div class="menu">
+      <form method="post" action="/me/lang">
+        <input type="hidden" name="csrf" value="{{.CSRF}}">
+        <div class="field">
+          <label for="lang">{{.T "user.language"}}</label>
+          <select id="lang" name="lang" class="btn btn-secondary">
+            <option value="de"{{if eq .Lang "de"}} selected{{end}}>Deutsch</option>
+            <option value="en"{{if eq .Lang "en"}} selected{{end}}>English</option>
+          </select>
+        </div>
+        <button class="btn btn-secondary" type="submit">{{.T "user.apply"}}</button>
+      </form>
+      <form method="post" action="/auth/logout">
+        <input type="hidden" name="csrf" value="{{.CSRF}}">
+        <button class="btn btn-quiet" type="submit">{{.T "user.logout"}}</button>
+      </form>
+    </div>
+  </details>
+</header>
+<div class="shell">
+  <nav class="sidenav" aria-label="{{.T "nav.spaces"}}">
+    <details open>
+      <summary>{{.T "nav.menu"}}</summary>
+      {{block "nav" .}}{{end}}
+    </details>
+  </nav>
+  <main class="main" id="main">
+    {{template "content" .}}
+    <footer class="footer"><a href="/about/licenses">{{.T "nav.licenses"}}</a></footer>
+  </main>
+</div>
+{{block "scripts" .}}{{end}}
+</body>
+</html>{{end}}

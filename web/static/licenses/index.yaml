@@ -1,0 +1,20 @@
+# Everything Kanso ships that others made. TestLicensesComplete keeps this
+# list in step with go.mod and the license files in this folder.
+- name: Go
+  module: std
+  version: "1.27"
+  license: BSD-3-Clause
+  url: https://go.dev
+  file: go.txt
+- name: go-yaml
+  module: go.yaml.in/yaml/v3
+  version: v3.0.5
+  license: Apache-2.0 and MIT
+  url: https://github.com/yaml/go-yaml
+  file: go-yaml.txt
+- name: IBM Plex Sans and IBM Plex Mono
+  module: font
+  version: 1.1.0 / 2.5.0
+  license: OFL-1.1
+  url: https://github.com/IBM/plex
+  file: ibm-plex.txt

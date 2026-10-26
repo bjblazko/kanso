@@ -14,4 +14,6 @@ All notable changes to this project are documented here. The format follows
 - OpenID Connect sign-in (code flow + PKCE, RS256/ES256 ID token verification) with the Go standard library.
 - Sessions (30 days, sliding), CSRF protection with token and origin check, password-less dev login on loopback only.
 - German and English interface texts, language from profile or browser.
+- Web shell: Rams design tokens, self-hosted IBM Plex, mobile-first layout, security headers, "Licenses and thanks" page, language switch.
+- End-to-end tests with Playwright (desktop Chromium, iPhone WebKit).
 - Documentation: arc42 architecture, ADRs 000–003, feature descriptions.

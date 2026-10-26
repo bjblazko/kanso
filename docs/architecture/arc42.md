@@ -108,6 +108,10 @@ Kopia jobs.
 
 ## 10. Quality Requirements
 
+Verified by unit tests (`go test ./...`) and browser end-to-end tests
+(`just e2e`, Playwright: desktop Chromium and iPhone WebKit).
+
+
 - A page saved by two people never silently loses text (lock + 409).
 - Removing a role hides the space on the next request.
 - Content stays usable with `git` and a text editor alone.
