@@ -21,6 +21,7 @@ Approved on 2026-10-26:
 | `go.yaml.in/yaml/v3` | Apache-2.0 / MIT | frozen, security fixes; v4 later |
 | mermaid 12.2.0, ESM build | MIT + bundled MIT/ISC/BSD/Apache | ELK chunk (EPL-2.0) removed, layout `dagre`; vendored, lazy |
 | IBM Plex Sans/Mono | OFL-1.1 | self-hosted |
+| `@playwright/test` 1.64.1 (dev only) | Apache-2.0 | end-to-end tests in `e2e/`; never shipped; GHSA-7mvr-c777-76hp fixed long before this version |
 
 Rejected: `pgx` (the Docmost migration is not part of the project).
 OIDC, Web Push, iCalendar and Git access are built on the standard library
