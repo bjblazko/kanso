@@ -35,3 +35,21 @@ test('layout has no horizontal scroll', async ({ page }) => {
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test('navigation starts folded on phones and open on wide screens', async ({ page, isMobile }) => {
+  await signIn(page, { sub: 'fritz', name: 'Fritz' });
+  const nav = page.locator('.sidenav > details');
+  if (isMobile) {
+    await expect(nav).not.toHaveAttribute('open', '');
+    await page.getByText('Menü').click();
+    await expect(nav).toHaveAttribute('open', '');
+  } else {
+    await expect(nav).toHaveAttribute('open', '');
+  }
+});
+
+test('links styled as buttons are not underlined', async ({ page }) => {
+  await signIn(page, { sub: 'gerd', name: 'Gerd', admin: true });
+  const button = page.getByRole('link', { name: 'Bereich anlegen' });
+  await expect(button).toHaveCSS('text-decoration-line', 'none');
+});

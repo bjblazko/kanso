@@ -165,3 +165,9 @@ p { margin: 0 0 var(--space-4); }
 .results li { padding: var(--space-4) 0; }
 .results a { font-weight: 500; }
 .snippet { margin: var(--space-1) 0 0; color: var(--fg-2); font-size: var(--text-sm); }
+
+/* ---- Review fixes ----------------------------------------------------- */
+
+a.btn { text-decoration: none; }
+input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
+.main > .footer { padding-left: 0; padding-right: 0; }
