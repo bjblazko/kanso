@@ -25,9 +25,17 @@ type User struct {
 	LastLogin time.Time `yaml:"last_login"`
 }
 
-// Author is how the user appears in the history.
+var authorUnsafe = strings.NewReplacer(`"`, "", "<", "", ">", "", "\n", " ", "\r", " ", "\x00", "")
+
+// Author is how the user appears in the history; characters Git does not
+// accept in an author are dropped, the display name stays as it is.
 func (u User) Author() store.Author {
-	return store.Author{Name: u.Name, Email: u.Email}
+	name := strings.Join(strings.Fields(authorUnsafe.Replace(u.Name)), " ")
+	email := authorUnsafe.Replace(u.Email)
+	if name == "" {
+		name = u.Sub
+	}
+	return store.Author{Name: name, Email: email}
 }
 
 const dir = "users"

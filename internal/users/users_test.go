@@ -78,3 +78,18 @@ func TestRejectsUnsafeSub(t *testing.T) {
 		}
 	}
 }
+
+func TestNamesWithQuotesCanSignIn(t *testing.T) {
+	s, repo := newStore(t)
+	u, err := s.Upsert(User{Sub: "timo", Name: `Timo "Blazko" <B.>`, Email: "t@x"})
+	if err != nil {
+		t.Fatalf("upsert: %v", err)
+	}
+	if u.Name != `Timo "Blazko" <B.>` {
+		t.Errorf("display name changed: %q", u.Name)
+	}
+	revs, _ := repo.Log("users/timo.yaml", 1)
+	if len(revs) != 1 || revs[0].Author.Name != "Timo Blazko B." {
+		t.Errorf("history author = %+v", revs)
+	}
+}

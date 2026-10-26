@@ -28,6 +28,7 @@ All notable changes to this project are documented here. The format follows
 - Deployment guide for Authelia (`docs/deploy-authelia.md`).
 
 ### Fixed
+- Sign-in no longer fails for names with quotes or angle brackets (they are dropped from the Git author only).
 - Design review: button links no longer underlined, navigation folded on phones, neutral checkboxes.
 - ECDSA keys parsed with the non-deprecated standard-library API.
 - Documentation: arc42 architecture, ADRs 000–003, feature descriptions.
