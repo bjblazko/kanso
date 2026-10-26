@@ -33,6 +33,7 @@ type Deps struct {
 	Spaces *spaces.Service
 	Wiki   *wiki.Wiki
 	MD     *markdown.Renderer
+	Locks  *wiki.Locks
 }
 
 // Server renders pages and routes requests.
@@ -63,7 +64,7 @@ func New(d Deps) (*Server, error) {
 	return s, nil
 }
 
-var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups", "page_view", "page_new", "page_delete"}
+var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups", "page_view", "page_new", "page_delete", "page_edit"}
 
 func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}
@@ -125,6 +126,10 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /s/{space}/new", s.createPage)
 	mux.HandleFunc("GET /p/{id}", s.showPage)
 	mux.HandleFunc("POST /api/preview", s.preview)
+	mux.HandleFunc("GET /p/{id}/edit", s.editPage)
+	mux.HandleFunc("POST /p/{id}", s.savePage)
+	mux.HandleFunc("POST /p/{id}/lock/heartbeat", s.heartbeat)
+	mux.HandleFunc("POST /p/{id}/lock/break", s.breakLock)
 	mux.HandleFunc("POST /p/{id}/attachments", s.uploadAttachment)
 	mux.HandleFunc("GET /p/{id}/attachments/{name}", s.serveAttachment)
 	mux.HandleFunc("POST /p/{id}/attachments/{name}/delete", s.deleteAttachment)

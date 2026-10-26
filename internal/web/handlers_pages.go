@@ -26,7 +26,11 @@ type pageCtx struct {
 	Files     []string
 	HTML      template.HTML
 	Info      markdown.Info
+	LockedBy  string
 }
+
+// CanBreakLock tells templates whether to offer breaking an edit lock.
+func (c pageCtx) CanBreakLock() bool { return access.Can(c.Role, access.BreakLock) }
 
 // CanWrite tells templates whether to offer changes.
 func (c pageCtx) CanWrite() bool { return access.Can(c.Role, access.Write) }
@@ -58,20 +62,28 @@ func (s *Server) showPage(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	html, info, err := s.MD.Render([]byte(pc.Page.Body), markdown.PageCtx{PageID: pc.Page.Meta.ID})
-	if err != nil {
+	if err := s.fillPageView(&pc); err != nil {
 		s.serverError(w, r, err)
 		return
+	}
+	v := s.inSpace(s.newView(r, pc.Page.Meta.Title, pc), pc.Space.Slug, pc.Page.Meta.ID)
+	s.render(w, r, http.StatusOK, "page_view", v)
+}
+
+// fillPageView adds what the read view shows around the page text.
+func (s *Server) fillPageView(pc *pageCtx) error {
+	html, info, err := s.MD.Render([]byte(pc.Page.Body), markdown.PageCtx{PageID: pc.Page.Meta.ID})
+	if err != nil {
+		return err
 	}
 	pc.HTML, pc.Info = html, info
 	pc.Files = s.Wiki.ListAttachments(pc.Page.Meta.ID)
 	pc.Ancestors = s.Wiki.Ancestors(pc.Page.Meta.ID)
 	pc.Children = childrenOf(s.Wiki.Tree(pc.Space.Slug), pc.Page.Meta.ID)
 	if pc.CanWrite() {
-		pc.Targets = s.moveTargets(pc)
+		pc.Targets = s.moveTargets(*pc)
 	}
-	v := s.inSpace(s.newView(r, pc.Page.Meta.Title, pc), pc.Space.Slug, pc.Page.Meta.ID)
-	s.render(w, r, http.StatusOK, "page_view", v)
+	return nil
 }
 
 func childrenOf(nodes []*wiki.Node, id string) []*wiki.Node {

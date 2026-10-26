@@ -71,7 +71,8 @@ func buildDeps(cfg config.Config) (web.Deps, error) {
 		return web.Deps{}, err
 	}
 	bundle, err := i18n.Load()
-	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, MD: markdown.New()}, err
+	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, MD: markdown.New(),
+		Locks: wiki.NewLocks(5*time.Minute, time.Now)}, err
 }
 
 func buildAuth(cfg config.Config, us *users.Store) (*auth.Auth, error) {

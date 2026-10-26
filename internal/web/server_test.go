@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/config"
@@ -71,7 +72,8 @@ func buildTestDeps(t *testing.T, cfg config.Config) Deps {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, MD: markdown.New()}
+	return Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, MD: markdown.New(),
+		Locks: wiki.NewLocks(5*time.Minute, time.Now)}
 }
 
 // client signs in through the dev login and returns a client with cookies.

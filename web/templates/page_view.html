@@ -3,6 +3,13 @@
   <a href="/s/{{$d.Space.Slug}}">{{$d.Space.Name}}</a>{{range $d.Ancestors}} <span aria-hidden="true">/</span> <a href="/p/{{.ID}}">{{.Title}}</a>{{end}}
 </nav>
 <h1>{{$d.Page.Meta.Title}}</h1>
+{{if $d.LockedBy}}<div class="notice notice-time" role="status">
+  <p>{{.T "lock.held_by" $d.LockedBy}}</p>
+  {{if $d.CanBreakLock}}<form method="post" action="/p/{{$d.Page.Meta.ID}}/lock/break">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <button class="btn btn-secondary btn-sm" type="submit">{{.T "lock.break"}}</button>
+  </form>{{end}}
+</div>{{end}}
 <p class="meta">{{.T "page.updated_by" $d.Page.Meta.Author}} <time datetime="{{$d.Page.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Page.Meta.Updated.Format "02.01.2006 15:04"}}</time></p>
 <div class="prose">{{if $d.Page.Body}}{{$d.HTML}}{{else}}<p class="empty">{{.T "page.empty"}}</p>{{end}}</div>
 
@@ -15,6 +22,7 @@
 {{if $d.Children}}<section class="children"><h2>{{.T "page.children"}}</h2>{{template "tree" (treeArgs $d.Children "")}}</section>{{end}}
 
 {{if $d.CanWrite}}<div class="actions">
+  {{if not $d.LockedBy}}<a class="btn btn-primary" href="/p/{{$d.Page.Meta.ID}}/edit">{{.T "page.edit"}}</a>{{end}}
   <a class="btn btn-secondary" href="/s/{{$d.Space.Slug}}/new?parent={{$d.Page.Meta.ID}}">{{.T "page.create_child"}}</a>
 </div>
 <details class="more">
