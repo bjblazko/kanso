@@ -1,6 +1,7 @@
 {{define "content"}}{{$d := .Data}}<div class="editor-page">
 <form method="post" action="/p/{{$d.Page.Meta.ID}}" class="editor" id="editor"
-      data-page="{{$d.Page.Meta.ID}}" data-msg-lost="{{.T "page.lock_lost"}}" data-msg-saved="{{.T "page.saved"}}" data-msg-failed="{{.T "page.save_failed"}}">
+      data-page="{{$d.Page.Meta.ID}}" data-msg-lost="{{.T "page.lock_lost"}}" data-msg-failed="{{.T "page.save_failed"}}"
+      data-msg-upload-failed="{{.T "editor.upload_failed"}}" data-msg-leave="{{.T "editor.unsaved"}}">
   <input type="hidden" name="csrf" value="{{.CSRF}}">
   <input type="hidden" name="lock" value="{{$d.Lock}}">
   <input type="hidden" name="release" value="1">
@@ -8,16 +9,31 @@
     <label for="title">{{.T "page.title"}}</label>
     <input id="title" name="title" required maxlength="200" value="{{$d.Page.Meta.Title}}">
   </div>
-  <div class="editor-panes">
-    <div class="field pane-source">
+  <div class="seg seg-quiet editor-tabs" role="tablist" aria-label="{{.T "editor.view"}}">
+    <button type="button" role="tab" id="tab-source" aria-controls="pane-source" aria-selected="true" aria-pressed="true">{{.T "editor.source"}}</button>
+    <button type="button" role="tab" id="tab-preview" aria-controls="preview" aria-selected="false" aria-pressed="false">{{.T "editor.preview"}}</button>
+  </div>
+  <div class="editor-panes" data-show="source">
+    <div class="field pane-source" id="pane-source" role="tabpanel" aria-labelledby="tab-source">
       <label for="body">{{.T "editor.source"}}</label>
       <textarea id="body" name="body" rows="24" spellcheck="true">{{$d.Page.Body}}</textarea>
+      <div class="upload">
+        <label class="btn btn-quiet btn-sm" for="file">{{.T "editor.attach"}}</label>
+        <input class="visually-hidden" type="file" id="file" multiple>
+        <span class="hint">{{.T "editor.attach_hint"}}</span>
+      </div>
+    </div>
+    <div class="pane-preview" role="tabpanel" aria-labelledby="tab-preview" aria-live="polite">
+      <span class="pane-label" aria-hidden="true">{{.T "editor.preview"}}</span>
+      <div class="prose" id="preview"></div>
     </div>
   </div>
   <p class="notice notice-warning" id="editor-status" role="alert" hidden></p>
   <div class="actions">
     <button class="btn btn-primary" type="submit">{{.T "page.save"}}</button>
     <a class="btn btn-quiet" href="/p/{{$d.Page.Meta.ID}}">{{.T "action.cancel"}}</a>
+    <span class="hint">{{.T "editor.shortcut"}}</span>
   </div>
 </form>
 </div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/editor.js"}}"></script>{{end}}

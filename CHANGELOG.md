@@ -21,4 +21,5 @@ All notable changes to this project are documented here. The format follows
 - Safe Markdown rendering (goldmark, GitHub-flavoured): no raw HTML, link allowlist, attachment paths per page, Mermaid blocks marked for the diagram script; preview endpoint for the editor.
 - Attachments per page (up to 50 MiB): safe readable file names, fixed content types, SVG and unknown types only as download.
 - Edit locks (ADR-003): five minutes after the last heartbeat, owners and admins can break them; saving without the lock is refused (409) and keeps the text.
+- Markdown editor: source and live preview (side by side on wide screens, tabs on phones), attach files by button, drag and drop or paste, ⌘S/Ctrl+S, warning before leaving with unsaved changes.
 - Documentation: arc42 architecture, ADRs 000–003, feature descriptions.

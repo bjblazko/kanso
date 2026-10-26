@@ -118,3 +118,14 @@ func TestViewerCannotEdit(t *testing.T) {
 		t.Errorf("viewer edit: %d", r.StatusCode)
 	}
 }
+
+func TestEditorPageLoadsScriptAndPreview(t *testing.T) {
+	ts, admin, _ := setupHaus(t)
+	id := ts.createPage(t, admin, "haus", "", "Heizung")
+	body, _, _ := openEditor(t, ts, admin, id)
+	for _, want := range []string{`<script type="module" src="/static/js/editor.js?v=`, `id="preview"`, `role="tablist"`, `type="file"`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("editor page lacks %s", want)
+		}
+	}
+}

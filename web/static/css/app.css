@@ -123,3 +123,29 @@ p { margin: 0 0 var(--space-4); }
 .notice-time { background: color-mix(in oklch, var(--time) 18%, var(--bg)); color: var(--time-ink); }
 .notice p { margin: 0 0 var(--space-2); }
 .notice form { margin: 0; }
+
+/* ---- Editor ----------------------------------------------------------- */
+
+.editor { display: flex; flex-direction: column; gap: var(--space-4); }
+.editor textarea {
+  width: 100%; min-height: 60vh; padding: var(--space-3);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--fg); resize: vertical;
+  font: 400 var(--text-sm)/1.6 var(--font-mono);
+}
+.editor-tabs { align-self: flex-start; }
+.editor-panes { display: grid; gap: var(--space-6); }
+.editor-panes[data-show="source"] .pane-preview { display: none; }
+.editor-panes[data-show="preview"] .pane-source { display: none; }
+.pane-preview { min-width: 0; }
+.pane-label { display: none; font: 500 var(--text-sm)/1.4 var(--font-sans); color: var(--fg-2); }
+.upload { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-top: var(--space-2); }
+.upload .hint, .actions .hint { color: var(--fg-3); font-size: var(--text-sm); }
+
+@media (min-width: 60rem) {
+  .editor-tabs { display: none; }
+  .editor-panes, .editor-panes[data-show] { grid-template-columns: 1fr 1fr; }
+  .editor-panes[data-show] .pane-preview, .editor-panes[data-show] .pane-source { display: block; }
+  .pane-label { display: block; margin-bottom: var(--space-1); }
+  .pane-preview .prose { padding-top: var(--space-1); }
+}
