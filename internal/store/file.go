@@ -26,13 +26,13 @@ func WriteAtomic(path string, data []byte) error {
 	if err != nil {
 		return err
 	}
-	defer os.Remove(tmp.Name())
+	defer func() { _ = os.Remove(tmp.Name()) }() // gone after the rename; cleans up on errors
 	if _, err := tmp.Write(data); err != nil {
-		tmp.Close()
+		_ = tmp.Close()
 		return err
 	}
 	if err := tmp.Sync(); err != nil {
-		tmp.Close()
+		_ = tmp.Close()
 		return err
 	}
 	if err := tmp.Close(); err != nil {

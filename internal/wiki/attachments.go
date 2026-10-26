@@ -98,7 +98,7 @@ func writeLimited(dst string, r io.Reader, max int64) error {
 		err = ErrTooLarge
 	}
 	if err != nil {
-		os.Remove(dst)
+		_ = os.Remove(dst)
 	}
 	return err
 }

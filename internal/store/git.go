@@ -192,7 +192,7 @@ func DiffText(old, new string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer os.RemoveAll(dir)
+	defer func() { _ = os.RemoveAll(dir) }()
 	a, b := filepath.Join(dir, "a"), filepath.Join(dir, "b")
 	if err := os.WriteFile(a, []byte(old), 0o600); err != nil {
 		return "", err

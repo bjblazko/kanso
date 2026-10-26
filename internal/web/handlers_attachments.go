@@ -38,7 +38,7 @@ func (s *Server) uploadAttachment(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	u, _ := auth.UserFrom(r.Context())
 	name, err := s.Wiki.AddAttachment(u.Author(), pc.Page.Meta.ID, header.Filename, file, maxAttachment)
 	if errors.Is(err, wiki.ErrTooLarge) {
@@ -76,25 +76,30 @@ func (s *Server) serveAttachment(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	defer f.Close()
-	ext := path.Ext(name)
-	ctype, known := attachmentTypes[ext]
-	disposition := "attachment"
-	if known && (isImage(ext) || ext == ".pdf") {
-		disposition = "inline"
-	}
-	if !known {
-		ctype = "application/octet-stream"
-	}
-	w.Header().Set("Content-Type", ctype)
-	w.Header().Set("Content-Disposition", disposition+`; filename="`+name+`"`)
-	w.Header().Set("Cache-Control", "private, no-cache")
+	defer func() { _ = f.Close() }()
 	info, err := f.Stat()
 	if err != nil {
 		s.serverError(w, r, err)
 		return
 	}
+	setAttachmentHeaders(w.Header(), name)
 	http.ServeContent(w, r, "", info.ModTime(), f)
+}
+
+// setAttachmentHeaders serves known types as themselves (images and PDFs
+// inline) and everything else as a download of plain bytes.
+func setAttachmentHeaders(h http.Header, name string) {
+	ext := path.Ext(name)
+	ctype, known := attachmentTypes[ext]
+	disposition := "attachment"
+	if !known {
+		ctype = "application/octet-stream"
+	} else if isImage(ext) || ext == ".pdf" {
+		disposition = "inline"
+	}
+	h.Set("Content-Type", ctype)
+	h.Set("Content-Disposition", disposition+`; filename="`+name+`"`)
+	h.Set("Cache-Control", "private, no-cache")
 }
 
 func (s *Server) deleteAttachment(w http.ResponseWriter, r *http.Request) {

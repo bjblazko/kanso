@@ -183,13 +183,21 @@ func (k jwk) publicKey() (crypto.PublicKey, error) {
 		}
 		return &rsa.PublicKey{N: n, E: int(e.Int64())}, nil
 	case k.Kty == "EC" && k.Crv == "P-256":
-		x, y := decodeInt(k.X), decodeInt(k.Y)
-		if x == nil || y == nil || !elliptic.P256().IsOnCurve(x, y) {
-			return nil, errors.New("jwk: bad EC key")
-		}
-		return &ecdsa.PublicKey{Curve: elliptic.P256(), X: x, Y: y}, nil
+		return p256Key(k.X, k.Y)
 	}
 	return nil, fmt.Errorf("jwk: unsupported key type %q", k.Kty)
+}
+
+// p256Key builds a P-256 key from base64url coordinates; the standard
+// library checks that the point lies on the curve.
+func p256Key(x, y string) (*ecdsa.PublicKey, error) {
+	xb, errX := base64.RawURLEncoding.DecodeString(x)
+	yb, errY := base64.RawURLEncoding.DecodeString(y)
+	if errX != nil || errY != nil || len(xb) != 32 || len(yb) != 32 {
+		return nil, errors.New("jwk: bad EC key")
+	}
+	point := append(append([]byte{4}, xb...), yb...)
+	return ecdsa.ParseUncompressedPublicKey(elliptic.P256(), point)
 }
 
 func decodeInt(s string) *big.Int {

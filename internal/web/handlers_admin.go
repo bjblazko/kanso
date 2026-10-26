@@ -94,27 +94,38 @@ func (s *Server) updateGroups(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/admin/groups", http.StatusSeeOther)
 }
 
+// applyGroupChange changes g as the form says; false means the change is invalid.
 func (s *Server) applyGroupChange(g access.Groups, r *http.Request) bool {
 	name := strings.TrimSpace(r.PostFormValue("group"))
 	sub := r.PostFormValue("sub")
-	_, exists := g[name]
 	switch r.PostFormValue("action") {
 	case "create":
-		if name == "" || exists || store.Slugify(name) != name {
-			return false
-		}
-		g[name] = []string{}
+		return createGroup(g, name)
 	case "add":
-		if _, ok := s.Users.Get(sub); !ok || !exists || slices.Contains(g[name], sub) {
-			return false
-		}
-		g[name] = append(g[name], sub)
+		return s.addToGroup(g, name, sub)
 	case "remove":
 		g[name] = slices.DeleteFunc(g[name], func(x string) bool { return x == sub })
+		return true
 	case "delete":
 		delete(g, name)
-	default:
+		return true
+	}
+	return false
+}
+
+func createGroup(g access.Groups, name string) bool {
+	if _, exists := g[name]; exists || name == "" || store.Slugify(name) != name {
 		return false
 	}
+	g[name] = []string{}
+	return true
+}
+
+func (s *Server) addToGroup(g access.Groups, name, sub string) bool {
+	members, exists := g[name]
+	if _, known := s.Users.Get(sub); !known || !exists || slices.Contains(members, sub) {
+		return false
+	}
+	g[name] = append(members, sub)
 	return true
 }

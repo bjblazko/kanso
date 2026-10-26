@@ -128,3 +128,15 @@ func TestDiscoverRejectsIssuerMismatch(t *testing.T) {
 		t.Error("issuer mismatch accepted")
 	}
 }
+
+func TestJWKRejectsPointOffCurve(t *testing.T) {
+	one := make([]byte, 32)
+	one[31] = 1
+	k := jwk{Kty: "EC", Crv: "P-256", X: b64(one), Y: b64(one)}
+	if _, err := k.publicKey(); err == nil {
+		t.Error("point off the curve accepted")
+	}
+	if _, err := (jwk{Kty: "EC", Crv: "P-384", X: b64(one), Y: b64(one)}).publicKey(); err == nil {
+		t.Error("unsupported curve accepted")
+	}
+}

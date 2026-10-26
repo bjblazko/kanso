@@ -109,7 +109,7 @@ func hashFS(fsys fs.FS) (string, error) {
 func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	s.Auth.Routes(mux)
-	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) { fmt.Fprint(w, "ok") })
+	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) { _, _ = fmt.Fprint(w, "ok") })
 	mux.Handle("GET /static/", http.StripPrefix("/static/", cacheForever(http.FileServerFS(s.static))))
 	app := http.NewServeMux()
 	s.routes(app)
