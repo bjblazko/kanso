@@ -23,6 +23,7 @@ type pageCtx struct {
 	Ancestors []wiki.PageMeta
 	Children  []*wiki.Node
 	Targets   []moveTarget
+	Files     []string
 	HTML      template.HTML
 	Info      markdown.Info
 }
@@ -63,6 +64,7 @@ func (s *Server) showPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	pc.HTML, pc.Info = html, info
+	pc.Files = s.Wiki.ListAttachments(pc.Page.Meta.ID)
 	pc.Ancestors = s.Wiki.Ancestors(pc.Page.Meta.ID)
 	pc.Children = childrenOf(s.Wiki.Tree(pc.Space.Slug), pc.Page.Meta.ID)
 	if pc.CanWrite() {

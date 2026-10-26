@@ -6,6 +6,12 @@
 <p class="meta">{{.T "page.updated_by" $d.Page.Meta.Author}} <time datetime="{{$d.Page.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Page.Meta.Updated.Format "02.01.2006 15:04"}}</time></p>
 <div class="prose">{{if $d.Page.Body}}{{$d.HTML}}{{else}}<p class="empty">{{.T "page.empty"}}</p>{{end}}</div>
 
+{{if $d.Files}}<section class="files"><h2>{{.T "page.attachments"}}</h2><ul class="list-plain">
+{{range $d.Files}}<li class="row"><span><a href="/p/{{$d.Page.Meta.ID}}/attachments/{{.}}">{{.}}</a></span>
+{{if $d.CanWrite}}<form method="post" action="/p/{{$d.Page.Meta.ID}}/attachments/{{.}}/delete"><input type="hidden" name="csrf" value="{{$.CSRF}}">
+<button class="btn btn-destructive btn-sm" type="submit">{{$.T "page.attachment_delete" .}}</button></form>{{end}}</li>{{end}}
+</ul></section>{{end}}
+
 {{if $d.Children}}<section class="children"><h2>{{.T "page.children"}}</h2>{{template "tree" (treeArgs $d.Children "")}}</section>{{end}}
 
 {{if $d.CanWrite}}<div class="actions">
