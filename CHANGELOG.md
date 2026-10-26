@@ -23,4 +23,5 @@ All notable changes to this project are documented here. The format follows
 - Edit locks (ADR-003): five minutes after the last heartbeat, owners and admins can break them; saving without the lock is refused (409) and keeps the text.
 - Markdown editor: source and live preview (side by side on wide screens, tabs on phones), attach files by button, drag and drop or paste, ⌘S/Ctrl+S, warning before leaving with unsaved changes.
 - Mermaid diagrams: mermaid 12.2.0 vendored without the ELK layout (EPL-2.0) and without source maps, loaded only on pages with diagrams and in the editor; strict security level, labels as plain SVG text.
+- Page history: every version with author and time, differences of the text to the current version, restore as a new version (respects edit locks).
 - Documentation: arc42 architecture, ADRs 000–003, feature descriptions.

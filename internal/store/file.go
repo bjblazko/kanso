@@ -54,11 +54,20 @@ var fence = []byte("---\n")
 
 // ReadDoc reads a document; a file without frontmatter has empty Meta.
 func ReadDoc[M any](path string) (Doc[M], error) {
-	var d Doc[M]
 	b, err := os.ReadFile(path)
 	if err != nil {
-		return d, err
+		return Doc[M]{}, err
 	}
+	d, err := ParseDoc[M](b)
+	if err != nil {
+		return d, fmt.Errorf("%s: %w", path, err)
+	}
+	return d, nil
+}
+
+// ParseDoc splits frontmatter and body.
+func ParseDoc[M any](b []byte) (Doc[M], error) {
+	var d Doc[M]
 	if !bytes.HasPrefix(b, fence) {
 		d.Body = string(b)
 		return d, nil
@@ -69,7 +78,7 @@ func ReadDoc[M any](path string) (Doc[M], error) {
 		return d, nil
 	}
 	if err := yaml.Unmarshal(head, &d.Meta); err != nil {
-		return d, fmt.Errorf("%s: frontmatter: %w", path, err)
+		return d, fmt.Errorf("frontmatter: %w", err)
 	}
 	d.Body = string(bytes.TrimPrefix(body, []byte("\n")))
 	return d, nil

@@ -106,6 +106,10 @@ func (w *Wiki) write(a store.Author, p Page, msg string) error {
 
 // Save stores a new title and body; the folder name stays.
 func (w *Wiki) Save(a store.Author, id, title, body string) error {
+	return w.save(a, id, title, body, "Seite geändert: ")
+}
+
+func (w *Wiki) save(a store.Author, id, title, body, msg string) error {
 	title = strings.TrimSpace(title)
 	if title == "" {
 		return ErrNoTitle
@@ -121,7 +125,7 @@ func (w *Wiki) Save(a store.Author, id, title, body string) error {
 		w.mu.Lock()
 		defer w.mu.Unlock()
 		saved = p
-		return w.write(a, p, "Seite geändert: "+title)
+		return w.write(a, p, msg+title)
 	})
 	if err == nil {
 		w.notify(saved, false)

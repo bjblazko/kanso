@@ -55,10 +55,6 @@ func TestCommitAndLog(t *testing.T) {
 	if err != nil || string(old) != "old\n" {
 		t.Errorf("show = %q, %v", old, err)
 	}
-	diff, err := r.Diff(revs[1].Hash, revs[0].Hash, "a.md")
-	if err != nil || !strings.Contains(diff, "-old") || !strings.Contains(diff, "+new") {
-		t.Errorf("diff = %q, %v", diff, err)
-	}
 }
 
 func TestCommitWithoutChangesIsNoop(t *testing.T) {
@@ -104,5 +100,40 @@ func TestOpenRepoIsIdempotent(t *testing.T) {
 	r := newRepo(t)
 	if _, err := OpenRepo(r.Dir()); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestLogReportsPathPerRevision(t *testing.T) {
+	r := newRepo(t)
+	write(t, r, "a/index.md", "eins\n")
+	r.Commit(anna, "first", "a")
+	if err := r.Move(ben, "a", "b", "move"); err != nil {
+		t.Fatal(err)
+	}
+	write(t, r, "b/index.md", "zwei\n")
+	r.Commit(ben, "second", "b")
+	revs, err := r.Log("b/index.md", 10)
+	if err != nil || len(revs) != 3 {
+		t.Fatalf("log = %+v, %v", revs, err)
+	}
+	if revs[0].Path != "b/index.md" || revs[2].Path != "a/index.md" {
+		t.Errorf("paths = %q … %q", revs[0].Path, revs[2].Path)
+	}
+	old, err := r.Show(revs[2].Hash, revs[2].Path)
+	if err != nil || string(old) != "eins\n" {
+		t.Errorf("show before move = %q, %v", old, err)
+	}
+}
+
+func TestDiffText(t *testing.T) {
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not installed")
+	}
+	diff, err := DiffText("eins\nzwei\n", "eins\ndrei\n")
+	if err != nil || !strings.Contains(diff, "-zwei") || !strings.Contains(diff, "+drei") || strings.Contains(diff, "-eins") {
+		t.Errorf("diff = %q, %v", diff, err)
+	}
+	if same, _ := DiffText("x\n", "x\n"); same != "" {
+		t.Errorf("equal texts: %q", same)
 	}
 }

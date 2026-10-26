@@ -152,3 +152,13 @@ p { margin: 0 0 var(--space-4); }
 .diagram-error { color: var(--warning-ink); font-size: var(--text-sm); }
 .prose pre.mermaid[data-processed="true"] { padding: 0; }
 .prose pre.mermaid svg { max-width: 100%; height: auto; }
+
+/* ---- History ---------------------------------------------------------- */
+
+.diff { font: 400 var(--text-sm)/1.6 var(--font-mono); border: 1px solid var(--line); border-radius: var(--radius-md); overflow-x: auto; }
+.diff > div { padding: 0 var(--space-3); white-space: pre-wrap; }
+.diff-sign { display: inline-block; width: 1.5ch; color: var(--fg-3); }
+.diff-add { background: color-mix(in oklch, var(--confirm) 12%, var(--bg)); }
+.diff-del { background: color-mix(in oklch, var(--warning) 10%, var(--bg)); text-decoration: line-through; text-decoration-color: var(--line-strong); }
+.diff-hunk { height: var(--space-2); background: var(--bg-2); }
+.revision { padding: var(--space-4); border: 1px solid var(--line); border-radius: var(--radius-md); }

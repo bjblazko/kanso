@@ -1,0 +1,10 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/p/{{$d.Page.Meta.ID}}">{{$d.Page.Meta.Title}}</a></nav>
+<h1>{{.T "history.title"}}</h1>
+<ol class="list-plain history">
+{{range $i, $r := $d.Revisions}}<li class="row">
+  <span><a href="/p/{{$d.Page.Meta.ID}}/history/{{$r.Hash}}">{{$r.Message}}</a><br>
+  <span class="meta">{{$r.Author.Name}} · <time datetime="{{$r.Time.Format "2006-01-02T15:04:05Z07:00"}}">{{$r.Time.Format "02.01.2006 15:04"}}</time> · <span class="mono">{{slice $r.Hash 0 7}}</span>{{if eq $i 0}} · {{$.T "history.current"}}{{end}}</span></span>
+</li>{{end}}
+</ol>
+</div>{{end}}

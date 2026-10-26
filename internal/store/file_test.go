@@ -66,3 +66,10 @@ func TestYAMLRoundTrip(t *testing.T) {
 		t.Errorf("got %+v, %v", m, err)
 	}
 }
+
+func TestParseDoc(t *testing.T) {
+	d, err := ParseDoc[meta]([]byte("---\nid: x\ntitle: T\n---\n\nText\n"))
+	if err != nil || d.Meta.ID != "x" || d.Body != "Text\n" {
+		t.Errorf("got %+v %v", d, err)
+	}
+}

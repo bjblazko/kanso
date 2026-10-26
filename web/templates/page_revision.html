@@ -1,0 +1,17 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/p/{{$d.Page.Meta.ID}}">{{$d.Page.Meta.Title}}</a> <span aria-hidden="true">/</span> <a href="/p/{{$d.Page.Meta.ID}}/history">{{.T "history.title"}}</a></nav>
+<h1>{{.T "history.revision_of" ($d.Revision.Time.Format "02.01.2006 15:04")}}</h1>
+<p class="meta">{{$d.Revision.Author.Name}} · {{$d.Revision.Message}} · <span class="mono">{{slice $d.Revision.Hash 0 7}}</span></p>
+
+{{if not $d.IsLatest}}<h2>{{.T "history.changes_since"}}</h2>
+<div class="diff" role="table" aria-label="{{.T "history.changes_since"}}">
+{{range $d.Diff}}{{if eq .Kind '@'}}<div class="diff-hunk" role="row"></div>{{else if eq .Kind '+'}}<div class="diff-add" role="row"><span class="diff-sign" aria-label="{{$.T "history.added"}}">+</span>{{.Text}}</div>{{else if eq .Kind '-'}}<div class="diff-del" role="row"><span class="diff-sign" aria-label="{{$.T "history.removed"}}">−</span>{{.Text}}</div>{{else}}<div class="diff-same" role="row"><span class="diff-sign"> </span>{{.Text}}</div>{{end}}{{end}}
+</div>
+{{if $d.CanWrite}}<form method="post" action="/p/{{$d.Page.Meta.ID}}/history/{{$d.Revision.Hash}}/restore" class="actions">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <button class="btn btn-primary" type="submit">{{.T "history.restore"}}</button>
+</form>{{end}}{{else}}<p class="empty">{{.T "history.is_current"}}</p>{{end}}
+
+<h2>{{.T "history.old_text"}}</h2>
+<div class="prose revision">{{$d.Old}}</div>
+</div>{{end}}

@@ -30,12 +30,14 @@ func (a Author) valid() bool {
 		!strings.ContainsAny(a.Name, bad) && !strings.ContainsAny(a.Email, bad)
 }
 
-// Revision is one commit that touched a file.
+// Revision is one commit that touched a file; Path is where the file was
+// at that commit (it changes when the file was moved).
 type Revision struct {
 	Hash    string
 	Author  Author
 	Time    time.Time
 	Message string
+	Path    string
 }
 
 // Repo is the data directory as a Git repository.
@@ -134,38 +136,35 @@ const (
 
 // Log lists the revisions of path, newest first, following renames.
 func (r *Repo) Log(path string, limit int) ([]Revision, error) {
-	format := "--format=%H%x1f%an%x1f%ae%x1f%aI%x1f%s%x1e"
-	out, err := r.run("log", "--follow", "-n", strconv.Itoa(limit), format, "--", path)
+	format := "--format=%x1e%H%x1f%an%x1f%ae%x1f%aI%x1f%s"
+	out, err := r.run("log", "--follow", "--name-only", "-n", strconv.Itoa(limit), format, "--", path)
 	if err != nil {
 		return nil, err
 	}
 	var revs []Revision
 	for _, rec := range strings.Split(string(out), recordSep) {
-		if rev, ok := parseRevision(strings.TrimSpace(rec)); ok {
+		if rev, ok := parseRevision(rec); ok {
 			revs = append(revs, rev)
 		}
 	}
 	return revs, nil
 }
 
+// parseRevision reads "header\n\npath\n" as written by Log.
 func parseRevision(rec string) (Revision, bool) {
-	f := strings.Split(rec, fieldSep)
+	header, rest, _ := strings.Cut(strings.TrimLeft(rec, "\n"), "\n")
+	f := strings.Split(header, fieldSep)
 	if len(f) != 5 {
 		return Revision{}, false
 	}
 	t, _ := time.Parse(time.RFC3339, f[3])
-	return Revision{Hash: f[0], Author: Author{Name: f[1], Email: f[2]}, Time: t, Message: f[4]}, true
+	return Revision{Hash: f[0], Author: Author{Name: f[1], Email: f[2]}, Time: t, Message: f[4],
+		Path: strings.TrimSpace(rest)}, true
 }
 
 // Show returns the content of path at revision hash.
 func (r *Repo) Show(hash, path string) ([]byte, error) {
 	return r.run("show", hash+":"+filepath.ToSlash(path))
-}
-
-// Diff returns the unified diff of path between two revisions.
-func (r *Repo) Diff(from, to, path string) (string, error) {
-	out, err := r.run("diff", "--no-color", from, to, "--", path)
-	return string(out), err
 }
 
 func (r *Repo) run(args ...string) ([]byte, error) {
@@ -180,4 +179,28 @@ func (r *Repo) run(args ...string) ([]byte, error) {
 		return out, fmt.Errorf("git %s: %w: %s", args[0], err, strings.TrimSpace(stderr.String()))
 	}
 	return out, nil
+}
+
+// DiffText returns the unified diff of two texts ("" when they are equal).
+func DiffText(old, new string) (string, error) {
+	dir, err := os.MkdirTemp("", "kanso-diff-")
+	if err != nil {
+		return "", err
+	}
+	defer os.RemoveAll(dir)
+	a, b := filepath.Join(dir, "a"), filepath.Join(dir, "b")
+	if err := os.WriteFile(a, []byte(old), 0o600); err != nil {
+		return "", err
+	}
+	if err := os.WriteFile(b, []byte(new), 0o600); err != nil {
+		return "", err
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), gitTimeout)
+	defer cancel()
+	out, err := exec.CommandContext(ctx, "git", "diff", "--no-index", "--no-color", "--", a, b).Output()
+	var exit *exec.ExitError
+	if errors.As(err, &exit) && exit.ExitCode() == 1 {
+		err = nil // exit code 1 means "the files differ"
+	}
+	return string(out), err
 }

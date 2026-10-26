@@ -10,7 +10,7 @@
     <button class="btn btn-secondary btn-sm" type="submit">{{.T "lock.break"}}</button>
   </form>{{end}}
 </div>{{end}}
-<p class="meta">{{.T "page.updated_by" $d.Page.Meta.Author}} <time datetime="{{$d.Page.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Page.Meta.Updated.Format "02.01.2006 15:04"}}</time></p>
+<p class="meta">{{.T "page.updated_by" $d.Page.Meta.Author}} <time datetime="{{$d.Page.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Page.Meta.Updated.Format "02.01.2006 15:04"}}</time> · <a href="/p/{{$d.Page.Meta.ID}}/history">{{.T "history.link"}}</a></p>
 <div class="prose">{{if $d.Page.Body}}{{$d.HTML}}{{else}}<p class="empty">{{.T "page.empty"}}</p>{{end}}</div>
 
 {{if $d.Files}}<section class="files"><h2>{{.T "page.attachments"}}</h2><ul class="list-plain">
