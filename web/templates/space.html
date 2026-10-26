@@ -1,6 +1,9 @@
-{{define "content"}}<div class="content">
-<h1>{{template "icon" .Data.Space.Icon}} {{.Data.Space.Name}}</h1>
-{{if .Data.Space.Description}}<p class="meta">{{.Data.Space.Description}}</p>{{end}}
-{{block "space-body" .}}<p class="empty">{{.T "space.no_pages"}}</p>{{end}}
-{{if .Data.CanManage}}<div class="actions"><a class="btn btn-secondary" href="/s/{{.Data.Space.Slug}}/settings">{{.T "space.settings"}}</a></div>{{end}}
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{template "icon" $d.Space.Icon}} {{$d.Space.Name}}</h1>
+{{if $d.Space.Description}}<p class="meta">{{$d.Space.Description}}</p>{{end}}
+{{if .Tree}}{{template "tree" (treeArgs .Tree "")}}{{else}}<p class="empty">{{.T "space.no_pages"}}</p>{{end}}
+<div class="actions">
+  {{if $d.CanWrite}}<a class="btn btn-primary" href="/s/{{$d.Space.Slug}}/new">{{.T "page.create"}}</a>{{end}}
+  {{if $d.CanManage}}<a class="btn btn-secondary" href="/s/{{$d.Space.Slug}}/settings">{{.T "space.settings"}}</a>{{end}}
+</div>
 </div>{{end}}

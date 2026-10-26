@@ -12,6 +12,7 @@ import (
 	"github.com/bjblazko/kanso/internal/i18n"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/users"
+	"github.com/bjblazko/kanso/internal/wiki"
 )
 
 // view is what every template receives.
@@ -25,6 +26,8 @@ type view struct {
 	Admin bool
 	Nav   []spaces.Space
 	Here  string // slug of the current space, for aria-current
+	Page  string // id of the current page, for aria-current
+	Tree  []*wiki.Node
 
 	bundle  *i18n.Bundle
 	version string
@@ -41,7 +44,7 @@ func (s *Server) newView(r *http.Request, title string, data any) view {
 	return view{
 		Title: title, Lang: i18n.Negotiate(r.Header.Get("Accept-Language"), u.Lang),
 		User: u, CSRF: auth.CSRFToken(r.Context()), Query: r.URL.Query().Get("q"), Data: data,
-		Admin: p.Admin, Nav: s.Spaces.Visible(p, s.groups()), Here: r.PathValue("space"),
+		Admin: p.Admin, Nav: s.Spaces.Visible(p, s.groups()),
 		bundle: s.I18n, version: s.version,
 	}
 }
@@ -61,6 +64,12 @@ func (s *Server) render(w http.ResponseWriter, r *http.Request, status int, page
 
 func (s *Server) page(w http.ResponseWriter, r *http.Request, page, title string, data any) {
 	s.render(w, r, http.StatusOK, page, s.newView(r, title, data))
+}
+
+// inSpace marks the navigation position: the space, its tree, the page.
+func (s *Server) inSpace(v view, space, pageID string) view {
+	v.Here, v.Page, v.Tree = space, pageID, s.Wiki.Tree(space)
+	return v
 }
 
 func (s *Server) fail(w http.ResponseWriter, r *http.Request, status int, key string) {

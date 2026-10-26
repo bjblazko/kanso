@@ -42,7 +42,8 @@
     <details open>
       <summary>{{.T "nav.menu"}}</summary>
       {{block "nav" .}}<ul class="navlist">
-        {{range .Nav}}<li><a href="/s/{{.Slug}}"{{if eq $.Here .Slug}} aria-current="page"{{end}}>{{template "icon" .Icon}}<span>{{.Name}}</span></a></li>
+        {{range .Nav}}<li><a href="/s/{{.Slug}}"{{if and (eq $.Here .Slug) (not $.Page)}} aria-current="page"{{end}}>{{template "icon" .Icon}}<span>{{.Name}}</span></a>
+          {{if and (eq $.Here .Slug) $.Tree}}{{template "tree" (treeArgs $.Tree $.Page)}}{{end}}</li>
         {{end}}
       </ul>
       {{if .Admin}}<ul class="navlist navlist-admin">

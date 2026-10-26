@@ -17,4 +17,5 @@ All notable changes to this project are documented here. The format follows
 - Web shell: Rams design tokens, self-hosted IBM Plex, mobile-first layout, security headers, "Licenses and thanks" page, language switch.
 - End-to-end tests with Playwright (desktop Chromium, iPhone WebKit).
 - Spaces with members (people or groups as viewer, editor, owner); admins create spaces and manage groups; own line icons.
+- Wiki pages as folders with `index.md`: page tree, stable ids (`/p/<id>`), sub-pages, move, delete with confirmation; history kept through `git mv`.
 - Documentation: arc42 architecture, ADRs 000–003, feature descriptions.

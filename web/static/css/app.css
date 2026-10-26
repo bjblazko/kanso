@@ -88,3 +88,16 @@ p { margin: 0 0 var(--space-4); }
 .notice-warning { background: color-mix(in oklch, var(--warning) 12%, var(--bg)); color: var(--warning-ink); }
 .spaces a { display: inline-flex; gap: var(--space-2); align-items: center; font-weight: 500; }
 .group { margin-bottom: var(--space-8); }
+
+/* ---- Pages ------------------------------------------------------------ */
+
+.breadcrumb { color: var(--fg-3); font-size: var(--text-sm); margin-bottom: var(--space-2); }
+.breadcrumb a { color: var(--fg-2); }
+.page .meta { margin-bottom: var(--space-6); }
+.tree a { min-height: 2.25rem; }
+@media (pointer: coarse) { .tree a { min-height: var(--target-min); } }
+.content > .tree { padding: 0; }
+.source { white-space: pre-wrap; font-family: var(--font-mono); font-size: var(--text-sm); }
+.children { margin-top: var(--space-8); }
+.more { margin-top: var(--space-6); }
+.more[open] > summary { margin-bottom: var(--space-4); }

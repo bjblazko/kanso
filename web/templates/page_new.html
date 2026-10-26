@@ -1,0 +1,14 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.T "page.create"}}</h1>
+<form method="post" action="/s/{{$d.Space.Slug}}/new" class="form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <input type="hidden" name="parent" value="{{$d.Parent}}">
+  <div class="field">
+    <label for="title">{{.T "page.title"}}</label>
+    <input id="title" name="title" required maxlength="200" autofocus placeholder="{{.T "page.title_example"}}"{{if $d.Error}} aria-invalid="true" aria-describedby="title-error"{{end}}>
+    {{if $d.Error}}<span class="hint" id="title-error" data-error>{{$d.Error}}</span>{{end}}
+  </div>
+  <div class="actions"><button class="btn btn-primary" type="submit">{{.T "page.create"}}</button>
+  <a class="btn btn-quiet" href="/s/{{$d.Space.Slug}}">{{.T "action.cancel"}}</a></div>
+</form>
+</div>{{end}}

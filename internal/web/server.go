@@ -18,6 +18,7 @@ import (
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/users"
+	"github.com/bjblazko/kanso/internal/wiki"
 	assets "github.com/bjblazko/kanso/web"
 )
 
@@ -29,6 +30,7 @@ type Deps struct {
 	Users  *users.Store
 	Repo   *store.Repo
 	Spaces *spaces.Service
+	Wiki   *wiki.Wiki
 }
 
 // Server renders pages and routes requests.
@@ -59,18 +61,28 @@ func New(d Deps) (*Server, error) {
 	return s, nil
 }
 
-var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups"}
+var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups", "page_view", "page_new", "page_delete"}
 
 func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}
 	for _, name := range pageNames {
-		t, err := template.ParseFS(assets.Files, "templates/layout.html", "templates/icons.html", "templates/"+name+".html")
+		t, err := template.New(name).Funcs(templateFuncs).ParseFS(assets.Files,
+			"templates/layout.html", "templates/icons.html", "templates/tree.html", "templates/"+name+".html")
 		if err != nil {
 			return nil, fmt.Errorf("template %s: %w", name, err)
 		}
 		pages[name] = t
 	}
 	return pages, nil
+}
+
+type treeArgs struct {
+	Nodes   []*wiki.Node
+	Current string
+}
+
+var templateFuncs = template.FuncMap{
+	"treeArgs": func(nodes []*wiki.Node, current string) treeArgs { return treeArgs{nodes, current} },
 }
 
 // hashFS fingerprints the static files for cache-busting URLs.
@@ -107,6 +119,12 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /s/{space}", s.showSpace)
 	mux.HandleFunc("GET /s/{space}/settings", s.spaceSettings)
 	mux.HandleFunc("POST /s/{space}/settings", s.updateSpaceSettings)
+	mux.HandleFunc("GET /s/{space}/new", s.newPageForm)
+	mux.HandleFunc("POST /s/{space}/new", s.createPage)
+	mux.HandleFunc("GET /p/{id}", s.showPage)
+	mux.HandleFunc("POST /p/{id}/move", s.movePage)
+	mux.HandleFunc("GET /p/{id}/delete", s.confirmDeletePage)
+	mux.HandleFunc("POST /p/{id}/delete", s.deletePage)
 	mux.HandleFunc("GET /admin/spaces/new", s.newSpaceForm)
 	mux.HandleFunc("POST /admin/spaces/new", s.createSpace)
 	mux.HandleFunc("GET /admin/groups", s.groupsPage)

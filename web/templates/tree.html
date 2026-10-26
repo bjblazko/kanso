@@ -1,0 +1,4 @@
+{{define "tree"}}<ul class="navlist tree">{{range .Nodes}}
+  <li><a href="/p/{{.Meta.ID}}"{{if eq $.Current .Meta.ID}} aria-current="page"{{end}}>{{.Meta.Title}}</a>
+  {{if .Children}}{{template "tree" (treeArgs .Children $.Current)}}{{end}}</li>{{end}}
+</ul>{{end}}

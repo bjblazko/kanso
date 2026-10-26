@@ -56,7 +56,8 @@ func (s *Server) showSpace(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	s.page(w, r, "space", sp.Name, spacePage{Space: sp, Role: role})
+	v := s.inSpace(s.newView(r, sp.Name, spacePage{Space: sp, Role: role}), sp.Slug, "")
+	s.render(w, r, http.StatusOK, "space", v)
 }
 
 type settingsPage struct {

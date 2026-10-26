@@ -21,6 +21,7 @@ import (
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/users"
 	"github.com/bjblazko/kanso/internal/web"
+	"github.com/bjblazko/kanso/internal/wiki"
 )
 
 func main() {
@@ -64,8 +65,12 @@ func buildDeps(cfg config.Config) (web.Deps, error) {
 	if err != nil {
 		return web.Deps{}, err
 	}
+	wk, err := wiki.NewWiki(cfg.DataDir, repo)
+	if err != nil {
+		return web.Deps{}, err
+	}
 	bundle, err := i18n.Load()
-	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp}, err
+	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk}, err
 }
 
 func buildAuth(cfg config.Config, us *users.Store) (*auth.Auth, error) {

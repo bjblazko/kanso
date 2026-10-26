@@ -1,0 +1,26 @@
+{{define "content"}}{{$d := .Data}}<article class="content page">
+<nav class="breadcrumb" aria-label="{{.T "page.path"}}">
+  <a href="/s/{{$d.Space.Slug}}">{{$d.Space.Name}}</a>{{range $d.Ancestors}} <span aria-hidden="true">/</span> <a href="/p/{{.ID}}">{{.Title}}</a>{{end}}
+</nav>
+<h1>{{$d.Page.Meta.Title}}</h1>
+<p class="meta">{{.T "page.updated_by" $d.Page.Meta.Author}} <time datetime="{{$d.Page.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Page.Meta.Updated.Format "02.01.2006 15:04"}}</time></p>
+<div class="prose">{{if $d.Page.Body}}<pre class="source">{{$d.Page.Body}}</pre>{{else}}<p class="empty">{{.T "page.empty"}}</p>{{end}}</div>
+
+{{if $d.Children}}<section class="children"><h2>{{.T "page.children"}}</h2>{{template "tree" (treeArgs $d.Children "")}}</section>{{end}}
+
+{{if $d.CanWrite}}<div class="actions">
+  <a class="btn btn-secondary" href="/s/{{$d.Space.Slug}}/new?parent={{$d.Page.Meta.ID}}">{{.T "page.create_child"}}</a>
+</div>
+<details class="more">
+  <summary class="btn btn-quiet btn-sm">{{.T "page.more"}}</summary>
+  <form method="post" action="/p/{{$d.Page.Meta.ID}}/move" class="form form-row">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <div class="field"><label for="parent">{{.T "page.move_below"}}</label>
+      <select id="parent" name="parent" class="btn btn-secondary">{{range $d.Targets}}<option value="{{.ID}}">{{.Label}}</option>{{end}}</select></div>
+    <div class="field"><label for="order">{{.T "page.position"}}</label>
+      <input id="order" name="order" type="number" min="0" value="{{$d.Page.Meta.Order}}" class="num"></div>
+    <button class="btn btn-secondary" type="submit">{{.T "page.move"}}</button>
+  </form>
+  <p><a class="btn btn-destructive btn-sm" href="/p/{{$d.Page.Meta.ID}}/delete">{{.T "page.delete"}}</a></p>
+</details>{{end}}
+</article>{{end}}

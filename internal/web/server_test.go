@@ -20,6 +20,7 @@ import (
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/users"
+	"github.com/bjblazko/kanso/internal/wiki"
 )
 
 // testServer runs the whole application with the dev login.
@@ -65,7 +66,11 @@ func buildTestDeps(t *testing.T, cfg config.Config) Deps {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp}
+	wk, err := wiki.NewWiki(cfg.DataDir, repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk}
 }
 
 // client signs in through the dev login and returns a client with cookies.
