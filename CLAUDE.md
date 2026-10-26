@@ -30,6 +30,13 @@ just lint   # gofmt + go vet
 
 ## Documentation
 
-- `CHANGELOG.md` (Keep a Changelog), update for every meaningful change.
-- `docs/adr/NNN-slug.md`: Context, Decision, Alternatives Considered,
-  Consequences; header `**Status:**`, `**Created:**`, `**Updated:**`.
+Update these in the same commit as the change they describe:
+
+- `CHANGELOG.md` — [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), entries under `[Unreleased]`.
+- `docs/adr/NNN-slug.md` — one per significant decision: Context, Decision,
+  Alternatives Considered, Consequences; header `**Status:**`, `**Created:**`,
+  `**Updated:**`. Next sequential number; list it in arc42 chapter 9.
+- `docs/architecture/arc42.md` — when building blocks, runtime flows,
+  deployment, quality goals or risks change; bump `**Updated:**`.
+- `docs/features/YYYY-MM-DD name.md` — one per feature, frontmatter `status`
+  (planned/active/done), `created`, `updated`; link ADRs under `## Related`.

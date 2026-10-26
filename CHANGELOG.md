@@ -7,3 +7,5 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 - Repository skeleton, configuration from environment, `/healthz`.
+- Safe file paths, slugs, atomic Markdown documents with YAML frontmatter.
+- Documentation: arc42 architecture, ADRs 000–003, feature descriptions.
