@@ -36,4 +36,5 @@
   </div>
 </form>
 </div>{{end}}
-{{define "scripts"}}<script type="module" src="{{.Asset "js/editor.js"}}"></script>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/mermaid-loader.js"}}" data-mermaid-src="{{.Asset "vendor/mermaid/mermaid.esm.min.mjs"}}"></script>
+<script type="module" src="{{.Asset "js/editor.js"}}"></script>{{end}}

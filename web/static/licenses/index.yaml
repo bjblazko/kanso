@@ -24,3 +24,9 @@
   license: MIT
   url: https://github.com/yuin/goldmark
   file: goldmark.txt
+- name: Mermaid (with bundled packages)
+  module: mermaid
+  version: 12.2.0
+  license: MIT (bundled packages MIT, ISC, BSD, Apache-2.0, Unlicense)
+  url: https://mermaid.js.org
+  file: mermaid.txt

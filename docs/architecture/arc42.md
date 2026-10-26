@@ -120,7 +120,10 @@ Verified by unit tests (`go test ./...`) and browser end-to-end tests
 
 - Write throughput is limited by one global lock; fine for a household.
 - `go.yaml.in/yaml/v3` is frozen; move to v4 once it is stable.
-- Mermaid is large (lazy-loaded); its ELK layout is deliberately left out.
+- Mermaid is large (3.9 MB, lazy-loaded); its ELK layout is deliberately left out.
+- Mermaid briefly puts label text into the DOM to measure it; hostile HTML
+  there is stopped by the CSP (no inline handlers). Labels are rendered as
+  SVG text (`htmlLabels: false`). Covered by an e2e test.
 
 ## 12. Glossary
 

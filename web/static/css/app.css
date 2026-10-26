@@ -149,3 +149,6 @@ p { margin: 0 0 var(--space-4); }
   .pane-label { display: block; margin-bottom: var(--space-1); }
   .pane-preview .prose { padding-top: var(--space-1); }
 }
+.diagram-error { color: var(--warning-ink); font-size: var(--text-sm); }
+.prose pre.mermaid[data-processed="true"] { padding: 0; }
+.prose pre.mermaid svg { max-width: 100%; height: auto; }
