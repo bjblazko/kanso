@@ -11,4 +11,5 @@ All notable changes to this project are documented here. The format follows
 - Git history for the data directory: commit per change with author, log, show, diff, move.
 - Access model: roles viewer, editor, owner per space; admins; groups in `kanso.yaml`.
 - User profiles in `users/<sub>.yaml`, created at sign-in, with interface language.
+- OpenID Connect sign-in (code flow + PKCE, RS256/ES256 ID token verification) with the Go standard library.
 - Documentation: arc42 architecture, ADRs 000–003, feature descriptions.
