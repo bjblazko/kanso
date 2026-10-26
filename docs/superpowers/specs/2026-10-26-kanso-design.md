@@ -58,7 +58,7 @@ systemd + `DynamicUser` + `StateDirectory`, hinter Caddy. Familienkalender heute
 
 ```
 data/
-  kanso.yaml                     # Gruppen, Space-Rollen, Einstellungen
+  kanso.yaml                     # Gruppen, Einstellungen (Space-Rollen stehen in space.yaml)
   users/<sub>.yaml               # Profil: Name, Sprache, Push-Abos (beim ersten Login angelegt)
   spaces/<space-slug>/
     space.yaml                   # Name, Icon, Beschreibung, Rollen
