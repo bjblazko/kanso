@@ -10,4 +10,5 @@ All notable changes to this project are documented here. The format follows
 - Safe file paths, slugs, atomic Markdown documents with YAML frontmatter.
 - Git history for the data directory: commit per change with author, log, show, diff, move.
 - Access model: roles viewer, editor, owner per space; admins; groups in `kanso.yaml`.
+- User profiles in `users/<sub>.yaml`, created at sign-in, with interface language.
 - Documentation: arc42 architecture, ADRs 000–003, feature descriptions.
