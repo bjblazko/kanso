@@ -1,6 +1,6 @@
 # Hüpattl! Kanso – Design
 
-**Status:** freigegeben · **Created:** 2026-10-26 · **Updated:** 2026-10-26
+**Status:** freigegeben · **Created:** 2026-10-26 · **Updated:** 2026-10-27
 
 ## Context
 
@@ -112,15 +112,16 @@ selbst gebaut. Alle Lizenztexte kommen in die App („Lizenzen und Dank“) mit 
 
 1. **Fundament + Wiki**: Repo-Gerüst (LICENSE Apache-2.0, README, CHANGELOG, `docs/adr/`, CLAUDE.md),
    Auth/OIDC, Rollen/Gruppen, Spaces, Seiten-Baum, Editor Quelltext/Vorschau, Anhänge, Mermaid,
-   Sperren, Git-Verlauf + Vergleich, Suche, i18n DE/EN, Design-System.
-2. **Deployment** in homelab2 (Flake-Input, Modul, Authelia-Client, Caddy, DNS) und Parallelbetrieb zu Docmost.
-3. **Notizen** (privat) → Task / Wiki-Artikel.
-4. **Tasks**: Boards (privat/Gruppe), Kanban + Eisenhower, Fälligkeiten, wiederkehrende Aufgaben.
-5. **Listen**: Einkauf, Wunschlisten (Freigabe, „Ich besorge das“), Links.
-6. **Kalender** nativ (.ics), Tasks mit Datum im Kalender, Geburtstage.
-7. **Mobil/Offline (PWA)** + **Web-Push**.
-8. **Extras**: Essensplan → Einkauf, Haus-Inventar (Wartung erzeugt Tasks), Kind & Kontakte.
-9. **Kalender extern**: ICS-Abo, CalDAV-Client (iCloud), später CalDAV-Server.
+   Sperren, Git-Verlauf + Vergleich, Suche, i18n DE/EN, Design-System. *(fertig)*
+2. **Notizen** (privat) → Task / Wiki-Artikel.
+3. **Tasks**: Boards (privat/Gruppe), Kanban + Eisenhower, Fälligkeiten, wiederkehrende Aufgaben.
+4. **Listen**: Einkauf, Wunschlisten (Freigabe, „Ich besorge das“), Links.
+5. **Kalender** nativ (.ics), Tasks mit Datum im Kalender, Geburtstage.
+6. **Mobil/Offline (PWA)** + **Web-Push**.
+7. **Extras**: Essensplan → Einkauf, Haus-Inventar (Wartung erzeugt Tasks), Kind & Kontakte.
+8. **Kalender extern**: ICS-Abo, CalDAV-Client (iCloud), später CalDAV-Server.
+9. **Deployment** in homelab2 (Flake-Input, Modul, Authelia-Client, Caddy, DNS) und Parallelbetrieb zu Docmost.
+   Auf Wunsch des Nutzers (2026-10-27) ganz am Ende; bis dahin läuft Kanso lokal mit Dev-Login.
 
 Docmost wird erst abgeschaltet, wenn Kanso im Alltag besteht und die separate Migration gelaufen ist.
 
