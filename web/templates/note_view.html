@@ -6,7 +6,7 @@
 <div class="actions">
   <a class="btn btn-primary" href="/notes/{{$d.Note.Meta.ID}}/edit">{{.T "page.edit"}}</a>
   <a class="btn btn-secondary" href="/notes/{{$d.Note.Meta.ID}}/promote">{{.T "notes.promote"}}</a>
-  <a class="btn btn-destructive btn-sm" href="/notes/{{$d.Note.Meta.ID}}/delete">{{.T "notes.delete"}}</a>
+  <a class="btn btn-destructive" href="/notes/{{$d.Note.Meta.ID}}/delete">{{.T "notes.delete"}}</a>
 </div>
 </article>{{end}}
 {{define "scripts"}}{{if .Data.Info.HasMermaid}}<script type="module" src="{{.Asset "js/mermaid-loader.js"}}" data-mermaid-src="{{.Asset "vendor/mermaid/mermaid.esm.min.mjs"}}"></script>{{end}}{{end}}

@@ -92,3 +92,17 @@ test('notes: capture with a photo from the library', async ({ page }) => {
   await page.getByRole('link', { name: text }).click();
   await expect(page.locator('.prose img')).toHaveAttribute('src', /attachments\/schild\.png$/);
 });
+
+test('notes: the actions of a note share one height', async ({ page }) => {
+  await signIn(page, { sub: 'nora', name: 'Nora' });
+  const text = unique('Gleich hoch');
+  await page.goto('/notes/new');
+  await page.getByLabel('Notiz', { exact: true }).fill(text);
+  await page.getByRole('button', { name: 'Speichern' }).click();
+  await expect(page.getByRole('status')).toHaveText('Gespeichert');
+  await page.goto('/notes');
+  await page.getByRole('link', { name: text }).click();
+  const heights = await page.locator('.actions .btn').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
+  expect(heights).toHaveLength(3);
+  expect(new Set(heights).size).toBe(1);
+});
