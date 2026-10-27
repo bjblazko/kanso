@@ -49,6 +49,7 @@ services and external calendars. Nothing else leaves the host.
 - **OIDC for identity, roles in Kanso** ([ADR-001](../adr/001-oidc-with-kanso-managed-roles.md)).
 - **Edit locks instead of live collaboration** ([ADR-003](../adr/003-edit-locks.md)).
 - **Private notes outside Git, captured offline** ([ADR-004](../adr/004-notes-outside-git-offline-capture.md)).
+- **To-do lists outside Git, synced as operations** ([ADR-006](../adr/006-todo-lists-outside-git-synced-operations.md)).
 - Server-rendered pages (`html/template`); JavaScript only where it helps
   (editor, drag and drop, offline, push).
 - Packages by domain capability, not by technical layer.
@@ -67,11 +68,12 @@ services and external calendars. Nothing else leaves the host.
 | `internal/wiki` | Page tree, pages, attachments, locks, history |
 | `internal/markdown` | Safe Markdown rendering |
 | `internal/notes` | Private notes per person, outside Git |
+| `internal/todos` | Shareable to-do lists outside Git, changed by operations |
 | `internal/photo` | Removes GPS data from JPEG uploads |
 | `internal/search` | In-memory search over pages and notes (scans all per query) |
 | `internal/devseed` | Made-up people, groups, spaces, pages and notes for development (`kanso seed`, dev login only) |
 | `internal/web` | HTTP routes, templates, static files |
-| `web/` | Templates, CSS, JS (editor, capture, service worker), fonts, icons, vendored Mermaid |
+| `web/` | Templates, CSS, JS (editor, capture, to-dos, service worker), fonts, icons, vendored Mermaid |
 
 Later phases add `tasks`, `lists`, `calendar`, `push`.
 
@@ -92,6 +94,13 @@ into an IndexedDB outbox with an id made on the device. Uploading asks
 server answers "created" or "exists" (same id seen before) and only then the
 note leaves the outbox. A signed-out device keeps its notes and shows a
 sign-in link.
+
+**Ticking a to-do offline:** `/todos` is drawn by `todos.js` from a copy in
+IndexedDB (the service worker keeps the page). A tick becomes an operation,
+applied to the copy and kept in an outbox. A sync posts all waiting
+operations to `/api/todos/sync` (CSRF token from `/notes/token`); the answer
+is the state of every visible list, which replaces the copy, and the sent
+operations leave the outbox.
 
 **Note → wiki page:** the note's folder is moved into the space below the
 chosen page, gets a fresh page id and frontmatter, and is committed as a
@@ -124,6 +133,7 @@ Kopia jobs.
 | [003](../adr/003-edit-locks.md) | Edit locks instead of live collaboration |
 | [004](../adr/004-notes-outside-git-offline-capture.md) | Notes outside Git, captured offline |
 | [005](../adr/005-navigation-parts-and-content.md) | Navigation: rail of parts, side bar for their content |
+| [006](../adr/006-todo-lists-outside-git-synced-operations.md) | To-do lists outside Git, synced as operations |
 
 ## 10. Quality Requirements
 
@@ -142,6 +152,8 @@ Verified by unit tests (`go test ./...`) and browser end-to-end tests
 - Write throughput is limited by one global lock; fine for a household.
 - Notes waiting offline live in browser storage, which a browser may evict;
   Kanso asks for persistent storage and shows what is waiting.
+- To-do conflicts are decided by device clocks; a badly wrong clock can lose
+  a change.
 - iOS does not open the keyboard by itself on the capture page; one tap stays.
 - Offline capture is tested in Chromium only (Playwright WebKit lacks reliable
   service workers); iOS is checked by hand.
