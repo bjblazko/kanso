@@ -3,7 +3,9 @@
 package wiki
 
 import (
+	"bytes"
 	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -74,5 +76,28 @@ func TestOpenAndDeleteAttachment(t *testing.T) {
 	}
 	if _, err := w.OpenAttachment(p.Meta.ID, name); err == nil {
 		t.Error("deleted attachment still opens")
+	}
+}
+
+func TestAttachmentLosesGPS(t *testing.T) {
+	w := newWiki(t)
+	p := mustCreate(t, w, "", "Seite")
+	in, err := os.ReadFile("../photo/testdata/gps.jpg")
+	if err != nil {
+		t.Fatal(err)
+	}
+	name, err := w.AddAttachment(anna, p.Meta.ID, "Typenschild.JPG", bytes.NewReader(in), 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	f, err := w.OpenAttachment(p.Meta.ID, name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() { _ = f.Close() }()
+	got, _ := io.ReadAll(f)
+	lat := []byte{48, 0, 0, 0, 1, 0, 0, 0, 8, 0, 0, 0, 1, 0, 0, 0}
+	if !bytes.Contains(in, lat) || bytes.Contains(got, lat) {
+		t.Error("stored photo still has its location")
 	}
 }

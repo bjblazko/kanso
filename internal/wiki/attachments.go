@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"slices"
 
+	"github.com/bjblazko/kanso/internal/photo"
 	"github.com/bjblazko/kanso/internal/store"
 )
 
@@ -42,7 +43,13 @@ func (w *Wiki) AddAttachment(a store.Author, id, filename string, r io.Reader, m
 			return err
 		}
 		name = store.UniqueFile(dir, store.AttachmentName(filename))
-		if err := writeLimited(filepath.Join(dir, name), r, max); err != nil {
+		clean, err := photo.Clean(name, r, max)
+		if errors.Is(err, photo.ErrTooLarge) {
+			return ErrTooLarge
+		} else if err != nil {
+			return err
+		}
+		if err := writeLimited(filepath.Join(dir, name), clean, max); err != nil {
 			return err
 		}
 		return w.repo.Commit(a, "Anhang hinzugefügt: "+name, path.Join(attachmentDir(p), name))
@@ -50,7 +57,7 @@ func (w *Wiki) AddAttachment(a store.Author, id, filename string, r io.Reader, m
 	return name, err
 }
 
-// uniqueFile returns name, or stem-2.ext, stem-3.ext … if dir holds it.
+// writeLimited writes at most max bytes of r to a new file dst.
 func writeLimited(dst string, r io.Reader, max int64) error {
 	f, err := os.OpenFile(dst, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o640)
 	if err != nil {
