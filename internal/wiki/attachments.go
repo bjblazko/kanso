@@ -3,26 +3,19 @@
 package wiki
 
 import (
-	"errors"
 	"io"
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"slices"
 
-	"github.com/bjblazko/kanso/internal/photo"
 	"github.com/bjblazko/kanso/internal/store"
 )
 
 // ErrTooLarge means an upload exceeded the size limit.
-var ErrTooLarge = errors.New("attachment too large")
+var ErrTooLarge = store.ErrTooLarge
 
 const attachmentsDir = "attachments"
-
-var (
-	safeName = regexp.MustCompile(`^[a-z0-9-]+(\.[a-z0-9]{1,8})?$`)
-)
 
 // attachmentDir is the repository-relative attachments folder of p.
 func attachmentDir(p Page) string {
@@ -39,17 +32,8 @@ func (w *Wiki) AddAttachment(a store.Author, id, filename string, r io.Reader, m
 			return ErrNotFound
 		}
 		dir := filepath.Join(w.dataDir, filepath.FromSlash(attachmentDir(p)))
-		if err := os.MkdirAll(dir, 0o750); err != nil {
-			return err
-		}
-		name = store.UniqueFile(dir, store.AttachmentName(filename))
-		clean, err := photo.Clean(name, r, max)
-		if errors.Is(err, photo.ErrTooLarge) {
-			return ErrTooLarge
-		} else if err != nil {
-			return err
-		}
-		if err := writeLimited(filepath.Join(dir, name), clean, max); err != nil {
+		var err error
+		if name, err = store.SaveUpload(dir, filename, r, max); err != nil {
 			return err
 		}
 		return w.repo.Commit(a, "Anhang hinzugefügt: "+name, path.Join(attachmentDir(p), name))
@@ -57,29 +41,10 @@ func (w *Wiki) AddAttachment(a store.Author, id, filename string, r io.Reader, m
 	return name, err
 }
 
-// writeLimited writes at most max bytes of r to a new file dst.
-func writeLimited(dst string, r io.Reader, max int64) error {
-	f, err := os.OpenFile(dst, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o640)
-	if err != nil {
-		return err
-	}
-	n, err := io.Copy(f, io.LimitReader(r, max+1))
-	if cerr := f.Close(); err == nil {
-		err = cerr
-	}
-	if err == nil && n > max {
-		err = ErrTooLarge
-	}
-	if err != nil {
-		_ = os.Remove(dst)
-	}
-	return err
-}
-
 // attachmentPath resolves name below page id's attachments, refusing tricks.
 func (w *Wiki) attachmentPath(id, name string) (string, Page, error) {
 	p, ok := w.ByID(id)
-	if !ok || !safeName.MatchString(name) {
+	if !ok || !store.ValidAttachmentName(name) {
 		return "", p, ErrNotFound
 	}
 	abs, err := store.Join(w.dataDir, filepath.FromSlash(attachmentDir(p)), name)
@@ -104,7 +69,7 @@ func (w *Wiki) ListAttachments(id string) []string {
 	entries, _ := os.ReadDir(filepath.Join(w.dataDir, filepath.FromSlash(attachmentDir(p))))
 	var names []string
 	for _, e := range entries {
-		if !e.IsDir() && safeName.MatchString(e.Name()) {
+		if !e.IsDir() && store.ValidAttachmentName(e.Name()) {
 			names = append(names, e.Name())
 		}
 	}
