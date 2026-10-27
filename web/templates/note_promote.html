@@ -1,0 +1,17 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/notes">{{.T "notes.title"}}</a> <span aria-hidden="true">/</span> <a href="/notes/{{$d.Note.Meta.ID}}">{{$d.Title}}</a></nav>
+<h1>{{.T "notes.promote"}}</h1>
+<p>{{.T "notes.promote_hint"}}</p>
+{{if $d.Targets}}<form method="post" action="/notes/{{$d.Note.Meta.ID}}/promote" class="form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <div class="field"><label for="title">{{.T "notes.promote_title"}}</label>
+    <input id="title" name="title" required maxlength="200" value="{{$d.Title}}"></div>
+  <div class="field"><label for="where">{{.T "notes.promote_where"}}</label>
+    <select id="where" name="where" class="btn btn-secondary">{{range $d.Targets}}<option value="{{.ID}}">{{.Label}}</option>{{end}}</select></div>
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">{{.T "notes.promote"}}</button>
+    <a class="btn btn-quiet" href="/notes/{{$d.Note.Meta.ID}}">{{.T "action.cancel"}}</a>
+  </div>
+</form>
+{{else}}<p class="notice notice-warning" role="alert">{{$d.Error}}</p>{{end}}
+</div>{{end}}

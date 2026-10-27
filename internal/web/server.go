@@ -69,7 +69,7 @@ func New(d Deps) (*Server, error) {
 }
 
 var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search",
-	"notes", "note_new", "note_view", "note_delete", "note_edit"}
+	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote"}
 
 func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}
@@ -153,6 +153,8 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /notes/{id}", s.saveNote)
 	mux.HandleFunc("POST /notes/{id}/attachments", s.uploadNoteAttachment)
 	mux.HandleFunc("GET /notes/{id}/attachments/{name}", s.serveNoteAttachment)
+	mux.HandleFunc("GET /notes/{id}/promote", s.promoteNoteForm)
+	mux.HandleFunc("POST /notes/{id}/promote", s.promoteNote)
 	mux.HandleFunc("GET /notes/{id}/delete", s.confirmDeleteNote)
 	mux.HandleFunc("POST /notes/{id}/delete", s.deleteNote)
 	mux.HandleFunc("GET /admin/spaces/new", s.newSpaceForm)

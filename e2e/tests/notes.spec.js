@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { test, expect } from '@playwright/test';
-import { signIn, unique } from './helpers.js';
+import { signIn, unique, createSpace } from './helpers.js';
 
 test('notes: write one, find it in the list, delete it', async ({ page }) => {
   await signIn(page, { sub: 'nora', name: 'Nora' });
@@ -51,4 +51,28 @@ test('notes: edit a note and add a photo', async ({ page }) => {
   await page.getByRole('button', { name: 'Speichern' }).click();
   await expect(page).toHaveURL(/\/notes\/[a-z2-7]{12}$/);
   await expect(page.locator('.prose img')).toHaveAttribute('src', /\/notes\/[a-z2-7]{12}\/attachments\/zaehler\.png$/);
+});
+
+test('notes: turn a note into a wiki page', async ({ page }) => {
+  await signIn(page, { sub: 'nils', name: 'Nils', admin: true });
+  const space = unique('Notizziel');
+  await createSpace(page, space);
+  const text = unique('Rasen düngen');
+  await page.goto('/notes/new');
+  await page.getByLabel('Notiz', { exact: true }).fill(`${text}\nIm April und im September.`);
+  await page.getByRole('button', { name: 'Speichern' }).click();
+  await expect(page.getByRole('status')).toHaveText('Gespeichert');
+
+  await page.goto('/notes');
+  await page.getByRole('link', { name: text }).click();
+  await page.getByRole('link', { name: 'Als Wiki-Seite anlegen' }).click();
+  await expect(page.getByLabel('Titel der Seite')).toHaveValue(text);
+  await page.getByLabel('Wo').selectOption({ label: space });
+  await page.getByRole('button', { name: 'Als Wiki-Seite anlegen' }).click();
+
+  await expect(page).toHaveURL(/\/p\/[a-z2-7]{12}$/);
+  await expect(page.getByRole('heading', { level: 1, name: text })).toBeVisible();
+  await expect(page.locator('.prose')).toContainText('Im April und im September.');
+  await page.goto('/notes');
+  await expect(page.getByRole('link', { name: text })).toHaveCount(0);
 });
