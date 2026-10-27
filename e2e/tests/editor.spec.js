@@ -71,3 +71,15 @@ test('editor: second person sees the lock; after a break the text survives', asy
   await ownerCtx.close();
   await editorCtx.close();
 });
+
+test('task lists show no bullets, also with blank lines between items', async ({ page }) => {
+  await signIn(page, { sub: 'tom', name: 'Tom', admin: true });
+  await createSpace(page, unique('Aufgabenliste'));
+  await createPage(page, 'Draußen');
+  await page.getByRole('link', { name: 'Bearbeiten' }).click();
+  await page.getByRole('textbox', { name: 'Quelltext' }).fill('- [x] Bambus\n\n- [ ] Laub\n  - [x] Tür\n  - [ ] Hof\n');
+  await page.getByRole('button', { name: 'Speichern' }).click();
+  await expect(page.locator('.prose input[type="checkbox"]')).toHaveCount(4);
+  const bullets = await page.locator('.prose li').evaluateAll((items) => items.map((li) => getComputedStyle(li).listStyleType));
+  expect(bullets).toEqual(['none', 'none', 'none', 'none']);
+});

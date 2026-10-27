@@ -124,7 +124,10 @@ ul ul.tree > li::after {
 .prose h1, .prose h2, .prose h3 { margin-top: var(--space-8); }
 .prose ul, .prose ol { padding-left: var(--space-6); margin: 0 0 var(--space-4); }
 .prose li + li { margin-top: var(--space-1); }
-.prose li:has(> input[type="checkbox"]) { list-style: none; margin-left: calc(-1 * var(--space-6)); }
+/* Task items: the checkbox replaces the bullet — in tight lists the input is
+   the item's first child, in loose lists (blank lines) it opens a paragraph. */
+.prose li:has(> input[type="checkbox"]),
+.prose li:has(> p:first-child > input[type="checkbox"]:first-child) { list-style: none; margin-left: calc(-1 * var(--space-6)); }
 .prose blockquote { margin: 0 0 var(--space-4); padding-left: var(--space-4); border-left: 1px solid var(--line-strong); color: var(--fg-2); }
 .prose pre { overflow-x: auto; padding: var(--space-3) var(--space-4); background: var(--bg-2); border-radius: var(--radius-md); font-size: var(--text-sm); }
 .prose code { font-family: var(--font-mono); font-size: 0.92em; }

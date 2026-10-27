@@ -44,6 +44,7 @@ All notable changes to this project are documented here. The format follows
 - The Markdown editor serves pages and notes; it reads its URLs from the form.
 
 ### Fixed
+- Task lists with blank lines between items no longer show bullets next to the checkboxes.
 - On phones the folded menu no longer stretches into an empty grey block on short pages.
 - Page history no longer shows commits of another page: Kanso follows real renames itself instead of `git log --follow`, which took look-alike new pages for copies.
 - Sign-in no longer fails for names with quotes or angle brackets (they are dropped from the Git author only).
