@@ -1,0 +1,10 @@
+{{define "content"}}{{$d := .Data}}<article class="content page">
+<nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/notes">{{.T "notes.title"}}</a></nav>
+<h1>{{$d.Title}}</h1>
+<p class="meta"><time datetime="{{$d.Note.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Note.Meta.Updated.Local.Format "02.01.2006 15:04"}}</time> · {{.T "notes.private"}}</p>
+<div class="prose">{{$d.HTML}}</div>
+<div class="actions">
+  <a class="btn btn-destructive btn-sm" href="/notes/{{$d.Note.Meta.ID}}/delete">{{.T "notes.delete"}}</a>
+</div>
+</article>{{end}}
+{{define "scripts"}}{{if .Data.Info.HasMermaid}}<script type="module" src="{{.Asset "js/mermaid-loader.js"}}" data-mermaid-src="{{.Asset "vendor/mermaid/mermaid.esm.min.mjs"}}"></script>{{end}}{{end}}

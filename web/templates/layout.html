@@ -42,7 +42,10 @@
   <nav class="sidenav" aria-label="{{.T "nav.spaces"}}">
     <details open>
       <summary>{{.T "nav.menu"}}</summary>
-      {{block "nav" .}}<ul class="navlist">
+      {{block "nav" .}}<ul class="navlist navlist-notes">
+        <li><a href="/notes"{{if eq .Here "/notes"}} aria-current="page"{{end}}>{{template "icon" "note"}}<span>{{.T "nav.notes"}}</span></a></li>
+      </ul>
+      <ul class="navlist">
         {{range .Nav}}<li><a href="/s/{{.Slug}}"{{if and (eq $.Here .Slug) (not $.Page)}} aria-current="page"{{end}}>{{template "icon" .Icon}}<span>{{.Name}}</span></a>
           {{if and (eq $.Here .Slug) $.Tree}}{{template "tree" (treeArgs $.Tree $.Page)}}{{end}}</li>
         {{end}}

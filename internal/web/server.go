@@ -68,7 +68,8 @@ func New(d Deps) (*Server, error) {
 	return s, nil
 }
 
-var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search"}
+var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search",
+	"notes", "note_new", "note_view", "note_delete"}
 
 func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}
@@ -144,6 +145,13 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /p/{id}/move", s.movePage)
 	mux.HandleFunc("GET /p/{id}/delete", s.confirmDeletePage)
 	mux.HandleFunc("POST /p/{id}/delete", s.deletePage)
+	mux.HandleFunc("GET /notes", s.listNotes)
+	mux.HandleFunc("GET /notes/new", s.newNoteForm)
+	mux.HandleFunc("POST /notes", s.createNote)
+	mux.HandleFunc("GET /notes/{id}", s.showNote)
+	mux.HandleFunc("GET /notes/{id}/attachments/{name}", s.serveNoteAttachment)
+	mux.HandleFunc("GET /notes/{id}/delete", s.confirmDeleteNote)
+	mux.HandleFunc("POST /notes/{id}/delete", s.deleteNote)
 	mux.HandleFunc("GET /admin/spaces/new", s.newSpaceForm)
 	mux.HandleFunc("POST /admin/spaces/new", s.createSpace)
 	mux.HandleFunc("GET /admin/groups", s.groupsPage)

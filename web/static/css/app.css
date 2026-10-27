@@ -171,3 +171,26 @@ p { margin: 0 0 var(--space-4); }
 a.btn { text-decoration: none; }
 input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .main > .footer { padding-left: 0; padding-right: 0; }
+
+/* ---- Notes ------------------------------------------------------------ */
+
+.navlist-notes { border-bottom: 1px solid var(--line); }
+.notes li { padding: var(--space-3) 0; border-bottom: 1px solid var(--line); }
+
+/* Capture: one job — write it down. The field takes the screen, the buttons
+   sit below it within thumb reach. 16px+ text keeps iOS from zooming in. */
+.capture-page { padding: 0; max-width: 48rem; }
+.capture { display: flex; flex-direction: column; gap: var(--space-3); }
+.capture textarea {
+  width: 100%; min-height: max(14rem, calc(100dvh - 18rem)); padding: var(--space-3);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  background: var(--bg); color: var(--fg); resize: vertical;
+  font: 400 var(--text-md)/1.5 var(--font-sans);
+}
+.capture-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.capture-actions .btn-primary { margin-left: auto; }
+.capture-status { min-height: 1.4em; margin: 0; }
+.previews { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.previews:empty { display: none; }
+.previews li { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+.previews img { width: 5rem; height: 5rem; object-fit: cover; border: 1px solid var(--line); border-radius: var(--radius-sm); }

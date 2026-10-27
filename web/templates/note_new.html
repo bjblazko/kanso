@@ -1,0 +1,18 @@
+{{define "content"}}{{$d := .Data}}<div class="capture-page">
+<form id="capture" class="capture" method="post" action="/notes" enctype="multipart/form-data">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <label class="visually-hidden" for="note-body">{{.T "notes.capture_label"}}</label>
+  <textarea id="note-body" name="body" placeholder="{{.T "notes.capture_placeholder"}}" spellcheck="true">{{$d.Body}}</textarea>
+  <ul id="previews" class="previews list-plain" aria-label="{{.T "notes.photos"}}"></ul>
+  {{if $d.Error}}<p class="notice notice-warning" role="alert">{{$d.Error}}</p>{{end}}
+  <p id="capture-status" class="meta capture-status" role="status">{{if $d.Saved}}{{.T "notes.saved"}}{{end}}</p>
+  <div class="capture-actions">
+    <label class="btn btn-secondary" for="camera">{{.T "notes.camera"}}</label>
+    <input class="visually-hidden" id="camera" type="file" name="files" accept="image/*" capture="environment">
+    <label class="btn btn-secondary" for="pick">{{.T "notes.pick"}}</label>
+    <input class="visually-hidden" id="pick" type="file" name="files" multiple accept="image/*,application/pdf">
+    <button class="btn btn-primary" type="submit">{{.T "notes.save"}}</button>
+  </div>
+  <p><a href="/notes">{{.T "notes.all"}}</a></p>
+</form>
+</div>{{end}}
