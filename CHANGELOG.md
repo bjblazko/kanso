@@ -28,11 +28,20 @@ All notable changes to this project are documented here. The format follows
 - Deployment guide for Authelia (`docs/deploy-authelia.md`).
 - Development data: `just seed` fills an empty `./tmp` with made-up people, a group, three spaces with different roles and sample pages; `just reset` deletes it. `kanso seed` refuses to run without the dev login.
 - Dev login: one click per made-up person, and "Switch person" in the user menu returns to the same page.
+- Notes (ADR-004): private notes per person, outside the Git history. Quick capture page (`/notes/new`) with camera and photo library; list, view, edit with source and preview, delete; turn a note into a wiki page; search finds your own notes; the seed adds some.
+- Offline capture: notes and photos wait on the device (IndexedDB) and upload when the network is back; a lost answer never creates a note twice; a signed-out device keeps its notes and offers to sign in.
+- Installable web app (manifest, own icon) whose home-screen icon opens the capture page.
 
 ### Security
+- GPS location is removed from JPEG photos on upload (notes and wiki pages); orientation and other EXIF data stay.
 - Requires Go 1.27.3 (`go.mod`), which fixes GO-2026-6809 in `crypto/x509`.
 
+### Changed
+- Uploads share one path (`store.SaveUpload`) for safe names, size limit and photo cleaning.
+- The Markdown editor serves pages and notes; it reads its URLs from the form.
+
 ### Fixed
+- On phones the folded menu no longer stretches into an empty grey block on short pages.
 - Page history no longer shows commits of another page: Kanso follows real renames itself instead of `git log --follow`, which took look-alike new pages for copies.
 - Sign-in no longer fails for names with quotes or angle brackets (they are dropped from the Git author only).
 - Design review: button links no longer underlined, navigation folded on phones, neutral checkboxes.

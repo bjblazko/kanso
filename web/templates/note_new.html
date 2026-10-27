@@ -4,7 +4,7 @@
       data-msg-saved="{{.T "notes.saved"}}" data-msg-empty="{{.T "notes.error_empty"}}"
       data-msg-waiting-one="{{.T "notes.waiting_one"}}" data-msg-waiting-many="{{.T "notes.waiting_many"}}"
       data-msg-failed-one="{{.T "notes.failed_one"}}" data-msg-failed-many="{{.T "notes.failed_many"}}"
-      data-msg-failed-mark="{{.T "notes.failed_mark"}}" data-msg-photo="{{.T "notes.photo"}}" data-msg-remove="{{.T "notes.remove"}}">
+      data-msg-failed-mark="{{.T "notes.failed_mark"}}" data-msg-photo="{{.T "notes.photo"}}" data-msg-remove="{{.T "notes.remove"}}" data-msg-not-saved="{{.T "notes.not_saved"}}">
   <input type="hidden" name="csrf" value="{{.CSRF}}">
   <label class="visually-hidden" for="note-body">{{.T "notes.capture_label"}}</label>
   <textarea id="note-body" name="body" placeholder="{{.T "notes.capture_placeholder"}}" spellcheck="true">{{$d.Body}}</textarea>

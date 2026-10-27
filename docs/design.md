@@ -15,6 +15,10 @@ Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 | Page editor | Change a page and save it. |
 | Space settings | Decide who may read and write. |
 | Licenses and thanks | Show whose work Kanso contains. |
+| Note capture | Write something down, now. The field fills the screen, buttons sit below it; "Speichern" is the only accent. |
+| Notes list | Find a note to sort. |
+| Note → wiki page | Choose where the note goes. |
+| App icon | Three note lines and one accent dot on the dark ink colour; mark inside the central 60 % (maskable safe zone). |
 
 ## Layout
 

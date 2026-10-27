@@ -68,7 +68,11 @@ func seed(cfg config.Config) error {
 	if err != nil {
 		return err
 	}
-	return devseed.Seed(cfg.DataDir, repo, us, sp, wk)
+	ns, err := notes.NewStore(cfg.DataDir, repo)
+	if err != nil {
+		return err
+	}
+	return devseed.Seed(cfg.DataDir, repo, us, sp, wk, ns)
 }
 
 func run(cfg config.Config) error {

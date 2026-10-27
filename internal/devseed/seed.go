@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // Package devseed fills an empty data directory with made-up people, groups,
-// spaces and pages for local development. It is used only with the dev login.
+// spaces, pages and notes for local development. It is used only with the dev login.
 package devseed
 
 import (
@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/bjblazko/kanso/internal/access"
+	"github.com/bjblazko/kanso/internal/notes"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/users"
@@ -61,8 +62,8 @@ var seedSpaces = []spaceSeed{
 		pages:   []pageSeed{{title: "Meine Bücher", body: booksBody}}},
 }
 
-// Seed writes people, groups, spaces and pages into an empty data directory.
-func Seed(dataDir string, repo *store.Repo, us *users.Store, sp *spaces.Service, wk *wiki.Wiki) error {
+// Seed writes people, groups, spaces, pages and notes into an empty data directory.
+func Seed(dataDir string, repo *store.Repo, us *users.Store, sp *spaces.Service, wk *wiki.Wiki, ns *notes.Store) error {
 	if len(sp.List()) > 0 {
 		return ErrNotEmpty
 	}
@@ -79,6 +80,23 @@ func Seed(dataDir string, repo *store.Repo, us *users.Store, sp *spaces.Service,
 	for _, s := range seedSpaces {
 		if err := seedSpace(admin, sp, wk, s); err != nil {
 			return err
+		}
+	}
+	return seedNotes(ns)
+}
+
+var seedNoteBodies = map[string][]string{
+	"anna": {"Zählerstand Strom ablesen\nAm Monatsende, Zähler im Keller links.\n", "Geschenkidee Lena: Hörspiel Ronja\n"},
+	"ben":  {"Dachrinne vor dem Winter reinigen\n"},
+}
+
+// seedNotes gives some people private notes to sort.
+func seedNotes(ns *notes.Store) error {
+	for owner, bodies := range seedNoteBodies {
+		for _, body := range bodies {
+			if _, _, err := ns.Create(owner, "", body, nil, 0); err != nil {
+				return err
+			}
 		}
 	}
 	return nil

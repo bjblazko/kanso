@@ -78,4 +78,3 @@ func (s *Server) manifest(w http.ResponseWriter, _ *http.Request) {
 func (s *Server) noteToken(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"csrf": auth.CSRFToken(r.Context())})
 }
-

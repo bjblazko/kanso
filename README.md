@@ -9,11 +9,11 @@ you can read without Kanso.
 
 ## Status
 
-Phase 1 is done: Markdown wiki with spaces, page tree, editor with live
-preview, attachments, Mermaid diagrams, edit locks, history with diff and
-restore, search; sign-in with OpenID Connect; roles per space; German and
-English. Next: notes, deployment, tasks (Kanban and Eisenhower), lists,
-calendars.
+Phases 1 and 2 are done: Markdown wiki with spaces, page tree, editor with
+live preview, attachments, Mermaid diagrams, edit locks, history with diff and
+restore, search; private notes, captured on the phone also offline and with
+photos; sign-in with OpenID Connect; roles per space; German and English.
+Next: deployment, tasks (Kanban and Eisenhower), lists, calendars.
 
 ## Run
 
@@ -50,6 +50,12 @@ Kanso sends no telemetry and checks for no updates. It talks only to your
 OIDC provider. It stores the name and e-mail address the provider sends, in
 `users/<id>.yaml` in the data directory, and writes them into the history as
 author of each change. Logs contain errors and request paths, no addresses.
+
+Notes are private to their author and are **not** kept in the Git history:
+deleting a note removes it for good (backups of the data directory may still
+hold it). A note written without network waits in the browser's storage on
+that device until it is uploaded. Kanso removes the GPS location from JPEG
+photos when they are uploaded.
 
 ## License
 

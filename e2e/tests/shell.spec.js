@@ -65,3 +65,25 @@ test('dev login switches between made-up people', async ({ page }) => {
   await expect(menu).toHaveText('Oma Gerda');
   await expect(page.getByRole('heading', { level: 1, name: 'Bereiche' })).toBeVisible();
 });
+
+test('a short page keeps the closed menu compact on phones', async ({ page, isMobile }) => {
+  test.skip(!isMobile, 'the menu sits above the content only on phones');
+  await signIn(page, { sub: 'kurt', name: 'Kurt' });
+  await page.goto('/notes');
+  const nav = await page.locator('.sidenav').boundingBox();
+  expect(nav.height).toBeLessThan(120);
+});
+
+const PIXEL = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+  'base64',
+);
+
+test('the save button stays visible with a photo attached', async ({ page }) => {
+  await signIn(page, { sub: 'kurt', name: 'Kurt' });
+  await page.goto('/notes/new');
+  await page.locator('#pick').setInputFiles({ name: 'a.png', mimeType: 'image/png', buffer: PIXEL });
+  await expect(page.locator('#previews img')).toHaveCount(1);
+  const save = await page.getByRole('button', { name: 'Speichern' }).boundingBox();
+  expect(save.y + save.height).toBeLessThanOrEqual(page.viewportSize().height);
+});

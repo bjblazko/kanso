@@ -48,6 +48,7 @@ services and external calendars. Nothing else leaves the host.
 - **Files + Git as the database** ([ADR-000](../adr/000-filesystem-and-git-storage.md)).
 - **OIDC for identity, roles in Kanso** ([ADR-001](../adr/001-oidc-with-kanso-managed-roles.md)).
 - **Edit locks instead of live collaboration** ([ADR-003](../adr/003-edit-locks.md)).
+- **Private notes outside Git, captured offline** ([ADR-004](../adr/004-notes-outside-git-offline-capture.md)).
 - Server-rendered pages (`html/template`); JavaScript only where it helps
   (editor, drag and drop, offline, push).
 - Packages by domain capability, not by technical layer.
@@ -65,12 +66,14 @@ services and external calendars. Nothing else leaves the host.
 | `internal/spaces` | Spaces and their members |
 | `internal/wiki` | Page tree, pages, attachments, locks, history |
 | `internal/markdown` | Safe Markdown rendering |
-| `internal/search` | In-memory search (scans all pages per query) |
-| `internal/devseed` | Made-up people, groups, spaces and pages for development (`kanso seed`, dev login only) |
+| `internal/notes` | Private notes per person, outside Git |
+| `internal/photo` | Removes GPS data from JPEG uploads |
+| `internal/search` | In-memory search over pages and notes (scans all per query) |
+| `internal/devseed` | Made-up people, groups, spaces, pages and notes for development (`kanso seed`, dev login only) |
 | `internal/web` | HTTP routes, templates, static files |
-| `web/` | Templates, CSS, JS, fonts, vendored Mermaid |
+| `web/` | Templates, CSS, JS (editor, capture, service worker), fonts, icons, vendored Mermaid |
 
-Later phases add `notes`, `tasks`, `lists`, `calendar`, `push`.
+Later phases add `tasks`, `lists`, `calendar`, `push`.
 
 ## 6. Runtime View
 
@@ -81,6 +84,18 @@ profile and a session; membership in `kanso-admin` sets the admin flag.
 **Saving a page:** the editor holds a lock (heartbeat every 60 s). Saving
 checks the lock token, writes `index.md` atomically, commits it with the
 user as author, updates the page index and the search index.
+
+**Capturing a note offline:** `/notes/new` registers the service worker,
+which keeps that page and its files. Saving puts the note (text and photos)
+into an IndexedDB outbox with an id made on the device. Uploading asks
+`/notes/token` for a fresh CSRF token and posts each note to `/notes`; the
+server answers "created" or "exists" (same id seen before) and only then the
+note leaves the outbox. A signed-out device keeps its notes and shows a
+sign-in link.
+
+**Note → wiki page:** the note's folder is moved into the space below the
+chosen page, gets a fresh page id and frontmatter, and is committed as a
+whole (text and photos).
 
 ## 7. Deployment View
 
@@ -106,6 +121,7 @@ Kopia jobs.
 | [001](../adr/001-oidc-with-kanso-managed-roles.md) | OIDC for identity, roles and groups managed in Kanso |
 | [002](../adr/002-dependency-policy.md) | Minimal, approved dependencies |
 | [003](../adr/003-edit-locks.md) | Edit locks instead of live collaboration |
+| [004](../adr/004-notes-outside-git-offline-capture.md) | Notes outside Git, captured offline |
 
 ## 10. Quality Requirements
 
@@ -120,9 +136,13 @@ Verified by unit tests (`go test ./...`) and browser end-to-end tests
 ## 11. Risks and Technical Debt
 
 - Build with Go ≥ 1.27.3 (GO-2026-6809, `crypto/x509`).
-- 34 unchecked return values in test setup code (golangci-lint errcheck).
 
 - Write throughput is limited by one global lock; fine for a household.
+- Notes waiting offline live in browser storage, which a browser may evict;
+  Kanso asks for persistent storage and shows what is waiting.
+- iOS does not open the keyboard by itself on the capture page; one tap stays.
+- Offline capture is tested in Chromium only (Playwright WebKit lacks reliable
+  service workers); iOS is checked by hand.
 - `go.yaml.in/yaml/v3` is frozen; move to v4 once it is stable.
 - Mermaid is large (3.9 MB, lazy-loaded); its ELK layout is deliberately left out.
 - Mermaid briefly puts label text into the DOM to measure it; hostile HTML

@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: Apache-2.0
 // Capture: a note goes into an outbox on the device first (IndexedDB, with
-// its photos) and is uploaded when the network allows. Only a confirmed
-// upload removes it from the outbox, so nothing is lost on the way.
+// its photos as bytes) and is uploaded when the network allows. Only a
+// confirmed upload removes it from the outbox, so nothing is lost on the way.
+// Where the outbox cannot be written (e.g. private browsing), the note is
+// uploaded at once, and the text stays in the field until that worked.
 
 const SYNC_MS = 30_000;
 const ID_ALPHABET = 'abcdefghijklmnopqrstuvwxyz234567';
@@ -97,7 +99,7 @@ async function upload(note, csrf) {
   const data = new FormData();
   data.append('id', note.id);
   data.append('body', note.body);
-  for (const f of note.files) data.append('files', f.blob, f.name);
+  for (const f of note.files) data.append('files', new Blob([f.data], { type: f.type }), f.name);
   try {
     const response = await fetch('/notes', {
       method: 'POST', body: data, credentials: 'same-origin',
@@ -183,9 +185,15 @@ async function save(event) {
     status.replaceChildren(msg.msgEmpty);
     return;
   }
-  const files = chosen.map((c) => ({ name: c.file.name, type: c.file.type, blob: c.file }));
-  await keep({ id: newID(), body: body.value, files, created: Date.now(), failed: false });
-  navigator.storage?.persist?.();
+  // Bytes, not Blobs: Safari cannot store Blobs in IndexedDB in private windows.
+  const files = await Promise.all(chosen.map(async (c) => ({
+    name: c.file.name, type: c.file.type, data: await c.file.arrayBuffer(),
+  })));
+  const note = { id: newID(), body: body.value, files, created: Date.now(), failed: false };
+  if (!(await stored(note))) {
+    status.replaceChildren(msg.msgNotSaved);
+    return;
+  }
   for (const c of chosen) URL.revokeObjectURL(c.url);
   chosen = [];
   body.value = '';
@@ -193,6 +201,19 @@ async function save(event) {
   justSaved = true;
   await render();
   await sync();
+}
+
+// stored puts the note into the outbox, or uploads it right away if the
+// outbox cannot be written; false means it is nowhere yet.
+async function stored(note) {
+  try {
+    await keep(note);
+    navigator.storage?.persist?.();
+    return true;
+  } catch {
+    const csrf = await token();
+    return Boolean(csrf) && (await upload(note, csrf)) === 'done';
+  }
 }
 
 // ---- Wiring ----------------------------------------------------------------

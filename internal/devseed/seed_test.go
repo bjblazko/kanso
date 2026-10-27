@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/bjblazko/kanso/internal/access"
+	"github.com/bjblazko/kanso/internal/notes"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/users"
@@ -20,6 +21,7 @@ type stores struct {
 	us   *users.Store
 	sp   *spaces.Service
 	wk   *wiki.Wiki
+	ns   *notes.Store
 }
 
 func newStores(t *testing.T) stores {
@@ -43,12 +45,16 @@ func newStores(t *testing.T) stores {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return stores{dir: repo.Dir(), repo: repo, us: us, sp: sp, wk: wk}
+	ns, err := notes.NewStore(repo.Dir(), repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return stores{dir: repo.Dir(), repo: repo, us: us, sp: sp, wk: wk, ns: ns}
 }
 
 func seed(t *testing.T, s stores) error {
 	t.Helper()
-	return Seed(s.dir, s.repo, s.us, s.sp, s.wk)
+	return Seed(s.dir, s.repo, s.us, s.sp, s.wk, s.ns)
 }
 
 func TestSeedCreatesPeople(t *testing.T) {
@@ -123,5 +129,18 @@ func TestExactlyOneAdmin(t *testing.T) {
 	}
 	if n != 1 {
 		t.Errorf("admins = %d", n)
+	}
+}
+
+func TestSeedWritesNotes(t *testing.T) {
+	s := newStores(t)
+	if err := seed(t, s); err != nil {
+		t.Fatal(err)
+	}
+	if n := len(s.ns.List("anna")); n != 2 {
+		t.Errorf("anna's notes = %d", n)
+	}
+	if n := len(s.ns.List("ben")); n != 1 {
+		t.Errorf("ben's notes = %d", n)
 	}
 }

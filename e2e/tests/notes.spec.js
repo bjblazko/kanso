@@ -76,3 +76,19 @@ test('notes: turn a note into a wiki page', async ({ page }) => {
   await page.goto('/notes');
   await expect(page.getByRole('link', { name: text })).toHaveCount(0);
 });
+
+test('notes: capture with a photo from the library', async ({ page }) => {
+  await signIn(page, { sub: 'nora', name: 'Nora' });
+  const text = unique('Typenschild');
+  await page.goto('/notes/new');
+  await page.getByLabel('Notiz', { exact: true }).fill(text);
+  await page.locator('#pick').setInputFiles({ name: 'schild.png', mimeType: 'image/png', buffer: PNG });
+  await expect(page.locator('#previews img')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Speichern' }).click();
+  await expect(page.getByRole('status')).toHaveText('Gespeichert');
+  await expect(page.locator('#previews img')).toHaveCount(0);
+
+  await page.goto('/notes');
+  await page.getByRole('link', { name: text }).click();
+  await expect(page.locator('.prose img')).toHaveAttribute('src', /attachments\/schild\.png$/);
+});

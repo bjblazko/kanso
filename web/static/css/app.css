@@ -36,14 +36,14 @@ p { margin: 0 0 var(--space-4); }
 }
 .usermenu form { display: flex; gap: var(--space-2); align-items: end; }
 
-.shell { display: grid; grid-template-columns: 1fr; min-height: calc(100vh - var(--space-12)); }
+.shell { display: grid; grid-template-columns: 1fr; grid-template-rows: auto 1fr; min-height: calc(100vh - var(--space-12)); }
 .sidenav { border-bottom: 1px solid var(--line); background: var(--bg-2); }
 .sidenav > details > summary { padding: var(--space-3) var(--space-4); cursor: pointer; font-weight: 500; }
 .main { padding: var(--space-6) var(--space-4); min-width: 0; }
 .content { max-width: var(--container-text); }
 
 @media (min-width: 60rem) {
-  .shell { grid-template-columns: 16rem 1fr; }
+  .shell { grid-template-columns: 16rem 1fr; grid-template-rows: 1fr; }
   .sidenav { border-bottom: 0; border-right: 1px solid var(--line); }
   .sidenav > details > summary { display: none; }
   .main { padding: var(--space-8) var(--space-10); }
@@ -182,7 +182,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .capture-page { padding: 0; max-width: 48rem; }
 .capture { display: flex; flex-direction: column; gap: var(--space-3); }
 .capture textarea {
-  width: 100%; min-height: max(14rem, calc(100dvh - 18rem)); padding: var(--space-3);
+  width: 100%; height: clamp(8rem, calc(100dvh - 26rem), 32rem); padding: var(--space-3);
   border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
   background: var(--bg); color: var(--fg); resize: vertical;
   font: 400 var(--text-md)/1.5 var(--font-sans);
@@ -192,7 +192,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .capture-status { min-height: 1.4em; margin: 0; }
 .previews { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .previews:empty { display: none; }
-.previews li { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+.previews li { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); padding: 0; border: 0; }
 .previews img { width: 5rem; height: 5rem; object-fit: cover; border: 1px solid var(--line); border-radius: var(--radius-sm); }
 .outbox summary { cursor: pointer; color: var(--fg-2); font-size: var(--text-sm); }
 .outbox li { padding: var(--space-1) 0; font-size: var(--text-sm); }
