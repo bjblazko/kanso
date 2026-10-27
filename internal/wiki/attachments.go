@@ -10,8 +10,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"slices"
-	"strconv"
-	"strings"
 
 	"github.com/bjblazko/kanso/internal/store"
 )
@@ -22,25 +20,8 @@ var ErrTooLarge = errors.New("attachment too large")
 const attachmentsDir = "attachments"
 
 var (
-	safeExt  = regexp.MustCompile(`^\.[a-z0-9]{1,8}$`)
 	safeName = regexp.MustCompile(`^[a-z0-9-]+(\.[a-z0-9]{1,8})?$`)
 )
-
-// AttachmentName turns an uploaded file name into a safe, readable one.
-func AttachmentName(upload string) string {
-	base := upload[strings.LastIndexAny(upload, `/\`)+1:]
-	base = strings.ReplaceAll(base, "\x00", "")
-	ext := strings.ToLower(filepath.Ext(base))
-	stem := strings.TrimSuffix(base, filepath.Ext(base))
-	if stem == "" || !safeExt.MatchString(ext) {
-		stem, ext = base, ""
-	}
-	slug := store.Slugify(stem)
-	if slug == "seite" && !strings.Contains(strings.ToLower(stem), "seite") {
-		slug = "datei" // Slugify's fallback for names without letters or digits
-	}
-	return slug + ext
-}
 
 // attachmentDir is the repository-relative attachments folder of p.
 func attachmentDir(p Page) string {
@@ -60,7 +41,7 @@ func (w *Wiki) AddAttachment(a store.Author, id, filename string, r io.Reader, m
 		if err := os.MkdirAll(dir, 0o750); err != nil {
 			return err
 		}
-		name = uniqueFile(dir, AttachmentName(filename))
+		name = store.UniqueFile(dir, store.AttachmentName(filename))
 		if err := writeLimited(filepath.Join(dir, name), r, max); err != nil {
 			return err
 		}
@@ -70,21 +51,6 @@ func (w *Wiki) AddAttachment(a store.Author, id, filename string, r io.Reader, m
 }
 
 // uniqueFile returns name, or stem-2.ext, stem-3.ext … if dir holds it.
-func uniqueFile(dir, name string) string {
-	ext := path.Ext(name)
-	stem := strings.TrimSuffix(name, ext)
-	candidate := name
-	for n := 2; fileExists(filepath.Join(dir, candidate)); n++ {
-		candidate = stem + "-" + strconv.Itoa(n) + ext
-	}
-	return candidate
-}
-
-func fileExists(p string) bool {
-	_, err := os.Lstat(p)
-	return err == nil
-}
-
 func writeLimited(dst string, r io.Reader, max int64) error {
 	f, err := os.OpenFile(dst, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0o640)
 	if err != nil {

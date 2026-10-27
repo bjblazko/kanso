@@ -9,7 +9,7 @@ import (
 
 func render(t *testing.T, src string) (string, Info) {
 	t.Helper()
-	html, info, err := New().Render([]byte(src), PageCtx{PageID: "abc"})
+	html, info, err := New().Render([]byte(src), PageCtx{Base: "/p/abc"})
 	if err != nil {
 		t.Fatal(err)
 	}

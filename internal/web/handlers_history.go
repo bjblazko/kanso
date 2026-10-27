@@ -95,7 +95,7 @@ func (s *Server) revisionData(pc pageCtx, hash string) (revisionPage, error) {
 		}
 	}
 	data.IsLatest = data.Revision.Hash == revs[0].Hash
-	data.Old, _, err = s.MD.Render([]byte(old.Body), markdown.PageCtx{PageID: pc.Page.Meta.ID})
+	data.Old, _, err = s.MD.Render([]byte(old.Body), markdown.PageCtx{Base: "/p/" + pc.Page.Meta.ID})
 	if err != nil {
 		return data, err
 	}

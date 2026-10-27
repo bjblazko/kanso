@@ -20,7 +20,7 @@ import (
 
 // PageCtx is what rendering needs to know about the page.
 type PageCtx struct {
-	PageID string
+	Base string // URL of the page or note, e.g. /p/<id>; attachments live below it
 }
 
 // Info describes what the rendered page contains.
@@ -95,7 +95,7 @@ func safeTarget(dest string, pc PageCtx) text.SingleLineValue {
 	case strings.HasPrefix(lower, "https://"), strings.HasPrefix(lower, "http://"),
 		strings.HasPrefix(lower, "mailto:"), strings.HasPrefix(d, "#"), pageLink.MatchString(d):
 	case attachmentLink.MatchString(d):
-		d = "/p/" + pc.PageID + "/" + d
+		d = pc.Base + "/" + d
 	default:
 		d = "#"
 	}

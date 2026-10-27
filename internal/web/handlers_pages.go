@@ -72,7 +72,7 @@ func (s *Server) showPage(w http.ResponseWriter, r *http.Request) {
 
 // fillPageView adds what the read view shows around the page text.
 func (s *Server) fillPageView(pc *pageCtx) error {
-	html, info, err := s.MD.Render([]byte(pc.Page.Body), markdown.PageCtx{PageID: pc.Page.Meta.ID})
+	html, info, err := s.MD.Render([]byte(pc.Page.Body), markdown.PageCtx{Base: "/p/" + pc.Page.Meta.ID})
 	if err != nil {
 		return err
 	}
@@ -213,7 +213,7 @@ func (s *Server) preview(w http.ResponseWriter, r *http.Request) {
 	if _, ok := s.pageFor(w, r, access.Write); !ok {
 		return
 	}
-	html, _, err := s.MD.Render([]byte(r.PostFormValue("body")), markdown.PageCtx{PageID: r.PathValue("id")})
+	html, _, err := s.MD.Render([]byte(r.PostFormValue("body")), markdown.PageCtx{Base: "/p/" + r.PathValue("id")})
 	if err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
