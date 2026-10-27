@@ -27,7 +27,6 @@ const Dir = "notes"
 const (
 	noteFile       = "index.md"
 	attachmentsDir = "attachments"
-	ignoreLine     = "/" + Dir + "/"
 )
 
 var (
@@ -81,27 +80,7 @@ type Store struct {
 // NewStore opens the notes below dataDir and keeps them out of Git.
 func NewStore(dataDir string, repo *store.Repo) (*Store, error) {
 	s := &Store{dataDir: dataDir, repo: repo, now: time.Now}
-	return s, s.ignoreInGit()
-}
-
-// ignoreInGit adds the notes folder to the data repository's .gitignore.
-func (s *Store) ignoreInGit() error {
-	path := filepath.Join(s.dataDir, ".gitignore")
-	b, err := os.ReadFile(path)
-	if err != nil && !errors.Is(err, fs.ErrNotExist) {
-		return err
-	}
-	if slices.Contains(strings.Split(string(b), "\n"), ignoreLine) {
-		return nil
-	}
-	if len(b) > 0 && b[len(b)-1] != '\n' {
-		b = append(b, '\n')
-	}
-	if err := store.WriteAtomic(path, append(b, ignoreLine+"\n"...)); err != nil {
-		return err
-	}
-	kanso := store.Author{Name: "Kanso", Email: "kanso@localhost"}
-	return s.repo.Commit(kanso, "Notizen vom Verlauf ausgenommen", ".gitignore")
+	return s, repo.Ignore(Dir, "Notizen vom Verlauf ausgenommen")
 }
 
 // folder returns the folder of note id, refusing ids that are not ours.
