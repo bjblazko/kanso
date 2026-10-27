@@ -16,6 +16,7 @@ import (
 	"github.com/bjblazko/kanso/internal/config"
 	"github.com/bjblazko/kanso/internal/i18n"
 	"github.com/bjblazko/kanso/internal/markdown"
+	"github.com/bjblazko/kanso/internal/notes"
 	"github.com/bjblazko/kanso/internal/search"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
@@ -33,6 +34,7 @@ type Deps struct {
 	Repo   *store.Repo
 	Spaces *spaces.Service
 	Wiki   *wiki.Wiki
+	Notes  *notes.Store
 	MD     *markdown.Renderer
 	Locks  *wiki.Locks
 	Search *search.Index

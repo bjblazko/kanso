@@ -19,6 +19,7 @@ import (
 	"github.com/bjblazko/kanso/internal/config"
 	"github.com/bjblazko/kanso/internal/i18n"
 	"github.com/bjblazko/kanso/internal/markdown"
+	"github.com/bjblazko/kanso/internal/notes"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/users"
@@ -72,8 +73,12 @@ func buildTestDeps(t *testing.T, cfg config.Config) Deps {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, MD: markdown.New(),
-		Locks: wiki.NewLocks(5*time.Minute, time.Now), Search: buildIndex(wk)}
+	ns, err := notes.NewStore(cfg.DataDir, repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, Notes: ns,
+		MD: markdown.New(), Locks: wiki.NewLocks(5*time.Minute, time.Now), Search: buildIndex(wk, ns)}
 }
 
 // client signs in through the dev login and returns a client with cookies.

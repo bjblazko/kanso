@@ -19,6 +19,7 @@ import (
 	"github.com/bjblazko/kanso/internal/devseed"
 	"github.com/bjblazko/kanso/internal/i18n"
 	"github.com/bjblazko/kanso/internal/markdown"
+	"github.com/bjblazko/kanso/internal/notes"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/users"
@@ -103,9 +104,13 @@ func buildDeps(cfg config.Config) (web.Deps, error) {
 	if err != nil {
 		return web.Deps{}, err
 	}
+	ns, err := notes.NewStore(cfg.DataDir, repo)
+	if err != nil {
+		return web.Deps{}, err
+	}
 	bundle, err := i18n.Load()
-	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, MD: markdown.New(),
-		Locks: wiki.NewLocks(5*time.Minute, time.Now), Search: web.BuildIndex(wk)}, err
+	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, Notes: ns,
+		MD: markdown.New(), Locks: wiki.NewLocks(5*time.Minute, time.Now), Search: web.BuildIndex(wk, ns)}, err
 }
 
 func buildAuth(cfg config.Config, us *users.Store) (*auth.Auth, error) {

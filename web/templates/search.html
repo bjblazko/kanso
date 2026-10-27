@@ -1,13 +1,20 @@
 {{define "content"}}{{$d := .Data}}<div class="content">
 <h1>{{.T "search.title"}}</h1>
 {{if $d.Query}}
-  {{if $d.Hits}}<p class="meta">{{.T "search.count" (len $d.Hits) $d.Query}}</p>
-  <ol class="list-plain results">
+  {{if or $d.Hits $d.Notes}}<p class="meta">{{.T "search.count" $d.Count $d.Query}}</p>
+  {{if $d.Hits}}<ol class="list-plain results">
   {{range $d.Hits}}<li>
     <a href="/p/{{.ID}}">{{.Title}}</a> <span class="meta">· {{index $d.Spaces .Space}}</span>
     {{if .Snippet}}<p class="snippet">{{.Snippet}}</p>{{end}}
   </li>{{end}}
-  </ol>
+  </ol>{{end}}
+  {{if $d.Notes}}<h2>{{.T "search.notes"}}</h2>
+  <ol class="list-plain results">
+  {{range $d.Notes}}<li>
+    <a href="/notes/{{.ID}}">{{if .Title}}{{.Title}}{{else}}{{$.T "notes.untitled"}}{{end}}</a>
+    {{if .Snippet}}<p class="snippet">{{.Snippet}}</p>{{end}}
+  </li>{{end}}
+  </ol>{{end}}
   {{else}}<p class="empty">{{.T "search.none" $d.Query}}</p>{{end}}
 {{else}}<p class="empty">{{.T "search.hint"}}</p>{{end}}
 </div>{{end}}

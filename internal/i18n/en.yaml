@@ -110,4 +110,6 @@ history.locked: "Someone is editing this page right now. Try again when they are
 search.title: "Search"
 search.count: "%d results for “%s”"
 search.none: "Nothing found for “%s”. Check the spelling or search for part of the word."
+search.notes: "Notes"
+notes.untitled: "Note without text"
 search.hint: "Type what you are looking for above. Titles and texts of all spaces you may read are searched."

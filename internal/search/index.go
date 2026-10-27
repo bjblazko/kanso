@@ -17,15 +17,15 @@ const (
 	snippetLen  = 160
 )
 
-// Doc is one searchable page.
+// Doc is one searchable page (Space set) or note (Owner set).
 type Doc struct {
-	ID, Space, Title, Body string
+	ID, Space, Owner, Title, Body string
 }
 
 // Hit is one search result.
 type Hit struct {
-	ID, Space, Title, Snippet string
-	Score                     int
+	ID, Space, Owner, Title, Snippet string
+	Score                            int
 }
 
 type entry struct {
@@ -61,8 +61,8 @@ func (ix *Index) Remove(id string) {
 }
 
 // Search returns documents containing every word of q (the last one as a
-// prefix) in spaces allowed reports true for, best first.
-func (ix *Index) Search(q string, allowed func(space string) bool, limit int) []Hit {
+// prefix) that allowed reports true for, best first.
+func (ix *Index) Search(q string, allowed func(d Doc) bool, limit int) []Hit {
 	terms := fold(q)
 	if len(terms) == 0 {
 		return nil
@@ -71,8 +71,8 @@ func (ix *Index) Search(q string, allowed func(space string) bool, limit int) []
 	defer ix.mu.RUnlock()
 	var hits []Hit
 	for _, e := range ix.docs {
-		if score := e.score(terms); score > 0 && allowed(e.doc.Space) {
-			hits = append(hits, Hit{ID: e.doc.ID, Space: e.doc.Space, Title: e.doc.Title,
+		if score := e.score(terms); score > 0 && allowed(e.doc) {
+			hits = append(hits, Hit{ID: e.doc.ID, Space: e.doc.Space, Owner: e.doc.Owner, Title: e.doc.Title,
 				Snippet: snippet(e.words, terms), Score: score})
 		}
 	}

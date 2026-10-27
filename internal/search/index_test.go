@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func everything(string) bool { return true }
+func everything(Doc) bool { return true }
 
 func ids(hits []Hit) []string {
 	var out []string
@@ -44,7 +44,7 @@ func TestPrefixOnLastWord(t *testing.T) {
 func TestPermissionFilter(t *testing.T) {
 	ix := NewIndex()
 	ix.Put(Doc{ID: "a", Space: "geheim", Title: "Tresor", Body: "Code"})
-	only := func(space string) bool { return space != "geheim" }
+	only := func(d Doc) bool { return d.Space != "geheim" }
 	if got := ix.Search("tresor", only, 10); len(got) != 0 {
 		t.Errorf("hidden space leaked: %v", ids(got))
 	}
@@ -88,5 +88,17 @@ func TestEmptyQuery(t *testing.T) {
 	ix.Put(Doc{ID: "a", Space: "s", Title: "x", Body: "y"})
 	if len(ix.Search("  ", everything, 10)) != 0 {
 		t.Error("empty query returned hits")
+	}
+}
+
+func TestAllowedSeesDoc(t *testing.T) {
+	ix := NewIndex()
+	ix.Put(Doc{ID: "n1", Owner: "anna", Title: "Zettel"})
+	hits := ix.Search("zettel", func(d Doc) bool { return d.Owner == "anna" }, 10)
+	if len(hits) != 1 || hits[0].Owner != "anna" {
+		t.Errorf("hits = %+v", hits)
+	}
+	if hits := ix.Search("zettel", func(d Doc) bool { return d.Owner == "ben" }, 10); len(hits) != 0 {
+		t.Errorf("ben sees %+v", hits)
 	}
 }

@@ -110,4 +110,6 @@ history.locked: "Gerade bearbeitet jemand diese Seite. Versuche es, wenn die Bea
 search.title: "Suche"
 search.count: "%d Treffer für „%s“"
 search.none: "Nichts gefunden für „%s“. Prüfe die Schreibweise oder suche nach einem Teil des Wortes."
+search.notes: "Notizen"
+notes.untitled: "Notiz ohne Text"
 search.hint: "Gib oben ein, wonach du suchst. Gesucht wird in Titeln und Texten aller Bereiche, die du lesen darfst."
