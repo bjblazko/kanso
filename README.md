@@ -20,6 +20,8 @@ Requires Go 1.27.3 or newer and `git` on the `PATH`.
 
 ```sh
 just run          # dev login on http://localhost:8090, data in ./tmp
+just seed         # made-up people, groups, spaces and pages in an empty ./tmp
+just reset        # delete ./tmp
 just test         # unit and HTTP tests
 just e2e          # browser tests (Playwright, Chromium + WebKit)
 ```

@@ -26,11 +26,14 @@ All notable changes to this project are documented here. The format follows
 - Page history: every version with author and time, differences of the text to the current version, restore as a new version (respects edit locks).
 - Search across titles and texts of all readable spaces: in memory, umlauts match either spelling, last word as prefix, title hits first, plain-text snippets.
 - Deployment guide for Authelia (`docs/deploy-authelia.md`).
+- Development data: `just seed` fills an empty `./tmp` with made-up people, a group, three spaces with different roles and sample pages; `just reset` deletes it. `kanso seed` refuses to run without the dev login.
+- Dev login: one click per made-up person, and "Switch person" in the user menu returns to the same page.
 
 ### Security
 - Requires Go 1.27.3 (`go.mod`), which fixes GO-2026-6809 in `crypto/x509`.
 
 ### Fixed
+- Page history no longer shows commits of another page: Kanso follows real renames itself instead of `git log --follow`, which took look-alike new pages for copies.
 - Sign-in no longer fails for names with quotes or angle brackets (they are dropped from the Git author only).
 - Design review: button links no longer underlined, navigation folded on phones, neutral checkboxes.
 - ECDSA keys parsed with the non-deprecated standard-library API.

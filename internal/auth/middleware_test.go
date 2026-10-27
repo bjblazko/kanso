@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/bjblazko/kanso/internal/config"
+	"github.com/bjblazko/kanso/internal/devseed"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/users"
 )
@@ -197,5 +198,41 @@ func TestCallbackFlow(t *testing.T) {
 	u, ok := a.users.Get("anna")
 	if !ok || u.Name != "Anna" {
 		t.Errorf("user %+v", u)
+	}
+}
+
+func TestDevFormOffersEveryPerson(t *testing.T) {
+	a := newAuth(t, true, nil)
+	rec := httptest.NewRecorder()
+	protected(a).ServeHTTP(rec, httptest.NewRequest("GET", "/auth/dev?next=/s/haus", nil))
+	body := rec.Body.String()
+	for _, p := range devseed.People {
+		if !strings.Contains(body, `name="sub" value="`+p.Sub+`"`) || !strings.Contains(body, p.Name) {
+			t.Errorf("no quick switch for %s", p.Sub)
+		}
+	}
+	if !strings.Contains(body, `name="admin" value="on"`) {
+		t.Error("admin person signs in without admin flag")
+	}
+	if strings.Count(body, `name="next" value="/s/haus"`) != len(devseed.People)+1 {
+		t.Error("quick switch forgets where to go next")
+	}
+}
+
+func TestDevLoginEndsPreviousSession(t *testing.T) {
+	a := newAuth(t, true, nil)
+	old, _ := loggedIn(t, a)
+	form := url.Values{"sub": {"ben"}, "name": {"Ben"}}
+	req := httptest.NewRequest("POST", "/auth/dev", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Origin", base)
+	req.AddCookie(old)
+	rec := httptest.NewRecorder()
+	protected(a).ServeHTTP(rec, req)
+	if rec.Code != http.StatusSeeOther {
+		t.Fatalf("code %d", rec.Code)
+	}
+	if _, ok := a.sessions.Get(old.Value); ok {
+		t.Error("old session still valid after switching person")
 	}
 }

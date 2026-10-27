@@ -5,6 +5,15 @@ run:
     mkdir -p tmp/data tmp/state
     KANSO_DATA_DIR=tmp/data KANSO_STATE_DIR=tmp/state KANSO_BASE_URL=http://localhost:8090 KANSO_DEV_LOGIN=true go run ./cmd/kanso
 
+# Fill ./tmp with made-up people, groups, spaces and pages (only when empty)
+seed:
+    mkdir -p tmp/data tmp/state
+    KANSO_DATA_DIR=tmp/data KANSO_STATE_DIR=tmp/state KANSO_BASE_URL=http://localhost:8090 KANSO_DEV_LOGIN=true go run ./cmd/kanso seed
+
+# Delete the throwaway data under ./tmp
+reset:
+    rm -rf tmp/data tmp/state
+
 test:
     go test ./...
 

@@ -24,6 +24,7 @@ in a Git repository. Design: `docs/superpowers/specs/2026-10-26-kanso-design.md`
 
 ```sh
 just run    # dev login, data in ./tmp
+just seed   # made-up people and spaces in an empty ./tmp (restart run after)
 just test   # go test ./...
 just lint   # gofmt + go vet
 ```

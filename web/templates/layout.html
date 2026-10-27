@@ -30,6 +30,7 @@
         </div>
         <button class="btn btn-secondary" type="submit">{{.T "user.apply"}}</button>
       </form>
+      {{if .Dev}}<a class="btn btn-secondary" href="/auth/dev?next={{.Path}}">{{.T "user.switch"}}</a>{{end}}
       <form method="post" action="/auth/logout">
         <input type="hidden" name="csrf" value="{{.CSRF}}">
         <button class="btn btn-quiet" type="submit">{{.T "user.logout"}}</button>

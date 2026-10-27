@@ -1,7 +1,7 @@
 # Hüpattl! Kanso — Architecture (arc42)
 
 **Created:** 2026-10-26
-**Updated:** 2026-10-26
+**Updated:** 2026-10-27
 
 ## 1. Introduction and Goals
 
@@ -66,6 +66,7 @@ services and external calendars. Nothing else leaves the host.
 | `internal/wiki` | Page tree, pages, attachments, locks, history |
 | `internal/markdown` | Safe Markdown rendering |
 | `internal/search` | In-memory search (scans all pages per query) |
+| `internal/devseed` | Made-up people, groups, spaces and pages for development (`kanso seed`, dev login only) |
 | `internal/web` | HTTP routes, templates, static files |
 | `web/` | Templates, CSS, JS, fonts, vendored Mermaid |
 

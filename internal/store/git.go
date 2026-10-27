@@ -141,8 +141,33 @@ const (
 
 // Log lists the revisions of path, newest first, following renames.
 func (r *Repo) Log(path string, limit int) ([]Revision, error) {
-	format := "--format=%x1e%H%x1f%an%x1f%ae%x1f%aI%x1f%s"
-	out, err := r.run("log", "--follow", "--name-only", "-n", strconv.Itoa(limit), format, "--", path)
+	var revs []Revision
+	from := ""
+	for len(revs) < limit {
+		batch, err := r.logPath(from, path, limit-len(revs))
+		if err != nil || len(batch) == 0 {
+			return revs, err
+		}
+		revs = append(revs, batch...)
+		oldest := batch[len(batch)-1].Hash
+		src, ok, err := r.renamedFrom(oldest, path)
+		if err != nil || !ok {
+			return revs, err
+		}
+		path, from = src, oldest+"^"
+	}
+	return revs, nil
+}
+
+// logPath lists up to limit commits touching path, starting at from (HEAD
+// when empty). It does not follow renames: git's --follow also takes
+// look-alike files for copies, and new pages look alike.
+func (r *Repo) logPath(from, path string, limit int) ([]Revision, error) {
+	args := []string{"log", "--name-only", "-n", strconv.Itoa(limit), "--format=%x1e%H%x1f%an%x1f%ae%x1f%aI%x1f%s"}
+	if from != "" {
+		args = append(args, from)
+	}
+	out, err := r.run(append(args, "--", path)...)
 	if err != nil {
 		return nil, err
 	}
@@ -153,6 +178,21 @@ func (r *Repo) Log(path string, limit int) ([]Revision, error) {
 		}
 	}
 	return revs, nil
+}
+
+// renamedFrom reports the old name of path if commit hash renamed it to path.
+func (r *Repo) renamedFrom(hash, path string) (string, bool, error) {
+	out, err := r.run("show", "-M", "--name-status", "--format=", hash)
+	if err != nil {
+		return "", false, err
+	}
+	for _, line := range strings.Split(string(out), "\n") {
+		f := strings.Split(line, "\t")
+		if len(f) == 3 && strings.HasPrefix(f[0], "R") && f[2] == path {
+			return f[1], true, nil
+		}
+	}
+	return "", false, nil
 }
 
 // parseRevision reads "header\n\npath\n" as written by Log.

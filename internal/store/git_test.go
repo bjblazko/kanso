@@ -3,6 +3,7 @@
 package store
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -151,5 +152,31 @@ func TestRepoRunsGCInForeground(t *testing.T) {
 	out, err := r.run("config", "--get", "gc.autoDetach")
 	if err != nil || strings.TrimSpace(string(out)) != "false" {
 		t.Errorf("gc.autoDetach = %q, %v", out, err)
+	}
+}
+
+// A new page looks much like any other new page; its history must not pick
+// up the other page as a copy source.
+func TestLogDoesNotFollowLookalikes(t *testing.T) {
+	r := newRepo(t)
+	page := "---\nid: %s\ntitle: %s\norder: 1\ncreated: 2026-10-27T05:55:50Z\nupdated: 2026-10-27T05:55:50Z\nauthor: %s\n---\n\n"
+	write(t, r, "x/gemeinsam/index.md", fmt.Sprintf(page, "bvw4mwkqz4v2", "Gemeinsam", "Olga"))
+	if err := r.Commit(anna, "Gemeinsam", "x"); err != nil {
+		t.Fatal(err)
+	}
+	write(t, r, "y/other.md", "unrelated\n")
+	if err := r.Commit(anna, "other", "y"); err != nil {
+		t.Fatal(err)
+	}
+	write(t, r, "z/rezept/index.md", fmt.Sprintf(page, "iydeqzksmy5l", "Rezept", "Hugo"))
+	if err := r.Commit(ben, "Rezept", "z"); err != nil {
+		t.Fatal(err)
+	}
+	revs, err := r.Log("z/rezept/index.md", 10)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(revs) != 1 {
+		t.Errorf("history of a new page = %+v", revs)
 	}
 }

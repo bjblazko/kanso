@@ -236,3 +236,11 @@ func TestStaticHasNoDirectoryListing(t *testing.T) {
 		t.Errorf("directory listing: %d", resp.StatusCode)
 	}
 }
+
+func TestDevModeOffersPersonSwitch(t *testing.T) {
+	ts := newTestServer(t)
+	_, body := get(t, ts.client(t, "anna", "Anna", false), ts.URL+"/")
+	if !strings.Contains(body, `href="/auth/dev?next=%2f"`) {
+		t.Error("no person switch in dev mode")
+	}
+}

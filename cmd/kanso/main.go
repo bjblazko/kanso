@@ -16,6 +16,7 @@ import (
 
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/config"
+	"github.com/bjblazko/kanso/internal/devseed"
 	"github.com/bjblazko/kanso/internal/i18n"
 	"github.com/bjblazko/kanso/internal/markdown"
 	"github.com/bjblazko/kanso/internal/spaces"
@@ -31,10 +32,42 @@ func main() {
 		fmt.Fprintln(os.Stderr, "kanso:", err)
 		os.Exit(2)
 	}
+	if len(os.Args) > 1 && os.Args[1] == "seed" {
+		if err := seed(cfg); err != nil {
+			fmt.Fprintln(os.Stderr, "kanso seed:", err)
+			os.Exit(1)
+		}
+		return
+	}
 	if err := run(cfg); err != nil {
 		slog.Error("kanso stopped", "err", err)
 		os.Exit(1)
 	}
+}
+
+// seed fills an empty data directory with made-up data; dev login only, so
+// it can never run against a real installation.
+func seed(cfg config.Config) error {
+	if !cfg.DevLogin {
+		return errors.New("only with KANSO_DEV_LOGIN=true")
+	}
+	repo, err := store.OpenRepo(cfg.DataDir)
+	if err != nil {
+		return err
+	}
+	us, err := users.NewStore(cfg.DataDir, repo)
+	if err != nil {
+		return err
+	}
+	sp, err := spaces.NewService(cfg.DataDir, repo)
+	if err != nil {
+		return err
+	}
+	wk, err := wiki.NewWiki(cfg.DataDir, repo)
+	if err != nil {
+		return err
+	}
+	return devseed.Seed(cfg.DataDir, repo, us, sp, wk)
 }
 
 func run(cfg config.Config) error {

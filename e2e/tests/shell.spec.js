@@ -53,3 +53,15 @@ test('links styled as buttons are not underlined', async ({ page }) => {
   const button = page.getByRole('link', { name: 'Bereich anlegen' });
   await expect(button).toHaveCSS('text-decoration-line', 'none');
 });
+
+test('dev login switches between made-up people', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Ben', exact: true }).click();
+  const menu = page.locator('.usermenu summary');
+  await expect(menu).toHaveText('Ben');
+  await menu.click();
+  await page.getByRole('link', { name: 'Person wechseln' }).click();
+  await page.getByRole('button', { name: 'Oma Gerda', exact: true }).click();
+  await expect(menu).toHaveText('Oma Gerda');
+  await expect(page.getByRole('heading', { level: 1, name: 'Bereiche' })).toBeVisible();
+});
