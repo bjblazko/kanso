@@ -2,7 +2,7 @@
 <html lang="{{.Lang}}">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="csrf" content="{{.CSRF}}">
 <title>{{if .Title}}{{.Title}} · {{end}}{{.T "app.name"}}</title>
 <link rel="stylesheet" href="{{.Asset "css/fonts.css"}}">
@@ -35,6 +35,7 @@
         </div>
         <button class="btn btn-secondary" type="submit">{{.T "user.apply"}}</button>
       </form>
+      {{if .Admin}}<a class="btn btn-secondary" href="/admin/groups">{{.T "user.groups"}}</a>{{end}}
       {{if .Dev}}<a class="btn btn-secondary" href="/auth/dev?next={{.Path}}">{{.T "user.switch"}}</a>{{end}}
       <form method="post" action="/auth/logout">
         <input type="hidden" name="csrf" value="{{.CSRF}}">
@@ -43,23 +44,26 @@
     </div>
   </details>
 </header>
-<div class="shell">
+<div class="shell{{if eq .Module "wiki"}} shell-wiki{{end}}">
+  {{/* The parts of Kanso (ADR-005): what the page is. Only parts that exist are listed. */}}
+  <nav class="rail" aria-label="{{.T "app.short"}}">
+    <ul>
+      <li><a href="/notes"{{if eq .Module "notes"}} aria-current="true"{{end}}>{{template "icon" "note"}}<span>{{.T "nav.notes"}}</span></a></li>
+      <li><a href="/"{{if eq .Module "wiki"}} aria-current="true"{{end}}>{{template "icon" "book"}}<span>{{.T "nav.wiki"}}</span></a></li>
+    </ul>
+  </nav>
+  {{if eq .Module "wiki"}}{{/* What is in the wiki: its spaces and the open space's pages. */}}
   <nav class="sidenav" aria-label="{{.T "nav.spaces"}}">
     <details open>
-      <summary>{{.T "nav.menu"}}</summary>
-      {{block "nav" .}}<ul class="navlist navlist-notes">
-        <li><a href="/notes"{{if eq .Here "/notes"}} aria-current="page"{{end}}>{{template "icon" "note"}}<span>{{.T "nav.notes"}}</span></a></li>
-      </ul>
-      <ul class="navlist">
+      <summary>{{.T "nav.spaces"}}</summary>
+      <p class="sidenav-title" aria-hidden="true">{{.T "nav.spaces"}}</p>
+      {{block "nav" .}}<ul class="navlist">
         {{range .Nav}}<li><a href="/s/{{.Slug}}"{{if and (eq $.Here .Slug) (not $.Page)}} aria-current="page"{{end}}>{{template "icon" .Icon}}<span>{{.Name}}</span></a>
           {{if and (eq $.Here .Slug) $.Tree}}{{template "tree" (treeArgs $.Tree $.Page)}}{{end}}</li>
         {{end}}
-      </ul>
-      {{if .Admin}}<ul class="navlist navlist-admin">
-        <li><a href="/admin/groups">{{template "icon" "users"}}<span>{{.T "nav.groups"}}</span></a></li>
-      </ul>{{end}}{{end}}
+      </ul>{{end}}
     </details>
-  </nav>
+  </nav>{{end}}
   <main class="main" id="main">
     {{template "content" .}}
     <footer class="footer"><a href="/about/licenses">{{.T "nav.licenses"}}</a></footer>

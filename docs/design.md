@@ -10,7 +10,8 @@ Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 
 | Screen | Primary job |
 |---|---|
-| Start | Get into a space. |
+| Rail (all screens) | Switch between the parts of Kanso; bottom bar on phones, left column on wide screens (ADR-005). |
+| Start (wiki) | Get into a wiki space. |
 | Page view | Read a page. |
 | Page editor | Change a page and save it. |
 | Space settings | Decide who may read and write. |

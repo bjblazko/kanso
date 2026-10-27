@@ -12,7 +12,7 @@ test('pages: create, nest, move and delete', async ({ page }) => {
   await expect(page.getByRole('navigation', { name: 'Pfad' }).getByRole('link', { name: 'Über uns' })).toBeVisible();
 
   // The navigation shows the tree with the current page marked.
-  const nav = page.getByRole('navigation', { name: 'Bereiche' });
+  const nav = page.getByRole('navigation', { name: 'Wiki-Bereiche' });
   await expect(nav.locator('a[aria-current="page"]')).toHaveText('Größe & Gewicht');
 
   // Move the sub-page to the top level.

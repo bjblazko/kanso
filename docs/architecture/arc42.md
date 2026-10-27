@@ -112,6 +112,7 @@ Kopia jobs.
 - **Internationalisation:** keys in `internal/i18n/{de,en}.yaml`; a test keeps
   both files in step.
 - **Design:** `huepattl-rams-design`; project deviations in `docs/design.md`.
+- **Navigation:** a rail of parts (notes, wiki, …) and a side bar for the content of the current part ([ADR-005](../adr/005-navigation-parts-and-content.md)); every part has its own URL.
 
 ## 9. Architecture Decisions
 
@@ -122,6 +123,7 @@ Kopia jobs.
 | [002](../adr/002-dependency-policy.md) | Minimal, approved dependencies |
 | [003](../adr/003-edit-locks.md) | Edit locks instead of live collaboration |
 | [004](../adr/004-notes-outside-git-offline-capture.md) | Notes outside Git, captured offline |
+| [005](../adr/005-navigation-parts-and-content.md) | Navigation: rail of parts, side bar for their content |
 
 ## 10. Quality Requirements
 

@@ -4,7 +4,7 @@ import { signIn } from './helpers.js';
 
 test('sign in shows the start page in German', async ({ page }) => {
   await signIn(page);
-  await expect(page.getByRole('heading', { level: 1, name: 'Bereiche' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Wiki-Bereiche' })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'de');
 });
 
@@ -13,7 +13,7 @@ test('language can be switched to English', async ({ page }) => {
   await page.getByText('Ben', { exact: true }).click();
   await page.getByLabel('Sprache').selectOption('en');
   await page.getByRole('button', { name: 'Übernehmen' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Spaces' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Wiki spaces' })).toBeVisible();
 });
 
 test('licenses page lists shipped third-party work', async ({ page }) => {
@@ -41,7 +41,7 @@ test('navigation starts folded on phones and open on wide screens', async ({ pag
   const nav = page.locator('.sidenav > details');
   if (isMobile) {
     await expect(nav).not.toHaveAttribute('open', '');
-    await page.getByText('Menü').click();
+    await page.locator('.sidenav summary').click();
     await expect(nav).toHaveAttribute('open', '');
   } else {
     await expect(nav).toHaveAttribute('open', '');
@@ -63,13 +63,13 @@ test('dev login switches between made-up people', async ({ page }) => {
   await page.getByRole('link', { name: 'Person wechseln' }).click();
   await page.getByRole('button', { name: 'Oma Gerda', exact: true }).click();
   await expect(menu).toHaveText('Oma Gerda');
-  await expect(page.getByRole('heading', { level: 1, name: 'Bereiche' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Wiki-Bereiche' })).toBeVisible();
 });
 
 test('a short page keeps the closed menu compact on phones', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'the menu sits above the content only on phones');
   await signIn(page, { sub: 'kurt', name: 'Kurt' });
-  await page.goto('/notes');
+  await page.goto('/');
   const nav = await page.locator('.sidenav').boundingBox();
   expect(nav.height).toBeLessThan(120);
 });
@@ -79,11 +79,13 @@ const PIXEL = Buffer.from(
   'base64',
 );
 
-test('the save button stays visible with a photo attached', async ({ page }) => {
+test('the save button stays visible with a photo attached', async ({ page, isMobile }) => {
   await signIn(page, { sub: 'kurt', name: 'Kurt' });
   await page.goto('/notes/new');
   await page.locator('#pick').setInputFiles({ name: 'a.png', mimeType: 'image/png', buffer: PIXEL });
   await expect(page.locator('#previews img')).toHaveCount(1);
   const save = await page.getByRole('button', { name: 'Speichern' }).boundingBox();
-  expect(save.y + save.height).toBeLessThanOrEqual(page.viewportSize().height);
+  const rail = await page.locator('.rail').boundingBox();
+  const bottom = isMobile ? rail.y : page.viewportSize().height; // phones: the bar sits at the bottom
+  expect(save.y + save.height).toBeLessThanOrEqual(bottom);
 });

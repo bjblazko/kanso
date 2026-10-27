@@ -38,6 +38,7 @@ All notable changes to this project are documented here. The format follows
 - Requires Go 1.27.3 (`go.mod`), which fixes GO-2026-6809 in `crypto/x509`.
 
 ### Changed
+- Navigation (ADR-005): a rail names the parts of Kanso — Notizen and Wiki — at the bottom on phones and at the left on wide screens; the side bar shows only the wiki's spaces and pages, under "Wiki-Bereiche"; group management moved to the user menu.
 - The page tree shows guide lines for every level, so nested pages stay apart on narrow screens.
 - Uploads share one path (`store.SaveUpload`) for safe names, size limit and photo cleaning.
 - The Markdown editor serves pages and notes; it reads its URLs from the form.

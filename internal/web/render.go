@@ -7,6 +7,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/i18n"
@@ -28,8 +29,11 @@ type view struct {
 	Here  string // slug of the current space, for aria-current
 	Page  string // id of the current page, for aria-current
 	Tree  []*wiki.Node
-	Dev   bool   // dev login: offer to switch person
-	Path  string // request URI, to come back after switching
+	// Module is the part of Kanso the page belongs to ("notes", "wiki"), "" for
+	// pages outside all parts (search, administration, licenses).
+	Module string
+	Dev    bool   // dev login: offer to switch person
+	Path   string // request URI, to come back after switching
 
 	bundle  *i18n.Bundle
 	version string
@@ -47,7 +51,7 @@ func (s *Server) newView(r *http.Request, title string, data any) view {
 		Title: title, Lang: i18n.Negotiate(r.Header.Get("Accept-Language"), u.Lang),
 		User: u, CSRF: auth.CSRFToken(r.Context()), Query: r.URL.Query().Get("q"), Data: data,
 		Admin: p.Admin, Nav: s.Spaces.Visible(p, s.groups()),
-		Dev: s.Cfg.DevLogin, Path: r.URL.RequestURI(),
+		Module: moduleOf(r.URL.Path), Dev: s.Cfg.DevLogin, Path: r.URL.RequestURI(),
 		bundle: s.I18n, version: s.version,
 	}
 }
@@ -96,3 +100,14 @@ func (s *Server) serverError(w http.ResponseWriter, r *http.Request, err error) 
 }
 
 var errBadRequest = errors.New("bad request")
+
+// moduleOf names the part of Kanso a path belongs to.
+func moduleOf(path string) string {
+	switch {
+	case path == "/notes" || strings.HasPrefix(path, "/notes/"):
+		return "notes"
+	case path == "/", strings.HasPrefix(path, "/s/"), strings.HasPrefix(path, "/p/"), strings.HasPrefix(path, "/admin/spaces/"):
+		return "wiki"
+	}
+	return ""
+}
