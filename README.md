@@ -12,8 +12,8 @@ you can read without Kanso.
 Phase 1 is done: Markdown wiki with spaces, page tree, editor with live
 preview, attachments, Mermaid diagrams, edit locks, history with diff and
 restore, search; sign-in with OpenID Connect; roles per space; German and
-English. Next: notes, tasks (Kanban and Eisenhower), lists, calendars;
-deployment comes last.
+English. Next: notes, deployment, tasks (Kanban and Eisenhower), lists,
+calendars.
 
 ## Run
 
