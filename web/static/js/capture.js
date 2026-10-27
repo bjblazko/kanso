@@ -83,11 +83,14 @@ async function render() {
 // ---- Upload ----------------------------------------------------------------
 
 // token returns a fresh CSRF token, null when signed out, undefined offline.
+// A signed-out request is redirected to the sign-in, which in production is
+// another site (the OIDC provider); the redirect is not followed but read as
+// "signed out".
 async function token() {
   try {
-    const response = await fetch('/notes/token', { credentials: 'same-origin' });
+    const response = await fetch('/notes/token', { credentials: 'same-origin', redirect: 'manual' });
     const json = (response.headers.get('Content-Type') || '').startsWith('application/json');
-    if (!response.ok || response.redirected || !json) return null;
+    if (response.type === 'opaqueredirect' || !response.ok || !json) return null;
     return (await response.json()).csrf;
   } catch {
     return undefined;

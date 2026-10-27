@@ -85,3 +85,13 @@ test('offline: after the sign-in expired, notes wait until signed in again', asy
   await page.goto('/notes');
   await expect(page.getByRole('link', { name: text })).toHaveCount(1);
 });
+
+test('offline: a sign-in at another site (Authelia) is recognised as signed out', async ({ page }) => {
+  await signIn(page, { sub: 'otto', name: 'Otto' });
+  await openCapture(page);
+  // In production the expired session redirects to the OIDC provider, another origin.
+  await page.route('**/notes/token', (route) =>
+    route.fulfill({ status: 303, headers: { Location: 'https://id.example.invalid/authorize' } }));
+  await write(page, unique('Woanders anmelden'));
+  await expect(page.getByRole('link', { name: 'Zum Hochladen bitte anmelden' })).toBeVisible();
+});
