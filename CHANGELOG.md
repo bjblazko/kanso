@@ -25,7 +25,8 @@ All notable changes to this project are documented here. The format follows
 - Mermaid diagrams: mermaid 12.2.0 vendored without the ELK layout (EPL-2.0) and without source maps, loaded only on pages with diagrams and in the editor; strict security level, labels as plain SVG text.
 - Page history: every version with author and time, differences of the text to the current version, restore as a new version (respects edit locks).
 - Search across titles and texts of all readable spaces: in memory, umlauts match either spelling, last word as prefix, title hits first, plain-text snippets.
-- Deployment guide for Authelia (`docs/deploy-authelia.md`).
+- Deployment guide for Authelia (`docs/deploy-authelia.md`), including the claims policy Authelia ≥ 4.39 needs.
+- `flake.nix`: Nix package (`buildGoModule`, Go 1.27.3, tests run with git).
 - Development data: `just seed` fills an empty `./tmp` with made-up people, a group, three spaces with different roles and sample pages; `just reset` deletes it. `kanso seed` refuses to run without the dev login.
 - Dev login: one click per made-up person, and "Switch person" in the user menu returns to the same page.
 - Notes (ADR-004): private notes per person, outside the Git history. Quick capture page (`/notes/new`) with camera and photo library; list, view, edit with source and preview, delete; turn a note into a wiki page; search finds your own notes; the seed adds some.

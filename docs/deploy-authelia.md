@@ -1,7 +1,7 @@
 # Deploying with Authelia
 
 **Created:** 2026-10-26
-**Updated:** 2026-10-26
+**Updated:** 2026-10-27
 
 Kanso signs people in with OpenID Connect (see
 [ADR-001](adr/001-oidc-with-kanso-managed-roles.md)). This is the client
@@ -12,6 +12,11 @@ Authelia needs.
 ```yaml
 identity_providers:
   oidc:
+    # Kanso reads name, e-mail and groups from the ID token. Authelia ≥ 4.39
+    # puts them only into userinfo unless a claims policy asks for them.
+    claims_policies:
+      kanso:
+        id_token: [name, email, email_verified, preferred_username, groups]
     clients:
       - client_id: kanso
         client_name: Hüpattl! Kanso
@@ -26,6 +31,7 @@ identity_providers:
         require_pkce: true
         pkce_challenge_method: S256
         token_endpoint_auth_method: client_secret_basic
+        claims_policy: kanso
 ```
 
 Put everyone who should administer Kanso into the Authelia group
@@ -44,7 +50,9 @@ KANSO_OIDC_CLIENT_ID=kanso
 KANSO_OIDC_CLIENT_SECRET_FILE=/run/secrets/kanso-oidc
 ```
 
-Run it behind a reverse proxy that terminates TLS. `git` must be on the
+On NixOS, `flake.nix` provides `packages.<system>.default` (built with Go
+1.27.3 from its own nixpkgs pin); the NixOS module lives with the host
+configuration. Run it behind a reverse proxy that terminates TLS. `git` must be on the
 `PATH`. Build with Go 1.27.3 or newer (GO-2026-6809 in `crypto/x509` is fixed
 there). Back up both directories; the data directory alone is enough to
 rebuild everything except sessions.
