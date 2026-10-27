@@ -94,8 +94,23 @@ p { margin: 0 0 var(--space-4); }
 .breadcrumb { color: var(--fg-3); font-size: var(--text-sm); margin-bottom: var(--space-2); }
 .breadcrumb a { color: var(--fg-2); }
 .page .meta { margin-bottom: var(--space-6); }
-.tree a { min-height: 2.25rem; }
-@media (pointer: coarse) { .tree a { min-height: var(--target-min); } }
+.tree { --tree-row: 2.25rem; }
+@media (pointer: coarse) { .tree { --tree-row: var(--target-min); } }
+.tree a { min-height: var(--tree-row); }
+
+/* Guide lines: every nested level hangs on a hairline with a short tick, so
+   levels stay apart on narrow screens. The last child ends the line. */
+ul ul.tree { padding-left: var(--space-5); }
+ul ul.tree > li { position: relative; }
+ul ul.tree > li::before {
+  content: ""; position: absolute; left: calc(-1 * var(--space-2)); top: 0; bottom: 0;
+  border-left: 1px solid var(--line-strong);
+}
+ul ul.tree > li:last-child::before { bottom: auto; height: calc(var(--tree-row) / 2); }
+ul ul.tree > li::after {
+  content: ""; position: absolute; left: calc(-1 * var(--space-2)); top: calc(var(--tree-row) / 2);
+  width: calc(var(--space-2) + var(--space-1)); border-top: 1px solid var(--line-strong);
+}
 .content > .tree { padding: 0; }
 .source { white-space: pre-wrap; font-family: var(--font-mono); font-size: var(--text-sm); }
 .children { margin-top: var(--space-8); }

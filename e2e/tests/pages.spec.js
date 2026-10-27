@@ -37,3 +37,17 @@ test('pages: a title is required', async ({ page }) => {
   await page.getByRole('button', { name: 'Seite anlegen' }).click();
   await expect(page.getByText('Gib der Seite einen Titel.')).toBeVisible();
 });
+
+test('the page tree shows guide lines for each level', async ({ page }) => {
+  await signIn(page, { sub: 'tina', name: 'Tina', admin: true });
+  await createSpace(page, unique('Baum'));
+  await createPage(page, 'Eltern');
+  await createPage(page, 'Kind', { child: true });
+  const child = page.locator('.sidenav .tree .tree li').filter({ hasText: 'Kind' });
+  const line = await child.evaluate((li) => {
+    const before = getComputedStyle(li, '::before');
+    const after = getComputedStyle(li, '::after');
+    return { vertical: before.borderLeftWidth, tick: after.borderTopWidth };
+  });
+  expect(line).toEqual({ vertical: '1px', tick: '1px' });
+});
