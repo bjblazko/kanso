@@ -30,7 +30,9 @@ func TestDocRoundTrip(t *testing.T) {
 
 func TestReadDocWithoutFrontmatter(t *testing.T) {
 	p := filepath.Join(t.TempDir(), "x.md")
-	os.WriteFile(p, []byte("just text\n"), 0o640)
+	if err := os.WriteFile(p, []byte("just text\n"), 0o640); err != nil {
+		t.Fatal(err)
+	}
 	d, err := ReadDoc[meta](p)
 	if err != nil {
 		t.Fatal(err)
@@ -42,7 +44,9 @@ func TestReadDocWithoutFrontmatter(t *testing.T) {
 
 func TestWriteAtomicReplaces(t *testing.T) {
 	p := filepath.Join(t.TempDir(), "f")
-	WriteAtomic(p, []byte("one"))
+	if err := WriteAtomic(p, []byte("one")); err != nil {
+		t.Fatal(err)
+	}
 	if err := WriteAtomic(p, []byte("two")); err != nil {
 		t.Fatal(err)
 	}

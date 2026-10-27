@@ -13,8 +13,12 @@ var ben = store.Author{Name: "Ben", Email: "ben@example.org"}
 func TestHistoryDiffRestore(t *testing.T) {
 	w := newWiki(t)
 	p := mustCreate(t, w, "", "Heizung")
-	w.Save(anna, p.Meta.ID, "Heizung", "eins\n")
-	w.Save(ben, p.Meta.ID, "Heizung", "zwei\n")
+	if err := w.Save(anna, p.Meta.ID, "Heizung", "eins\n"); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.Save(ben, p.Meta.ID, "Heizung", "zwei\n"); err != nil {
+		t.Fatal(err)
+	}
 	revs, err := w.History(p.Meta.ID, 50)
 	if err != nil || len(revs) != 3 {
 		t.Fatalf("history = %+v, %v", revs, err)
@@ -47,8 +51,12 @@ func TestHistorySurvivesMove(t *testing.T) {
 	w := newWiki(t)
 	a := mustCreate(t, w, "", "A")
 	b := mustCreate(t, w, "", "B")
-	w.Save(anna, a.Meta.ID, "A", "vorher\n")
-	w.Move(anna, a.Meta.ID, b.Meta.ID, 1)
+	if err := w.Save(anna, a.Meta.ID, "A", "vorher\n"); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.Move(anna, a.Meta.ID, b.Meta.ID, 1); err != nil {
+		t.Fatal(err)
+	}
 	revs, _ := w.History(a.Meta.ID, 50)
 	oldest := revs[len(revs)-1]
 	if _, err := w.Revision(a.Meta.ID, oldest.Hash); err != nil {
@@ -84,8 +92,12 @@ func hasLine(lines []DiffLine, kind byte, text string) bool {
 func TestDiffIgnoresFrontmatter(t *testing.T) {
 	w := newWiki(t)
 	p := mustCreate(t, w, "", "A")
-	w.Save(anna, p.Meta.ID, "A", "text\n")
-	w.Save(ben, p.Meta.ID, "A", "text\n")
+	if err := w.Save(anna, p.Meta.ID, "A", "text\n"); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.Save(ben, p.Meta.ID, "A", "text\n"); err != nil {
+		t.Fatal(err)
+	}
 	revs, _ := w.History(p.Meta.ID, 10)
 	lines, err := w.Diff(p.Meta.ID, revs[1].Hash, revs[0].Hash)
 	if err != nil || len(lines) != 0 {

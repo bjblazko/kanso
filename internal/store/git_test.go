@@ -60,7 +60,9 @@ func TestCommitAndLog(t *testing.T) {
 func TestCommitWithoutChangesIsNoop(t *testing.T) {
 	r := newRepo(t)
 	write(t, r, "a.md", "x\n")
-	r.Commit(anna, "first", "a.md")
+	if err := r.Commit(anna, "first", "a.md"); err != nil {
+		t.Fatal(err)
+	}
 	if err := r.Commit(anna, "again", "a.md"); err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +75,9 @@ func TestCommitWithoutChangesIsNoop(t *testing.T) {
 func TestMoveKeepsHistory(t *testing.T) {
 	r := newRepo(t)
 	write(t, r, "a/index.md", "x\n")
-	r.Commit(anna, "first", "a")
+	if err := r.Commit(anna, "first", "a"); err != nil {
+		t.Fatal(err)
+	}
 	if err := r.Move(ben, "a", "b", "move"); err != nil {
 		t.Fatal(err)
 	}
@@ -106,12 +110,16 @@ func TestOpenRepoIsIdempotent(t *testing.T) {
 func TestLogReportsPathPerRevision(t *testing.T) {
 	r := newRepo(t)
 	write(t, r, "a/index.md", "eins\n")
-	r.Commit(anna, "first", "a")
+	if err := r.Commit(anna, "first", "a"); err != nil {
+		t.Fatal(err)
+	}
 	if err := r.Move(ben, "a", "b", "move"); err != nil {
 		t.Fatal(err)
 	}
 	write(t, r, "b/index.md", "zwei\n")
-	r.Commit(ben, "second", "b")
+	if err := r.Commit(ben, "second", "b"); err != nil {
+		t.Fatal(err)
+	}
 	revs, err := r.Log("b/index.md", 10)
 	if err != nil || len(revs) != 3 {
 		t.Fatalf("log = %+v, %v", revs, err)

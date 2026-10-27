@@ -21,7 +21,7 @@ func (ts *testServer) postForm(t *testing.T, c *http.Client, page, action string
 	if err != nil {
 		t.Fatal(err)
 	}
-	resp.Body.Close()
+	_ = resp.Body.Close()
 	return resp
 }
 

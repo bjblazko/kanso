@@ -14,8 +14,12 @@ import (
 func TestHistoryOverHTTP(t *testing.T) {
 	ts, admin, anna := setupHaus(t)
 	id := ts.createPage(t, admin, "haus", "", "Heizung")
-	ts.deps.Wiki.Save(store.Author{Name: "Anna", Email: "a@x"}, id, "Heizung", "eins\n")
-	ts.deps.Wiki.Save(store.Author{Name: "Ben", Email: "b@x"}, id, "Heizung", "zwei\n")
+	if err := ts.deps.Wiki.Save(store.Author{Name: "Anna", Email: "a@x"}, id, "Heizung", "eins\n"); err != nil {
+		t.Fatal(err)
+	}
+	if err := ts.deps.Wiki.Save(store.Author{Name: "Ben", Email: "b@x"}, id, "Heizung", "zwei\n"); err != nil {
+		t.Fatal(err)
+	}
 	revs, _ := ts.deps.Wiki.History(id, 10)
 
 	_, body := get(t, anna, ts.URL+"/p/"+id+"/history")

@@ -27,6 +27,9 @@ All notable changes to this project are documented here. The format follows
 - Search across titles and texts of all readable spaces: in memory, umlauts match either spelling, last word as prefix, title hits first, plain-text snippets.
 - Deployment guide for Authelia (`docs/deploy-authelia.md`).
 
+### Security
+- Requires Go 1.27.3 (`go.mod`), which fixes GO-2026-6809 in `crypto/x509`.
+
 ### Fixed
 - Sign-in no longer fails for names with quotes or angle brackets (they are dropped from the Git author only).
 - Design review: button links no longer underlined, navigation folded on phones, neutral checkboxes.

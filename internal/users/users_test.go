@@ -38,7 +38,9 @@ func TestUpsertCreatesFileAndCommit(t *testing.T) {
 
 func TestUpsertKeepsLanguage(t *testing.T) {
 	s, _ := newStore(t)
-	s.Upsert(User{Sub: "anna", Name: "Anna", Email: "a@x"})
+	if _, err := s.Upsert(User{Sub: "anna", Name: "Anna", Email: "a@x"}); err != nil {
+		t.Fatal(err)
+	}
 	if err := s.SetLang("anna", "en"); err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +52,9 @@ func TestUpsertKeepsLanguage(t *testing.T) {
 
 func TestSetLangRejectsUnknown(t *testing.T) {
 	s, _ := newStore(t)
-	s.Upsert(User{Sub: "anna", Name: "Anna", Email: "a@x"})
+	if _, err := s.Upsert(User{Sub: "anna", Name: "Anna", Email: "a@x"}); err != nil {
+		t.Fatal(err)
+	}
 	if err := s.SetLang("anna", "fr"); err == nil {
 		t.Error("fr accepted")
 	}
@@ -58,8 +62,12 @@ func TestSetLangRejectsUnknown(t *testing.T) {
 
 func TestListSortedAndReloaded(t *testing.T) {
 	s, repo := newStore(t)
-	s.Upsert(User{Sub: "z", Name: "Zoe", Email: "z@x"})
-	s.Upsert(User{Sub: "a", Name: "Anna", Email: "a@x"})
+	if _, err := s.Upsert(User{Sub: "z", Name: "Zoe", Email: "z@x"}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.Upsert(User{Sub: "a", Name: "Anna", Email: "a@x"}); err != nil {
+		t.Fatal(err)
+	}
 	again, _ := NewStore(repo.Dir(), repo)
 	list := again.List()
 	if len(list) != 2 || list[0].Name != "Anna" {

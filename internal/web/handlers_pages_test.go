@@ -103,7 +103,7 @@ func postPreview(t *testing.T, ts *testServer, c *http.Client, id, md string) (*
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	b, _ := io.ReadAll(resp.Body)
 	return resp, string(b)
 }

@@ -54,7 +54,9 @@ func TestUniqueSlug(t *testing.T) {
 	if got := UniqueSlug(dir, "x"); got != "x" {
 		t.Errorf("free slug = %q", got)
 	}
-	os.Mkdir(filepath.Join(dir, "x"), 0o750)
+	if err := os.Mkdir(filepath.Join(dir, "x"), 0o750); err != nil {
+		t.Fatal(err)
+	}
 	if got := UniqueSlug(dir, "x"); got != "x-2" {
 		t.Errorf("taken slug = %q", got)
 	}

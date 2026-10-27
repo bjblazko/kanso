@@ -33,10 +33,12 @@ func saveJSON(t *testing.T, ts *testServer, c *http.Client, id, csrf, lock, titl
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	b, _ := io.ReadAll(resp.Body)
 	out := map[string]string{}
-	json.Unmarshal(b, &out)
+	if err := json.Unmarshal(b, &out); err != nil {
+		t.Fatal(err)
+	}
 	return resp.StatusCode, out
 }
 

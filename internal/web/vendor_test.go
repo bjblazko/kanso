@@ -40,7 +40,9 @@ func TestMermaidLoaderOnlyWhereNeeded(t *testing.T) {
 	ts, admin, _ := setupHaus(t)
 	with := ts.createPage(t, admin, "haus", "", "Mit Diagramm")
 	without := ts.createPage(t, admin, "haus", "", "Ohne Diagramm")
-	ts.deps.Wiki.Save(store.Author{Name: "Admin", Email: "a@x"}, with, "Mit Diagramm", "```mermaid\ngraph TD\n A-->B\n```\n")
+	if err := ts.deps.Wiki.Save(store.Author{Name: "Admin", Email: "a@x"}, with, "Mit Diagramm", "```mermaid\ngraph TD\n A-->B\n```\n"); err != nil {
+		t.Fatal(err)
+	}
 	_, body := get(t, admin, ts.URL+"/p/"+with)
 	if !strings.Contains(body, "/static/js/mermaid-loader.js") {
 		t.Error("page with diagram lacks the loader")

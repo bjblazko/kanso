@@ -46,7 +46,7 @@ func newFakeIdP(t *testing.T) *fakeIdP {
 }
 
 func (f *fakeIdP) discovery(w http.ResponseWriter, _ *http.Request) {
-	json.NewEncoder(w).Encode(map[string]any{
+	_ = json.NewEncoder(w).Encode(map[string]any{
 		"issuer":                           f.srv.URL,
 		"authorization_endpoint":           f.srv.URL + "/authorize",
 		"token_endpoint":                   f.srv.URL + "/token",
@@ -61,7 +61,7 @@ func b64(b []byte) string { return base64.RawURLEncoding.EncodeToString(b) }
 func (f *fakeIdP) jwks(w http.ResponseWriter, _ *http.Request) {
 	f.jwksHit++
 	pad := func(b []byte) []byte { out := make([]byte, 32); copy(out[32-len(b):], b); return out }
-	json.NewEncoder(w).Encode(map[string]any{"keys": []map[string]string{
+	_ = json.NewEncoder(w).Encode(map[string]any{"keys": []map[string]string{
 		{"kty": "RSA", "kid": "rsa1", "alg": "RS256", "use": "sig",
 			"n": b64(f.rsaKey.N.Bytes()), "e": b64(big.NewInt(int64(f.rsaKey.E)).Bytes())},
 		{"kty": "EC", "kid": "ec1", "alg": "ES256", "crv": "P-256",
@@ -75,7 +75,7 @@ func (f *fakeIdP) token(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"error":"invalid_grant"}`, http.StatusBadRequest)
 		return
 	}
-	json.NewEncoder(w).Encode(map[string]any{"access_token": "at", "token_type": "Bearer", "id_token": f.idToken()})
+	_ = json.NewEncoder(w).Encode(map[string]any{"access_token": "at", "token_type": "Bearer", "id_token": f.idToken()})
 }
 
 func (f *fakeIdP) idToken() string {

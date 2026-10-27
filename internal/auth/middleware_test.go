@@ -42,14 +42,16 @@ func protected(a *Auth) http.Handler {
 	a.Routes(mux)
 	mux.Handle("/", a.RequireUser(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		u, p := UserFrom(r.Context())
-		w.Write([]byte(u.Name + "|" + p.Sub + "|" + CSRFToken(r.Context())))
+		_, _ = w.Write([]byte(u.Name + "|" + p.Sub + "|" + CSRFToken(r.Context())))
 	})))
 	return mux
 }
 
 func loggedIn(t *testing.T, a *Auth) (*http.Cookie, Session) {
 	t.Helper()
-	a.users.Upsert(users.User{Sub: "anna", Name: "Anna", Email: "anna@example.org"})
+	if _, err := a.users.Upsert(users.User{Sub: "anna", Name: "Anna", Email: "anna@example.org"}); err != nil {
+		t.Fatal(err)
+	}
 	s := a.sessions.Create("anna", false)
 	return &http.Cookie{Name: sessionCookie, Value: s.ID}, s
 }

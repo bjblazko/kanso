@@ -22,7 +22,9 @@ func newWiki(t *testing.T) *Wiki {
 	if err != nil {
 		t.Fatal(err)
 	}
-	os.MkdirAll(filepath.Join(repo.Dir(), "spaces", "haus"), 0o750)
+	if err := os.MkdirAll(filepath.Join(repo.Dir(), "spaces", "haus"), 0o750); err != nil {
+		t.Fatal(err)
+	}
 	w, err := NewWiki(repo.Dir(), repo)
 	if err != nil {
 		t.Fatal(err)
@@ -86,7 +88,9 @@ func TestMoveKeepsHistoryAndChildren(t *testing.T) {
 	a := mustCreate(t, w, "", "A")
 	b := mustCreate(t, w, "", "B")
 	c := mustCreate(t, w, a.Meta.ID, "C")
-	w.Save(anna, a.Meta.ID, "A", "eins\n")
+	if err := w.Save(anna, a.Meta.ID, "A", "eins\n"); err != nil {
+		t.Fatal(err)
+	}
 	if err := w.Move(anna, a.Meta.ID, b.Meta.ID, 0); err != nil {
 		t.Fatal(err)
 	}
@@ -145,7 +149,9 @@ func TestOrderSortsTree(t *testing.T) {
 	w := newWiki(t)
 	mustCreate(t, w, "", "Zebra")
 	b := mustCreate(t, w, "", "Apfel")
-	w.Move(anna, b.Meta.ID, "", 5)
+	if err := w.Move(anna, b.Meta.ID, "", 5); err != nil {
+		t.Fatal(err)
+	}
 	tree := w.Tree("haus")
 	if tree[0].Meta.Title != "Zebra" {
 		t.Errorf("order: first is %q", tree[0].Meta.Title)

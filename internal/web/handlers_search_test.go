@@ -13,7 +13,9 @@ import (
 func TestSearchRespectsPermissions(t *testing.T) {
 	ts, admin, anna := setupHaus(t)
 	id := ts.createPage(t, admin, "haus", "", "Heizung")
-	ts.deps.Wiki.Save(store.Author{Name: "Admin", Email: "a@x"}, id, "Heizung", "Der Zählerstand steht im Keller.")
+	if err := ts.deps.Wiki.Save(store.Author{Name: "Admin", Email: "a@x"}, id, "Heizung", "Der Zählerstand steht im Keller."); err != nil {
+		t.Fatal(err)
+	}
 	ts.postForm(t, admin, "/", "/admin/spaces/new", url.Values{"name": {"Geheim"}})
 	secret := ts.createPage(t, admin, "geheim", "", "Zählerstand Tresor")
 

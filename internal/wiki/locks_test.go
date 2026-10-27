@@ -37,7 +37,9 @@ func TestSecondUserCannotAcquire(t *testing.T) {
 func TestLockExpiresWithoutHeartbeat(t *testing.T) {
 	c := &clock{t: time.Now()}
 	l := newLocks(c)
-	l.Acquire("p1", "anna", "Anna")
+	if _, err := l.Acquire("p1", "anna", "Anna"); err != nil {
+		t.Fatal(err)
+	}
 	c.add(5*time.Minute + time.Second)
 	if _, err := l.Acquire("p1", "ben", "Ben"); err != nil {
 		t.Errorf("expired lock still held: %v", err)
@@ -96,7 +98,9 @@ func TestHolderReportsCurrentLock(t *testing.T) {
 	if _, ok := l.Holder("p1"); ok {
 		t.Error("holder without lock")
 	}
-	l.Acquire("p1", "anna", "Anna")
+	if _, err := l.Acquire("p1", "anna", "Anna"); err != nil {
+		t.Fatal(err)
+	}
 	if h, ok := l.Holder("p1"); !ok || h.Sub != "anna" {
 		t.Errorf("holder %+v %v", h, ok)
 	}

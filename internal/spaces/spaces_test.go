@@ -61,7 +61,9 @@ func TestReloadAndVisible(t *testing.T) {
 	if err := svc.Update(admin, sp); err != nil {
 		t.Fatal(err)
 	}
-	svc.Create(admin, "Geheim", "")
+	if _, err := svc.Create(admin, "Geheim", ""); err != nil {
+		t.Fatal(err)
+	}
 	again, err := NewService(svc.dataDir, svc.repo)
 	if err != nil {
 		t.Fatal(err)

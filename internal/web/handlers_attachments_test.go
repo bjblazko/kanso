@@ -18,8 +18,12 @@ func upload(t *testing.T, ts *testServer, c *http.Client, id, filename, content 
 	var body bytes.Buffer
 	mw := multipart.NewWriter(&body)
 	fw, _ := mw.CreateFormFile("file", filename)
-	fw.Write([]byte(content))
-	mw.Close()
+	if _, err := fw.Write([]byte(content)); err != nil {
+		t.Fatal(err)
+	}
+	if err := mw.Close(); err != nil {
+		t.Fatal(err)
+	}
 	req, _ := http.NewRequest("POST", ts.URL+"/p/"+id+"/attachments", &body)
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.Header.Set("Origin", ts.URL)
@@ -28,9 +32,9 @@ func upload(t *testing.T, ts *testServer, c *http.Client, id, filename, content 
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 	out := map[string]string{}
-	json.NewDecoder(resp.Body).Decode(&out)
+	_ = json.NewDecoder(resp.Body).Decode(&out) // refusals answer with an HTML page
 	return resp, out
 }
 

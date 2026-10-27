@@ -1,6 +1,6 @@
 module github.com/bjblazko/kanso
 
-go 1.27
+go 1.27.3
 
 require go.yaml.in/yaml/v3 v3.0.5
 

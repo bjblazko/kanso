@@ -16,7 +16,7 @@ English. Next: notes, tasks (Kanban and Eisenhower), lists, calendars.
 
 ## Run
 
-Requires Go 1.27 and `git` on the `PATH`.
+Requires Go 1.27.3 or newer and `git` on the `PATH`.
 
 ```sh
 just run          # dev login on http://localhost:8090, data in ./tmp

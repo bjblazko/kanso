@@ -63,7 +63,9 @@ func TestOpenAndDeleteAttachment(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	f.Close()
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := w.OpenAttachment(p.Meta.ID, "../index.md"); err == nil {
 		t.Error("opened file outside attachments")
 	}
