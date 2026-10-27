@@ -95,3 +95,29 @@ test('offline: a sign-in at another site (Authelia) is recognised as signed out'
   await write(page, unique('Woanders anmelden'));
   await expect(page.getByRole('link', { name: 'Zum Hochladen bitte anmelden' })).toBeVisible();
 });
+
+test('offline: todo ticks wait and sync when the network is back', async ({ page, context }) => {
+  await signIn(page, { sub: 'otto', name: 'Otto' });
+  await page.goto('/todos');
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.waitForFunction(async () => Boolean(await caches.match('/todos')));
+  const name = unique('Offline-Liste');
+  await page.getByLabel('Neue Liste').fill(name);
+  await page.getByRole('button', { name: 'Anlegen' }).click();
+  await page.getByLabel('Neuer Punkt').fill('Holz holen');
+  await Promise.all([page.waitForResponse('**/api/todos/sync'), page.getByLabel('Neuer Punkt').press('Enter')]);
+  await expect(page.getByRole('status')).toHaveText('');
+
+  await context.setOffline(true);
+  await page.reload(); // the list opens from the device
+  await page.getByRole('checkbox', { name: 'Holz holen' }).check();
+  await page.getByLabel('Neuer Punkt').fill('Ofen anmachen');
+  await page.getByLabel('Neuer Punkt').press('Enter');
+  await expect(page.getByRole('status')).toHaveText('2 Änderungen warten auf Netz');
+
+  await context.setOffline(false);
+  await expect(page.getByRole('status')).toHaveText('');
+  const lists = (await (await page.request.get('/api/todos')).json()).lists;
+  const list = lists.find((l) => l.name === name);
+  expect(list.items.map((i) => [i.text, i.done])).toEqual([['Holz holen', true], ['Ofen anmachen', false]]);
+});

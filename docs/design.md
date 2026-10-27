@@ -37,6 +37,11 @@ links with `aria-current`, actions are framed buttons.
 
 ## Deviations from huepattl-rams-design
 
+- **To-do items:** an item's text is a frameless button that opens the item
+  for editing (as in reminder apps). It is the item itself, not a separate
+  action; a framed edit button in every row would double the list's noise.
+  Ticked items fade to 0.62 opacity, which keeps their text at 4.5:1.
+
 - **Icons:** Lucide is not used (every dependency needs approval). Kanso
   draws its few icons itself, in the same style: line icons, 1.5 px stroke at
   24 px, round caps and joins, `currentColor`.

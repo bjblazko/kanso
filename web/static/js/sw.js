@@ -1,17 +1,19 @@
 // SPDX-License-Identifier: Apache-2.0
-// Service worker: keeps the capture page and its files on the device, so a
-// note can be written without network. The server puts VERSION and PRECACHE
-// (fingerprinted static URLs) above this file. Everything else goes to the
-// network untouched.
+// Service worker: keeps the capture page, the to-do page and their files on
+// the device, so notes can be written and lists ticked without network. The
+// server puts VERSION and PRECACHE (fingerprinted static URLs) above this
+// file. Everything else goes to the network untouched.
 
 const CACHE = `kanso-${VERSION}`;
 const CAPTURE = '/notes/new';
+const TODOS = '/todos';
+const TODO_PAGES = /^\/todos(?:\/[a-z2-7]{12})?$/; // one page draws the overview and every list
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
     await cache.addAll(PRECACHE);
-    await storeCapturePage(cache);
+    await Promise.all([storePage(cache, CAPTURE), storePage(cache, TODOS)]);
     await self.skipWaiting();
   })());
 });
@@ -29,30 +31,33 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
   if (url.origin !== self.location.origin || event.request.method !== 'GET') return;
   if (event.request.mode === 'navigate' && url.pathname === CAPTURE) {
-    event.respondWith(captureNetworkFirst(event.request));
+    event.respondWith(networkFirst(event.request, CAPTURE));
+  } else if (event.request.mode === 'navigate' && TODO_PAGES.test(url.pathname)) {
+    event.respondWith(networkFirst(event.request, TODOS));
   } else if (url.pathname.startsWith('/static/')) {
     event.respondWith(caches.match(event.request).then((hit) => hit || fetch(event.request)));
   }
 });
 
-// storeCapturePage keeps the signed-in capture page; a redirect to the login
-// is not stored.
-async function storeCapturePage(cache) {
+// storePage keeps a signed-in page; a redirect to the login is not stored.
+async function storePage(cache, path) {
   try {
-    const response = await fetch(CAPTURE, { credentials: 'same-origin' });
-    if (response.ok && !response.redirected) await cache.put(CAPTURE, response);
+    const response = await fetch(path, { credentials: 'same-origin' });
+    if (response.ok && !response.redirected) await cache.put(path, response);
   } catch {
     // Offline while installing: the next visit stores the page.
   }
 }
 
-async function captureNetworkFirst(request) {
+// networkFirst answers from the network and keeps the answer under key; without
+// network it answers with what was kept.
+async function networkFirst(request, key) {
   const cache = await caches.open(CACHE);
   try {
     const response = await fetch(request);
-    if (response.ok && !response.redirected) await cache.put(CAPTURE, response.clone());
+    if (response.ok && !response.redirected) await cache.put(key, response.clone());
     return response;
   } catch {
-    return (await cache.match(CAPTURE)) || Response.error();
+    return (await cache.match(key)) || Response.error();
   }
 }

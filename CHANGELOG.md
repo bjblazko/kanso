@@ -32,14 +32,16 @@ All notable changes to this project are documented here. The format follows
 - Notes (ADR-004): private notes per person, outside the Git history. Quick capture page (`/notes/new`) with camera and photo library; list, view, edit with source and preview, delete; turn a note into a wiki page; search finds your own notes; the seed adds some.
 - Offline capture: notes and photos wait on the device (IndexedDB) and upload when the network is back; a lost answer never creates a note twice; a signed-out device keeps its notes and offers to sign in.
 - Installable web app (manifest, own icon) whose home-screen icon opens the capture page.
+- To-do lists (ADR-006): flat lists with one level of sub-items, outside the Git history; ticked items stay in place and fade; overview by last change; the owner shares with people or groups, renames and deletes; ticking and editing work offline and sync when the network is back.
 
 ### Security
 - GPS location is removed from JPEG photos on upload (notes and wiki pages); orientation and other EXIF data stay.
 - Requires Go 1.27.3 (`go.mod`), which fixes GO-2026-6809 in `crypto/x509`.
 
 ### Changed
-- Navigation (ADR-005): a rail names the parts of Kanso — Notizen and Wiki — at the bottom on phones and at the left on wide screens; the side bar shows only the wiki's spaces and pages, under "Wiki-Bereiche"; group management moved to the user menu.
+- Navigation (ADR-005): a rail names the parts of Kanso — Notizen, Todos and Wiki — at the bottom on phones and at the left on wide screens; the side bar shows only the wiki's spaces and pages, under "Wiki-Bereiche"; group management moved to the user menu.
 - The page tree shows guide lines for every level, so nested pages stay apart on narrow screens.
+- Keeping a folder out of the history is one helper (`Repo.Ignore`) for notes and to-do lists.
 - Uploads share one path (`store.SaveUpload`) for safe names, size limit and photo cleaning.
 - The Markdown editor serves pages and notes; it reads its URLs from the form.
 

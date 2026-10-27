@@ -57,6 +57,11 @@ hold it). A note written without network waits in the browser's storage on
 that device until it is uploaded. Kanso removes the GPS location from JPEG
 photos when they are uploaded.
 
+To-do lists are visible to their owner and the people and groups they are
+shared with, and are not kept in the Git history either. Each device keeps a
+copy of your lists and any changes made without network in the browser's
+storage until they are synced.
+
 ## License
 
 Apache-2.0, see [LICENSE](LICENSE). Third-party licenses: [NOTICE](NOTICE).

@@ -1,0 +1,9 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.T "todos.delete_confirm" $d.Name}}</h1>
+<p>{{.T "todos.delete_hint"}}</p>
+<form method="post" action="/todos/{{$d.ID}}/delete" class="actions">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <button class="btn btn-destructive" type="submit">{{.T "todos.delete_named" $d.Name}}</button>
+  <a class="btn btn-secondary" href="/todos/{{$d.ID}}">{{.T "action.cancel"}}</a>
+</form>
+</div>{{end}}

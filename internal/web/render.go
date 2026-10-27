@@ -29,7 +29,7 @@ type view struct {
 	Here  string // slug of the current space, for aria-current
 	Page  string // id of the current page, for aria-current
 	Tree  []*wiki.Node
-	// Module is the part of Kanso the page belongs to ("notes", "wiki"), "" for
+	// Module is the part of Kanso the page belongs to ("notes", "todos", "wiki"), "" for
 	// pages outside all parts (search, administration, licenses).
 	Module string
 	Dev    bool   // dev login: offer to switch person
@@ -106,6 +106,8 @@ func moduleOf(path string) string {
 	switch {
 	case path == "/notes" || strings.HasPrefix(path, "/notes/"):
 		return "notes"
+	case path == "/todos" || strings.HasPrefix(path, "/todos/"):
+		return "todos"
 	case path == "/", strings.HasPrefix(path, "/s/"), strings.HasPrefix(path, "/p/"), strings.HasPrefix(path, "/admin/spaces/"):
 		return "wiki"
 	}
