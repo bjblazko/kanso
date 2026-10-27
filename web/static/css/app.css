@@ -194,3 +194,5 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .previews:empty { display: none; }
 .previews li { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
 .previews img { width: 5rem; height: 5rem; object-fit: cover; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.outbox summary { cursor: pointer; color: var(--fg-2); font-size: var(--text-sm); }
+.outbox li { padding: var(--space-1) 0; font-size: var(--text-sm); }

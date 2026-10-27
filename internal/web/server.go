@@ -114,6 +114,8 @@ func (s *Server) Handler() http.Handler {
 	s.Auth.Routes(mux)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) { _, _ = fmt.Fprint(w, "ok") })
 	mux.Handle("GET /static/", http.StripPrefix("/static/", cacheForever(http.FileServerFS(s.static))))
+	mux.HandleFunc("GET /sw.js", s.serviceWorker)
+	mux.HandleFunc("GET /manifest.webmanifest", s.manifest)
 	app := http.NewServeMux()
 	s.routes(app)
 	mux.Handle("/", s.Auth.RequireUser(app))
@@ -147,6 +149,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /p/{id}/delete", s.deletePage)
 	mux.HandleFunc("GET /notes", s.listNotes)
 	mux.HandleFunc("GET /notes/new", s.newNoteForm)
+	mux.HandleFunc("GET /notes/token", s.noteToken)
 	mux.HandleFunc("POST /notes", s.createNote)
 	mux.HandleFunc("GET /notes/{id}", s.showNote)
 	mux.HandleFunc("GET /notes/{id}/edit", s.editNote)
@@ -164,7 +167,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { s.notFound(w, r) })
 }
 
-const csp = "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; " +
+const csp = "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; " +
 	"object-src 'none'; base-uri 'none'; frame-ancestors 'none'"
 
 func securityHeaders(next http.Handler) http.Handler {

@@ -1,11 +1,17 @@
 {{define "content"}}{{$d := .Data}}<div class="capture-page">
-<form id="capture" class="capture" method="post" action="/notes" enctype="multipart/form-data">
+<form id="capture" class="capture" method="post" action="/notes" enctype="multipart/form-data"
+      data-login-url="/auth/login?next=%2Fnotes%2Fnew" data-msg-login="{{.T "notes.sync_login"}}"
+      data-msg-saved="{{.T "notes.saved"}}" data-msg-empty="{{.T "notes.error_empty"}}"
+      data-msg-waiting-one="{{.T "notes.waiting_one"}}" data-msg-waiting-many="{{.T "notes.waiting_many"}}"
+      data-msg-failed-one="{{.T "notes.failed_one"}}" data-msg-failed-many="{{.T "notes.failed_many"}}"
+      data-msg-failed-mark="{{.T "notes.failed_mark"}}" data-msg-photo="{{.T "notes.photo"}}" data-msg-remove="{{.T "notes.remove"}}">
   <input type="hidden" name="csrf" value="{{.CSRF}}">
   <label class="visually-hidden" for="note-body">{{.T "notes.capture_label"}}</label>
   <textarea id="note-body" name="body" placeholder="{{.T "notes.capture_placeholder"}}" spellcheck="true">{{$d.Body}}</textarea>
   <ul id="previews" class="previews list-plain" aria-label="{{.T "notes.photos"}}"></ul>
   {{if $d.Error}}<p class="notice notice-warning" role="alert">{{$d.Error}}</p>{{end}}
   <p id="capture-status" class="meta capture-status" role="status">{{if $d.Saved}}{{.T "notes.saved"}}{{end}}</p>
+  <details id="outbox" class="outbox" hidden><summary>{{.T "notes.outbox"}}</summary><ul class="list-plain"></ul></details>
   <div class="capture-actions">
     <label class="btn btn-secondary" for="camera">{{.T "notes.camera"}}</label>
     <input class="visually-hidden" id="camera" type="file" name="files" accept="image/*" capture="environment">
@@ -16,3 +22,4 @@
   <p><a href="/notes">{{.T "notes.all"}}</a></p>
 </form>
 </div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/capture.js"}}"></script>{{end}}

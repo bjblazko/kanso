@@ -26,7 +26,7 @@ test('notes: an empty note is refused with a reason', async ({ page }) => {
   await signIn(page, { sub: 'nora', name: 'Nora' });
   await page.goto('/notes/new');
   await page.getByRole('button', { name: 'Speichern' }).click();
-  await expect(page.getByRole('alert')).toHaveText('Schreib etwas oder hänge ein Foto an.');
+  await expect(page.getByRole('status')).toHaveText('Schreib etwas oder hänge ein Foto an.');
 });
 
 // A tiny valid PNG (1×1 pixel).

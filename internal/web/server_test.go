@@ -30,6 +30,7 @@ import (
 type testServer struct {
 	*httptest.Server
 	deps Deps
+	srv  *Server
 }
 
 func newTestServer(t *testing.T) *testServer {
@@ -46,6 +47,7 @@ func newTestServer(t *testing.T) *testServer {
 	if err != nil {
 		t.Fatal(err)
 	}
+	ts.srv = srv
 	ts.Config.Handler = srv.Handler()
 	ts.Start()
 	t.Cleanup(ts.Close)
@@ -120,7 +122,7 @@ func TestSecurityHeaders(t *testing.T) {
 	ts := newTestServer(t)
 	resp, _ := get(t, http.DefaultClient, ts.URL+"/healthz")
 	want := map[string]string{
-		"Content-Security-Policy": "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+		"Content-Security-Policy": "default-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
 		"X-Content-Type-Options":  "nosniff",
 		"Referrer-Policy":         "same-origin",
 	}
