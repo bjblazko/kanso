@@ -10,8 +10,9 @@ const preview = document.getElementById('preview');
 const status = document.getElementById('editor-status');
 const panes = form.querySelector('.editor-panes');
 const csrf = document.querySelector('meta[name="csrf"]').content;
-const pageID = form.dataset.page;
-const lock = form.elements.lock.value;
+// The form says where it belongs: a wiki page (with an edit lock) or a note.
+const { saveUrl, viewUrl, uploadUrl, previewKey, previewId } = form.dataset;
+const lock = form.elements.lock?.value;
 
 let dirty = false;
 let lockLost = false;
@@ -35,7 +36,7 @@ function showStatus(message) {
 let previewTimer;
 
 async function refreshPreview() {
-  const data = new URLSearchParams({ page: pageID, body: body.value });
+  const data = new URLSearchParams({ [previewKey]: previewId, body: body.value });
   const response = await post('/api/preview', data);
   if (!response.ok) return;
   preview.innerHTML = await response.text(); // server-rendered, sanitised HTML
@@ -68,19 +69,21 @@ function loseLock() {
 
 async function heartbeat() {
   if (lockLost) return;
-  const response = await post(`/p/${pageID}/lock/heartbeat`, new URLSearchParams({ lock }));
+  const response = await post(`${viewUrl}/lock/heartbeat`, new URLSearchParams({ lock }));
   if (response.status === 409) loseLock();
 }
 
 async function save(event) {
   event?.preventDefault();
   if (lockLost) return loseLock();
-  const response = await post(`/p/${pageID}`, new URLSearchParams(new FormData(form)), 'application/json');
+  const response = await post(saveUrl, new URLSearchParams(new FormData(form)), 'application/json');
   if (response.ok) {
     dirty = false;
-    window.location.assign(`/p/${pageID}`);
+    window.location.assign(viewUrl);
   } else if (response.status === 409) {
-    loseLock();
+    const { error } = await response.json().catch(() => ({}));
+    if (error === 'conflict') showStatus(form.dataset.msgConflict);
+    else loseLock();
   } else {
     showStatus(form.dataset.msgFailed);
   }
@@ -100,7 +103,7 @@ async function uploadFiles(files) {
   for (const file of files) {
     const data = new FormData();
     data.append('file', file);
-    const response = await post(`/p/${pageID}/attachments`, data, 'application/json');
+    const response = await post(uploadUrl, data, 'application/json');
     if (!response.ok) {
       showStatus(form.dataset.msgUploadFailed);
       continue;
@@ -116,7 +119,7 @@ function filesFrom(dataTransfer) {
 // ---- Wiring ----------------------------------------------------------------
 
 body.addEventListener('input', () => { dirty = true; schedulePreview(); });
-form.elements.title.addEventListener('input', () => { dirty = true; });
+form.elements.title?.addEventListener('input', () => { dirty = true; });
 form.addEventListener('submit', save);
 for (const tab of form.querySelectorAll('[role="tab"]')) {
   tab.addEventListener('click', () => selectTab(tab.id.replace('tab-', '')));
@@ -137,5 +140,5 @@ document.addEventListener('keydown', (e) => {
 window.addEventListener('beforeunload', (e) => {
   if (dirty) { e.preventDefault(); e.returnValue = form.dataset.msgLeave; }
 });
-setInterval(heartbeat, HEARTBEAT_MS);
+if (lock) setInterval(heartbeat, HEARTBEAT_MS);
 refreshPreview();

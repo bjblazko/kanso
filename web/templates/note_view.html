@@ -4,6 +4,7 @@
 <p class="meta"><time datetime="{{$d.Note.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Note.Meta.Updated.Local.Format "02.01.2006 15:04"}}</time> · {{.T "notes.private"}}</p>
 <div class="prose">{{$d.HTML}}</div>
 <div class="actions">
+  <a class="btn btn-primary" href="/notes/{{$d.Note.Meta.ID}}/edit">{{.T "page.edit"}}</a>
   <a class="btn btn-destructive btn-sm" href="/notes/{{$d.Note.Meta.ID}}/delete">{{.T "notes.delete"}}</a>
 </div>
 </article>{{end}}

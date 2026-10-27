@@ -207,17 +207,15 @@ func (s *Server) deletePage(w http.ResponseWriter, r *http.Request) {
 }
 
 // preview renders Markdown for the editor; the caller must be allowed to
-// write the page the text belongs to.
+// write the page (or own the note) the text belongs to.
 func (s *Server) preview(w http.ResponseWriter, r *http.Request) {
+	if r.PostFormValue("note") != "" {
+		s.notePreview(w, r)
+		return
+	}
 	r.SetPathValue("id", r.PostFormValue("page"))
 	if _, ok := s.pageFor(w, r, access.Write); !ok {
 		return
 	}
-	html, _, err := s.MD.Render([]byte(r.PostFormValue("body")), markdown.PageCtx{Base: "/p/" + r.PathValue("id")})
-	if err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	_, _ = w.Write([]byte(html))
+	s.writePreview(w, r.PostFormValue("body"), markdown.PageCtx{Base: "/p/" + r.PathValue("id")})
 }

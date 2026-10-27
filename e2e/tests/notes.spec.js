@@ -28,3 +28,27 @@ test('notes: an empty note is refused with a reason', async ({ page }) => {
   await page.getByRole('button', { name: 'Speichern' }).click();
   await expect(page.getByRole('alert')).toHaveText('Schreib etwas oder hänge ein Foto an.');
 });
+
+// A tiny valid PNG (1×1 pixel).
+const PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+  'base64',
+);
+
+test('notes: edit a note and add a photo', async ({ page }) => {
+  await signIn(page, { sub: 'nora', name: 'Nora' });
+  const text = unique('Heizung ablesen');
+  await page.goto('/notes/new');
+  await page.getByLabel('Notiz', { exact: true }).fill(text);
+  await page.getByRole('button', { name: 'Speichern' }).click();
+  await expect(page.getByRole('status')).toHaveText('Gespeichert');
+
+  await page.goto('/notes');
+  await page.getByRole('link', { name: text }).click();
+  await page.getByRole('link', { name: 'Bearbeiten' }).click();
+  await page.locator('#file').setInputFiles({ name: 'Zähler.png', mimeType: 'image/png', buffer: PNG });
+  await expect(page.getByRole('textbox', { name: 'Quelltext' })).toHaveValue(/!\[Zähler\]\(attachments\/zaehler\.png\)/);
+  await page.getByRole('button', { name: 'Speichern' }).click();
+  await expect(page).toHaveURL(/\/notes\/[a-z2-7]{12}$/);
+  await expect(page.locator('.prose img')).toHaveAttribute('src', /\/notes\/[a-z2-7]{12}\/attachments\/zaehler\.png$/);
+});

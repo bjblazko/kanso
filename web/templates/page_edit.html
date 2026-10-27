@@ -1,6 +1,7 @@
 {{define "content"}}{{$d := .Data}}<div class="editor-page">
 <form method="post" action="/p/{{$d.Page.Meta.ID}}" class="editor" id="editor"
-      data-page="{{$d.Page.Meta.ID}}" data-msg-lost="{{.T "page.lock_lost"}}" data-msg-failed="{{.T "page.save_failed"}}"
+      data-save-url="/p/{{$d.Page.Meta.ID}}" data-view-url="/p/{{$d.Page.Meta.ID}}" data-upload-url="/p/{{$d.Page.Meta.ID}}/attachments"
+      data-preview-key="page" data-preview-id="{{$d.Page.Meta.ID}}" data-msg-lost="{{.T "page.lock_lost"}}" data-msg-failed="{{.T "page.save_failed"}}"
       data-msg-upload-failed="{{.T "editor.upload_failed"}}" data-msg-leave="{{.T "editor.unsaved"}}">
   <input type="hidden" name="csrf" value="{{.CSRF}}">
   <input type="hidden" name="lock" value="{{$d.Lock}}">
