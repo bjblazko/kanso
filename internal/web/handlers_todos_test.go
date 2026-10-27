@@ -201,3 +201,14 @@ func TestRailHasTodos(t *testing.T) {
 		t.Fatalf("messages %q: %v", raw, err)
 	}
 }
+
+// todos.js reads items and shares as arrays, also for a new, empty list.
+func TestNewListHasEmptyArrays(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	syncTodos(t, ts, anna, `{"ops":[{"id":"op1","kind":"create","list":"`+gardenID+`","text":"Leer","at":1}]}`, true)
+	_, body := get(t, anna, ts.URL+"/api/todos")
+	if !strings.Contains(body, `"items":[]`) || !strings.Contains(body, `"shared":[]`) {
+		t.Fatalf("body %s", body)
+	}
+}

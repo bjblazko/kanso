@@ -44,6 +44,12 @@ func (s *Server) todoLists(sub string, g access.Groups) []listOut {
 	out := []listOut{}
 	for _, l := range s.Todos.Visible(sub, g) {
 		o := listOut{List: l, Mine: l.Owner == sub, OwnerName: s.userName(l.Owner), SharedNames: []string{}}
+		if o.Items == nil {
+			o.Items = []todos.Item{}
+		}
+		if o.Shared == nil {
+			o.Shared = []todos.Share{}
+		}
 		for _, sh := range l.Shared {
 			o.SharedNames = append(o.SharedNames, s.shareName(sh))
 		}

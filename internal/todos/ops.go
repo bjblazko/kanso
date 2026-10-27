@@ -70,7 +70,7 @@ func (s *Store) listFor(sub string, g access.Groups, op Op, lists map[string]*Li
 	l, err := s.read(op.List)
 	switch {
 	case errors.Is(err, ErrNotFound) && op.Kind == "create" && idPattern.MatchString(op.List):
-		now := s.now().UTC()
+		now := s.now().UTC().Truncate(time.Millisecond)
 		l = List{ID: op.List, Owner: sub, Created: now, Updated: now}
 	case err != nil:
 		return nil, err
@@ -82,7 +82,7 @@ func (s *Store) listFor(sub string, g access.Groups, op Op, lists map[string]*Li
 }
 
 func (s *Store) save(lists map[string]*List, changed map[string]bool) {
-	now := s.now().UTC()
+	now := s.now().UTC().Truncate(time.Millisecond)
 	for id := range changed {
 		l := lists[id]
 		l.Updated = now

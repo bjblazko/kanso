@@ -44,7 +44,7 @@ func TestServiceWorkerListsAssets(t *testing.T) {
 	ts := newTestServer(t)
 	_, body := get(t, http.DefaultClient, ts.URL+"/sw.js")
 	list := precached(t, body)
-	for _, want := range []string{"/static/js/capture.js?v=", "/static/css/app.css?v=", "/static/fonts/IBMPlexSans-Regular-Latin1.woff2"} {
+	for _, want := range []string{"/static/js/capture.js?v=", "/static/js/todos.js?v=", "/static/css/app.css?v=", "/static/fonts/IBMPlexSans-Regular-Latin1.woff2"} {
 		found := false
 		for _, u := range list {
 			found = found || strings.HasPrefix(u, want)
