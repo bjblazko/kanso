@@ -147,16 +147,24 @@ func (s *Server) memberFromForm(r *http.Request) (access.Member, string) {
 	if err != nil {
 		return access.Member{}, "settings.invalid"
 	}
+	m, ok := s.whoFromForm(r)
+	if !ok {
+		return access.Member{}, "settings.unknown_member"
+	}
+	m.Role = role
+	return m, ""
+}
+
+// whoFromForm reads the known person or group a form names (fields kind, who).
+func (s *Server) whoFromForm(r *http.Request) (access.Member, bool) {
 	who := r.PostFormValue("who")
 	switch r.PostFormValue("kind") {
 	case "user":
-		if _, ok := s.Users.Get(who); ok {
-			return access.Member{User: who, Role: role}, ""
-		}
+		_, ok := s.Users.Get(who)
+		return access.Member{User: who}, ok
 	case "group":
-		if _, ok := s.groups()[who]; ok {
-			return access.Member{Group: who, Role: role}, ""
-		}
+		_, ok := s.groups()[who]
+		return access.Member{Group: who}, ok
 	}
-	return access.Member{}, "settings.unknown_member"
+	return access.Member{}, false
 }

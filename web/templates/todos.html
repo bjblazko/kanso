@@ -1,0 +1,8 @@
+{{define "content"}}<div class="content todos-page">
+{{/* todos.js draws the overview or one list from the copy on the device. */}}
+<div id="todos" class="todos"></div>
+<p id="todos-status" class="meta todos-status" role="status"></p>
+<noscript><p class="notice notice-warning">{{.T "todos.noscript"}}</p></noscript>
+<script type="application/json" id="todo-messages">{{.Data}}</script>
+</div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/todos.js"}}"></script>{{end}}

@@ -20,6 +20,7 @@ import (
 	"github.com/bjblazko/kanso/internal/search"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
+	"github.com/bjblazko/kanso/internal/todos"
 	"github.com/bjblazko/kanso/internal/users"
 	"github.com/bjblazko/kanso/internal/wiki"
 	assets "github.com/bjblazko/kanso/web"
@@ -35,6 +36,7 @@ type Deps struct {
 	Spaces *spaces.Service
 	Wiki   *wiki.Wiki
 	Notes  *notes.Store
+	Todos  *todos.Store
 	MD     *markdown.Renderer
 	Locks  *wiki.Locks
 	Search *search.Index
@@ -69,7 +71,7 @@ func New(d Deps) (*Server, error) {
 }
 
 var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search",
-	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote"}
+	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote", "todos", "todo_share", "todo_delete"}
 
 func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}
@@ -160,6 +162,14 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /notes/{id}/promote", s.promoteNote)
 	mux.HandleFunc("GET /notes/{id}/delete", s.confirmDeleteNote)
 	mux.HandleFunc("POST /notes/{id}/delete", s.deleteNote)
+	mux.HandleFunc("GET /todos", s.todosPage)
+	mux.HandleFunc("GET /todos/{id}", s.todosPage)
+	mux.HandleFunc("GET /todos/{id}/share", s.shareTodoForm)
+	mux.HandleFunc("POST /todos/{id}/share", s.shareTodo)
+	mux.HandleFunc("GET /todos/{id}/delete", s.confirmDeleteTodo)
+	mux.HandleFunc("POST /todos/{id}/delete", s.deleteTodo)
+	mux.HandleFunc("GET /api/todos", s.apiTodos)
+	mux.HandleFunc("POST /api/todos/sync", s.syncTodos)
 	mux.HandleFunc("GET /admin/spaces/new", s.newSpaceForm)
 	mux.HandleFunc("POST /admin/spaces/new", s.createSpace)
 	mux.HandleFunc("GET /admin/groups", s.groupsPage)
