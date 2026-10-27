@@ -44,6 +44,8 @@ All notable changes to this project are documented here. The format follows
 - The Markdown editor serves pages and notes; it reads its URLs from the form.
 
 ### Fixed
+- Sub-items of task lists keep their indent.
+- Phones: the bottom bar no longer jumps while Safari's toolbar shows or hides; page heights use `svh`.
 - Task lists with blank lines between items no longer show bullets next to the checkboxes.
 - On phones the folded menu no longer stretches into an empty grey block on short pages.
 - Page history no longer shows commits of another page: Kanso follows real renames itself instead of `git log --follow`, which took look-alike new pages for copies.

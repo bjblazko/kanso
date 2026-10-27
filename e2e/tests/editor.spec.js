@@ -83,3 +83,16 @@ test('task lists show no bullets, also with blank lines between items', async ({
   const bullets = await page.locator('.prose li').evaluateAll((items) => items.map((li) => getComputedStyle(li).listStyleType));
   expect(bullets).toEqual(['none', 'none', 'none', 'none']);
 });
+
+test('sub-items of a task list stay indented', async ({ page }) => {
+  await signIn(page, { sub: 'tom', name: 'Tom', admin: true });
+  await createSpace(page, unique('Unteraufgaben'));
+  await createPage(page, 'Wünsche');
+  await page.getByRole('link', { name: 'Bearbeiten' }).click();
+  await page.getByRole('textbox', { name: 'Quelltext' }).fill('- [ ] Wünsche aufnehmen\n  - [ ] Christina\n  - [ ] Paula\n');
+  await page.getByRole('button', { name: 'Speichern' }).click();
+  const boxes = page.locator('.prose input[type="checkbox"]');
+  await expect(boxes).toHaveCount(3);
+  const [parent, child] = await Promise.all([boxes.nth(0).boundingBox(), boxes.nth(1).boundingBox()]);
+  expect(child.x - parent.x).toBeGreaterThan(16);
+});
