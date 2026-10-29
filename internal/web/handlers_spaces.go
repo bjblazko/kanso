@@ -36,8 +36,15 @@ func (s *Server) spaceFor(w http.ResponseWriter, r *http.Request) (spaces.Space,
 	return sp, role, true
 }
 
+// home lists the visible spaces, each with who else sees it.
 func (s *Server) home(w http.ResponseWriter, r *http.Request) {
-	s.page(w, r, "home", "", nil)
+	v := s.newView(r, "", nil)
+	seen := map[string]audience{}
+	for _, sp := range v.Nav {
+		seen[sp.Slug] = s.spaceAudience(v, sp)
+	}
+	v.Data = seen
+	s.render(w, r, http.StatusOK, "home", v)
 }
 
 type spacePage struct {
@@ -57,6 +64,7 @@ func (s *Server) showSpace(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v := s.inSpace(s.newView(r, sp.Name, spacePage{Space: sp, Role: role}), sp.Slug, "")
+	v.Audience = ptr(s.spaceAudience(v, sp))
 	s.render(w, r, http.StatusOK, "space", v)
 }
 

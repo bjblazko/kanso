@@ -60,6 +60,7 @@ func (s *Server) listNotes(w http.ResponseWriter, r *http.Request) {
 		items = append(items, noteItem{ID: n.Meta.ID, Title: noteTitle(v, n), Created: n.Meta.Created.Local(), Files: len(n.Attachments)})
 	}
 	v.Title, v.Data, v.Here = v.T("notes.title"), items, notesHere
+	v.Audience = ptr(onlyYou(v))
 	s.render(w, r, http.StatusOK, "notes", v)
 }
 
@@ -69,7 +70,7 @@ func (s *Server) newNoteForm(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) renderCapture(w http.ResponseWriter, r *http.Request, status int, data noteNew) {
 	v := s.newView(r, "", data)
-	v.Title, v.Here = v.T("notes.new"), notesHere
+	v.Title, v.Here, v.Audience = v.T("notes.new"), notesHere, ptr(onlyYou(v))
 	s.render(w, r, status, "note_new", v)
 }
 
@@ -96,7 +97,7 @@ func (s *Server) showNote(w http.ResponseWriter, r *http.Request) {
 	}
 	v := s.newView(r, "", nil)
 	v.Data = noteView{Note: n, Title: noteTitle(v, n), HTML: html, Info: info}
-	v.Title, v.Here = noteTitle(v, n), notesHere
+	v.Title, v.Here, v.Audience = noteTitle(v, n), notesHere, ptr(onlyYou(v))
 	s.render(w, r, http.StatusOK, "note_view", v)
 }
 

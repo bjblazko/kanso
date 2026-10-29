@@ -66,8 +66,14 @@ func (s *Server) showPage(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
+	s.render(w, r, http.StatusOK, "page_view", s.pageView(r, pc))
+}
+
+// pageView is the view of the read page, placed in its space.
+func (s *Server) pageView(r *http.Request, pc pageCtx) view {
 	v := s.inSpace(s.newView(r, pc.Page.Meta.Title, pc), pc.Space.Slug, pc.Page.Meta.ID)
-	s.render(w, r, http.StatusOK, "page_view", v)
+	v.Audience = ptr(s.spaceAudience(v, pc.Space))
+	return v
 }
 
 // fillPageView adds what the read view shows around the page text.

@@ -1,7 +1,8 @@
 {{define "content"}}{{$d := .Data}}<article class="content page">
 <nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/notes">{{.T "notes.title"}}</a></nav>
 <h1>{{$d.Title}}</h1>
-<p class="meta"><time datetime="{{$d.Note.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Note.Meta.Updated.Local.Format "02.01.2006 15:04"}}</time> · {{.T "notes.private"}}</p>
+<p class="meta"><time datetime="{{$d.Note.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Note.Meta.Updated.Local.Format "02.01.2006 15:04"}}</time></p>
+{{template "audience" .Audience}}
 <div class="prose">{{$d.HTML}}</div>
 <div class="actions">
   <a class="btn btn-primary" href="/notes/{{$d.Note.Meta.ID}}/edit">{{.T "page.edit"}}</a>

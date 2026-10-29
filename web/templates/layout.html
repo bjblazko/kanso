@@ -1,3 +1,5 @@
+{{/* audience says who can see what a page shows; see view.Audience. */}}
+{{define "audience"}}{{with .}}<p class="meta audience">{{if .Private}}{{template "icon" "lock"}}{{else}}{{template "icon" "users"}}{{end}}<span>{{.Text}}</span></p>{{end}}{{end}}
 {{define "layout"}}<!doctype html>
 <html lang="{{.Lang}}">
 <head>

@@ -1,7 +1,7 @@
 # Hüpattl! Kanso — Architecture (arc42)
 
 **Created:** 2026-10-26
-**Updated:** 2026-10-27
+**Updated:** 2026-10-29
 
 ## 1. Introduction and Goals
 
@@ -50,6 +50,7 @@ services and external calendars. Nothing else leaves the host.
 - **Edit locks instead of live collaboration** ([ADR-003](../adr/003-edit-locks.md)).
 - **Private notes outside Git, captured offline** ([ADR-004](../adr/004-notes-outside-git-offline-capture.md)).
 - **To-do lists outside Git, synced as operations** ([ADR-006](../adr/006-todo-lists-outside-git-synced-operations.md)).
+- **Every page says who can see it** ([ADR-007](../adr/007-say-who-can-see-it.md)).
 - Server-rendered pages (`html/template`); JavaScript only where it helps
   (editor, drag and drop, offline, push).
 - Packages by domain capability, not by technical layer.
@@ -134,6 +135,7 @@ Kopia jobs.
 | [004](../adr/004-notes-outside-git-offline-capture.md) | Notes outside Git, captured offline |
 | [005](../adr/005-navigation-parts-and-content.md) | Navigation: rail of parts, side bar for their content |
 | [006](../adr/006-todo-lists-outside-git-synced-operations.md) | To-do lists outside Git, synced as operations |
+| [007](../adr/007-say-who-can-see-it.md) | Every page says who can see it |
 
 ## 10. Quality Requirements
 

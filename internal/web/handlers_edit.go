@@ -41,8 +41,7 @@ func (s *Server) showLocked(w http.ResponseWriter, r *http.Request, pc pageCtx, 
 		return
 	}
 	pc.LockedBy = holder.Name
-	v := s.inSpace(s.newView(r, pc.Page.Meta.Title, pc), pc.Space.Slug, pc.Page.Meta.ID)
-	s.render(w, r, http.StatusOK, "page_view", v)
+	s.render(w, r, http.StatusOK, "page_view", s.pageView(r, pc))
 }
 
 // savePage stores the editor's text if the lock still holds. Scripts get

@@ -33,6 +33,8 @@ All notable changes to this project are documented here. The format follows
 - Offline capture: notes and photos wait on the device (IndexedDB) and upload when the network is back; a lost answer never creates a note twice; a signed-out device keeps its notes and offers to sign in.
 - Installable web app (manifest, own icon) whose home-screen icon opens the capture page.
 - To-do lists (ADR-006): flat lists with one level of sub-items, outside the Git history; ticked items stay in place and fade; overview by last change; the owner shares with people or groups, renames and deletes; ticking and editing work offline and sync when the network is back.
+- Every page says who can see it (ADR-007): spaces, pages and the space list name the people with access plus admins; notes say only you; to-do lists name their owner and shares.
+- To-do lists show progress: a bar with percent between the heading and the items; the overview shows a short bar per list, whose shape tells open, partly done and done apart, green when done.
 
 ### Security
 - GPS location is removed from JPEG photos on upload (notes and wiki pages); orientation and other EXIF data stay.

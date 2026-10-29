@@ -51,6 +51,9 @@ OIDC provider. It stores the name and e-mail address the provider sends, in
 `users/<id>.yaml` in the data directory, and writes them into the history as
 author of each change. Logs contain errors and request paths, no addresses.
 
+Every page says who can see it. "Visible only to you" means within Kanso:
+whoever runs the server can read the data directory.
+
 Notes are private to their author and are **not** kept in the Git history:
 deleting a note removes it for good (backups of the data directory may still
 hold it). A note written without network waits in the browser's storage on

@@ -103,13 +103,16 @@ test('a shared list: the other person ticks, only the owner deletes', async ({ b
   const name = unique('Einkauf Fest');
   await createList(anna, name);
   await addItem(anna, 'Kerzen');
+  await expect(anna.locator('.audience')).toHaveText('Nur für dich sichtbar');
   await anna.getByRole('link', { name: 'Teilen …' }).click();
   await anna.getByLabel('Wer').selectOption({ label: benName });
   await anna.getByRole('button', { name: 'Hinzufügen' }).click();
   await expect(anna.locator('.members')).toContainText(benName);
 
   await ben.goto('/todos');
-  await expect(ben.locator('.todo-lists li', { hasText: name })).toContainText('von Anna');
+  const row = ben.locator('.todo-lists li', { hasText: name });
+  await expect(row).toContainText('von Anna');
+  await expect(row.locator('.audience')).toHaveText('Sichtbar für Anna, dich');
   await ben.getByRole('link', { name }).click();
   await Promise.all([ben.waitForResponse('**/api/todos/sync'), ben.getByRole('checkbox', { name: 'Kerzen' }).check()]);
   await expect(ben.getByRole('link', { name: 'Liste löschen …' })).toHaveCount(0);
@@ -118,6 +121,7 @@ test('a shared list: the other person ticks, only the owner deletes', async ({ b
   await anna.goto('/todos');
   await anna.getByRole('link', { name }).click();
   await expect(anna.getByRole('checkbox', { name: 'Kerzen' })).toBeChecked();
+  await expect(anna.locator('.audience')).toHaveText(`Sichtbar für dich, ${benName}`);
   await anna.getByRole('link', { name: 'Liste löschen …' }).click();
   await anna.getByRole('button', { name: `„${name}“ löschen` }).click();
   await expect(anna).toHaveURL(/\/todos$/);
@@ -137,4 +141,36 @@ test('while an item is edited, a tap on a link or a checkbox still works', async
   await page.getByRole('button', { name: 'Eins' }).click();
   await page.getByRole('link', { name: 'Alle Listen' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Todos' })).toBeVisible();
+});
+
+test('progress: a bar with percent above the items, a short bar in the overview', async ({ page }) => {
+  await signIn(page, { sub: 'tilda', name: 'Tilda' });
+  const name = unique('Umzug');
+  await createList(page, name);
+  await expect(page.getByRole('progressbar')).toHaveCount(0); // nothing to measure yet
+  for (const t of ['Kartons', 'Ummelden', 'Schlüssel']) await addItem(page, t);
+
+  const bar = page.getByRole('progressbar', { name: 'Fortschritt' });
+  await expect(bar).toHaveAttribute('aria-valuenow', '0');
+  await page.getByRole('checkbox', { name: 'Kartons' }).check();
+  await expect(bar).toHaveAttribute('aria-valuenow', '33');
+  await expect(page.locator('.todo-progress')).toContainText('33 %');
+  // between the heading and the first item
+  const order = await page.evaluate(() => {
+    const y = (sel) => document.querySelector(sel).getBoundingClientRect().y;
+    return [y('h1'), y('.todo-progress'), y('.todo-item')];
+  });
+  expect(order[0]).toBeLessThan(order[1]);
+  expect(order[1]).toBeLessThan(order[2]);
+
+  await page.getByRole('link', { name: 'Alle Listen' }).click();
+  const row = page.locator('.todo-lists li', { hasText: name });
+  await expect(row.locator('.todo-meter')).toHaveAttribute('data-state', 'partial');
+  await expect(row).not.toContainText('%');
+
+  await row.getByRole('link', { name }).click();
+  for (const t of ['Ummelden', 'Schlüssel']) await page.getByRole('checkbox', { name: t }).check();
+  await expect(bar).toHaveAttribute('aria-valuenow', '100');
+  await page.getByRole('link', { name: 'Alle Listen' }).click();
+  await expect(row.locator('.todo-meter')).toHaveAttribute('data-state', 'full');
 });

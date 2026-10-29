@@ -1,5 +1,6 @@
 {{define "content"}}{{$d := .Data}}<div class="content">
 <h1>{{.T "notes.title"}}</h1>
+{{template "audience" .Audience}}
 {{if $d}}<ul class="list-plain notes">
 {{range $d}}<li><a href="/notes/{{.ID}}">{{.Title}}</a><br>
 <span class="meta"><time datetime="{{.Created.Format "2006-01-02T15:04:05Z07:00"}}">{{.Created.Format "02.01.2006 15:04"}}</time>{{if .Files}} · {{$.T "notes.attachments" .Files}}{{end}}</span></li>

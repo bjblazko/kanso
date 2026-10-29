@@ -259,9 +259,25 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
   }
 }
 
+/* Who can see this: one line under the heading or in a list row, everywhere. */
+.audience { display: flex; align-items: center; gap: var(--space-1); margin: var(--space-1) 0; }
+.audience .icon { width: 16px; height: 16px; vertical-align: 0; }
+
 /* To-do lists: ticked items stay in place and fade (0.62 keeps 4.5:1 contrast). */
 .todo-new .field, .todo-add .field { flex: 1; min-width: 12rem; }
 .todo-lists a { font-weight: 500; }
+/* Progress: one bar, its shape tells empty, partial and full apart; a finished list turns green. */
+.todo-meter {
+  display: block; height: var(--space-2); overflow: hidden;
+  border-radius: var(--radius-sm); background: var(--line);
+}
+.todo-meter-fill { display: block; height: 100%; background: var(--fg-2); transition: width var(--dur) var(--ease); }
+.todo-meter[data-state="full"] .todo-meter-fill { background: var(--confirm); }
+.todo-summary { display: inline-flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.todo-summary .todo-meter { width: var(--space-12); height: var(--space-1); flex: none; }
+.todo-progress { display: flex; align-items: center; gap: var(--space-3); margin: var(--space-2) 0 var(--space-1); }
+.todo-progress .todo-meter { flex: 1; }
+.todo-percent { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--fg-2); min-width: 4ch; text-align: right; }
 .todo-items { list-style: none; padding: 0; margin: var(--space-4) 0; }
 .todo-item {
   display: flex; flex-wrap: wrap; align-items: center; gap: 0 var(--space-1);

@@ -10,6 +10,7 @@
   <textarea id="note-body" name="body" placeholder="{{.T "notes.capture_placeholder"}}" spellcheck="true">{{$d.Body}}</textarea>
   <ul id="previews" class="previews list-plain" aria-label="{{.T "notes.photos"}}"></ul>
   {{if $d.Error}}<p class="notice notice-warning" role="alert">{{$d.Error}}</p>{{end}}
+  {{template "audience" .Audience}}
   <p id="capture-status" class="meta capture-status" role="status">{{if $d.Saved}}{{.T "notes.saved"}}{{end}}</p>
   <details id="outbox" class="outbox" hidden><summary>{{.T "notes.outbox"}}</summary><ul class="list-plain"></ul></details>
   <div class="capture-actions">

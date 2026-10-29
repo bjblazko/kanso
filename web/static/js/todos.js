@@ -13,6 +13,8 @@ const LIST_PATH = /^\/todos(?:\/([a-z2-7]{12}))?$/;
 const root = document.getElementById('todos');
 const status = document.getElementById('todos-status');
 const msg = JSON.parse(document.getElementById('todo-messages').textContent);
+const ME = root.dataset.sub;
+const ICONS = [...document.getElementById('todo-icons').content.children];
 const titleSuffix = document.title.slice(document.title.indexOf(' · '));
 
 const state = {
@@ -314,16 +316,52 @@ function overview(all) {
   return [h('h1', {}, msg.title), form, body];
 }
 
-function progress(l) {
+function counts(l) {
   const done = l.items.filter((it) => it.done).length;
-  const parts = [fill(msg.progress, { done, total: l.items.length })];
+  return { done, total: l.items.length, percent: l.items.length ? Math.floor((100 * done) / l.items.length) : 0 };
+}
+
+function progress(l) {
+  const parts = [fill(msg.progress, counts(l))];
   if (!l.mine) parts.push(fill(msg.from, { name: l.ownerName }));
-  else if (l.sharedNames.length) parts.push(fill(msg.shared_with, { names: l.sharedNames.join(', ') }));
   return parts.join(' · ');
 }
 
+// audience says who sees the list: its owner and everyone it is shared with,
+// the viewer as "you"; drawn like the server's line on the other pages.
+function audience(l) {
+  const you = (name, i) => (l.shared[i]?.user === ME ? msg.you : name);
+  const names = [l.mine ? msg.you : l.ownerName, ...l.sharedNames.map(you)];
+  const priv = names.length === 1;
+  const icon = ICONS[priv ? 0 : 1].cloneNode(true);
+  return h('p', { className: 'meta audience' }, icon,
+    h('span', {}, priv ? msg.only_you : fill(msg.visible_to, { names: names.join(', ') })));
+}
+
+// meter is a bar whose shape alone tells empty, partial and full apart; a
+// list without items has nothing to measure and gets none. Rounding down keeps
+// 100 for a list that is really done.
+function meter(l, attrs = {}) {
+  const { done, total, percent } = counts(l);
+  if (!total) return null;
+  const state = done === 0 ? 'empty' : (done === total ? 'full' : 'partial');
+  const bar = h('span', { className: 'todo-meter-fill' });
+  bar.style.width = `${percent}%`;
+  return h('span', { className: 'todo-meter', 'data-state': state, ...attrs }, bar);
+}
+
 function listRow(l) {
-  return h('li', {}, h('a', { href: `/todos/${l.id}` }, l.name), h('br'), h('span', { className: 'meta' }, progress(l)));
+  return h('li', {}, h('a', { href: `/todos/${l.id}` }, l.name), h('br'),
+    h('span', { className: 'meta todo-summary' }, meter(l, { 'aria-hidden': 'true' }), progress(l)), audience(l));
+}
+
+// listProgress is the bar with its percentage between heading and items.
+function listProgress(l) {
+  const { percent } = counts(l);
+  const bar = meter(l, { role: 'progressbar', 'aria-label': msg.progress_label,
+    'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': percent });
+  if (!bar) return null;
+  return h('div', { className: 'todo-progress' }, bar, h('span', { className: 'todo-percent' }, fill(msg.percent, { n: percent })));
 }
 
 async function createList(event) {
@@ -342,7 +380,7 @@ async function createList(event) {
 function listPage(l) {
   const back = h('p', { className: 'breadcrumb' }, h('a', { href: '/todos' }, msg.all));
   if (!l) return [back, state.loaded ? h('p', { className: 'empty' }, msg.not_found) : ''];
-  return [back, heading(l), h('p', { className: 'meta' }, progress(l)),
+  return [back, heading(l), listProgress(l), h('p', { className: 'meta' }, progress(l)), audience(l),
     h('ul', { className: 'todo-items' }, rows(l)), addForm(l), l.mine ? ownerActions(l) : ''];
 }
 

@@ -29,6 +29,8 @@ type view struct {
 	Here  string // slug of the current space, for aria-current
 	Page  string // id of the current page, for aria-current
 	Tree  []*wiki.Node
+	// Audience says who can see what the page shows; nil where that is not one thing.
+	Audience *audience
 	// Module is the part of Kanso the page belongs to ("notes", "todos", "wiki"), "" for
 	// pages outside all parts (search, administration, licenses).
 	Module string
