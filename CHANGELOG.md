@@ -50,6 +50,7 @@ All notable changes to this project are documented here. The format follows
 - The Markdown editor serves pages and notes; it reads its URLs from the form.
 
 ### Fixed
+- Signing in failed with "Bad Request" when a second login started meanwhile (the service worker refreshing a page while signed out); each login now keeps its own cookie.
 - Creating a group named as people write it ("Familie", "Großeltern") failed with a bare "Bad Request"; such names are allowed now, and a refused change says why on the page. Failures to save are logged and answered as server errors.
 - Sub-items of task lists keep their indent.
 - Phones: the bottom bar no longer jumps while Safari's toolbar shows or hides; page heights use `svh`.
