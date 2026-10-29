@@ -236,3 +236,36 @@ func TestDevLoginEndsPreviousSession(t *testing.T) {
 		t.Error("old session still valid after switching person")
 	}
 }
+
+// A second login started meanwhile (a service worker refreshing a page, a
+// second tab) must not break the first: each login keeps its own cookie.
+func TestLaterLoginKeepsEarlierOne(t *testing.T) {
+	f := newFakeIdP(t)
+	p, err := Discover(context.Background(), f.srv.URL, "kanso", "secret", base+"/auth/callback", f.srv.Client())
+	if err != nil {
+		t.Fatal(err)
+	}
+	h := protected(newAuth(t, false, p))
+	jar := map[string]*http.Cookie{} // like a browser: a cookie replaces one of the same name
+	start := func(next string) url.Values {
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, httptest.NewRequest("GET", "/auth/login?next="+next, nil))
+		for _, c := range rec.Result().Cookies() {
+			jar[c.Name] = c
+		}
+		loc, _ := url.Parse(rec.Header().Get("Location"))
+		return loc.Query()
+	}
+	first := start("/s/haus")
+	start("/todos")
+	f.nonce = first.Get("nonce")
+	req := httptest.NewRequest("GET", "/auth/callback?code=good-code&state="+first.Get("state"), nil)
+	for _, c := range jar {
+		req.AddCookie(c)
+	}
+	rec := httptest.NewRecorder()
+	h.ServeHTTP(rec, req)
+	if rec.Code != http.StatusSeeOther || rec.Header().Get("Location") != "/s/haus" {
+		t.Fatalf("callback: %d %q", rec.Code, rec.Header().Get("Location"))
+	}
+}

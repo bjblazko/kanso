@@ -10,6 +10,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -156,17 +157,18 @@ type pendingLogin struct {
 func (a *Auth) login(w http.ResponseWriter, r *http.Request) {
 	pl := pendingLogin{AuthRequest: NewAuthRequest(), Next: safeNext(r.URL.Query().Get("next"))}
 	b, _ := json.Marshal(pl)
-	a.setCookie(w, authCookie, a.signer.sign(base64.RawURLEncoding.EncodeToString(b)), authCookieTTL)
+	a.setCookie(w, pendingCookie(pl.State), a.signer.sign(base64.RawURLEncoding.EncodeToString(b)), authCookieTTL)
 	http.Redirect(w, r, a.provider.AuthURL(pl.AuthRequest), http.StatusSeeOther)
 }
 
 func (a *Auth) callback(w http.ResponseWriter, r *http.Request) {
-	pl, ok := a.readPending(r)
-	if !ok || r.URL.Query().Get("state") != pl.State {
+	state := r.URL.Query().Get("state")
+	pl, ok := a.readPending(r, state)
+	if !ok || state != pl.State {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
-	a.setCookie(w, authCookie, "", -1)
+	a.setCookie(w, pendingCookie(state), "", -1)
 	claims, err := a.provider.Exchange(r.Context(), r.URL.Query().Get("code"), pl.AuthRequest)
 	if err != nil {
 		http.Error(w, "Sign-in failed", http.StatusBadGateway)
@@ -175,9 +177,19 @@ func (a *Auth) callback(w http.ResponseWriter, r *http.Request) {
 	a.startSession(w, r, claims, pl.Next)
 }
 
-func (a *Auth) readPending(r *http.Request) (pendingLogin, bool) {
+// pendingCookie names the cookie of one login. Each login has its own, so a
+// login started meanwhile (a service worker refreshing a page, a second tab)
+// does not replace the first one's.
+func pendingCookie(state string) string { return authCookie + "_" + state }
+
+var statePattern = regexp.MustCompile(`^[A-Za-z0-9_-]{1,64}$`)
+
+func (a *Auth) readPending(r *http.Request, state string) (pendingLogin, bool) {
 	var pl pendingLogin
-	c, err := r.Cookie(authCookie)
+	if !statePattern.MatchString(state) {
+		return pl, false
+	}
+	c, err := r.Cookie(pendingCookie(state))
 	if err != nil {
 		return pl, false
 	}
