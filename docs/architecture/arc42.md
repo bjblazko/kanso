@@ -40,8 +40,10 @@ flowchart LR
   K -. later: CalDAV / ICS .-> E[External calendars]
 ```
 
-Kanso talks to Authelia (login) and, in later phases, to browser push
-services and external calendars. Nothing else leaves the host.
+Kanso talks to Authelia (login), to the address of a profile picture
+Authelia names (fetched once per sign-in, HTTPS only, at most 1 MiB) and, in
+later phases, to browser push services and external calendars. Nothing else
+leaves the host.
 
 ## 4. Solution Strategy
 
@@ -82,7 +84,9 @@ Later phases add `tasks`, `lists`, `calendar`, `push`.
 
 **Login:** browser → `/auth/login` → Authelia (code + PKCE) →
 `/auth/callback` → Kanso verifies the ID token, creates or updates the user
-profile and a session; membership in `kanso-admin` sets the admin flag.
+profile and a session; membership in `kanso-admin` sets the admin flag. In
+the background it copies the profile picture, if the ID token names one, to
+`avatars/<sub>` (no picture: the copy is removed).
 
 **Saving a page:** the editor holds a lock (heartbeat every 60 s). Saving
 checks the lock token, writes `index.md` atomically, commits it with the

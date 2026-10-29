@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { test, expect } from '@playwright/test';
-import { signIn } from './helpers.js';
+import { signIn, unique } from './helpers.js';
 
 test('sign in shows the start page in German', async ({ page }) => {
   await signIn(page);
@@ -10,9 +10,8 @@ test('sign in shows the start page in German', async ({ page }) => {
 
 test('language can be switched to English', async ({ page }) => {
   await signIn(page, { sub: 'ben', name: 'Ben' });
-  await page.getByText('Ben', { exact: true }).click();
-  await page.getByLabel('Sprache').selectOption('en');
-  await page.getByRole('button', { name: 'Übernehmen' }).click();
+  await page.getByLabel('Menü von Ben').click();
+  await page.getByRole('button', { name: 'English' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Wiki spaces' })).toBeVisible();
 });
 
@@ -88,4 +87,32 @@ test('the save button stays visible with a photo attached', async ({ page, isMob
   const rail = await page.locator('.rail').boundingBox();
   const bottom = isMobile ? rail.y : page.viewportSize().height; // phones: the bar sits at the bottom
   expect(save.y + save.height).toBeLessThanOrEqual(bottom);
+});
+
+test('groups: an admin creates one as people write it, adds and removes people, deletes it', async ({ page }) => {
+  const gerd = unique('Gerd');
+  await signIn(page, { sub: 'gerd', name: gerd }); // someone to add
+  await page.context().clearCookies();
+  await signIn(page, { sub: 'hilde', name: 'Hilde', admin: true });
+  await page.getByLabel('Menü von Hilde').click();
+  await page.getByRole('link', { name: 'Gruppen verwalten' }).click();
+  const name = unique('Großeltern');
+  await page.getByLabel('Name der Gruppe').fill(name);
+  await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+  const group = page.locator('section.group', { has: page.getByRole('heading', { name }) });
+  await expect(group).toContainText('Noch keine Mitglieder.');
+
+  await group.getByLabel('Person').selectOption({ label: gerd });
+  await group.getByRole('button', { name: 'Hinzufügen' }).click();
+  await expect(group.locator('.members')).toContainText(gerd);
+  await group.getByRole('button', { name: `${gerd} aus der Gruppe entfernen` }).click();
+  await expect(group).toContainText('Noch keine Mitglieder.');
+
+  await page.getByLabel('Name der Gruppe').fill(name);
+  await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+  await expect(page.getByRole('alert')).toHaveText('Diese Gruppe gibt es schon.');
+
+  await group.getByText('Löschen …').click();
+  await group.getByRole('button', { name: `Gruppe „${name}“ löschen` }).click();
+  await expect(page.getByRole('heading', { name })).toHaveCount(0);
 });

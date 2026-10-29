@@ -42,6 +42,11 @@ links with `aria-current`, actions are framed buttons.
   action; a framed edit button in every row would double the list's noise.
   Ticked items fade to 0.62 opacity, which keeps their text at 4.5:1.
 
+- **Account entry:** the picture (or a round placeholder) and the name open
+  the account menu, without a frame, as on every platform; it gets the hover
+  overlay and the focus ring. Inside, the language is a segmented control of
+  two submit buttons, so no "Apply" is needed.
+
 - **Icons:** Lucide is not used (every dependency needs approval). Kanso
   draws its few icons itself, in the same style: line icons, 1.5 px stroke at
   24 px, round caps and joins, `currentColor`.

@@ -128,6 +128,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /{$}", s.home)
 	mux.HandleFunc("GET /about/licenses", s.showLicenses)
 	mux.HandleFunc("POST /me/lang", s.setLang)
+	mux.HandleFunc("GET /avatar/{sub}", s.avatar)
 	mux.HandleFunc("GET /search", s.search)
 	mux.HandleFunc("GET /s/{space}", s.showSpace)
 	mux.HandleFunc("GET /s/{space}/settings", s.spaceSettings)

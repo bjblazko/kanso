@@ -43,6 +43,18 @@ func (s *Server) setLang(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, safeReferer(r), http.StatusSeeOther)
 }
 
+// avatar serves a person's picture to everyone signed in.
+func (s *Server) avatar(w http.ResponseWriter, r *http.Request) {
+	b, typ, ok := s.Users.Avatar(r.PathValue("sub"))
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", typ)
+	w.Header().Set("Cache-Control", "private, max-age=604800") // the URL changes with the picture
+	_, _ = w.Write(b)
+}
+
 // safeReferer returns the path of the referring page on this site, or "/".
 func safeReferer(r *http.Request) string {
 	ref, err := r.URL.Parse(r.Header.Get("Referer"))

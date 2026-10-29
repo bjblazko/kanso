@@ -47,7 +47,10 @@ Architecture: [docs/architecture/arc42.md](docs/architecture/arc42.md).
 ## Privacy
 
 Kanso sends no telemetry and checks for no updates. It talks only to your
-OIDC provider. It stores the name and e-mail address the provider sends, in
+OIDC provider and, if the provider names a profile picture (`picture`), to
+the address of that picture: Kanso fetches it once per sign-in over HTTPS and
+serves its copy (in `avatars/`, outside the history), so browsers never load
+it from elsewhere. It stores the name and e-mail address the provider sends, in
 `users/<id>.yaml` in the data directory, and writes them into the history as
 author of each change. Logs contain errors and request paths, no addresses.
 

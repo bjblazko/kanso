@@ -64,7 +64,7 @@ func NewStore(dataDir string, repo *store.Repo) (*Store, error) {
 		}
 		s.users[u.Sub] = u
 	}
-	return s, nil
+	return s, repo.Ignore(avatarDir, "Profilbilder vom Verlauf ausgenommen")
 }
 
 // Upsert stores a signed-in user, keeping their chosen language.

@@ -1,5 +1,7 @@
 {{/* audience says who can see what a page shows; see view.Audience. */}}
 {{define "audience"}}{{with .}}<p class="meta audience">{{if .Private}}{{template "icon" "lock"}}{{else}}{{template "icon" "users"}}{{end}}<span>{{.Text}}</span></p>{{end}}{{end}}
+{{/* avatar is the person's picture, round, or a placeholder until there is one. */}}
+{{define "avatar"}}{{if .AvatarVersion}}<img class="avatar" src="/avatar/{{.User.Sub}}?v={{.AvatarVersion}}" alt="">{{else}}<span class="avatar avatar-none">{{template "icon" "user"}}</span>{{end}}{{end}}
 {{define "layout"}}<!doctype html>
 <html lang="{{.Lang}}">
 <head>
@@ -24,24 +26,24 @@
     <input id="q" name="q" type="search" placeholder="{{.T "nav.search"}} …" value="{{.Query}}">
   </form>
   <details class="usermenu">
-    <summary class="btn btn-quiet btn-sm">{{.User.Name}}</summary>
+    <summary class="usermenu-button" aria-label="{{.T "user.menu" .User.Name}}">{{template "avatar" .}}<span class="usermenu-name">{{.User.Name}}</span></summary>
     <div class="menu">
-      <form method="post" action="/me/lang">
+      <div class="menu-who">{{template "avatar" .}}<div><strong>{{.User.Name}}</strong>{{if .User.Email}}<br><span class="meta">{{.User.Email}}</span>{{end}}</div></div>
+      <form class="menu-row" method="post" action="/me/lang">
         <input type="hidden" name="csrf" value="{{.CSRF}}">
-        <div class="field">
-          <label for="lang">{{.T "user.language"}}</label>
-          <select id="lang" name="lang" class="btn btn-secondary">
-            <option value="de"{{if eq .Lang "de"}} selected{{end}}>Deutsch</option>
-            <option value="en"{{if eq .Lang "en"}} selected{{end}}>English</option>
-          </select>
+        <span class="menu-label" id="lang-label">{{template "icon" "globe"}}{{.T "user.language"}}</span>
+        <div class="seg seg-sm" role="group" aria-labelledby="lang-label">
+          <button type="submit" name="lang" value="de" aria-pressed="{{eq .Lang "de"}}">Deutsch</button>
+          <button type="submit" name="lang" value="en" aria-pressed="{{eq .Lang "en"}}">English</button>
         </div>
-        <button class="btn btn-secondary" type="submit">{{.T "user.apply"}}</button>
       </form>
-      {{if .Admin}}<a class="btn btn-secondary" href="/admin/groups">{{.T "user.groups"}}</a>{{end}}
-      {{if .Dev}}<a class="btn btn-secondary" href="/auth/dev?next={{.Path}}">{{.T "user.switch"}}</a>{{end}}
-      <form method="post" action="/auth/logout">
+      {{if or .Admin .Dev}}<ul class="navlist menu-links">
+        {{if .Admin}}<li><a href="/admin/groups">{{template "icon" "users"}}<span>{{.T "user.groups"}}</span></a></li>{{end}}
+        {{if .Dev}}<li><a href="/auth/dev?next={{.Path}}">{{template "icon" "switch"}}<span>{{.T "user.switch"}}</span></a></li>{{end}}
+      </ul>{{end}}
+      <form class="menu-end" method="post" action="/auth/logout">
         <input type="hidden" name="csrf" value="{{.CSRF}}">
-        <button class="btn btn-quiet" type="submit">{{.T "user.logout"}}</button>
+        <button class="btn btn-secondary btn-sm" type="submit">{{template "icon" "logout"}}{{.T "user.logout"}}</button>
       </form>
     </div>
   </details>

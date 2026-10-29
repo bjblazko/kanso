@@ -31,6 +31,8 @@ type view struct {
 	Tree  []*wiki.Node
 	// Audience says who can see what the page shows; nil where that is not one thing.
 	Audience *audience
+	// AvatarVersion names the signed-in person's picture; "" means a placeholder.
+	AvatarVersion string
 	// Module is the part of Kanso the page belongs to ("notes", "todos", "wiki"), "" for
 	// pages outside all parts (search, administration, licenses).
 	Module string
@@ -54,7 +56,8 @@ func (s *Server) newView(r *http.Request, title string, data any) view {
 		User: u, CSRF: auth.CSRFToken(r.Context()), Query: r.URL.Query().Get("q"), Data: data,
 		Admin: p.Admin, Nav: s.Spaces.Visible(p, s.groups()),
 		Module: moduleOf(r.URL.Path), Dev: s.Cfg.DevLogin, Path: r.URL.RequestURI(),
-		bundle: s.I18n, version: s.version,
+		AvatarVersion: s.Users.AvatarVersion(u.Sub),
+		bundle:        s.I18n, version: s.version,
 	}
 }
 

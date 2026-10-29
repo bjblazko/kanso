@@ -24,17 +24,42 @@ p { margin: 0 0 var(--space-4); }
   border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
   background: var(--bg); color: var(--fg); font: inherit;
 }
+/* Account menu: picture (or placeholder) and name open it; inside, who you
+   are, the language, the admin pages, signing out. */
 .usermenu { position: relative; margin-left: auto; }
 .usermenu summary { list-style: none; cursor: pointer; }
 .usermenu summary::-webkit-details-marker { display: none; }
+.usermenu-button {
+  display: flex; align-items: center; gap: var(--space-2);
+  min-height: var(--target-min); padding: 0 var(--space-2) 0 var(--space-1);
+  border-radius: var(--radius-full); color: var(--fg); font-weight: 500;
+}
+.usermenu-button:hover, .usermenu[open] .usermenu-button { background: var(--hover-overlay); }
+.usermenu-button:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+.usermenu-name { max-width: 9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.avatar {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 2rem; height: 2rem; border-radius: 50%; object-fit: cover;
+}
+.avatar-none { background: var(--bg-3); color: var(--fg-2); }
+.avatar-none .icon { width: 18px; height: 18px; vertical-align: 0; }
 .usermenu .menu {
   position: absolute; right: 0; top: calc(100% + var(--space-2)); z-index: 10;
-  display: flex; flex-direction: column; gap: var(--space-3);
-  min-width: 14rem; padding: var(--space-4);
+  display: flex; flex-direction: column;
+  width: min(18rem, calc(100vw - 2 * var(--space-4))); padding: var(--space-2) 0;
   background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-lg);
   box-shadow: var(--shadow-float);
 }
-.usermenu form { display: flex; gap: var(--space-2); align-items: end; }
+.menu > * { padding: var(--space-3) var(--space-4); }
+.menu > * + * { border-top: 1px solid var(--line); }
+.menu-who { display: flex; align-items: center; gap: var(--space-3); min-width: 0; }
+.menu-who .avatar { width: 2.5rem; height: 2.5rem; }
+.menu-who .avatar-none .icon { width: 22px; height: 22px; }
+.menu-who > div { min-width: 0; overflow-wrap: anywhere; }
+.menu-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+.menu-label { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--fg-2); }
+.menu-links.navlist { padding: var(--space-2); }
+.menu-end .btn { display: inline-flex; align-items: center; gap: var(--space-2); }
 
 .shell { display: grid; grid-template-columns: 1fr; grid-template-rows: 1fr; min-height: calc(100svh - var(--space-12)); }
 .shell-wiki { grid-template-rows: auto 1fr; }
@@ -258,6 +283,14 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
     color: var(--fg-3); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
   }
 }
+
+/* Groups: one section per group, separated by a hairline. */
+.group-new { align-items: start; }
+.group-new .field { flex: 1; min-width: 12rem; }
+.group-new .btn { margin-top: calc(var(--text-sm) * 1.4 + var(--space-1)); }
+.group { margin-top: var(--space-8); padding-top: var(--space-6); border-top: 1px solid var(--line); }
+.group h2 { display: flex; align-items: center; gap: var(--space-2); margin-top: 0; }
+.group-delete .btn { margin-top: var(--space-2); }
 
 /* Who can see this: one line under the heading or in a list row, everywhere. */
 .audience { display: flex; align-items: center; gap: var(--space-1); margin: var(--space-1) 0; }

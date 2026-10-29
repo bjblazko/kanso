@@ -33,6 +33,8 @@ All notable changes to this project are documented here. The format follows
 - Offline capture: notes and photos wait on the device (IndexedDB) and upload when the network is back; a lost answer never creates a note twice; a signed-out device keeps its notes and offers to sign in.
 - Installable web app (manifest, own icon) whose home-screen icon opens the capture page.
 - To-do lists (ADR-006): flat lists with one level of sub-items, outside the Git history; ticked items stay in place and fade; overview by last change; the owner shares with people or groups, renames and deletes; ticking and editing work offline and sync when the network is back.
+- Account menu: your picture (round) or a placeholder with your name opens it; inside, who you are, language as two buttons (no "Apply"), group management and signing out, each with an icon. A profile picture named by the sign-in (`picture`, Authelia 4.39 can send it) is copied once per sign-in and served by Kanso.
+- Groups can be deleted; members who were never signed in are listed by their id.
 - Every page says who can see it (ADR-007): spaces, pages and the space list name the people with access plus admins; notes say only you; to-do lists name their owner and shares.
 - To-do lists show progress: a bar with percent between the heading and the items; the overview shows a short bar per list, whose shape tells open, partly done and done apart, green when done.
 
@@ -48,6 +50,7 @@ All notable changes to this project are documented here. The format follows
 - The Markdown editor serves pages and notes; it reads its URLs from the form.
 
 ### Fixed
+- Creating a group named as people write it ("Familie", "Großeltern") failed with a bare "Bad Request"; such names are allowed now, and a refused change says why on the page. Failures to save are logged and answered as server errors.
 - Sub-items of task lists keep their indent.
 - Phones: the bottom bar no longer jumps while Safari's toolbar shows or hides; page heights use `svh`.
 - Task lists with blank lines between items no longer show bullets next to the checkboxes.

@@ -103,6 +103,8 @@ type Claims struct {
 	Name   string   `json:"name"`
 	Email  string   `json:"email"`
 	Groups []string `json:"groups"`
+	// Picture is the URL of a profile picture, if the provider has one.
+	Picture string `json:"picture"`
 }
 
 // Exchange trades the code for tokens and returns the verified claims.

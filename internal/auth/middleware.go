@@ -7,6 +7,7 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -194,6 +195,7 @@ func (a *Auth) startSession(w http.ResponseWriter, r *http.Request, c Claims, ne
 		http.Error(w, "Sign-in failed", http.StatusInternalServerError)
 		return
 	}
+	go a.syncAvatar(u.Sub, c.Picture)
 	admin := false
 	for _, g := range c.Groups {
 		admin = admin || g == a.cfg.AdminGroup
@@ -202,6 +204,16 @@ func (a *Auth) startSession(w http.ResponseWriter, r *http.Request, c Claims, ne
 	a.setCookie(w, sessionCookie, s.ID, sessionTTL)
 	http.Redirect(w, r, safeNext(next), http.StatusSeeOther)
 }
+
+// syncAvatar copies the sign-in's picture in the background: a slow picture
+// host must not hold up the sign-in.
+func (a *Auth) syncAvatar(sub, picture string) {
+	if err := a.users.SyncAvatar(context.Background(), avatarClient, sub, picture); err != nil {
+		slog.Warn("profile picture", "sub", sub, "err", err)
+	}
+}
+
+var avatarClient = &http.Client{Timeout: 15 * time.Second}
 
 func (a *Auth) logout(w http.ResponseWriter, r *http.Request) {
 	ru, _ := r.Context().Value(ctxKey{}).(requestUser)
