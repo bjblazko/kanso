@@ -1,4 +1,4 @@
-{{define "content"}}{{$d := .Data}}<div class="board-page" data-board="{{$d.Board.ID}}" data-view="{{$d.View}}">
+{{define "content"}}{{$d := .Data}}<div class="board-page" data-board="{{$d.Board.ID}}" data-view="{{$d.View}}" data-msg-move-failed="{{.T "tasks.move_failed"}}" data-msg-move-gone="{{.T "tasks.move_gone"}}">
 <h1>{{$d.Name}}</h1>
 {{template "audience" .Audience}}
 {{if gt (len $d.Tabs) 1}}<nav class="board-switch" aria-label="{{.T "tasks.boards"}}"><ul class="tabs">
@@ -22,7 +22,7 @@
 </section>{{end}}
 </div>{{end}}
 </div>{{end}}
-{{define "card"}}{{$c := .Card}}{{$t := $c.Task}}<li class="card" data-task="{{$t.Meta.ID}}">
+{{define "card"}}{{$c := .Card}}{{$t := $c.Task}}<li class="card" draggable="true" data-task="{{$t.Meta.ID}}">
   <a class="card-title" href="/tasks/b/{{$t.Board}}/{{$t.Meta.ID}}">{{$t.Meta.Title}}</a>
   {{if or $t.Meta.Urgent $t.Meta.Important}}<span class="card-marks">{{if $t.Meta.Urgent}}<abbr title="{{.V.T "tasks.urgent"}}">{{.V.T "tasks.mark_urgent"}}<span class="visually-hidden"> {{.V.T "tasks.urgent"}}</span></abbr>{{end}}{{if $t.Meta.Important}}<abbr title="{{.V.T "tasks.important"}}">{{.V.T "tasks.mark_important"}}<span class="visually-hidden"> {{.V.T "tasks.important"}}</span></abbr>{{end}}</span>{{end}}
   {{if or $c.DueText $c.Claimed (and (eq (print $t.Meta.Status) "waiting") $t.Meta.WaitingFor)}}<p class="meta card-meta">
@@ -30,3 +30,4 @@
     {{- if and (eq (print $t.Meta.Status) "waiting") $t.Meta.WaitingFor}}<span>{{.V.T "tasks.waiting_for" $t.Meta.WaitingFor}}</span>{{end}}
     {{- if $c.Claimed}}<span>{{$c.Claimed}}</span>{{end}}</p>{{end}}
 </li>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/board.js"}}"></script>{{end}}

@@ -203,3 +203,31 @@ func (s *Server) taskPreview(w http.ResponseWriter, r *http.Request) {
 	}
 	s.writePreview(w, r.PostFormValue("body"), markdown.PageCtx{Base: taskPath(t)})
 }
+
+// moveTask is what dragging a card does: a new column (status) or a new
+// quadrant (urgent and important). It changes one field and always wins.
+func (s *Server) moveTask(w http.ResponseWriter, r *http.Request) {
+	a, board, id := s.actor(r), r.PathValue("board"), r.PathValue("task")
+	if err := r.ParseForm(); err != nil {
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid"})
+		return
+	}
+	var t tasks.Task
+	err := tasks.ErrInvalid
+	switch {
+	case r.PostForm.Has("status"):
+		t, err = s.Tasks.SetStatus(a, board, id, tasks.Status(r.PostFormValue("status")))
+	case r.PostForm.Has("urgent") && r.PostForm.Has("important"):
+		t, err = s.Tasks.SetQuadrant(a, board, id, r.PostFormValue("urgent") == "1", r.PostFormValue("important") == "1")
+	}
+	switch {
+	case errors.Is(err, tasks.ErrNotFound):
+		writeJSON(w, http.StatusNotFound, map[string]string{"error": "gone"})
+	case errors.Is(err, tasks.ErrInvalid):
+		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid"})
+	case err != nil:
+		s.serverError(w, r, err)
+	default:
+		writeJSON(w, http.StatusOK, map[string]any{"status": t.Meta.Status, "urgent": t.Meta.Urgent, "important": t.Meta.Important})
+	}
+}

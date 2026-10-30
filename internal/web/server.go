@@ -182,6 +182,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /tasks/b/{board}/{task}/edit", s.editTask)
 	mux.HandleFunc("POST /tasks/b/{board}/{task}", s.saveTask)
 	mux.HandleFunc("POST /tasks/b/{board}/{task}/claim", s.claimTask)
+	mux.HandleFunc("POST /tasks/b/{board}/{task}/move", s.moveTask)
 	mux.HandleFunc("GET /tasks/b/{board}/{task}/delete", s.confirmDeleteTask)
 	mux.HandleFunc("POST /tasks/b/{board}/{task}/delete", s.deleteTask)
 	mux.HandleFunc("GET /admin/spaces/new", s.newSpaceForm)

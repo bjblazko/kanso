@@ -51,3 +51,27 @@ test.describe('offline', () => {
     await expect(card(page, 'open', title)).toBeVisible();
   });
 });
+
+test.describe('desktop', () => {
+  test.skip(({ isMobile }) => isMobile, 'dragging: desktop only');
+
+  test('drag in Kanban and Matrix shows the same task', async ({ page }) => {
+    await signIn(page, { sub: 'dora', name: 'Dora' });
+    await page.goto('/tasks/new');
+    const title = unique('Lohnsteuer');
+    await capture(page, title);
+    await expect(page.getByRole('status')).toHaveText('Gespeichert in Mein Board');
+    await page.getByRole('link', { name: 'Zum Board' }).click();
+
+    await card(page, 'open', title).dragTo(page.locator('.board-col[data-key="doing"]'));
+    await expect(card(page, 'doing', title)).toBeVisible();
+    await page.reload();
+    await expect(card(page, 'doing', title)).toBeVisible();
+
+    await page.getByRole('link', { name: 'Matrix' }).click();
+    await card(page, 'later', title).dragTo(page.locator('.board-col[data-key="do_now"]'));
+    await expect(card(page, 'do_now', title)).toBeVisible();
+    await page.getByRole('link', { name: 'Kanban' }).click();
+    await expect(card(page, 'doing', title).locator('abbr')).toHaveCount(2);
+  });
+});

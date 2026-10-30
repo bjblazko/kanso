@@ -240,3 +240,93 @@ func TestTaskPreview(t *testing.T) {
 		t.Fatalf("foreign preview: %d", resp.StatusCode)
 	}
 }
+
+func moveTask(t *testing.T, ts *testServer, c *http.Client, tk tasks.Task, f url.Values) (*http.Response, string) {
+	t.Helper()
+	return postTaskForm(t, ts, c, taskURL(tk)+"/move", f, "application/json")
+}
+
+func TestMoveStatus(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	tk := addTask(t, ts, "anna", tasks.New{Title: "Hof fegen"})
+	resp, body := moveTask(t, ts, anna, tk, url.Values{"status": {"done"}})
+	if resp.StatusCode != http.StatusOK || !strings.Contains(body, `"status":"done"`) {
+		t.Fatalf("%d %s", resp.StatusCode, body)
+	}
+	got, _ := ts.deps.Tasks.Get(taskActor(ts, "anna"), tk.Board, tk.Meta.ID)
+	if got.Meta.Status != tasks.Done || got.Meta.DoneAt == nil {
+		t.Fatalf("%+v", got.Meta)
+	}
+	out, _ := exec.Command("git", "-C", ts.deps.Cfg.DataDir, "log", "-1", "--format=%s").Output()
+	if !strings.Contains(string(out), "→ done") {
+		t.Fatalf("commit %q", out)
+	}
+}
+
+func TestMoveQuadrant(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	tk := addTask(t, ts, "anna", tasks.New{Title: "Lohnsteuer"})
+	resp, body := moveTask(t, ts, anna, tk, url.Values{"urgent": {"1"}, "important": {"1"}})
+	if resp.StatusCode != http.StatusOK || !strings.Contains(body, `"urgent":true`) {
+		t.Fatalf("%d %s", resp.StatusCode, body)
+	}
+	got, _ := ts.deps.Tasks.Get(taskActor(ts, "anna"), tk.Board, tk.Meta.ID)
+	if !got.Meta.Urgent || !got.Meta.Important {
+		t.Fatalf("%+v", got.Meta)
+	}
+}
+
+func TestMoveGoneTask(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	tk := addTask(t, ts, "anna", tasks.New{Title: "Hof fegen"})
+	if err := ts.deps.Tasks.Delete(taskActor(ts, "anna"), tk.Board, tk.Meta.ID); err != nil {
+		t.Fatal(err)
+	}
+	if resp, _ := moveTask(t, ts, anna, tk, url.Values{"status": {"done"}}); resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	if _, err := ts.deps.Tasks.Get(taskActor(ts, "anna"), tk.Board, tk.Meta.ID); err == nil {
+		t.Fatal("task came back")
+	}
+}
+
+func TestMoveBadValue(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	tk := addTask(t, ts, "anna", tasks.New{Title: "Hof fegen"})
+	for _, f := range []url.Values{{"status": {"later"}}, {}} {
+		if resp, _ := moveTask(t, ts, anna, tk, f); resp.StatusCode != http.StatusBadRequest {
+			t.Errorf("%v: %d", f, resp.StatusCode)
+		}
+	}
+}
+
+func TestMoveNeedsCSRF(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	tk := addTask(t, ts, "anna", tasks.New{Title: "Hof fegen"})
+	req, _ := http.NewRequest("POST", ts.URL+taskURL(tk)+"/move", strings.NewReader("status=done"))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Origin", ts.URL)
+	resp, err := anna.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_ = resp.Body.Close()
+	if resp.StatusCode != http.StatusForbidden {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+}
+
+func TestBoardCardsAreDraggable(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	tk := addTask(t, ts, "anna", tasks.New{Title: "Hof fegen"})
+	_, body := get(t, anna, ts.URL+"/tasks/b/"+tk.Board)
+	if !strings.Contains(body, `draggable="true"`) || !strings.Contains(body, "js/board.js") {
+		t.Fatalf("board not draggable:\n%s", body)
+	}
+}
