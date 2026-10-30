@@ -132,6 +132,11 @@ and the members of the page and its ancestors (from the in-memory index).
 Someone without a space role gets the space's tree cut down to the subtrees
 shared with them, listed under "Für dich freigegeben".
 
+**Moving a page to another space:** `git mv` of its folder into the other
+space's pages, one commit; the index and the search index learn the new space
+for the page and its subpages. Refused while someone holds an edit lock on
+any of them; asks first when the readers change.
+
 **Note → wiki page:** the note's folder is moved into the space below the
 chosen page, gets a fresh page id and frontmatter, and is committed as a
 whole (text and photos).

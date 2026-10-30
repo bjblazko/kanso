@@ -73,7 +73,7 @@ func New(d Deps) (*Server, error) {
 }
 
 var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search",
-	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote", "todos", "todo_share", "todo_delete", "tasks_board", "task_view", "task_edit", "task_delete", "task_new", "admin_boards", "note_task", "page_share"}
+	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote", "todos", "todo_share", "todo_delete", "tasks_board", "task_view", "task_edit", "task_delete", "task_new", "admin_boards", "note_task", "page_share", "page_move_confirm"}
 
 func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}

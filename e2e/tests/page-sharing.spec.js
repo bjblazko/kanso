@@ -35,3 +35,27 @@ test('a page shared on its own: the other person finds it and nothing else of th
   await expect(page.getByText('Geheim')).toHaveCount(0);
   await expect(page.getByRole('link', { name: space })).toHaveCount(0);
 });
+
+test('a page moves to another space, after saying who will see it then', async ({ page }) => {
+  await signIn(page, { sub: 'mo', name: 'Mo', admin: true });
+  const from = unique('Haus alt');
+  const to = unique('Keller neu');
+  await createSpace(page, to);
+  await createSpace(page, from);
+  await page.getByRole('link', { name: 'Einstellungen' }).click(); // someone reads "from", nobody "to"
+  await page.getByLabel('Wer').selectOption({ label: 'Mo' });
+  await page.getByRole('button', { name: 'Hinzufügen' }).click();
+  await page.getByRole('link', { name: 'Zum Bereich' }).click();
+  await createPage(page, 'Heizung');
+  await createPage(page, 'Wartung', { child: true });
+  await page.getByRole('link', { name: 'Heizung' }).first().click();
+
+  await page.locator('details.more summary').click();
+  await page.getByLabel('Verschieben nach').selectOption({ label: to });
+  await page.getByRole('button', { name: 'Seite verschieben' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(`„Heizung“ nach „${to}“ verschieben?`);
+  await page.getByRole('button', { name: 'Verschieben', exact: true }).click();
+
+  await expect(page.locator('.breadcrumb')).toContainText(to);
+  await expect(page.locator('main').getByRole('link', { name: 'Wartung' })).toBeVisible();
+});

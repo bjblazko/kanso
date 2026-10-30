@@ -1,0 +1,15 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.Title}}</h1>
+<dl class="task-facts">
+  <div><dt>{{.T "page.move_before"}}</dt><dd>{{$d.Before}}</dd></div>
+  <div><dt>{{.T "page.move_after"}}</dt><dd>{{$d.After}}</dd></div>
+</dl>
+<p class="meta">{{.T "page.move_hint"}}</p>
+<form method="post" action="/p/{{$d.Page.Meta.ID}}/move" class="actions">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <input type="hidden" name="parent" value="{{$d.Target}}"><input type="hidden" name="order" value="{{$d.Order}}">
+  <input type="hidden" name="confirm" value="1">
+  <button class="btn btn-primary" type="submit">{{.T "page.move_go"}}</button>
+  <a class="btn btn-secondary" href="/p/{{$d.Page.Meta.ID}}">{{.T "action.cancel"}}</a>
+</form>
+</div>{{end}}
