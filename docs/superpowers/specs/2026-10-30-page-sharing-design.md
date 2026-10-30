@@ -1,6 +1,6 @@
 # Hüpattl! Kanso – Seiten einzeln freigeben
 
-**Status:** Entwurf · **Created:** 2026-10-30 · **Updated:** 2026-10-30
+**Status:** freigegeben · **Created:** 2026-10-30 · **Updated:** 2026-10-30
 
 Baut auf dem Gesamtdesign auf: [2026-10-26-kanso-design.md](2026-10-26-kanso-design.md) (Rollen, Spaces)
 und ADR-007 (jede Seite sagt, wer sie sieht).
