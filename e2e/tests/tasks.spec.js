@@ -121,3 +121,24 @@ test('a family board: capture onto it, another member takes the task', async ({ 
   await page.getByRole('link', { name: boardName }).click();
   await expect(card(page, 'waiting', title)).toContainText('wartet auf: Antwort Hort');
 });
+
+test('a note becomes a task', async ({ page }) => {
+  await signIn(page, { sub: 'nora', name: 'Nora' });
+  await page.goto('/notes/new');
+  const subject = unique('Kind anmelden');
+  await page.getByLabel('Notiz', { exact: true }).fill(`${subject}\nMail an den Hort`);
+  await page.getByRole('button', { name: 'Speichern' }).click();
+  await expect(page.getByRole('status')).toHaveText('Gespeichert');
+  await page.goto('/notes');
+  await page.getByRole('link', { name: subject }).click();
+
+  await page.getByRole('link', { name: 'Als Aufgabe …' }).click();
+  await page.getByRole('button', { name: 'Aufgabe anlegen' }).click();
+  await expect(page.getByLabel('Betreff')).toHaveValue(subject);
+  await expect(page.getByLabel('Text', { exact: true })).toHaveValue('Mail an den Hort');
+
+  await page.goto('/notes');
+  await page.getByRole('link', { name: subject }).click();
+  await page.getByRole('link', { name: 'Zur Aufgabe' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: subject })).toBeVisible();
+});

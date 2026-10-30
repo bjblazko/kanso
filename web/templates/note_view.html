@@ -7,6 +7,8 @@
 <div class="actions">
   <a class="btn btn-primary" href="/notes/{{$d.Note.Meta.ID}}/edit">{{.T "page.edit"}}</a>
   <a class="btn btn-secondary" href="/notes/{{$d.Note.Meta.ID}}/promote">{{.T "notes.promote"}}</a>
+  {{if $d.Note.Meta.Task}}<a class="btn btn-secondary" href="/tasks/b/{{$d.Note.Meta.Task}}">{{.T "notes.task_link"}}</a>
+  {{else}}<a class="btn btn-secondary" href="/notes/{{$d.Note.Meta.ID}}/task">{{.T "notes.to_task"}}</a>{{end}}
   <a class="btn btn-destructive" href="/notes/{{$d.Note.Meta.ID}}/delete">{{.T "notes.delete"}}</a>
 </div>
 </article>{{end}}
