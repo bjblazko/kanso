@@ -113,11 +113,12 @@ selbst gebaut. Alle Lizenztexte kommen in die App („Lizenzen und Dank“) mit 
 1. **Fundament + Wiki**: Repo-Gerüst (LICENSE Apache-2.0, README, CHANGELOG, `docs/adr/`, CLAUDE.md),
    Auth/OIDC, Rollen/Gruppen, Spaces, Seiten-Baum, Editor Quelltext/Vorschau, Anhänge, Mermaid,
    Sperren, Git-Verlauf + Vergleich, Suche, i18n DE/EN, Design-System. *(fertig)*
-2. **Notizen** (privat) → Wiki-Artikel; schnelles Erfassen am Handy, auch offline, mit Fotos.
+2. **Notizen** (privat) → Wiki-Artikel; schnelles Erfassen am Handy, auch offline, mit Fotos. *(fertig)*
+   Dazwischen: **To-do-Listen** (offline, teilbar; eigene Spec). *(fertig)*
 3. **Deployment** in homelab2 (Flake-Input, Modul, Authelia-Client, Caddy) und Parallelbetrieb zu Docmost.
-   DNS-Eintrag existiert (Nutzer, 2026-10-27).
+   *(fertig)*
 4. **Tasks**: Boards (privat/Gruppe), Kanban + Eisenhower, Fälligkeiten, wiederkehrende Aufgaben; Notiz → Task.
-5. **Listen**: Einkauf, Wunschlisten (Freigabe, „Ich besorge das“), Links.
+5. **Listen**: Einkauf (eigener Listentyp, nicht die To-do-Listen), Wunschlisten (Freigabe, „Ich besorge das“), Links.
 6. **Kalender** nativ (.ics), Tasks mit Datum im Kalender, Geburtstage.
 7. **Mobil/Offline (PWA)** + **Web-Push**.
 8. **Extras**: Essensplan → Einkauf, Haus-Inventar (Wartung erzeugt Tasks), Kind & Kontakte.
