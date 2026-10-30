@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/i18n"
 	"github.com/bjblazko/kanso/internal/spaces"
@@ -80,7 +81,8 @@ func (s *Server) page(w http.ResponseWriter, r *http.Request, page, title string
 
 // inSpace marks the navigation position: the space, its tree, the page.
 func (s *Server) inSpace(v view, space, pageID string) view {
-	v.Here, v.Page, v.Tree = space, pageID, s.Wiki.Tree(space)
+	who := access.Principal{Sub: v.User.Sub, Admin: v.Admin}
+	v.Here, v.Page, v.Tree = space, pageID, s.visibleTree(who, space, s.groups())
 	return v
 }
 
