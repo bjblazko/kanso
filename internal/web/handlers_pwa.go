@@ -18,11 +18,11 @@ const (
 )
 
 // precacheList is what the service worker keeps on the device: the files the
-// capture and to-do pages need, with the same fingerprinted URLs the pages use.
+// capture, task capture and to-do pages need, with the same fingerprinted URLs the pages use.
 func (s *Server) precacheList() ([]string, error) {
 	v := view{version: s.version}
 	list := []string{v.Asset("css/fonts.css"), v.Asset("css/tokens.css"), v.Asset("css/app.css"),
-		v.Asset("js/nav.js"), v.Asset("js/capture.js"), v.Asset("js/todos.js"), v.Asset("icons/icon.svg"), v.Asset("icons/apple-touch-icon.png")}
+		v.Asset("js/nav.js"), v.Asset("js/capture.js"), v.Asset("js/todos.js"), v.Asset("js/task-capture.js"), v.Asset("icons/icon.svg"), v.Asset("icons/apple-touch-icon.png")}
 	fonts, err := fs.Glob(s.static, "fonts/*.woff2")
 	for _, f := range fonts {
 		list = append(list, "/static/"+f) // fonts.css loads them without a version

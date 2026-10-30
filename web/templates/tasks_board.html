@@ -1,0 +1,33 @@
+{{define "content"}}{{$d := .Data}}<div class="board-page" data-board="{{$d.Board.ID}}" data-view="{{$d.View}}" data-msg-move-failed="{{.T "tasks.move_failed"}}" data-msg-move-gone="{{.T "tasks.move_gone"}}">
+<h1>{{$d.Name}}</h1>
+{{template "audience" .Audience}}
+{{if gt (len $d.Tabs) 1}}<nav class="board-switch" aria-label="{{.T "tasks.boards"}}"><ul class="tabs">
+{{range $d.Tabs}}<li><a href="/tasks/b/{{.ID}}"{{if .Current}} aria-current="page"{{end}}>{{.Name}}</a></li>{{end}}
+</ul></nav>{{end}}
+<div class="board-bar">
+  <nav aria-label="{{.T "tasks.views"}}"><ul class="tabs tabs-quiet">
+    <li><a href="/tasks/b/{{$d.Board.ID}}?view=kanban"{{if eq $d.View "kanban"}} aria-current="page"{{end}}>{{.T "tasks.kanban"}}</a></li>
+    <li><a href="/tasks/b/{{$d.Board.ID}}?view=matrix"{{if eq $d.View "matrix"}} aria-current="page"{{end}}>{{.T "tasks.matrix"}}</a></li>
+  </ul></nav>
+  <a class="btn btn-primary" href="/tasks/new?board={{$d.Board.ID}}">{{.T "tasks.new"}}</a>
+</div>
+<p id="board-status" class="notice notice-warning" role="status" hidden></p>
+{{if $d.Empty}}<p class="empty">{{.T "tasks.empty"}}</p>{{else}}
+<div class="board board-{{$d.View}}">
+{{range $d.Columns}}<section class="board-col" data-key="{{.Key}}" aria-labelledby="col-{{.Key}}">
+  <h2 id="col-{{.Key}}">{{.Label}} <span class="meta">{{len .Cards}}</span></h2>
+  {{if .Hint}}<p class="meta board-hint">{{.Hint}}</p>{{end}}
+  <ul class="cards list-plain">{{range .Cards}}{{template "card" (cardArgs . $)}}{{end}}</ul>
+  {{if and (eq .Key "done") $d.HiddenDone}}<p><a href="/tasks/b/{{$d.Board.ID}}?view=kanban&amp;done=all">{{$.T "tasks.show_done"}}</a></p>{{end}}
+</section>{{end}}
+</div>{{end}}
+</div>{{end}}
+{{define "card"}}{{$c := .Card}}{{$t := $c.Task}}<li class="card" draggable="true" data-task="{{$t.Meta.ID}}">
+  <a class="card-title" href="/tasks/b/{{$t.Board}}/{{$t.Meta.ID}}">{{$t.Meta.Title}}</a>
+  {{if or $t.Meta.Urgent $t.Meta.Important}}<span class="card-marks">{{if $t.Meta.Urgent}}<abbr title="{{.V.T "tasks.urgent"}}">{{.V.T "tasks.mark_urgent"}}<span class="visually-hidden"> {{.V.T "tasks.urgent"}}</span></abbr>{{end}}{{if $t.Meta.Important}}<abbr title="{{.V.T "tasks.important"}}">{{.V.T "tasks.mark_important"}}<span class="visually-hidden"> {{.V.T "tasks.important"}}</span></abbr>{{end}}</span>{{end}}
+  {{if or $c.DueText $c.Claimed (and (eq (print $t.Meta.Status) "waiting") $t.Meta.WaitingFor)}}<p class="meta card-meta">
+    {{- if $c.DueText}}<span class="due{{with $c.DueClass}} due-{{.}}{{end}}">{{$c.DueText}}</span>{{end}}
+    {{- if and (eq (print $t.Meta.Status) "waiting") $t.Meta.WaitingFor}}<span>{{.V.T "tasks.waiting_for" $t.Meta.WaitingFor}}</span>{{end}}
+    {{- if $c.Claimed}}<span>{{$c.Claimed}}</span>{{end}}</p>{{end}}
+</li>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/board.js"}}"></script>{{end}}

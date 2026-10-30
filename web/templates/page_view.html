@@ -31,7 +31,7 @@
   <form method="post" action="/p/{{$d.Page.Meta.ID}}/move" class="form form-row">
     <input type="hidden" name="csrf" value="{{.CSRF}}">
     <div class="field"><label for="parent">{{.T "page.move_below"}}</label>
-      <select id="parent" name="parent" class="btn btn-secondary">{{range $d.Targets}}<option value="{{.ID}}">{{.Label}}</option>{{end}}</select></div>
+      <select id="parent" name="parent">{{range $d.Targets}}<option value="{{.ID}}">{{.Label}}</option>{{end}}</select></div>
     <div class="field"><label for="order">{{.T "page.position"}}</label>
       <input id="order" name="order" type="number" min="0" value="{{$d.Page.Meta.Order}}" class="num"></div>
     <button class="btn btn-secondary" type="submit">{{.T "page.move"}}</button>

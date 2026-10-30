@@ -1,19 +1,20 @@
 // SPDX-License-Identifier: Apache-2.0
-// Service worker: keeps the capture page, the to-do page and their files on
-// the device, so notes can be written and lists ticked without network. The
+// Service worker: keeps the capture pages, the to-do page and their files on
+// the device, so notes and tasks can be written and lists ticked without network. The
 // server puts VERSION and PRECACHE (fingerprinted static URLs) above this
 // file. Everything else goes to the network untouched.
 
 const CACHE = `kanso-${VERSION}`;
 const CAPTURE = '/notes/new';
 const TODOS = '/todos';
+const TASK_CAPTURE = '/tasks/new';
 const TODO_PAGES = /^\/todos(?:\/[a-z2-7]{12})?$/; // one page draws the overview and every list
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
     await cache.addAll(PRECACHE);
-    await Promise.all([storePage(cache, CAPTURE), storePage(cache, TODOS)]);
+    await Promise.all([storePage(cache, CAPTURE), storePage(cache, TODOS), storePage(cache, TASK_CAPTURE)]);
     await self.skipWaiting();
   })());
 });
@@ -32,6 +33,8 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin || event.request.method !== 'GET') return;
   if (event.request.mode === 'navigate' && url.pathname === CAPTURE) {
     event.respondWith(networkFirst(event.request, CAPTURE));
+  } else if (event.request.mode === 'navigate' && url.pathname === TASK_CAPTURE) {
+    event.respondWith(networkFirst(event.request, TASK_CAPTURE));
   } else if (event.request.mode === 'navigate' && TODO_PAGES.test(url.pathname)) {
     event.respondWith(networkFirst(event.request, TODOS));
   } else if (url.pathname.startsWith('/static/')) {

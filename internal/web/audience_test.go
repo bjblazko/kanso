@@ -46,3 +46,34 @@ func TestNotesSayOnlyYou(t *testing.T) {
 		}
 	}
 }
+
+// Where a page says who can see it, whoever may change that gets a link to do so.
+func TestAudienceLinksToSharingForOwners(t *testing.T) {
+	ts, admin, anna := setupHaus(t) // anna is editor via familie, admin is owner everywhere
+	id := ts.createPage(t, anna, "haus", "", "Garten")
+	link := `href="/s/haus/settings">Freigabe ändern`
+	for _, path := range []string{"/s/haus", "/p/" + id} {
+		if _, body := get(t, admin, ts.URL+path); !strings.Contains(body, link) {
+			t.Errorf("owner misses the link on %s", path)
+		}
+		if _, body := get(t, anna, ts.URL+path); strings.Contains(body, "Freigabe ändern") {
+			t.Errorf("editor gets the link on %s", path)
+		}
+	}
+}
+
+func TestBoardAudienceLinksAdminsToBoards(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", true) // admin and member of familie
+	ben := ts.client(t, "ben", "Ben", false)
+	fam := familyBoardID(t, ts)
+	if _, body := get(t, anna, ts.URL+"/tasks/b/"+fam); !strings.Contains(body, `href="/admin/groups">Freigabe ändern`) {
+		t.Fatal("admin misses the link")
+	}
+	if _, body := get(t, ben, ts.URL+"/tasks/b/"+fam); strings.Contains(body, "Freigabe ändern") {
+		t.Fatal("member without admin rights gets the link")
+	}
+	if _, body := get(t, anna, ts.URL+"/tasks"); strings.Contains(body, "Freigabe ändern") {
+		t.Fatal("private board offers sharing")
+	}
+}

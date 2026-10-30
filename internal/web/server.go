@@ -20,6 +20,7 @@ import (
 	"github.com/bjblazko/kanso/internal/search"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
+	"github.com/bjblazko/kanso/internal/tasks"
 	"github.com/bjblazko/kanso/internal/todos"
 	"github.com/bjblazko/kanso/internal/users"
 	"github.com/bjblazko/kanso/internal/wiki"
@@ -37,6 +38,7 @@ type Deps struct {
 	Wiki   *wiki.Wiki
 	Notes  *notes.Store
 	Todos  *todos.Store
+	Tasks  *tasks.Store
 	MD     *markdown.Renderer
 	Locks  *wiki.Locks
 	Search *search.Index
@@ -71,7 +73,7 @@ func New(d Deps) (*Server, error) {
 }
 
 var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search",
-	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote", "todos", "todo_share", "todo_delete"}
+	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote", "todos", "todo_share", "todo_delete", "tasks_board", "task_view", "task_edit", "task_delete", "task_new", "admin_boards", "note_task"}
 
 func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}
@@ -93,6 +95,7 @@ type treeArgs struct {
 
 var templateFuncs = template.FuncMap{
 	"treeArgs": func(nodes []*wiki.Node, current string) treeArgs { return treeArgs{nodes, current} },
+	"cardArgs": func(c card, v view) cardArgs { return cardArgs{c, v} },
 }
 
 // hashFS fingerprints the static files for cache-busting URLs.
@@ -161,6 +164,8 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /notes/{id}/attachments/{name}", s.serveNoteAttachment)
 	mux.HandleFunc("GET /notes/{id}/promote", s.promoteNoteForm)
 	mux.HandleFunc("POST /notes/{id}/promote", s.promoteNote)
+	mux.HandleFunc("GET /notes/{id}/task", s.noteTaskForm)
+	mux.HandleFunc("POST /notes/{id}/task", s.noteToTask)
 	mux.HandleFunc("GET /notes/{id}/delete", s.confirmDeleteNote)
 	mux.HandleFunc("POST /notes/{id}/delete", s.deleteNote)
 	mux.HandleFunc("GET /todos", s.todosPage)
@@ -171,10 +176,24 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /todos/{id}/delete", s.deleteTodo)
 	mux.HandleFunc("GET /api/todos", s.apiTodos)
 	mux.HandleFunc("POST /api/todos/sync", s.syncTodos)
+	mux.HandleFunc("GET /tasks", s.tasksHome)
+	mux.HandleFunc("GET /tasks/new", s.newTaskForm)
+	mux.HandleFunc("POST /tasks", s.createTask)
+	mux.HandleFunc("GET /tasks/b/{board}", s.showBoard)
+	mux.HandleFunc("GET /tasks/t/{task}", s.findTaskByID)
+	mux.HandleFunc("GET /tasks/b/{board}/{task}", s.showTask)
+	mux.HandleFunc("GET /tasks/b/{board}/{task}/edit", s.editTask)
+	mux.HandleFunc("POST /tasks/b/{board}/{task}", s.saveTask)
+	mux.HandleFunc("POST /tasks/b/{board}/{task}/claim", s.claimTask)
+	mux.HandleFunc("POST /tasks/b/{board}/{task}/move", s.moveTask)
+	mux.HandleFunc("GET /tasks/b/{board}/{task}/delete", s.confirmDeleteTask)
+	mux.HandleFunc("POST /tasks/b/{board}/{task}/delete", s.deleteTask)
 	mux.HandleFunc("GET /admin/spaces/new", s.newSpaceForm)
 	mux.HandleFunc("POST /admin/spaces/new", s.createSpace)
 	mux.HandleFunc("GET /admin/groups", s.groupsPage)
 	mux.HandleFunc("POST /admin/groups", s.updateGroups)
+	mux.HandleFunc("GET /admin/boards", s.boardsPage)
+	mux.HandleFunc("POST /admin/boards", s.updateBoards)
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { s.notFound(w, r) })
 }
 

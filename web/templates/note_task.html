@@ -1,0 +1,15 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.T "notes.to_task"}}</h1>
+<p>„{{$d.Title}}“</p>
+<form method="post" action="/notes/{{$d.Note.Meta.ID}}/task" class="form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <fieldset class="field-set"><legend>{{.T "notes.to_task_where"}}</legend><div class="choices">
+    {{range $d.Boards}}<label class="choice"><input type="radio" name="board" value="{{.ID}}"{{if .Current}} checked{{end}}> {{.Name}}</label>{{end}}
+  </div></fieldset>
+  <p class="meta">{{.T "notes.to_task_hint"}}</p>
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">{{.T "notes.to_task_create"}}</button>
+    <a class="btn btn-secondary" href="/notes/{{$d.Note.Meta.ID}}">{{.T "action.cancel"}}</a>
+  </div>
+</form>
+</div>{{end}}

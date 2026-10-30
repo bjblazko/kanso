@@ -22,6 +22,7 @@ import (
 	"github.com/bjblazko/kanso/internal/notes"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
+	"github.com/bjblazko/kanso/internal/tasks"
 	"github.com/bjblazko/kanso/internal/todos"
 	"github.com/bjblazko/kanso/internal/users"
 	"github.com/bjblazko/kanso/internal/web"
@@ -73,7 +74,7 @@ func seed(cfg config.Config) error {
 	if err != nil {
 		return err
 	}
-	return devseed.Seed(cfg.DataDir, repo, us, sp, wk, ns)
+	return devseed.Seed(cfg.DataDir, devseed.Stores{Repo: repo, Users: us, Spaces: sp, Wiki: wk, Notes: ns, Tasks: tasks.NewStore(cfg.DataDir, repo)})
 }
 
 func run(cfg config.Config) error {
@@ -118,7 +119,7 @@ func buildDeps(cfg config.Config) (web.Deps, error) {
 		return web.Deps{}, err
 	}
 	bundle, err := i18n.Load()
-	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, Notes: ns, Todos: td,
+	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, Notes: ns, Todos: td, Tasks: tasks.NewStore(cfg.DataDir, repo),
 		MD: markdown.New(), Locks: wiki.NewLocks(5*time.Minute, time.Now), Search: web.BuildIndex(wk, ns)}, err
 }
 

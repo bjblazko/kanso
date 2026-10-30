@@ -29,10 +29,12 @@ type noteItem struct {
 }
 
 type noteView struct {
-	Note  notes.Note
-	Title string
-	HTML  template.HTML
-	Info  markdown.Info
+	// TaskID names the task made from the note while it still exists; "" otherwise.
+	TaskID string
+	Note   notes.Note
+	Title  string
+	HTML   template.HTML
+	Info   markdown.Info
 }
 
 type noteNew struct {
@@ -96,7 +98,7 @@ func (s *Server) showNote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v := s.newView(r, "", nil)
-	v.Data = noteView{Note: n, Title: noteTitle(v, n), HTML: html, Info: info}
+	v.Data = noteView{Note: n, Title: noteTitle(v, n), HTML: html, Info: info, TaskID: s.noteTaskID(r, n)}
 	v.Title, v.Here, v.Audience = noteTitle(v, n), notesHere, ptr(onlyYou(v))
 	s.render(w, r, http.StatusOK, "note_view", v)
 }

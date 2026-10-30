@@ -72,7 +72,7 @@ func (s *Server) showPage(w http.ResponseWriter, r *http.Request) {
 // pageView is the view of the read page, placed in its space.
 func (s *Server) pageView(r *http.Request, pc pageCtx) view {
 	v := s.inSpace(s.newView(r, pc.Page.Meta.Title, pc), pc.Space.Slug, pc.Page.Meta.ID)
-	v.Audience = ptr(s.spaceAudience(v, pc.Space))
+	v.Audience = ptr(s.spaceAudienceFor(v, pc.Space, pc.Role))
 	return v
 }
 
@@ -217,6 +217,10 @@ func (s *Server) deletePage(w http.ResponseWriter, r *http.Request) {
 func (s *Server) preview(w http.ResponseWriter, r *http.Request) {
 	if r.PostFormValue("note") != "" {
 		s.notePreview(w, r)
+		return
+	}
+	if r.PostFormValue("task") != "" {
+		s.taskPreview(w, r)
 		return
 	}
 	r.SetPathValue("id", r.PostFormValue("page"))

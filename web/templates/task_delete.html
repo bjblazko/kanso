@@ -1,0 +1,9 @@
+{{define "content"}}{{$t := .Data}}<div class="content">
+<h1>{{.T "tasks.delete_confirm" $t.Meta.Title}}</h1>
+<p>{{.T "tasks.delete_hint"}}</p>
+<form method="post" action="/tasks/b/{{$t.Board}}/{{$t.Meta.ID}}/delete" class="actions">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <button class="btn btn-destructive" type="submit">{{.T "tasks.delete_named" $t.Meta.Title}}</button>
+  <a class="btn btn-secondary" href="/tasks/b/{{$t.Board}}/{{$t.Meta.ID}}">{{.T "action.cancel"}}</a>
+</form>
+</div>{{end}}

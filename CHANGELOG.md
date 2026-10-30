@@ -37,6 +37,15 @@ All notable changes to this project are documented here. The format follows
 - Groups can be deleted; members who were never signed in are listed by their id.
 - Every page says who can see it (ADR-007): spaces, pages and the space list name the people with access plus admins; notes say only you; to-do lists name their owner and shares.
 - To-do lists show progress: a bar with percent between the heading and the items; the overview shows a short bar per list, whose shape tells open, partly done and done apart, green when done.
+- Tasks: one private board per person and boards per group, each task a Markdown file in the Git history (ADR-008).
+- Tasks part in the rail: a board with the tabs Kanban (Offen · In Arbeit · Wartet · Erledigt; done tasks older than 14 days on request) and Matrix (Sofort, Planen, Kurz erledigen, Später); cards show due words, what a task waits for and who took it.
+- A task's page: Markdown text, column, urgent/important, due date, what it waits for, the note it came from (for its author); edit with preview, take or give back a task of a group board, move it to another board, delete it with confirmation. Saving never overwrites a change made meanwhile.
+- Quick task capture (`/tasks/new`, "Neue Aufgabe"): subject, board, urgent, important and due (heute, morgen, diese Woche = coming Sunday, or a date); works offline with an outbox like notes, a task sent twice is stored once, a task for a board that is gone lands on the own board.
+- Drag cards between Kanban columns and matrix quadrants (desktop); the board redraws from the server, a failed move leaves the card in place. The device remembers the last board and tab.
+- Admins manage group boards (`/admin/boards`, "Gruppen-Boards" in the account menu): create one for a group, rename it, delete it after confirmation.
+- A note becomes a task ("Als Aufgabe …"): first line as subject (as notes name it), the rest as text without the photo links; the note stays. The note links to its task by id (`/tasks/t/<id>`), so the link survives moving the task; when the task is gone, the note offers "Als Aufgabe …" again.
+- `just seed` adds a "Familie" board for the group with tasks in every column and two private tasks for Anna.
+- The line that says who can see something links to "Freigabe ändern" for whoever may change it: space owners, list owners, admins on group boards.
 
 ### Security
 - GPS location is removed from JPEG photos on upload (notes and wiki pages); orientation and other EXIF data stay.
@@ -48,6 +57,7 @@ All notable changes to this project are documented here. The format follows
 - Keeping a folder out of the history is one helper (`Repo.Ignore`) for notes and to-do lists.
 - Uploads share one path (`store.SaveUpload`) for safe names, size limit and photo cleaning.
 - The Markdown editor serves pages and notes; it reads its URLs from the form.
+- Select fields look like fields (frame plus chevron), no longer like buttons.
 
 ### Fixed
 - Signing in failed with "Bad Request" when a second login started meanwhile (the service worker refreshing a page while signed out); each login now keeps its own cookie.

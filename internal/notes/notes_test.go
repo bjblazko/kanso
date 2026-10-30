@@ -254,3 +254,23 @@ func TestTitle(t *testing.T) {
 		}
 	}
 }
+
+func TestLinkTask(t *testing.T) {
+	s := newStore(t)
+	n := mustCreate(t, s, "anna", "", "Hof fegen\n")
+	if err := s.LinkTask("anna", n.Meta.ID, "aaaaaaaaaaaa/bbbbbbbbbbbb"); err != nil {
+		t.Fatal(err)
+	}
+	got, err := s.Get("anna", n.Meta.ID)
+	if err != nil || got.Meta.Task != "aaaaaaaaaaaa/bbbbbbbbbbbb" || got.Body != n.Body || !got.Meta.Updated.Equal(n.Meta.Updated) {
+		t.Fatalf("note = %+v, %v", got, err)
+	}
+}
+
+func TestLinkTaskForeignNote(t *testing.T) {
+	s := newStore(t)
+	n := mustCreate(t, s, "anna", "", "Hof fegen\n")
+	if err := s.LinkTask("ben", n.Meta.ID, "x/y"); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("LinkTask = %v", err)
+	}
+}

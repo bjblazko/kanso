@@ -1,5 +1,5 @@
 {{/* audience says who can see what a page shows; see view.Audience. */}}
-{{define "audience"}}{{with .}}<p class="meta audience">{{if .Private}}{{template "icon" "lock"}}{{else}}{{template "icon" "users"}}{{end}}<span>{{.Text}}</span></p>{{end}}{{end}}
+{{define "audience"}}{{with .}}<p class="meta audience">{{if .Private}}{{template "icon" "lock"}}{{else}}{{template "icon" "users"}}{{end}}<span>{{.Text}}</span>{{with .Change}} · <a href="{{.}}">{{$.ChangeText}}</a>{{end}}</p>{{end}}{{end}}
 {{/* avatar is the person's picture, round, or a placeholder until there is one. */}}
 {{define "avatar"}}{{if .AvatarVersion}}<img class="avatar" src="/avatar/{{.User.Sub}}?v={{.AvatarVersion}}" alt="">{{else}}<span class="avatar avatar-none">{{template "icon" "user"}}</span>{{end}}{{end}}
 {{define "layout"}}<!doctype html>
@@ -38,7 +38,8 @@
         </div>
       </form>
       {{if or .Admin .Dev}}<ul class="navlist menu-links">
-        {{if .Admin}}<li><a href="/admin/groups">{{template "icon" "users"}}<span>{{.T "user.groups"}}</span></a></li>{{end}}
+        {{if .Admin}}<li><a href="/admin/groups">{{template "icon" "users"}}<span>{{.T "user.groups"}}</span></a></li>
+        <li><a href="/admin/boards">{{template "icon" "board"}}<span>{{.T "tasks.admin_boards"}}</span></a></li>{{end}}
         {{if .Dev}}<li><a href="/auth/dev?next={{.Path}}">{{template "icon" "switch"}}<span>{{.T "user.switch"}}</span></a></li>{{end}}
       </ul>{{end}}
       <form class="menu-end" method="post" action="/auth/logout">
@@ -54,6 +55,7 @@
     <ul>
       <li><a href="/notes"{{if eq .Module "notes"}} aria-current="true"{{end}}>{{template "icon" "note"}}<span>{{.T "nav.notes"}}</span></a></li>
       <li><a href="/todos"{{if eq .Module "todos"}} aria-current="true"{{end}}>{{template "icon" "check"}}<span>{{.T "nav.todos"}}</span></a></li>
+      <li><a href="/tasks"{{if eq .Module "tasks"}} aria-current="true"{{end}}>{{template "icon" "board"}}<span>{{.T "nav.tasks"}}</span></a></li>
       <li><a href="/"{{if eq .Module "wiki"}} aria-current="true"{{end}}>{{template "icon" "book"}}<span>{{.T "nav.wiki"}}</span></a></li>
     </ul>
   </nav>

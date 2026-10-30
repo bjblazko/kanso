@@ -1,7 +1,7 @@
 # Hüpattl! Kanso — Architecture (arc42)
 
 **Created:** 2026-10-26
-**Updated:** 2026-10-29
+**Updated:** 2026-10-30
 
 ## 1. Introduction and Goals
 
@@ -72,13 +72,14 @@ leaves the host.
 | `internal/markdown` | Safe Markdown rendering |
 | `internal/notes` | Private notes per person, outside Git |
 | `internal/todos` | Shareable to-do lists outside Git, changed by operations |
+| `internal/tasks` | Private and group boards of tasks in Git; Kanban and Eisenhower views |
 | `internal/photo` | Removes GPS data from JPEG uploads |
 | `internal/search` | In-memory search over pages and notes (scans all per query) |
-| `internal/devseed` | Made-up people, groups, spaces, pages and notes for development (`kanso seed`, dev login only) |
+| `internal/devseed` | Made-up people, groups, spaces, pages, notes and tasks for development (`kanso seed`, dev login only) |
 | `internal/web` | HTTP routes, templates, static files |
-| `web/` | Templates, CSS, JS (editor, capture, to-dos, service worker), fonts, icons, vendored Mermaid |
+| `web/` | Templates, CSS, JS (editor, capture, task capture, board, to-dos, service worker), fonts, icons, vendored Mermaid |
 
-Later phases add `tasks`, `lists`, `calendar`, `push`.
+Later phases add `lists`, `calendar`, `push`.
 
 ## 6. Runtime View
 
@@ -106,6 +107,24 @@ applied to the copy and kept in an outbox. A sync posts all waiting
 operations to `/api/todos/sync` (CSRF token from `/notes/token`); the answer
 is the state of every visible list, which replaces the copy, and the sent
 operations leave the outbox.
+
+**Capturing a task offline:** `/tasks/new` is kept by the service worker
+like the note capture, with the boards of the last online visit. Saving puts
+the task (subject, board, urgent, important, due as a date in the device's
+time) into the IndexedDB outbox `kanso-tasks` with an id made on the device;
+uploading posts it to `/tasks` (CSRF token from `/notes/token`), answered
+"created" or "exists". A board that is gone or no longer visible means the
+person's own board; the answer names the board used.
+
+**Moving a card:** dragging posts the new column or quadrant to
+`/tasks/b/<board>/<task>/move`; the task file is rewritten and committed with
+the person as author, then the page fetches the board again and redraws its
+columns. Editing a task sends the version it read; a task changed meanwhile
+is not overwritten (409).
+
+**Note → task:** the note's first line becomes the subject, the rest the
+text; the task records the note's id, the note the task's path. The note
+stays where it is.
 
 **Note → wiki page:** the note's folder is moved into the space below the
 chosen page, gets a fresh page id and frontmatter, and is committed as a
@@ -140,6 +159,7 @@ Kopia jobs.
 | [005](../adr/005-navigation-parts-and-content.md) | Navigation: rail of parts, side bar for their content |
 | [006](../adr/006-todo-lists-outside-git-synced-operations.md) | To-do lists outside Git, synced as operations |
 | [007](../adr/007-say-who-can-see-it.md) | Every page says who can see it |
+| [008](../adr/008-tasks-in-git-offline-capture-only.md) | Tasks in Git, offline only for capture |
 
 ## 10. Quality Requirements
 
@@ -163,6 +183,8 @@ Verified by unit tests (`go test ./...`) and browser end-to-end tests
 - iOS does not open the keyboard by itself on the capture page; one tap stays.
 - Offline capture is tested in Chromium only (Playwright WebKit lacks reliable
   service workers); iOS is checked by hand.
+- Tasks are committed on every change, including every drag; the history
+  grows with use. A deleted task stays in the history (README).
 - `go.yaml.in/yaml/v3` is frozen; move to v4 once it is stable.
 - Mermaid is large (3.9 MB, lazy-loaded); its ELK layout is deliberately left out.
 - Mermaid briefly puts label text into the DOM to measure it; hostile HTML

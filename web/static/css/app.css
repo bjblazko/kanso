@@ -339,3 +339,81 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
   flex-basis: 100%; display: flex; flex-wrap: wrap; gap: var(--space-2);
   padding: var(--space-2) 0 var(--space-3) var(--target-min);
 }
+
+/* Tasks: board switcher and view tabs are navigation (links, current = strong fill). */
+.tabs { list-style: none; margin: var(--space-3) 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.tabs a {
+  display: inline-flex; align-items: center; min-height: var(--target-min); padding: 0 var(--space-3);
+  border-radius: var(--radius-md); text-decoration: none; color: var(--fg-2);
+}
+.tabs a:hover { background: var(--hover-overlay); }
+.tabs a[aria-current="page"] { background: var(--fg); color: var(--bg); }
+.board-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.board-bar .tabs { margin: 0; }
+/* Columns stack on phones; side by side (Kanban 4, matrix 2 × 2) from 60rem. */
+.board { display: grid; grid-template-columns: 1fr; gap: var(--space-4); margin-top: var(--space-4); }
+.board-col { background: var(--bg-2); border-radius: var(--radius-md); padding: var(--space-3); min-width: 0; }
+.board-col h2 { display: flex; align-items: baseline; gap: var(--space-2); margin: 0 0 var(--space-2); font-size: var(--text-md); }
+.board-hint { margin: 0 0 var(--space-2); }
+.board-col.drop-target { background: var(--bg-3); }
+@media (min-width: 60rem) {
+  .board-kanban { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .board-matrix { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.cards { min-height: var(--space-8); }
+.list-plain .card {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-2);
+  margin-bottom: var(--space-2); padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--bg);
+}
+.card[draggable="true"] { cursor: grab; }
+.card.dragging { opacity: 0.62; }
+.card-title { flex: 1; min-width: 0; overflow-wrap: anywhere; color: var(--fg); }
+.card-marks { display: inline-flex; gap: var(--space-1); }
+.card-marks abbr {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 1.25rem; height: 1.25rem;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
+  font: 600 var(--text-xs)/1 var(--font-mono); text-decoration: none; color: var(--fg-2);
+}
+.card-meta { flex-basis: 100%; margin: 0; display: flex; flex-wrap: wrap; gap: 0 var(--space-3); }
+.due-overdue { color: var(--warning-ink); font-weight: 500; }
+.due-soon { color: var(--time-ink); font-weight: 500; }
+/* Task form: "worauf" only while Wartet is chosen; hidden, its value is still sent. */
+.task-form .form-row { display: flex; }
+.task-form .form-row .field { min-width: 12rem; }
+.field-set { border: 0; padding: 0; margin: 0; }
+.field-set legend { font: 500 var(--text-sm)/1.4 var(--font-sans); color: var(--fg-2); margin-bottom: var(--space-1); padding: 0; }
+.choices { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
+.choice { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--target-min); cursor: pointer; }
+.choice input { width: 1.125rem; height: 1.125rem; margin: 0; }
+.task-form .waiting-for { display: none; }
+.task-form:has(input[name="status"][value="waiting"]:checked) .waiting-for { display: flex; }
+.task-facts { display: grid; gap: var(--space-2); margin: var(--space-4) 0; }
+.task-facts div { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.task-facts dt { min-width: 8rem; color: var(--fg-3); }
+.task-facts dd { margin: 0; }
+.actions form { margin: 0; }
+/* Task capture: one-tap choices that wrap on narrow phones; the chosen one is filled. */
+.task-capture .seg-choice { display: flex; flex-wrap: wrap; gap: var(--space-2); height: auto; border: 0; }
+.seg-choice label { position: relative; display: inline-flex; }
+.seg-choice input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: pointer; }
+.seg-choice span {
+  display: inline-flex; align-items: center; min-height: var(--target-min); padding: 0 var(--space-4);
+  border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--bg);
+  color: var(--fg-2); font: 500 var(--text-sm)/1 var(--font-sans);
+}
+.seg-choice input:checked + span { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+.seg-choice input:focus-visible + span { box-shadow: var(--focus-ring); }
+.task-capture .due-date { display: none; margin-top: var(--space-3); max-width: 14rem; }
+.task-capture:has(input[name="due"][value="date"]:checked) .due-date { display: flex; }
+
+/* Selects are fields, not buttons: the field frame plus a chevron, so a choice
+   never looks like an action. The chevron is drawn from the tokens, so it
+   follows light and dark. */
+.field select {
+  appearance: none; cursor: pointer;
+  padding-right: calc(var(--space-3) * 2 + var(--space-3));
+  background-image: linear-gradient(45deg, transparent 50%, var(--fg-2) 50%), linear-gradient(135deg, var(--fg-2) 50%, transparent 50%);
+  background-position: calc(100% - var(--space-3) - var(--space-1) - 1px) 55%, calc(100% - var(--space-3) - 1px) 55%;
+  background-size: var(--space-1) var(--space-1); background-repeat: no-repeat;
+}

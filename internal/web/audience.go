@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/spaces"
 )
 
@@ -13,6 +14,14 @@ import (
 type audience struct {
 	Text    string
 	Private bool
+	// Change links to where the viewer may change who sees it; "" when they may not.
+	Change, ChangeText string
+}
+
+// changeAt offers the viewer to change who sees it at href.
+func (a audience) changeAt(v view, href string) audience {
+	a.Change, a.ChangeText = href, v.T("visibility.change")
+	return a
 }
 
 // ptr returns a pointer to a copy of v.
@@ -52,4 +61,13 @@ func (s *Server) spaceAudience(v view, sp spaces.Space) audience {
 		return audience{Text: v.T("visibility.admins_only")}
 	}
 	return audience{Text: v.T("visibility.space", strings.Join(names, ", "))}
+}
+
+// spaceAudienceFor is spaceAudience with a link to the settings for whoever may change them.
+func (s *Server) spaceAudienceFor(v view, sp spaces.Space, role access.Role) audience {
+	a := s.spaceAudience(v, sp)
+	if access.Can(role, access.ManageSpace) {
+		a = a.changeAt(v, "/s/"+sp.Slug+"/settings")
+	}
+	return a
 }

@@ -21,7 +21,7 @@
   {{if .Candidates}}<form method="post" action="/admin/groups" class="form form-row">
     <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="add"><input type="hidden" name="group" value="{{.Name}}">
     <div class="field"><label for="sub-{{$gi}}">{{$.T "settings.person"}}</label>
-      <select id="sub-{{$gi}}" name="sub" class="btn btn-secondary">{{range .Candidates}}<option value="{{.Sub}}">{{.Name}}</option>{{end}}</select></div>
+      <select id="sub-{{$gi}}" name="sub">{{range .Candidates}}<option value="{{.Sub}}">{{.Name}}</option>{{end}}</select></div>
     <button class="btn btn-secondary" type="submit">{{$.T "settings.add"}}</button>
   </form>{{end}}
   <details class="more">

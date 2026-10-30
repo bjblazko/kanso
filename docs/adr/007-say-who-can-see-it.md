@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Created:** 2026-10-29
-**Updated:** 2026-10-29
+**Updated:** 2026-10-30
 
 ## Context
 
@@ -19,6 +19,10 @@ will read it, also where nothing can be shared at all.
   sichtbar", or a people icon and "Sichtbar für …". Same words, same look
   everywhere; the server renders it as the `audience` partial, `todos.js`
   draws the same markup.
+- Whoever may change who sees it gets "Freigabe ändern" at the end of the
+  line (2026-10-30): space owners → space settings, the owner of a to-do
+  list → its share page, admins on a group board → groups. Where nothing can
+  be shared (notes, private boards) there is no link.
 - **Spaces and pages:** people with a role, members of a group listed as the
   people they are, sorted by name, the viewer first as "dich", and always
   "und Admins": admins read every space, but Kanso learns who they are only at

@@ -7,7 +7,7 @@
   <div class="field"><label for="title">{{.T "notes.promote_title"}}</label>
     <input id="title" name="title" required maxlength="200" value="{{$d.Title}}"></div>
   <div class="field"><label for="where">{{.T "notes.promote_where"}}</label>
-    <select id="where" name="where" class="btn btn-secondary">{{range $d.Targets}}<option value="{{.ID}}">{{.Label}}</option>{{end}}</select></div>
+    <select id="where" name="where">{{range $d.Targets}}<option value="{{.ID}}">{{.Label}}</option>{{end}}</select></div>
   <div class="actions">
     <button class="btn btn-primary" type="submit">{{.T "notes.promote"}}</button>
     <a class="btn btn-quiet" href="/notes/{{$d.Note.Meta.ID}}">{{.T "action.cancel"}}</a>

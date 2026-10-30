@@ -1,0 +1,25 @@
+{{define "content"}}{{$d := .Data}}{{$t := $d.Card.Task}}<article class="content page task">
+<nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/tasks/b/{{$t.Board}}">{{$d.BoardName}}</a></nav>
+<h1>{{$t.Meta.Title}}</h1>
+{{template "audience" .Audience}}
+<dl class="task-facts">
+  <div><dt>{{.T "tasks.column"}}</dt><dd>{{.T (printf "tasks.status.%s" $t.Meta.Status)}}{{if and (eq (print $t.Meta.Status) "waiting") $t.Meta.WaitingFor}} · {{.T "tasks.waiting_for" $t.Meta.WaitingFor}}{{end}}</dd></div>
+  {{if or $t.Meta.Urgent $t.Meta.Important}}<div><dt>{{.T "tasks.priority"}}</dt><dd>{{if $t.Meta.Urgent}}{{.T "tasks.urgent"}}{{end}}{{if and $t.Meta.Urgent $t.Meta.Important}}, {{end}}{{if $t.Meta.Important}}{{.T "tasks.important"}}{{end}}</dd></div>{{end}}
+  {{if $d.Card.DueText}}<div><dt>{{.T "tasks.due"}}</dt><dd><span class="due{{with $d.Card.DueClass}} due-{{.}}{{end}}">{{$d.Card.DueText}}</span></dd></div>{{end}}
+  {{if $d.Card.Claimed}}<div><dt>{{.T "tasks.taken"}}</dt><dd>{{$d.Card.Claimed}}</dd></div>{{end}}
+  {{if eq $d.Note "link"}}<div><dt>{{.T "tasks.from_note"}}</dt><dd><a href="/notes/{{$t.Meta.Note}}">{{.T "tasks.open_note"}}</a></dd></div>{{end}}
+  {{if eq $d.Note "gone"}}<div><dt>{{.T "tasks.from_note"}}</dt><dd>{{.T "tasks.note_gone"}}</dd></div>{{end}}
+</dl>
+{{if $t.Body}}<div class="prose">{{$d.HTML}}</div>{{end}}
+<p class="meta">{{.T "tasks.created_by" $d.AuthorName ($t.Meta.Created.Local.Format "02.01.2006 15:04")}} · {{.T "tasks.updated_at" ($t.Meta.Updated.Local.Format "02.01.2006 15:04")}}</p>
+<div class="actions">
+  <a class="btn btn-primary" href="/tasks/b/{{$t.Board}}/{{$t.Meta.ID}}/edit">{{.T "page.edit"}}</a>
+  {{if not $d.Private}}<form method="post" action="/tasks/b/{{$t.Board}}/{{$t.Meta.ID}}/claim">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    {{if eq $t.Meta.Claimed .User.Sub}}<input type="hidden" name="claim" value="0"><button class="btn btn-secondary" type="submit">{{.T "tasks.release"}}</button>
+    {{else}}<input type="hidden" name="claim" value="1"><button class="btn btn-secondary" type="submit">{{.T "tasks.claim"}}</button>{{end}}
+  </form>{{end}}
+  <a class="btn btn-destructive" href="/tasks/b/{{$t.Board}}/{{$t.Meta.ID}}/delete">{{.T "tasks.delete"}}</a>
+</div>
+</article>{{end}}
+{{define "scripts"}}{{if .Data.Info.HasMermaid}}<script type="module" src="{{.Asset "js/mermaid-loader.js"}}" data-mermaid-src="{{.Asset "vendor/mermaid/mermaid.esm.min.mjs"}}"></script>{{end}}{{end}}
