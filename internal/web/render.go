@@ -33,7 +33,7 @@ type view struct {
 	Audience *audience
 	// AvatarVersion names the signed-in person's picture; "" means a placeholder.
 	AvatarVersion string
-	// Module is the part of Kanso the page belongs to ("notes", "todos", "wiki"), "" for
+	// Module is the part of Kanso the page belongs to ("notes", "todos", "tasks", "wiki"), "" for
 	// pages outside all parts (search, administration, licenses).
 	Module string
 	Dev    bool   // dev login: offer to switch person
@@ -113,6 +113,8 @@ func moduleOf(path string) string {
 		return "notes"
 	case path == "/todos" || strings.HasPrefix(path, "/todos/"):
 		return "todos"
+	case path == "/tasks" || strings.HasPrefix(path, "/tasks/"):
+		return "tasks"
 	case path == "/", strings.HasPrefix(path, "/s/"), strings.HasPrefix(path, "/p/"), strings.HasPrefix(path, "/admin/spaces/"):
 		return "wiki"
 	}

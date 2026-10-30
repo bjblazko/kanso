@@ -54,6 +54,7 @@
     <ul>
       <li><a href="/notes"{{if eq .Module "notes"}} aria-current="true"{{end}}>{{template "icon" "note"}}<span>{{.T "nav.notes"}}</span></a></li>
       <li><a href="/todos"{{if eq .Module "todos"}} aria-current="true"{{end}}>{{template "icon" "check"}}<span>{{.T "nav.todos"}}</span></a></li>
+      <li><a href="/tasks"{{if eq .Module "tasks"}} aria-current="true"{{end}}>{{template "icon" "board"}}<span>{{.T "nav.tasks"}}</span></a></li>
       <li><a href="/"{{if eq .Module "wiki"}} aria-current="true"{{end}}>{{template "icon" "book"}}<span>{{.T "nav.wiki"}}</span></a></li>
     </ul>
   </nav>

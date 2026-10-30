@@ -38,6 +38,7 @@ All notable changes to this project are documented here. The format follows
 - Every page says who can see it (ADR-007): spaces, pages and the space list name the people with access plus admins; notes say only you; to-do lists name their owner and shares.
 - To-do lists show progress: a bar with percent between the heading and the items; the overview shows a short bar per list, whose shape tells open, partly done and done apart, green when done.
 - Tasks: one private board per person and boards per group, each task a Markdown file in the Git history (ADR-008).
+- Tasks part in the rail: a board with the tabs Kanban (Offen · In Arbeit · Wartet · Erledigt; done tasks older than 14 days on request) and Matrix (Sofort, Planen, Kurz erledigen, Später); cards show due words, what a task waits for and who took it.
 
 ### Security
 - GPS location is removed from JPEG photos on upload (notes and wiki pages); orientation and other EXIF data stay.
