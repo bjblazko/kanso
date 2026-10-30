@@ -188,5 +188,9 @@ func (s *Server) boardAudience(v view, b tasks.Board) audience {
 	if you {
 		names = append([]string{v.T("visibility.you")}, names...)
 	}
-	return audience{Text: v.T("visibility.board", strings.Join(names, ", "))}
+	a := audience{Text: v.T("visibility.board", strings.Join(names, ", "))}
+	if v.Admin { // the group decides who sees the board
+		a = a.changeAt(v, "/admin/groups")
+	}
+	return a
 }

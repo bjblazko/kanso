@@ -17,14 +17,14 @@
 <form method="post" action="/s/{{$d.Space.Slug}}/settings" class="form form-row">
   <input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="action" value="add">
   <div class="field"><label for="kind">{{.T "settings.kind"}}</label>
-    <select id="kind" name="kind" class="btn btn-secondary"><option value="user">{{.T "settings.person"}}</option><option value="group">{{.T "settings.group"}}</option></select></div>
+    <select id="kind" name="kind"><option value="user">{{.T "settings.person"}}</option><option value="group">{{.T "settings.group"}}</option></select></div>
   <div class="field"><label for="who">{{.T "settings.who"}}</label>
-    <select id="who" name="who" class="btn btn-secondary">
+    <select id="who" name="who">
       <optgroup label="{{.T "settings.people"}}">{{range $sub, $name := $d.Users}}<option value="{{$sub}}">{{$name}}</option>{{end}}</optgroup>
       <optgroup label="{{.T "settings.groups"}}">{{range $d.Groups}}<option value="{{.}}">{{.}}</option>{{end}}</optgroup>
     </select></div>
   <div class="field"><label for="role">{{.T "settings.role"}}</label>
-    <select id="role" name="role" class="btn btn-secondary">{{range $d.Roles}}<option value="{{.}}">{{$.T (printf "role.%s" .)}}</option>{{end}}</select></div>
+    <select id="role" name="role">{{range $d.Roles}}<option value="{{.}}">{{$.T (printf "role.%s" .)}}</option>{{end}}</select></div>
   <button class="btn btn-secondary" type="submit">{{.T "settings.add"}}</button>
 </form>
 <p class="meta">{{.T "settings.kind_hint"}}</p>

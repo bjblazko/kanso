@@ -328,14 +328,17 @@ function progress(l) {
 }
 
 // audience says who sees the list: its owner and everyone it is shared with,
-// the viewer as "you"; drawn like the server's line on the other pages.
-function audience(l) {
+// the viewer as "you"; drawn like the server's line on the other pages. On the
+// list itself its owner gets a link to change who sees it.
+function audience(l, offerChange = false) {
   const you = (name, i) => (l.shared[i]?.user === ME ? msg.you : name);
   const names = [l.mine ? msg.you : l.ownerName, ...l.sharedNames.map(you)];
   const priv = names.length === 1;
   const icon = ICONS[priv ? 0 : 1].cloneNode(true);
+  const change = offerChange && l.mine
+    ? [' · ', h('a', { href: `/todos/${l.id}/share` }, msg.change_sharing)] : [];
   return h('p', { className: 'meta audience' }, icon,
-    h('span', {}, priv ? msg.only_you : fill(msg.visible_to, { names: names.join(', ') })));
+    h('span', {}, priv ? msg.only_you : fill(msg.visible_to, { names: names.join(', ') })), ...change);
 }
 
 // meter is a bar whose shape alone tells empty, partial and full apart; a
@@ -380,7 +383,7 @@ async function createList(event) {
 function listPage(l) {
   const back = h('p', { className: 'breadcrumb' }, h('a', { href: '/todos' }, msg.all));
   if (!l) return [back, state.loaded ? h('p', { className: 'empty' }, msg.not_found) : ''];
-  return [back, heading(l), listProgress(l), h('p', { className: 'meta' }, progress(l)), audience(l),
+  return [back, heading(l), listProgress(l), h('p', { className: 'meta' }, progress(l)), audience(l, true),
     h('ul', { className: 'todo-items' }, rows(l)), addForm(l), l.mine ? ownerActions(l) : ''];
 }
 

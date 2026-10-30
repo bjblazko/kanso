@@ -25,7 +25,7 @@ type listOut struct {
 var todoMessages = []string{"title", "new_list", "create", "empty", "offline_empty", "progress", "progress_label", "percent", "from",
 	"only_you", "you", "visible_to", "new_item", "add", "indent", "outdent", "add_sub", "delete_item", "rename", "share",
 	"delete_list", "all", "waiting_one", "waiting_many", "sync_login", "not_found", "name", "save", "cancel",
-	"item", "edit_item"}
+	"item", "edit_item", "change_sharing"}
 
 // todosPage serves the page for /todos and /todos/{id}; todos.js draws it
 // from the copy on the device, so it also opens offline.

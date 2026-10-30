@@ -31,6 +31,17 @@ Mobile first: top bar (name, search, user menu), navigation below it as a
 collapsible block; from 60rem a fixed left navigation. Navigation entries are
 links with `aria-current`, actions are framed buttons.
 
+## Choices and actions
+
+Selects are fields, never buttons: the input frame (`--radius-sm`, field
+background) plus a chevron drawn from `--fg-2`, so a choice never looks like
+an action next to an "Add" button. Buttons keep their own frame and weight.
+
+The line that says who can see something (ADR-007) ends with "Freigabe
+ändern" for whoever may change it: space owners (space settings), the owner of
+a to-do list (share page), admins on group boards (groups). Notes and private
+boards have nothing to share.
+
 ## Contrast (checked with contrast.py)
 
 | Pair | Ratio |

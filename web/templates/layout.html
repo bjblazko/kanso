@@ -1,5 +1,5 @@
 {{/* audience says who can see what a page shows; see view.Audience. */}}
-{{define "audience"}}{{with .}}<p class="meta audience">{{if .Private}}{{template "icon" "lock"}}{{else}}{{template "icon" "users"}}{{end}}<span>{{.Text}}</span></p>{{end}}{{end}}
+{{define "audience"}}{{with .}}<p class="meta audience">{{if .Private}}{{template "icon" "lock"}}{{else}}{{template "icon" "users"}}{{end}}<span>{{.Text}}</span>{{with .Change}} · <a href="{{.}}">{{$.ChangeText}}</a>{{end}}</p>{{end}}{{end}}
 {{/* avatar is the person's picture, round, or a placeholder until there is one. */}}
 {{define "avatar"}}{{if .AvatarVersion}}<img class="avatar" src="/avatar/{{.User.Sub}}?v={{.AvatarVersion}}" alt="">{{else}}<span class="avatar avatar-none">{{template "icon" "user"}}</span>{{end}}{{end}}
 {{define "layout"}}<!doctype html>

@@ -103,7 +103,7 @@ test('a shared list: the other person ticks, only the owner deletes', async ({ b
   const name = unique('Einkauf Fest');
   await createList(anna, name);
   await addItem(anna, 'Kerzen');
-  await expect(anna.locator('.audience')).toHaveText('Nur für dich sichtbar');
+  await expect(anna.locator('.audience')).toHaveText('Nur für dich sichtbar · Freigabe ändern');
   await anna.getByRole('link', { name: 'Teilen …' }).click();
   await anna.getByLabel('Wer').selectOption({ label: benName });
   await anna.getByRole('button', { name: 'Hinzufügen' }).click();
@@ -121,7 +121,7 @@ test('a shared list: the other person ticks, only the owner deletes', async ({ b
   await anna.goto('/todos');
   await anna.getByRole('link', { name }).click();
   await expect(anna.getByRole('checkbox', { name: 'Kerzen' })).toBeChecked();
-  await expect(anna.locator('.audience')).toHaveText(`Sichtbar für dich, ${benName}`);
+  await expect(anna.locator('.audience')).toHaveText(`Sichtbar für dich, ${benName} · Freigabe ändern`);
   await anna.getByRole('link', { name: 'Liste löschen …' }).click();
   await anna.getByRole('button', { name: `„${name}“ löschen` }).click();
   await expect(anna).toHaveURL(/\/todos$/);
@@ -173,4 +173,11 @@ test('progress: a bar with percent above the items, a short bar in the overview'
   await expect(bar).toHaveAttribute('aria-valuenow', '100');
   await page.getByRole('link', { name: 'Alle Listen' }).click();
   await expect(row.locator('.todo-meter')).toHaveAttribute('data-state', 'full');
+});
+
+test('the owner changes sharing right from the line that says who sees the list', async ({ page }) => {
+  await signIn(page, { sub: 'frieda', name: 'Frieda' });
+  await createList(page, unique('Fest'));
+  await page.locator('.audience').getByRole('link', { name: 'Freigabe ändern' }).click();
+  await expect(page).toHaveURL(/\/todos\/[a-z2-7]{12}\/share$/);
 });

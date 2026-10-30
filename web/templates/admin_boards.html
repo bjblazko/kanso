@@ -16,7 +16,7 @@
   <input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="action" value="create">
   <div class="field"><label for="board-name">{{.T "tasks.board_name"}}</label><input id="board-name" name="name" required maxlength="80"></div>
   <div class="field"><label for="board-group">{{.T "settings.group"}}</label>
-    <select id="board-group" name="group" class="btn btn-secondary">{{range $d.Groups}}<option value="{{.}}">{{.}}</option>{{end}}</select></div>
+    <select id="board-group" name="group">{{range $d.Groups}}<option value="{{.}}">{{.}}</option>{{end}}</select></div>
   <button class="btn btn-primary" type="submit">{{.T "tasks.board_create"}}</button>
 </form>{{else}}<p class="empty">{{.T "tasks.admin_no_groups"}} <a href="/admin/groups">{{.T "nav.groups"}}</a></p>{{end}}
 

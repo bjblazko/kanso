@@ -406,3 +406,14 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .seg-choice input:focus-visible + span { box-shadow: var(--focus-ring); }
 .task-capture .due-date { display: none; margin-top: var(--space-3); max-width: 14rem; }
 .task-capture:has(input[name="due"][value="date"]:checked) .due-date { display: flex; }
+
+/* Selects are fields, not buttons: the field frame plus a chevron, so a choice
+   never looks like an action. The chevron is drawn from the tokens, so it
+   follows light and dark. */
+.field select {
+  appearance: none; cursor: pointer;
+  padding-right: calc(var(--space-3) * 2 + var(--space-3));
+  background-image: linear-gradient(45deg, transparent 50%, var(--fg-2) 50%), linear-gradient(135deg, var(--fg-2) 50%, transparent 50%);
+  background-position: calc(100% - var(--space-3) - var(--space-1) - 1px) 55%, calc(100% - var(--space-3) - 1px) 55%;
+  background-size: var(--space-1) var(--space-1); background-repeat: no-repeat;
+}
