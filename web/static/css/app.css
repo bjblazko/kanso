@@ -378,3 +378,18 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .card-meta { flex-basis: 100%; margin: 0; display: flex; flex-wrap: wrap; gap: 0 var(--space-3); }
 .due-overdue { color: var(--warning-ink); font-weight: 500; }
 .due-soon { color: var(--time-ink); font-weight: 500; }
+/* Task form: "worauf" only while Wartet is chosen; hidden, its value is still sent. */
+.task-form .form-row { display: flex; }
+.task-form .form-row .field { min-width: 12rem; }
+.field-set { border: 0; padding: 0; margin: 0; }
+.field-set legend { font: 500 var(--text-sm)/1.4 var(--font-sans); color: var(--fg-2); margin-bottom: var(--space-1); padding: 0; }
+.choices { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }
+.choice { display: inline-flex; align-items: center; gap: var(--space-2); min-height: var(--target-min); cursor: pointer; }
+.choice input { width: 1.125rem; height: 1.125rem; margin: 0; }
+.task-form .waiting-for { display: none; }
+.task-form:has(input[name="status"][value="waiting"]:checked) .waiting-for { display: flex; }
+.task-facts { display: grid; gap: var(--space-2); margin: var(--space-4) 0; }
+.task-facts div { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.task-facts dt { min-width: 8rem; color: var(--fg-3); }
+.task-facts dd { margin: 0; }
+.actions form { margin: 0; }

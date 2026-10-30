@@ -79,7 +79,8 @@ async function save(event) {
   const response = await post(saveUrl, new URLSearchParams(new FormData(form)), 'application/json');
   if (response.ok) {
     dirty = false;
-    window.location.assign(viewUrl);
+    const answer = await response.json().catch(() => ({}));
+    window.location.assign(answer.url || viewUrl); // a task moved to another board has a new address
   } else if (response.status === 409) {
     const { error } = await response.json().catch(() => ({}));
     if (error === 'conflict') showStatus(form.dataset.msgConflict);
@@ -119,21 +120,23 @@ function filesFrom(dataTransfer) {
 // ---- Wiring ----------------------------------------------------------------
 
 body.addEventListener('input', () => { dirty = true; schedulePreview(); });
-form.elements.title?.addEventListener('input', () => { dirty = true; });
+form.addEventListener('input', (e) => { if (e.target !== body) dirty = true; });
 form.addEventListener('submit', save);
 for (const tab of form.querySelectorAll('[role="tab"]')) {
   tab.addEventListener('click', () => selectTab(tab.id.replace('tab-', '')));
 }
-document.getElementById('file').addEventListener('change', (e) => uploadFiles([...e.target.files]));
-body.addEventListener('paste', (e) => {
-  const files = filesFrom(e.clipboardData);
-  if (files.length) { e.preventDefault(); uploadFiles(files); }
-});
-body.addEventListener('dragover', (e) => e.preventDefault());
-body.addEventListener('drop', (e) => {
-  const files = filesFrom(e.dataTransfer);
-  if (files.length) { e.preventDefault(); uploadFiles(files); }
-});
+if (uploadUrl) { // tasks have no attachments
+  document.getElementById('file').addEventListener('change', (e) => uploadFiles([...e.target.files]));
+  body.addEventListener('paste', (e) => {
+    const files = filesFrom(e.clipboardData);
+    if (files.length) { e.preventDefault(); uploadFiles(files); }
+  });
+  body.addEventListener('dragover', (e) => e.preventDefault());
+  body.addEventListener('drop', (e) => {
+    const files = filesFrom(e.dataTransfer);
+    if (files.length) { e.preventDefault(); uploadFiles(files); }
+  });
+}
 document.addEventListener('keydown', (e) => {
   if ((e.metaKey || e.ctrlKey) && e.key === 's') save(e);
 });

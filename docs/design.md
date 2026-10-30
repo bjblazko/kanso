@@ -20,6 +20,8 @@ Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 | Notes list | Find a note to sort. |
 | Note → wiki page | Choose where the note goes. |
 | Board | See where each task stands and pick the next one. Tabs Kanban and Matrix are links; "Neue Aufgabe" is the only accent. Due words: overdue red, today/tomorrow yellow, always as a word. |
+| Task | Read a task and act on it: Bearbeiten is the accent; Übernehmen/Freigeben (group boards only) secondary; delete last. |
+| Task editor | Change a task. Column as radio buttons; "Worauf wartest du?" appears only while Wartet is chosen (CSS `:has`, value kept); text with source/preview like the wiki editor, no attachments. |
 | App icon | Three note lines and one accent dot on the dark ink colour; mark inside the central 60 % (maskable safe zone). |
 
 ## Layout

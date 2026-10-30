@@ -1,0 +1,45 @@
+{{define "content"}}{{$d := .Data}}{{$t := $d.Task}}{{$url := printf "/tasks/b/%s/%s" $t.Board $t.Meta.ID}}<div class="editor-page">
+<form method="post" action="{{$url}}" class="editor task-form" id="editor"
+      data-save-url="{{$url}}" data-view-url="{{$url}}" data-preview-key="task" data-preview-id="{{$t.Board}}/{{$t.Meta.ID}}"
+      data-msg-conflict="{{.T "tasks.conflict"}}" data-msg-failed="{{.T "page.save_failed"}}" data-msg-leave="{{.T "editor.unsaved"}}">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <input type="hidden" name="version" value="{{$d.Version}}">
+  <div class="field"><label for="title">{{.T "tasks.subject"}}</label><input id="title" name="title" required maxlength="200" value="{{$t.Meta.Title}}"></div>
+  <fieldset class="field-set"><legend>{{.T "tasks.column"}}</legend><div class="choices">
+    {{range $d.Statuses}}<label class="choice"><input type="radio" name="status" value="{{.Key}}"{{if eq .Key (print $t.Meta.Status)}} checked{{end}}> {{.Label}}</label>{{end}}
+  </div></fieldset>
+  <div class="field waiting-for"><label for="waiting_for">{{.T "tasks.waiting_label"}}</label><input id="waiting_for" name="waiting_for" maxlength="120" value="{{$t.Meta.WaitingFor}}"></div>
+  <fieldset class="field-set"><legend>{{.T "tasks.priority"}}</legend><div class="choices">
+    <label class="choice"><input type="checkbox" name="urgent" value="1"{{if $t.Meta.Urgent}} checked{{end}}> {{.T "tasks.urgent"}}</label>
+    <label class="choice"><input type="checkbox" name="important" value="1"{{if $t.Meta.Important}} checked{{end}}> {{.T "tasks.important"}}</label>
+  </div></fieldset>
+  <div class="form-row">
+    <div class="field"><label for="due">{{.T "tasks.due"}}</label><input id="due" name="due" type="date" value="{{$t.Meta.Due}}"></div>
+    {{if gt (len $d.Boards) 1}}<div class="field"><label for="board">{{.T "tasks.board"}}</label>
+      <select id="board" name="board">{{range $d.Boards}}<option value="{{.ID}}"{{if .Current}} selected{{end}}>{{.Name}}</option>{{end}}</select></div>
+    {{else}}<input type="hidden" name="board" value="{{$t.Board}}">{{end}}
+  </div>
+  <div class="seg seg-quiet editor-tabs" role="tablist" aria-label="{{.T "editor.view"}}">
+    <button type="button" role="tab" id="tab-source" aria-controls="pane-source" aria-selected="true" aria-pressed="true">{{.T "editor.source"}}</button>
+    <button type="button" role="tab" id="tab-preview" aria-controls="preview" aria-selected="false" aria-pressed="false">{{.T "editor.preview"}}</button>
+  </div>
+  <div class="editor-panes" data-show="source">
+    <div class="field pane-source" id="pane-source" role="tabpanel" aria-labelledby="tab-source">
+      <label for="body">{{.T "tasks.text"}}</label>
+      <textarea id="body" name="body" rows="12" spellcheck="true">{{$t.Body}}</textarea>
+    </div>
+    <div class="pane-preview" role="tabpanel" aria-labelledby="tab-preview" aria-live="polite">
+      <span class="pane-label" aria-hidden="true">{{.T "editor.preview"}}</span>
+      <div class="prose" id="preview"></div>
+    </div>
+  </div>
+  <p class="notice notice-warning" id="editor-status" role="alert"{{if not $d.Error}} hidden{{end}}>{{$d.Error}}</p>
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">{{.T "page.save"}}</button>
+    <a class="btn btn-quiet" href="{{$url}}">{{.T "action.cancel"}}</a>
+    <span class="hint">{{.T "editor.shortcut"}}</span>
+  </div>
+</form>
+</div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/mermaid-loader.js"}}" data-mermaid-src="{{.Asset "vendor/mermaid/mermaid.esm.min.mjs"}}"></script>
+<script type="module" src="{{.Asset "js/editor.js"}}"></script>{{end}}

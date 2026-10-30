@@ -219,6 +219,10 @@ func (s *Server) preview(w http.ResponseWriter, r *http.Request) {
 		s.notePreview(w, r)
 		return
 	}
+	if r.PostFormValue("task") != "" {
+		s.taskPreview(w, r)
+		return
+	}
 	r.SetPathValue("id", r.PostFormValue("page"))
 	if _, ok := s.pageFor(w, r, access.Write); !ok {
 		return
