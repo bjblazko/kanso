@@ -3,7 +3,9 @@
 package web
 
 import (
+	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/bjblazko/kanso/internal/notes"
 	"github.com/bjblazko/kanso/internal/tasks"
@@ -34,6 +36,15 @@ func (s *Server) noteTaskForm(w http.ResponseWriter, r *http.Request) {
 	s.render(w, r, http.StatusOK, "note_task", v)
 }
 
+// noteTaskID is the id of the task made from n, if that task still exists.
+func (s *Server) noteTaskID(r *http.Request, n notes.Note) string {
+	_, id, _ := strings.Cut(n.Meta.Task, "/")
+	if _, err := s.Tasks.Find(s.actor(r), id); err != nil {
+		return ""
+	}
+	return id
+}
+
 // noteToTask makes a task from a note: its first line is the subject, the rest
 // the text. The note stays; both point at each other.
 func (s *Server) noteToTask(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +54,14 @@ func (s *Server) noteToTask(w http.ResponseWriter, r *http.Request) {
 	}
 	v := s.newView(r, "", nil)
 	t, _, err := s.Tasks.Create(s.actor(r), taskFromNote(v, n, r.PostFormValue("board")))
-	if err != nil {
+	switch {
+	case errors.Is(err, tasks.ErrInvalid):
+		s.fail(w, r, http.StatusBadRequest, "notes.to_task_invalid")
+		return
+	case errors.Is(err, tasks.ErrFull):
+		s.fail(w, r, http.StatusBadRequest, "tasks.full")
+		return
+	case err != nil:
 		s.serverError(w, r, err)
 		return
 	}
@@ -56,8 +74,8 @@ func (s *Server) noteToTask(w http.ResponseWriter, r *http.Request) {
 
 func taskFromNote(v view, n notes.Note, board string) tasks.New {
 	title, rest := tasks.FromNote(n.Body)
-	if notes.Title(n) == "" { // only photos: the subject is the note's name, the text keeps the links
-		title, rest = noteTitle(v, n), n.Body
+	if title == "" { // only photos: the subject is the note's name; the photos stay with the note
+		title = noteTitle(v, n)
 	}
 	return tasks.New{Board: board, Title: title, Body: rest, Note: n.Meta.ID}
 }

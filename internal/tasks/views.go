@@ -114,14 +114,38 @@ func DueOf(due string, now time.Time) DueState {
 	return DueLater
 }
 
-// FromNote splits a note into a task title (its first line, without heading
-// marks, at most 200 characters) and the rest as the task's text.
+// FromNote splits a note into a task subject and text. The subject is the
+// first line of text as notes name it (no heading or list mark, at most 200
+// characters); the text is what follows. The note's photo links are left out:
+// the photos stay with the note, which the task links to.
 func FromNote(body string) (title, rest string) {
-	body = strings.TrimLeft(body, " \t\r\n")
-	first, rest, _ := strings.Cut(body, "\n")
-	title = strings.TrimSpace(strings.TrimLeft(first, "# "))
-	if r := []rune(title); len(r) > maxTitle {
-		title = string(r[:maxTitle])
+	var kept []string
+	for line := range strings.SplitSeq(body, "\n") {
+		switch {
+		case isPhoto(line):
+		case title == "":
+			title = subjectOf(line)
+		default:
+			kept = append(kept, line)
+		}
 	}
-	return title, strings.TrimLeft(rest, "\r\n")
+	if rest = strings.Trim(strings.Join(kept, "\n"), "\n"); rest != "" {
+		rest += "\n"
+	}
+	return title, rest
+}
+
+func isPhoto(line string) bool {
+	line = strings.TrimSpace(line)
+	return strings.HasPrefix(line, "![") && strings.Contains(line, "](attachments/")
+}
+
+// subjectOf is a line without heading and list marks, cut to 200 characters.
+func subjectOf(line string) string {
+	line = strings.TrimSpace(strings.TrimLeft(strings.TrimSpace(line), "#"))
+	line = strings.TrimPrefix(strings.TrimPrefix(line, "- "), "* ")
+	if r := []rune(line); len(r) > maxTitle {
+		line = string(r[:maxTitle])
+	}
+	return line
 }

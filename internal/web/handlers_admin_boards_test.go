@@ -80,3 +80,16 @@ func TestAdminBoardsListHidesPrivateBoards(t *testing.T) {
 		t.Fatalf("delete private: %d", resp.StatusCode)
 	}
 }
+
+func TestAdminBoardsOpenLinkOnlyForMembers(t *testing.T) {
+	ts := newTestServer(t)
+	boss := ts.client(t, "boss", "Boss", true)
+	id := familyBoardID(t, ts) // familie = anna, ben
+	if _, body := get(t, boss, ts.URL+"/admin/boards"); strings.Contains(body, `href="/tasks/b/`+id+`"`) {
+		t.Fatal("non-member admin gets a link that ends in 404")
+	}
+	anna := ts.client(t, "anna", "Anna", true)
+	if _, body := get(t, anna, ts.URL+"/admin/boards"); !strings.Contains(body, `href="/tasks/b/`+id+`"`) {
+		t.Fatal("member admin misses the link")
+	}
+}

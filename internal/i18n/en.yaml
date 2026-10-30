@@ -298,3 +298,4 @@ notes.to_task_hint: "The first line becomes the subject, the rest the text. The 
 notes.to_task_create: "Create task"
 notes.task_link: "To the task"
 tasks.edit: "Edit task"
+notes.to_task_invalid: "This note cannot become a task: its text is longer than 100 KB."

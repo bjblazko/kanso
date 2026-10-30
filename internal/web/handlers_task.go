@@ -115,18 +115,21 @@ func (s *Server) saveTask(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	a, e := s.actor(r), editFromForm(r)
-	if to := r.PostFormValue("board"); to != "" && to != t.Board {
-		if _, err := s.Tasks.Board(a, to); err != nil {
-			s.notFound(w, r)
-			return
-		}
+	a, e, to := s.actor(r), editFromForm(r), r.PostFormValue("board")
+	if _, err := s.Tasks.Board(a, to); to != "" && err != nil {
+		s.notFound(w, r)
+		return
 	}
 	version, _ := time.Parse(time.RFC3339Nano, r.PostFormValue("version"))
 	saved, err := s.Tasks.Update(a, t.Board, t.Meta.ID, e, version)
-	if err == nil && r.PostFormValue("board") != "" {
-		saved, err = s.Tasks.Move(a, t.Board, t.Meta.ID, r.PostFormValue("board"))
+	if err == nil && to != "" {
+		saved, err = s.Tasks.Move(a, t.Board, t.Meta.ID, to)
 	}
+	s.taskSaved(w, r, t, e, saved, err)
+}
+
+// taskSaved answers the edit form after saving.
+func (s *Server) taskSaved(w http.ResponseWriter, r *http.Request, t tasks.Task, e tasks.Edit, saved tasks.Task, err error) {
 	switch {
 	case errors.Is(err, tasks.ErrConflict):
 		s.taskFormError(w, r, t, e, http.StatusConflict, "conflict", "tasks.conflict")
@@ -230,4 +233,15 @@ func (s *Server) moveTask(w http.ResponseWriter, r *http.Request) {
 	default:
 		writeJSON(w, http.StatusOK, map[string]any{"status": t.Meta.Status, "urgent": t.Meta.Urgent, "important": t.Meta.Important})
 	}
+}
+
+// findTaskByID sends a link by task id to wherever the task is now; notes link this way,
+// so the link survives moving the task to another board.
+func (s *Server) findTaskByID(w http.ResponseWriter, r *http.Request) {
+	t, err := s.Tasks.Find(s.actor(r), r.PathValue("task"))
+	if err != nil {
+		s.notFound(w, r)
+		return
+	}
+	http.Redirect(w, r, taskPath(t), http.StatusSeeOther)
 }

@@ -22,7 +22,7 @@
 
 {{range $d.Boards}}<section class="group">
   <h2>{{template "icon" "board"}} {{.Name}} <span class="meta">{{$.T "tasks.board_of_group" .Owner.Group}}</span></h2>
-  <p><a href="/tasks/b/{{.ID}}">{{$.T "tasks.open_board"}}</a></p>
+  {{if .Member}}<p><a href="/tasks/b/{{.ID}}">{{$.T "tasks.open_board"}}</a></p>{{end}}
   <form method="post" action="/admin/boards" class="form form-row">
     <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="rename"><input type="hidden" name="id" value="{{.ID}}">
     <div class="field"><label for="rename-{{.ID}}">{{$.T "tasks.board_name"}}</label><input id="rename-{{.ID}}" name="name" required maxlength="80" value="{{.Name}}"></div>

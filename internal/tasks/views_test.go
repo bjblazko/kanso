@@ -109,3 +109,21 @@ func TestFromNote(t *testing.T) {
 		t.Fatalf("empty = %q, %q", title, rest)
 	}
 }
+
+func TestFromNoteLikeNoteTitles(t *testing.T) {
+	title, rest := FromNote("- Milch kaufen\n* Brot\n")
+	if title != "Milch kaufen" || rest != "* Brot\n" {
+		t.Fatalf("list mark: %q, %q", title, rest)
+	}
+	body := "![](attachments/a.jpg)\n\nKind anmelden\nMail an den Hort\n\n![](attachments/b.jpg)\n"
+	title, rest = FromNote(body)
+	if title != "Kind anmelden" || strings.Contains(rest, "attachments/") || !strings.Contains(rest, "Mail an den Hort") {
+		t.Fatalf("photos: %q, %q", title, rest)
+	}
+	if title, rest := FromNote("![](attachments/a.jpg)\n"); title != "" || rest != "" {
+		t.Fatalf("photo only: %q, %q", title, rest)
+	}
+	if title, _ := FromNote("#\nEinkauf\n"); title != "Einkauf" {
+		t.Fatalf("empty heading: %q", title)
+	}
+}

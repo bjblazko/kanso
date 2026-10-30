@@ -78,7 +78,77 @@ func TestNoteViewShowsTaskLink(t *testing.T) {
 	postTaskForm(t, ts, anna, "/notes/"+n.Meta.ID+"/task", url.Values{}, "")
 	got, _ := ts.deps.Notes.Get("anna", n.Meta.ID)
 	_, body := get(t, anna, ts.URL+"/notes/"+n.Meta.ID)
-	if !strings.Contains(body, `href="/tasks/b/`+got.Meta.Task+`"`) || strings.Contains(body, `/notes/`+n.Meta.ID+`/task"`) {
+	_, taskID, _ := strings.Cut(got.Meta.Task, "/")
+	if !strings.Contains(body, `href="/tasks/t/`+taskID+`"`) || strings.Contains(body, `/notes/`+n.Meta.ID+`/task"`) {
 		t.Fatalf("task link missing:\n%s", body)
+	}
+}
+
+// turnIntoTask turns anna's note into a task on her own board and returns the task.
+func turnIntoTask(t *testing.T, ts *testServer, anna *http.Client, n notes.Note) (string, string) {
+	t.Helper()
+	postTaskForm(t, ts, anna, "/notes/"+n.Meta.ID+"/task", url.Values{}, "")
+	got, _ := ts.deps.Notes.Get("anna", n.Meta.ID)
+	board, id, _ := strings.Cut(got.Meta.Task, "/")
+	return board, id
+}
+
+func TestNoteTaskLinkFollowsMove(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	fam := familyBoardID(t, ts)
+	n, _, _ := ts.deps.Notes.Create("anna", "", "Hof fegen\n", nil, 1<<20)
+	board, id := turnIntoTask(t, ts, anna, n)
+	if _, err := ts.deps.Tasks.Move(taskActor(ts, "anna"), board, id, fam); err != nil {
+		t.Fatal(err)
+	}
+	_, body := get(t, anna, ts.URL+"/notes/"+n.Meta.ID)
+	if !strings.Contains(body, `href="/tasks/t/`+id+`"`) {
+		t.Fatalf("note link:\n%s", body)
+	}
+	resp, _ := get(t, anna, ts.URL+"/tasks/t/"+id)
+	if resp.StatusCode != http.StatusSeeOther || resp.Header.Get("Location") != "/tasks/b/"+fam+"/"+id {
+		t.Fatalf("%d %s", resp.StatusCode, resp.Header.Get("Location"))
+	}
+	ben := ts.client(t, "carla", "Carla", false)
+	if resp, _ := get(t, ben, ts.URL+"/tasks/t/"+id); resp.StatusCode != http.StatusNotFound {
+		t.Fatalf("stranger: %d", resp.StatusCode)
+	}
+}
+
+func TestNoteOffersTaskAgainWhenGone(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	n, _, _ := ts.deps.Notes.Create("anna", "", "Hof fegen\n", nil, 1<<20)
+	board, id := turnIntoTask(t, ts, anna, n)
+	if err := ts.deps.Tasks.Delete(taskActor(ts, "anna"), board, id); err != nil {
+		t.Fatal(err)
+	}
+	_, body := get(t, anna, ts.URL+"/notes/"+n.Meta.ID)
+	if !strings.Contains(body, `href="/notes/`+n.Meta.ID+`/task"`) || strings.Contains(body, "/tasks/t/"+id) {
+		t.Fatalf("note view:\n%s", body)
+	}
+}
+
+func TestNoteToTaskDropsPhotoLinks(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	n, _, err := ts.deps.Notes.Create("anna", "", "Zettel vom Hort\nbitte ausfüllen\n", []notes.Upload{{Name: "zettel.png", R: bytes.NewReader([]byte("png"))}}, 1<<20)
+	if err != nil {
+		t.Fatal(err)
+	}
+	board, id := turnIntoTask(t, ts, anna, n)
+	tk, _ := ts.deps.Tasks.Get(taskActor(ts, "anna"), board, id)
+	if tk.Meta.Title != "Zettel vom Hort" || strings.Contains(tk.Body, "attachments/") || !strings.Contains(tk.Body, "bitte ausfüllen") {
+		t.Fatalf("task %q %q", tk.Meta.Title, tk.Body)
+	}
+}
+
+func TestNoteToTaskTooLong(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	n, _, _ := ts.deps.Notes.Create("anna", "", "Langer Text\n"+strings.Repeat("x", 101<<10), nil, 1<<20)
+	if resp, _ := postTaskForm(t, ts, anna, "/notes/"+n.Meta.ID+"/task", url.Values{}, ""); resp.StatusCode != http.StatusBadRequest {
+		t.Fatalf("status %d", resp.StatusCode)
 	}
 }

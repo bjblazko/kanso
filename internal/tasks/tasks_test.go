@@ -263,3 +263,43 @@ func TestTasksListsBoard(t *testing.T) {
 		t.Fatalf("Tasks = %v, %v", ts, err)
 	}
 }
+
+func TestFind(t *testing.T) {
+	s := newStore(t)
+	anna := actor("anna")
+	tk := mustCreate(t, s, anna, New{Title: "Hof fegen"})
+	fb := familyBoard(t, s)
+	if _, err := s.Move(anna, tk.Board, tk.Meta.ID, fb.ID); err != nil {
+		t.Fatal(err)
+	}
+	got, err := s.Find(anna, tk.Meta.ID)
+	if err != nil || got.Board != fb.ID {
+		t.Fatalf("Find = %+v, %v", got, err)
+	}
+	if _, err := s.Find(actor("carla"), tk.Meta.ID); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("stranger Find = %v", err)
+	}
+	for _, id := range []string{"zzzzzzzzzzzz", "../x", ""} {
+		if _, err := s.Find(anna, id); !errors.Is(err, ErrNotFound) {
+			t.Errorf("Find(%q) = %v", id, err)
+		}
+	}
+}
+
+func TestMoveToPrivateClearsClaim(t *testing.T) {
+	s := newStore(t)
+	anna := actor("anna")
+	fb := familyBoard(t, s)
+	tk := mustCreate(t, s, anna, New{Board: fb.ID, Title: "Hof fegen"})
+	if _, err := s.Claim(actor("ben"), fb.ID, tk.Meta.ID, true); err != nil {
+		t.Fatal(err)
+	}
+	own := ownBoard(t, s, anna)
+	moved, err := s.Move(anna, fb.ID, tk.Meta.ID, own.ID)
+	if err != nil || moved.Meta.Claimed != "" {
+		t.Fatalf("Move = %+v, %v", moved.Meta, err)
+	}
+	if got, _ := s.Get(anna, own.ID, tk.Meta.ID); got.Meta.Claimed != "" {
+		t.Fatalf("stored claim %q", got.Meta.Claimed)
+	}
+}

@@ -135,10 +135,23 @@ test('a note becomes a task', async ({ page }) => {
   await page.getByRole('link', { name: 'Als Aufgabe …' }).click();
   await page.getByRole('button', { name: 'Aufgabe anlegen' }).click();
   await expect(page.getByLabel('Betreff')).toHaveValue(subject);
-  await expect(page.getByLabel('Text', { exact: true })).toHaveValue('Mail an den Hort');
+  await expect(page.getByLabel('Text', { exact: true })).toHaveValue(/^Mail an den Hort\n?$/);
 
   await page.goto('/notes');
   await page.getByRole('link', { name: subject }).click();
   await page.getByRole('link', { name: 'Zur Aufgabe' }).click();
   await expect(page.getByRole('heading', { level: 1, name: subject })).toBeVisible();
+});
+
+test('a resent task that someone moved meanwhile does not claim its board is gone', async ({ page }) => {
+  await signIn(page, { sub: 'rosa', name: 'Rosa' });
+  await page.goto('/tasks/new');
+  await page.route('**/tasks', async (route) => {
+    if (route.request().method() !== 'POST') return route.continue();
+    const id = new URLSearchParams(route.request().postData()).get('id');
+    await route.fulfill({ status: 200, contentType: 'application/json',
+      body: JSON.stringify({ id, board: 'zzzzzzzzzzzz', status: 'exists' }) });
+  });
+  await capture(page, unique('Schon da'));
+  await expect(page.getByRole('status')).toHaveText('Gespeichert in Mein Board');
 });

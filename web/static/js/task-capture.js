@@ -123,7 +123,9 @@ async function upload(task, csrf) {
     });
     if (response.ok) {
       const answer = await response.json().catch(() => ({}));
-      if (task.board && answer.board && answer.board !== task.board) moved = true;
+      // Only a new task lands elsewhere because its board is gone; an "exists"
+      // answer names where someone moved the task meanwhile.
+      if (answer.status === 'created' && task.board && answer.board !== task.board) moved = true;
       return 'done';
     }
     if (response.status === 400 || response.status === 413) return 'failed';

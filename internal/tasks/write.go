@@ -118,6 +118,18 @@ func (s *Store) findTask(a Actor, id string) (Task, error) {
 	return s.readTask(board, id)
 }
 
+// Find returns a task by id on whichever board it is now, if the person sees that board.
+func (s *Store) Find(a Actor, id string) (Task, error) {
+	if !idPattern.MatchString(id) {
+		return Task{}, ErrNotFound
+	}
+	t, err := s.findTask(a, id)
+	if errors.Is(err, ErrBadID) {
+		return Task{}, ErrNotFound
+	}
+	return t, err
+}
+
 func commitMsg(t Task, what string) string { return "tasks: " + t.Meta.Title + " → " + what }
 
 // change loads a task, lets fn change it and saves it as one commit.
@@ -234,7 +246,23 @@ func (s *Store) Move(a Actor, fromBoard, taskID, toBoard string) (Task, error) {
 		}
 		t.Board = to.ID
 		out = t
-		return s.repo.Move(a.Author, s.taskRel(fromBoard, taskID), s.taskRel(to.ID, taskID), commitMsg(t, "verschoben"))
+		if err := s.repo.Move(a.Author, s.taskRel(fromBoard, taskID), s.taskRel(to.ID, taskID), commitMsg(t, "verschoben")); err != nil {
+			return err
+		}
+		return s.releaseOnPrivate(a, to, &out)
 	})
 	return out, err
+}
+
+// releaseOnPrivate gives a claimed task back when it lands on a private board,
+// where nobody else can take it and nobody could release it.
+func (s *Store) releaseOnPrivate(a Actor, to Board, t *Task) error {
+	if !to.Private() || t.Meta.Claimed == "" {
+		return nil
+	}
+	t.Meta.Claimed, t.Meta.Updated = "", s.stamp(t.Meta.Updated)
+	if err := s.writeTask(*t); err != nil {
+		return err
+	}
+	return s.repo.Commit(a.Author, commitMsg(*t, "freigegeben"), s.taskRel(t.Board, t.Meta.ID))
 }

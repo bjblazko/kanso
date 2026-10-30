@@ -11,8 +11,14 @@ import (
 	"github.com/bjblazko/kanso/internal/tasks"
 )
 
+// adminBoard is a group board and whether the admin is in its group (and may open it).
+type adminBoard struct {
+	tasks.Board
+	Member bool
+}
+
 type adminBoardsPage struct {
-	Boards  []tasks.Board
+	Boards  []adminBoard
 	Groups  []string
 	Confirm *tasks.Board // board whose deletion waits for confirmation
 	Error   string
@@ -26,7 +32,10 @@ func (s *Server) boardsPage(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) renderAdminBoards(w http.ResponseWriter, r *http.Request, status int, data adminBoardsPage) {
 	v := s.newView(r, "", nil)
-	data.Boards = s.Tasks.GroupBoards()
+	a := s.actor(r)
+	for _, b := range s.Tasks.GroupBoards() {
+		data.Boards = append(data.Boards, adminBoard{Board: b, Member: slices.Contains(a.Groups[b.Owner.Group], a.Sub)})
+	}
 	for name := range s.groups() {
 		data.Groups = append(data.Groups, name)
 	}

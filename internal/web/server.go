@@ -180,6 +180,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /tasks/new", s.newTaskForm)
 	mux.HandleFunc("POST /tasks", s.createTask)
 	mux.HandleFunc("GET /tasks/b/{board}", s.showBoard)
+	mux.HandleFunc("GET /tasks/t/{task}", s.findTaskByID)
 	mux.HandleFunc("GET /tasks/b/{board}/{task}", s.showTask)
 	mux.HandleFunc("GET /tasks/b/{board}/{task}/edit", s.editTask)
 	mux.HandleFunc("POST /tasks/b/{board}/{task}", s.saveTask)
