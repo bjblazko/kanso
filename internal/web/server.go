@@ -73,7 +73,7 @@ func New(d Deps) (*Server, error) {
 }
 
 var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search",
-	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote", "todos", "todo_share", "todo_delete", "tasks_board", "task_view", "task_edit", "task_delete"}
+	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote", "todos", "todo_share", "todo_delete", "tasks_board", "task_view", "task_edit", "task_delete", "task_new"}
 
 func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}
@@ -175,6 +175,8 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/todos", s.apiTodos)
 	mux.HandleFunc("POST /api/todos/sync", s.syncTodos)
 	mux.HandleFunc("GET /tasks", s.tasksHome)
+	mux.HandleFunc("GET /tasks/new", s.newTaskForm)
+	mux.HandleFunc("POST /tasks", s.createTask)
 	mux.HandleFunc("GET /tasks/b/{board}", s.showBoard)
 	mux.HandleFunc("GET /tasks/b/{board}/{task}", s.showTask)
 	mux.HandleFunc("GET /tasks/b/{board}/{task}/edit", s.editTask)

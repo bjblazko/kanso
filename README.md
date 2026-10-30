@@ -68,6 +68,12 @@ shared with, and are not kept in the Git history either. Each device keeps a
 copy of your lists and any changes made without network in the browser's
 storage until they are synced.
 
+Tasks are visible to their board's owner: only you on your own board, the
+members of the group on a group board (admins have no extra access). Tasks
+**are** kept in the Git history, so a deleted task is not gone without trace.
+A task captured without network waits in the browser's storage on that device
+(`kanso-tasks`) until it is uploaded.
+
 ## License
 
 Apache-2.0, see [LICENSE](LICENSE). Third-party licenses: [NOTICE](NOTICE).

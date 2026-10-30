@@ -1,0 +1,37 @@
+{{define "content"}}{{$d := .Data}}<div class="content capture-page">
+<h1>{{.T "tasks.new"}}</h1>
+<form id="task-capture" class="form task-capture" method="post" action="/tasks"
+      data-login-url="/auth/login?next=%2Ftasks%2Fnew" data-msg-login="{{.T "notes.sync_login"}}"
+      data-msg-saved="{{.T "tasks.saved_in" "{board}"}}" data-msg-moved="{{.T "tasks.moved"}}"
+      data-msg-waiting-one="{{.T "tasks.waiting_one"}}" data-msg-waiting-many="{{.T "tasks.waiting_many"}}"
+      data-msg-failed-one="{{.T "tasks.failed_one"}}" data-msg-failed-many="{{.T "tasks.failed_many"}}"
+      data-msg-failed-mark="{{.T "notes.failed_mark"}}" data-msg-not-saved="{{.T "tasks.not_saved"}}">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <div class="field"><label for="task-title">{{.T "tasks.subject"}}</label>
+    <input id="task-title" name="title" required maxlength="200" autofocus autocomplete="off" value="{{$d.Title}}"></div>
+  <fieldset class="field-set"><legend>{{.T "tasks.board"}}</legend><div class="seg seg-choice">
+    {{range $d.Boards}}<label><input type="radio" name="board" value="{{.ID}}"{{if .Current}} checked{{end}} data-name="{{.Name}}"><span>{{.Name}}</span></label>{{end}}
+  </div></fieldset>
+  <fieldset class="field-set"><legend>{{.T "tasks.priority"}}</legend><div class="choices">
+    <label class="choice"><input type="checkbox" name="urgent" value="1"> {{.T "tasks.urgent"}}</label>
+    <label class="choice"><input type="checkbox" name="important" value="1"> {{.T "tasks.important"}}</label>
+  </div></fieldset>
+  <fieldset class="field-set"><legend>{{.T "tasks.due"}}</legend><div class="seg seg-choice">
+    <label><input type="radio" name="due" value="" checked><span>{{.T "tasks.due_none"}}</span></label>
+    <label><input type="radio" name="due" value="{{$d.Due.Today}}" data-due="today"><span>{{.T "tasks.today"}}</span></label>
+    <label><input type="radio" name="due" value="{{$d.Due.Tomorrow}}" data-due="tomorrow"><span>{{.T "tasks.tomorrow"}}</span></label>
+    <label><input type="radio" name="due" value="{{$d.Due.Week}}" data-due="week"><span>{{.T "tasks.due_week"}}</span></label>
+    <label><input type="radio" name="due" value="date"><span>{{.T "tasks.due_date"}}</span></label>
+  </div>
+  <div class="field due-date"><label for="due-date">{{.T "tasks.due_date_label"}}</label><input id="due-date" name="due_date" type="date"></div>
+  </fieldset>
+  {{if $d.Error}}<p class="notice notice-warning" role="alert">{{$d.Error}}</p>{{end}}
+  <p id="capture-status" class="meta capture-status" role="status">{{with $d.Saved}}{{$.T "tasks.saved_in" .}}{{end}}</p>
+  <details id="outbox" class="outbox" hidden><summary>{{.T "tasks.outbox"}}</summary><ul class="list-plain"></ul></details>
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">{{.T "page.save"}}</button>
+    <a class="btn btn-quiet" id="to-board" href="/tasks">{{.T "tasks.to_board"}}</a>
+  </div>
+</form>
+</div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/task-capture.js"}}"></script>{{end}}
