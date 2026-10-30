@@ -38,7 +38,8 @@
         </div>
       </form>
       {{if or .Admin .Dev}}<ul class="navlist menu-links">
-        {{if .Admin}}<li><a href="/admin/groups">{{template "icon" "users"}}<span>{{.T "user.groups"}}</span></a></li>{{end}}
+        {{if .Admin}}<li><a href="/admin/groups">{{template "icon" "users"}}<span>{{.T "user.groups"}}</span></a></li>
+        <li><a href="/admin/boards">{{template "icon" "board"}}<span>{{.T "tasks.admin_boards"}}</span></a></li>{{end}}
         {{if .Dev}}<li><a href="/auth/dev?next={{.Path}}">{{template "icon" "switch"}}<span>{{.T "user.switch"}}</span></a></li>{{end}}
       </ul>{{end}}
       <form class="menu-end" method="post" action="/auth/logout">

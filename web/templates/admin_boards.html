@@ -1,0 +1,36 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.T "tasks.admin_boards"}}</h1>
+<p class="meta">{{.T "tasks.admin_intro"}}</p>
+{{if $d.Error}}<p class="notice notice-warning" role="alert">{{$d.Error}}</p>{{end}}
+{{with $d.Confirm}}<section class="notice notice-warning" role="alert">
+  <p><strong>{{$.T "tasks.board_delete_confirm" .Name}}</strong></p>
+  <p>{{$.T "tasks.board_delete_hint"}}</p>
+  <form method="post" action="/admin/boards" class="actions">
+    <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="delete_confirmed"><input type="hidden" name="id" value="{{.ID}}">
+    <button class="btn btn-destructive" type="submit">{{$.T "tasks.board_delete_named" .Name}}</button>
+    <a class="btn btn-secondary" href="/admin/boards">{{$.T "action.cancel"}}</a>
+  </form>
+</section>{{end}}
+
+{{if $d.Groups}}<form method="post" action="/admin/boards" class="form form-row group-new">
+  <input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="action" value="create">
+  <div class="field"><label for="board-name">{{.T "tasks.board_name"}}</label><input id="board-name" name="name" required maxlength="80"></div>
+  <div class="field"><label for="board-group">{{.T "settings.group"}}</label>
+    <select id="board-group" name="group" class="btn btn-secondary">{{range $d.Groups}}<option value="{{.}}">{{.}}</option>{{end}}</select></div>
+  <button class="btn btn-primary" type="submit">{{.T "tasks.board_create"}}</button>
+</form>{{else}}<p class="empty">{{.T "tasks.admin_no_groups"}} <a href="/admin/groups">{{.T "nav.groups"}}</a></p>{{end}}
+
+{{range $d.Boards}}<section class="group">
+  <h2>{{template "icon" "board"}} {{.Name}} <span class="meta">{{$.T "tasks.board_of_group" .Owner.Group}}</span></h2>
+  <p><a href="/tasks/b/{{.ID}}">{{$.T "tasks.open_board"}}</a></p>
+  <form method="post" action="/admin/boards" class="form form-row">
+    <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="rename"><input type="hidden" name="id" value="{{.ID}}">
+    <div class="field"><label for="rename-{{.ID}}">{{$.T "tasks.board_name"}}</label><input id="rename-{{.ID}}" name="name" required maxlength="80" value="{{.Name}}"></div>
+    <button class="btn btn-secondary" type="submit">{{$.T "tasks.board_rename"}}</button>
+  </form>
+  <form method="post" action="/admin/boards" class="group-delete">
+    <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{.ID}}">
+    <button class="btn btn-destructive btn-sm" type="submit">{{$.T "tasks.board_delete"}}</button>
+  </form>
+</section>{{else}}<p class="empty">{{.T "tasks.admin_none"}}</p>{{end}}
+</div>{{end}}

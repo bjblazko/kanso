@@ -75,3 +75,49 @@ test.describe('desktop', () => {
     await expect(card(page, 'doing', title).locator('abbr')).toHaveCount(2);
   });
 });
+
+test('a family board: capture onto it, another member takes the task', async ({ page }) => {
+  const ben = unique('Ben');
+  const ida = unique('Ida');
+  await signIn(page, { sub: 'benno', name: ben }); // someone to add to the group
+  await page.context().clearCookies();
+  await signIn(page, { sub: 'ida', name: ida, admin: true });
+
+  const group = unique('Familie');
+  await page.goto('/admin/groups');
+  await page.getByLabel('Name der Gruppe').fill(group);
+  await page.getByRole('button', { name: 'Gruppe anlegen' }).click();
+  const section = page.locator('section.group', { has: page.getByRole('heading', { name: group }) });
+  for (const person of [ben, ida]) {
+    await section.getByLabel('Person').selectOption({ label: person });
+    await section.getByRole('button', { name: 'Hinzufügen' }).click();
+    await expect(section.locator('.members')).toContainText(person);
+  }
+
+  const boardName = unique('Haushalt');
+  await page.goto('/admin/boards');
+  const create = page.locator('form', { has: page.getByRole('button', { name: 'Board anlegen' }) });
+  await create.getByLabel('Name', { exact: true }).fill(boardName);
+  await create.getByLabel('Gruppe').selectOption(group);
+  await create.getByRole('button', { name: 'Board anlegen' }).click();
+
+  await page.goto('/tasks/new');
+  const title = unique('Kind zur Ferienbetreuung anmelden');
+  await capture(page, title, { board: boardName, urgent: true, important: true, due: 'morgen' });
+  await expect(page.getByRole('status')).toHaveText(`Gespeichert in ${boardName}`);
+
+  await page.context().clearCookies();
+  await signIn(page, { sub: 'benno', name: ben });
+  await page.goto('/tasks');
+  await page.getByRole('link', { name: boardName }).click();
+  await card(page, 'open', title).getByRole('link', { name: title }).click();
+  await page.getByRole('button', { name: 'Übernehmen' }).click();
+  await expect(page.locator('.task-facts')).toContainText('übernommen von dir');
+
+  await page.getByRole('link', { name: 'Bearbeiten' }).click();
+  await page.getByRole('radio', { name: 'Wartet' }).check();
+  await page.getByLabel('Worauf wartest du?').fill('Antwort Hort');
+  await page.getByRole('button', { name: 'Speichern' }).click();
+  await page.getByRole('link', { name: boardName }).click();
+  await expect(card(page, 'waiting', title)).toContainText('wartet auf: Antwort Hort');
+});

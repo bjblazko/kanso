@@ -42,6 +42,7 @@ All notable changes to this project are documented here. The format follows
 - A task's page: Markdown text, column, urgent/important, due date, what it waits for, the note it came from (for its author); edit with preview, take or give back a task of a group board, move it to another board, delete it with confirmation. Saving never overwrites a change made meanwhile.
 - Quick task capture (`/tasks/new`, "Neue Aufgabe"): subject, board, urgent, important and due (heute, morgen, diese Woche = coming Sunday, or a date); works offline with an outbox like notes, a task sent twice is stored once, a task for a board that is gone lands on the own board.
 - Drag cards between Kanban columns and matrix quadrants (desktop); the board redraws from the server, a failed move leaves the card in place. The device remembers the last board and tab.
+- Admins manage group boards (`/admin/boards`, "Gruppen-Boards" in the account menu): create one for a group, rename it, delete it after confirmation.
 
 ### Security
 - GPS location is removed from JPEG photos on upload (notes and wiki pages); orientation and other EXIF data stay.
