@@ -1,6 +1,6 @@
 # Hüpattl! Kanso – Aufgaben (Boards)
 
-**Status:** Entwurf · **Created:** 2026-10-30 · **Updated:** 2026-10-30
+**Status:** freigegeben · **Created:** 2026-10-30 · **Updated:** 2026-10-30
 
 Baut auf dem Gesamtdesign auf: [2026-10-26-kanso-design.md](2026-10-26-kanso-design.md) (Phase 4).
 Ergänzt Notizen ([2026-10-27-notes-design.md](2026-10-27-notes-design.md)) und Todo-Listen
