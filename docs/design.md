@@ -23,6 +23,7 @@ Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 | Task | Read a task and act on it: Bearbeiten is the accent; Übernehmen/Freigeben (group boards only) secondary; delete last. |
 | Task editor | Change a task. Column as radio buttons; "Worauf wartest du?" appears only while Wartet is chosen (CSS `:has`, value kept); text with source/preview like the wiki editor, no attachments. |
 | Task capture | Write a task down, now: subject (focused), board, urgent/important, due as one-tap choices; "Speichern" is the only accent. Choices wrap on narrow phones instead of a segment row. |
+| Page sharing | Decide who else may read or change this one page: list of shares, add form, hint "Gilt auch für N Unterseiten", inherited shares and the space's readers below. |
 | App icon | Three note lines and one accent dot on the dark ink colour; mark inside the central 60 % (maskable safe zone). |
 
 ## Layout

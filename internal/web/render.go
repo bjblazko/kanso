@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/i18n"
 	"github.com/bjblazko/kanso/internal/spaces"
@@ -36,6 +37,8 @@ type view struct {
 	// Module is the part of Kanso the page belongs to ("notes", "todos", "tasks", "wiki"), "" for
 	// pages outside all parts (search, administration, licenses).
 	Module string
+	// Shared are the pages shared with the person in spaces they cannot read (wiki only).
+	Shared []sharedEntry
 	Dev    bool   // dev login: offer to switch person
 	Path   string // request URI, to come back after switching
 
@@ -51,7 +54,7 @@ func (v view) Asset(path string) string { return "/static/" + path + "?v=" + v.v
 
 func (s *Server) newView(r *http.Request, title string, data any) view {
 	u, p := auth.UserFrom(r.Context())
-	return view{
+	v := view{
 		Title: title, Lang: i18n.Negotiate(r.Header.Get("Accept-Language"), u.Lang),
 		User: u, CSRF: auth.CSRFToken(r.Context()), Query: r.URL.Query().Get("q"), Data: data,
 		Admin: p.Admin, Nav: s.Spaces.Visible(p, s.groups()),
@@ -59,6 +62,10 @@ func (s *Server) newView(r *http.Request, title string, data any) view {
 		AvatarVersion: s.Users.AvatarVersion(u.Sub),
 		bundle:        s.I18n, version: s.version,
 	}
+	if v.Module == "wiki" {
+		v.Shared = s.sharedWith(p)
+	}
+	return v
 }
 
 // render executes a page into a buffer first, so errors never leave half a page.
@@ -80,7 +87,8 @@ func (s *Server) page(w http.ResponseWriter, r *http.Request, page, title string
 
 // inSpace marks the navigation position: the space, its tree, the page.
 func (s *Server) inSpace(v view, space, pageID string) view {
-	v.Here, v.Page, v.Tree = space, pageID, s.Wiki.Tree(space)
+	who := access.Principal{Sub: v.User.Sub, Admin: v.Admin}
+	v.Here, v.Page, v.Tree = space, pageID, s.visibleTree(who, space, s.groups())
 	return v
 }
 

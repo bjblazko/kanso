@@ -46,6 +46,7 @@ All notable changes to this project are documented here. The format follows
 - A note becomes a task ("Als Aufgabe …"): first line as subject (as notes name it), the rest as text without the photo links; the note stays. The note links to its task by id (`/tasks/t/<id>`), so the link survives moving the task; when the task is gone, the note offers "Als Aufgabe …" again.
 - `just seed` adds a "Familie" board for the group with tasks in every column and two private tasks for Anna.
 - The line that says who can see something links to "Freigabe ändern" for whoever may change it: space owners, list owners, admins on group boards.
+- Share a single wiki page (and its subpages) with people or groups, with a role, as an exception to its space (ADR-009): "Freigabe ändern" on a page opens the page's sharing, with a hint how many subpages it covers. Whoever gets a page this way finds it under "Für dich freigegeben" in the wiki navigation and on the wiki start page, and sees nothing else of the space.
 
 ### Security
 - GPS location is removed from JPEG photos on upload (notes and wiki pages); orientation and other EXIF data stay.

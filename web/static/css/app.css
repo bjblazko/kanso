@@ -417,3 +417,9 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
   background-position: calc(100% - var(--space-3) - var(--space-1) - 1px) 55%, calc(100% - var(--space-3) - 1px) 55%;
   background-size: var(--space-1) var(--space-1); background-repeat: no-repeat;
 }
+
+/* "Für dich freigegeben" in the wiki navigation: a small heading, on phones too. */
+.sidenav-sub {
+  margin: 0; padding: var(--space-4) var(--space-5) var(--space-1);
+  color: var(--fg-3); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+}

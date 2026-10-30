@@ -69,7 +69,7 @@ func (s *Server) search(w http.ResponseWriter, r *http.Request) {
 		if d.Owner != "" {
 			return d.Owner == u.Sub
 		}
-		return access.Can(s.Spaces.RoleOf(p, d.Space, g), access.Read)
+		return access.Can(s.pageRole(p, d.Space, d.ID, g), access.Read)
 	}
 	q := strings.TrimSpace(r.URL.Query().Get("q"))
 	data := searchPage{Query: q, Spaces: map[string]string{}}

@@ -27,6 +27,10 @@ type pageCtx struct {
 	HTML      template.HTML
 	Info      markdown.Info
 	LockedBy  string
+	// Who is the person asking; their rights below this page may differ (page shares).
+	Who access.Principal
+	// SpaceReadable is false for someone who reads the page only through a share.
+	SpaceReadable bool
 }
 
 // CanBreakLock tells templates whether to offer breaking an edit lock.
@@ -45,7 +49,7 @@ func (s *Server) pageFor(w http.ResponseWriter, r *http.Request, action access.A
 	p, ok := s.Wiki.ByID(r.PathValue("id"))
 	sp, spOK := s.Spaces.Get(p.Space)
 	_, who := auth.UserFrom(r.Context())
-	role := s.Spaces.RoleOf(who, p.Space, s.groups())
+	role := s.pageRole(who, p.Space, p.Meta.ID, s.groups())
 	if !ok || !spOK || !access.Can(role, access.Read) {
 		s.notFound(w, r)
 		return pageCtx{}, false
@@ -54,7 +58,7 @@ func (s *Server) pageFor(w http.ResponseWriter, r *http.Request, action access.A
 		s.forbidden(w, r)
 		return pageCtx{}, false
 	}
-	return pageCtx{Page: p, Space: sp, Role: role}, true
+	return pageCtx{Page: p, Space: sp, Role: role, Who: who}, true
 }
 
 func (s *Server) showPage(w http.ResponseWriter, r *http.Request) {
@@ -72,7 +76,7 @@ func (s *Server) showPage(w http.ResponseWriter, r *http.Request) {
 // pageView is the view of the read page, placed in its space.
 func (s *Server) pageView(r *http.Request, pc pageCtx) view {
 	v := s.inSpace(s.newView(r, pc.Page.Meta.Title, pc), pc.Space.Slug, pc.Page.Meta.ID)
-	v.Audience = ptr(s.spaceAudienceFor(v, pc.Space, pc.Role))
+	v.Audience = ptr(s.pageAudience(v, pc))
 	return v
 }
 
@@ -85,7 +89,10 @@ func (s *Server) fillPageView(pc *pageCtx) error {
 	pc.HTML, pc.Info = html, info
 	pc.Files = s.Wiki.ListAttachments(pc.Page.Meta.ID)
 	pc.Ancestors = s.Wiki.Ancestors(pc.Page.Meta.ID)
-	pc.Children = childrenOf(s.Wiki.Tree(pc.Space.Slug), pc.Page.Meta.ID)
+	if pc.SpaceReadable = access.Can(s.Spaces.RoleOf(pc.Who, pc.Space.Slug, s.groups()), access.Read); !pc.SpaceReadable {
+		pc.Ancestors = s.readableAncestors(*pc, s.groups())
+	}
+	pc.Children = childrenOf(s.visibleTree(pc.Who, pc.Space.Slug, s.groups()), pc.Page.Meta.ID)
 	if pc.CanWrite() {
 		pc.Targets = s.moveTargets(*pc)
 	}
@@ -104,22 +111,15 @@ func childrenOf(nodes []*wiki.Node, id string) []*wiki.Node {
 	return nil
 }
 
-// moveTargets lists the places a page may move to: top level or any page
-// outside its own subtree.
+// moveTargets lists the places a page may move to: the top level and every
+// page outside its own subtree, as far as the person may write there.
 func (s *Server) moveTargets(pc pageCtx) []moveTarget {
-	targets := []moveTarget{{ID: "", Label: pc.Space.Name}}
-	var walk func(nodes []*wiki.Node, prefix string)
-	walk = func(nodes []*wiki.Node, prefix string) {
-		for _, n := range nodes {
-			if n.Meta.ID == pc.Page.Meta.ID {
-				continue
-			}
-			targets = append(targets, moveTarget{ID: n.Meta.ID, Label: prefix + n.Meta.Title})
-			walk(n.Children, prefix+n.Meta.Title+" / ")
-		}
+	g := s.groups()
+	var targets []moveTarget
+	if access.Can(s.Spaces.RoleOf(pc.Who, pc.Space.Slug, g), access.Write) {
+		targets = append(targets, moveTarget{ID: "", Label: pc.Space.Name})
 	}
-	walk(s.Wiki.Tree(pc.Space.Slug), pc.Space.Name+" / ")
-	return targets
+	return append(targets, s.writableTargets(pc.Who, pc.Space, g, pc.Page.Meta.ID)...)
 }
 
 type newPageForm struct {
@@ -129,7 +129,7 @@ type newPageForm struct {
 }
 
 func (s *Server) newPageForm(w http.ResponseWriter, r *http.Request) {
-	sp, role, ok := s.spaceFor(w, r)
+	sp, role, ok := s.placeFor(w, r, r.URL.Query().Get("parent"))
 	if !ok {
 		return
 	}
@@ -142,7 +142,7 @@ func (s *Server) newPageForm(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) createPage(w http.ResponseWriter, r *http.Request) {
-	sp, role, ok := s.spaceFor(w, r)
+	sp, role, ok := s.placeFor(w, r, r.PostFormValue("parent"))
 	if !ok {
 		return
 	}
@@ -182,7 +182,11 @@ func (s *Server) movePage(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		order = pc.Page.Meta.Order
 	}
-	u, _ := auth.UserFrom(r.Context())
+	u, p := auth.UserFrom(r.Context())
+	if !access.Can(s.targetRole(p, pc.Space.Slug, r.PostFormValue("parent"), s.groups()), access.Write) {
+		s.forbidden(w, r)
+		return
+	}
 	if err := s.Wiki.Move(u.Author(), pc.Page.Meta.ID, r.PostFormValue("parent"), order); err != nil {
 		s.fail(w, r, http.StatusConflict, pageErrorKey(err))
 		return

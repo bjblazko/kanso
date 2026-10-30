@@ -1,0 +1,42 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/p/{{$d.Page.Meta.ID}}">{{$d.Page.Meta.Title}}</a></nav>
+<h1>{{.T "share.title" $d.Page.Meta.Title}}</h1>
+<p class="meta">{{.T "share.intro"}}</p>
+{{if $d.Descendants}}<p class="notice">{{if eq $d.Descendants 1}}{{.T "share.children_one"}}{{else}}{{.T "share.children_many" $d.Descendants}}{{end}}</p>{{end}}
+{{if $d.Error}}<p class="notice notice-warning" role="alert">{{$d.Error}}</p>{{end}}
+
+<h2>{{.T "share.members"}}</h2>
+{{if $d.Members}}<ul class="list-plain members">
+{{range $i, $m := $d.Members}}<li class="row">
+  <span>{{if $m.User}}{{or (index $d.Users $m.User) $m.User}}{{else}}{{template "icon" "users"}} {{$m.Group}}{{end}}</span>
+  <span class="badge">{{$.T (printf "role.%s" $m.Role)}}</span>
+  <form method="post" action="/p/{{$d.Page.Meta.ID}}/share">
+    <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="remove"><input type="hidden" name="index" value="{{$i}}">
+    <button class="btn btn-destructive btn-sm" type="submit">{{$.T "settings.remove"}}</button>
+  </form>
+</li>{{end}}</ul>
+{{else}}<p class="empty">{{.T "share.none"}}</p>{{end}}
+
+<form method="post" action="/p/{{$d.Page.Meta.ID}}/share" class="form form-row">
+  <input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="action" value="add">
+  <div class="field"><label for="kind">{{.T "settings.kind"}}</label>
+    <select id="kind" name="kind"><option value="user">{{.T "settings.person"}}</option><option value="group">{{.T "settings.group"}}</option></select></div>
+  <div class="field"><label for="who">{{.T "settings.who"}}</label>
+    <select id="who" name="who">
+      <optgroup label="{{.T "settings.people"}}">{{range $sub, $name := $d.Users}}<option value="{{$sub}}">{{$name}}</option>{{end}}</optgroup>
+      <optgroup label="{{.T "settings.groups"}}">{{range $d.Groups}}<option value="{{.}}">{{.}}</option>{{end}}</optgroup>
+    </select></div>
+  <div class="field"><label for="role">{{.T "settings.role"}}</label>
+    <select id="role" name="role">{{range $d.Roles}}<option value="{{.}}">{{$.T (printf "role.%s" .)}}</option>{{end}}</select></div>
+  <button class="btn btn-secondary" type="submit">{{.T "settings.add"}}</button>
+</form>
+<p class="meta">{{.T "settings.kind_hint"}}</p>
+
+{{if $d.Inherited}}<h2>{{.T "share.inherited"}}</h2>
+<ul class="list-plain">{{range $d.Inherited}}<li>{{$.T "share.from"}} <a href="/p/{{.From.ID}}/share">{{.From.Title}}</a>:
+  {{range $i, $m := .Members}}{{if $i}}, {{end}}{{if $m.User}}{{or (index $d.Users $m.User) $m.User}}{{else}}{{$m.Group}}{{end}} ({{$.T (printf "role.%s" $m.Role)}}){{end}}</li>{{end}}</ul>{{end}}
+
+<h2>{{.T "share.space"}}</h2>
+<p>{{.T "share.space_hint" $d.Space.Name}}{{if $d.CanManageSpace}} <a href="/s/{{$d.Space.Slug}}/settings">{{.T "space.settings"}}</a>{{end}}</p>
+<div class="actions"><a class="btn btn-quiet" href="/p/{{$d.Page.Meta.ID}}">{{.T "share.back"}}</a></div>
+</div>{{end}}

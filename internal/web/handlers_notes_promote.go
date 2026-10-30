@@ -37,19 +37,13 @@ func (s *Server) promoteTargets(r *http.Request) []moveTarget {
 	_, p := auth.UserFrom(r.Context())
 	g := s.groups()
 	var targets []moveTarget
-	for _, sp := range s.Spaces.Visible(p, g) {
-		if !access.Can(s.Spaces.RoleOf(p, sp.Slug, g), access.Write) {
-			continue
+	for _, sp := range s.Spaces.List() {
+		if access.Can(s.Spaces.RoleOf(p, sp.Slug, g), access.Write) {
+			targets = append(targets, moveTarget{ID: sp.Slug + "/", Label: sp.Name})
 		}
-		targets = append(targets, moveTarget{ID: sp.Slug + "/", Label: sp.Name})
-		var walk func(nodes []*wiki.Node, prefix string)
-		walk = func(nodes []*wiki.Node, prefix string) {
-			for _, n := range nodes {
-				targets = append(targets, moveTarget{ID: sp.Slug + "/" + n.Meta.ID, Label: prefix + n.Meta.Title})
-				walk(n.Children, prefix+n.Meta.Title+" / ")
-			}
+		for _, t := range s.writableTargets(p, sp, g, "") {
+			targets = append(targets, moveTarget{ID: sp.Slug + "/" + t.ID, Label: t.Label})
 		}
-		walk(s.Wiki.Tree(sp.Slug), sp.Name+" / ")
 	}
 	return targets
 }
@@ -62,7 +56,7 @@ func (s *Server) promoteNote(w http.ResponseWriter, r *http.Request) {
 	}
 	u, p := auth.UserFrom(r.Context())
 	space, parent, found := strings.Cut(r.PostFormValue("where"), "/")
-	if !found || !access.Can(s.Spaces.RoleOf(p, space, s.groups()), access.Write) {
+	if !found || !access.Can(s.targetRole(p, space, parent, s.groups()), access.Write) {
 		s.fail(w, r, http.StatusForbidden, "error.forbidden")
 		return
 	}

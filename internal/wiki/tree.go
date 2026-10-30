@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/store"
 )
 
@@ -24,6 +25,8 @@ type PageMeta struct {
 	Created time.Time `yaml:"created"`
 	Updated time.Time `yaml:"updated"`
 	Author  string    `yaml:"author"`
+	// Members are shared this page and its subpages on top of the space (ADR-009).
+	Members []access.Member `yaml:"members,omitempty"`
 }
 
 // Page is a page with its location: Dir is relative to the space's pages
