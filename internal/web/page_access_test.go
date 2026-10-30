@@ -87,10 +87,10 @@ func TestShareEditorWritesInSubtree(t *testing.T) {
 		t.Fatalf("top-level page: %d", resp.StatusCode)
 	}
 	_, body := get(t, w.christina, w.ts.URL+"/p/"+child)
-	if strings.Contains(body, `value="`+w.secret+`"`) || strings.Contains(body, `<option value="">`) {
+	if strings.Contains(body, `value="haus/`+w.secret+`"`) || strings.Contains(body, `value="haus/"`) {
 		t.Fatalf("move targets outside the share:\n%s", body)
 	}
-	if !strings.Contains(body, `value="`+w.books+`"`) {
+	if !strings.Contains(body, `value="haus/`+w.books+`"`) {
 		t.Fatal("move targets miss the shared subtree")
 	}
 	resp := w.ts.postForm(t, w.christina, "/p/"+child, "/p/"+child+"/move", url.Values{"parent": {w.secret}, "order": {"0"}})

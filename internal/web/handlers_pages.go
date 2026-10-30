@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/auth"
@@ -111,15 +112,27 @@ func childrenOf(nodes []*wiki.Node, id string) []*wiki.Node {
 	return nil
 }
 
-// moveTargets lists the places a page may move to: the top level and every
-// page outside its own subtree, as far as the person may write there.
+// moveTargets lists the places a page may move to, its own space first: the
+// top level ("<space>/") and every page outside its own subtree
+// ("<space>/<id>"), as far as the person may write there.
 func (s *Server) moveTargets(pc pageCtx) []moveTarget {
 	g := s.groups()
-	var targets []moveTarget
-	if access.Can(s.Spaces.RoleOf(pc.Who, pc.Space.Slug, g), access.Write) {
-		targets = append(targets, moveTarget{ID: "", Label: pc.Space.Name})
+	all := []spaces.Space{pc.Space}
+	for _, sp := range s.Spaces.List() {
+		if sp.Slug != pc.Space.Slug {
+			all = append(all, sp)
+		}
 	}
-	return append(targets, s.writableTargets(pc.Who, pc.Space, g, pc.Page.Meta.ID)...)
+	var targets []moveTarget
+	for _, sp := range all {
+		if access.Can(s.Spaces.RoleOf(pc.Who, sp.Slug, g), access.Write) {
+			targets = append(targets, moveTarget{ID: sp.Slug + "/", Label: sp.Name})
+		}
+		for _, t := range s.writableTargets(pc.Who, sp, g, pc.Page.Meta.ID) {
+			targets = append(targets, moveTarget{ID: sp.Slug + "/" + t.ID, Label: t.Label})
+		}
+	}
+	return targets
 }
 
 type newPageForm struct {
@@ -173,21 +186,31 @@ func pageErrorKey(err error) string {
 	return "error.generic"
 }
 
+// movePage puts a page below another place, in its space or in another one
+// ("<space>/<parent>"; a bare id means the page's own space). Moving to
+// another space asks first when that changes who can see the page.
 func (s *Server) movePage(w http.ResponseWriter, r *http.Request) {
 	pc, ok := s.pageFor(w, r, access.Write)
 	if !ok {
+		return
+	}
+	space, parent, found := strings.Cut(r.PostFormValue("parent"), "/")
+	if !found {
+		space, parent = pc.Space.Slug, r.PostFormValue("parent")
+	}
+	if !access.Can(s.targetRole(pc.Who, space, parent, s.groups()), access.Write) {
+		s.forbidden(w, r)
+		return
+	}
+	if space != pc.Space.Slug && !s.mayLeaveSpace(w, r, pc, space, parent) {
 		return
 	}
 	order, err := strconv.Atoi(r.PostFormValue("order"))
 	if err != nil {
 		order = pc.Page.Meta.Order
 	}
-	u, p := auth.UserFrom(r.Context())
-	if !access.Can(s.targetRole(p, pc.Space.Slug, r.PostFormValue("parent"), s.groups()), access.Write) {
-		s.forbidden(w, r)
-		return
-	}
-	if err := s.Wiki.Move(u.Author(), pc.Page.Meta.ID, r.PostFormValue("parent"), order); err != nil {
+	u, _ := auth.UserFrom(r.Context())
+	if err := s.Wiki.MoveTo(u.Author(), pc.Page.Meta.ID, space, parent, order); err != nil {
 		s.fail(w, r, http.StatusConflict, pageErrorKey(err))
 		return
 	}
