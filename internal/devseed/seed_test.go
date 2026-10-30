@@ -11,6 +11,7 @@ import (
 	"github.com/bjblazko/kanso/internal/notes"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
+	"github.com/bjblazko/kanso/internal/tasks"
 	"github.com/bjblazko/kanso/internal/users"
 	"github.com/bjblazko/kanso/internal/wiki"
 )
@@ -22,6 +23,7 @@ type stores struct {
 	sp   *spaces.Service
 	wk   *wiki.Wiki
 	ns   *notes.Store
+	ts   *tasks.Store
 }
 
 func newStores(t *testing.T) stores {
@@ -49,12 +51,12 @@ func newStores(t *testing.T) stores {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return stores{dir: repo.Dir(), repo: repo, us: us, sp: sp, wk: wk, ns: ns}
+	return stores{dir: repo.Dir(), repo: repo, us: us, sp: sp, wk: wk, ns: ns, ts: tasks.NewStore(repo.Dir(), repo)}
 }
 
 func seed(t *testing.T, s stores) error {
 	t.Helper()
-	return Seed(s.dir, s.repo, s.us, s.sp, s.wk, s.ns)
+	return Seed(s.dir, Stores{Repo: s.repo, Users: s.us, Spaces: s.sp, Wiki: s.wk, Notes: s.ns, Tasks: s.ts})
 }
 
 func TestSeedCreatesPeople(t *testing.T) {
@@ -142,5 +144,32 @@ func TestSeedWritesNotes(t *testing.T) {
 	}
 	if n := len(s.ns.List("ben")); n != 1 {
 		t.Errorf("ben's notes = %d", n)
+	}
+}
+
+func TestSeedTasks(t *testing.T) {
+	s := newStores(t)
+	if err := seed(t, s); err != nil {
+		t.Fatal(err)
+	}
+	who := func(sub string) tasks.Actor {
+		return tasks.Actor{Sub: sub, Author: store.Author{Name: sub, Email: sub + "@example.org"}, Groups: groups}
+	}
+	ben := who("ben")
+	boards, err := s.ts.Boards(ben)
+	if err != nil || len(boards) != 2 || boards[1].Name != "Familie" || boards[1].Owner.Group != "familie" {
+		t.Fatalf("boards = %+v, %v", boards, err)
+	}
+	family, _ := s.ts.Tasks(ben, boards[1].ID)
+	seen := map[tasks.Status]bool{}
+	for _, tk := range family {
+		seen[tk.Meta.Status] = true
+	}
+	if len(seen) != len(tasks.Statuses) {
+		t.Errorf("statuses on the family board = %v", seen)
+	}
+	annaBoards, _ := s.ts.Boards(who("anna"))
+	if own, _ := s.ts.Tasks(who("anna"), annaBoards[0].ID); len(own) != 2 {
+		t.Errorf("anna's own tasks = %d", len(own))
 	}
 }

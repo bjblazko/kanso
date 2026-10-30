@@ -74,7 +74,7 @@ func seed(cfg config.Config) error {
 	if err != nil {
 		return err
 	}
-	return devseed.Seed(cfg.DataDir, repo, us, sp, wk, ns)
+	return devseed.Seed(cfg.DataDir, devseed.Stores{Repo: repo, Users: us, Spaces: sp, Wiki: wk, Notes: ns, Tasks: tasks.NewStore(cfg.DataDir, repo)})
 }
 
 func run(cfg config.Config) error {

@@ -44,6 +44,7 @@ All notable changes to this project are documented here. The format follows
 - Drag cards between Kanban columns and matrix quadrants (desktop); the board redraws from the server, a failed move leaves the card in place. The device remembers the last board and tab.
 - Admins manage group boards (`/admin/boards`, "Gruppen-Boards" in the account menu): create one for a group, rename it, delete it after confirmation.
 - A note becomes a task ("Als Aufgabe …"): first line as subject, the rest as text; the note stays, note and task link to each other.
+- `just seed` adds a "Familie" board for the group with tasks in every column and two private tasks for Anna.
 
 ### Security
 - GPS location is removed from JPEG photos on upload (notes and wiki pages); orientation and other EXIF data stay.

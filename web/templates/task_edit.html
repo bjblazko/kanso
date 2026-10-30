@@ -4,6 +4,7 @@
       data-msg-conflict="{{.T "tasks.conflict"}}" data-msg-failed="{{.T "page.save_failed"}}" data-msg-leave="{{.T "editor.unsaved"}}">
   <input type="hidden" name="csrf" value="{{.CSRF}}">
   <input type="hidden" name="version" value="{{$d.Version}}">
+  <h1>{{.T "tasks.edit"}}</h1>
   <div class="field"><label for="title">{{.T "tasks.subject"}}</label><input id="title" name="title" required maxlength="200" value="{{$t.Meta.Title}}"></div>
   <fieldset class="field-set"><legend>{{.T "tasks.column"}}</legend><div class="choices">
     {{range $d.Statuses}}<label class="choice"><input type="radio" name="status" value="{{.Key}}"{{if eq .Key (print $t.Meta.Status)}} checked{{end}}> {{.Label}}</label>{{end}}

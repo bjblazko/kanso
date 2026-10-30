@@ -12,6 +12,7 @@ import (
 	"github.com/bjblazko/kanso/internal/notes"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
+	"github.com/bjblazko/kanso/internal/tasks"
 	"github.com/bjblazko/kanso/internal/users"
 	"github.com/bjblazko/kanso/internal/wiki"
 )
@@ -62,27 +63,40 @@ var seedSpaces = []spaceSeed{
 		pages:   []pageSeed{{title: "Meine Bücher", body: booksBody}}},
 }
 
-// Seed writes people, groups, spaces, pages and notes into an empty data directory.
-func Seed(dataDir string, repo *store.Repo, us *users.Store, sp *spaces.Service, wk *wiki.Wiki, ns *notes.Store) error {
-	if len(sp.List()) > 0 {
+// Stores are the places the made-up data goes.
+type Stores struct {
+	Repo   *store.Repo
+	Users  *users.Store
+	Spaces *spaces.Service
+	Wiki   *wiki.Wiki
+	Notes  *notes.Store
+	Tasks  *tasks.Store
+}
+
+// Seed writes people, groups, spaces, pages, notes and tasks into an empty data directory.
+func Seed(dataDir string, s Stores) error {
+	if len(s.Spaces.List()) > 0 {
 		return ErrNotEmpty
 	}
-	admin, err := seedPeople(us)
+	admin, err := seedPeople(s.Users)
 	if err != nil {
 		return err
 	}
 	if err := access.SaveGroups(dataDir, groups); err != nil {
 		return err
 	}
-	if err := repo.Commit(admin, "Testgruppen angelegt", access.ConfigFile); err != nil {
+	if err := s.Repo.Commit(admin, "Testgruppen angelegt", access.ConfigFile); err != nil {
 		return err
 	}
-	for _, s := range seedSpaces {
-		if err := seedSpace(admin, sp, wk, s); err != nil {
+	for _, sp := range seedSpaces {
+		if err := seedSpace(admin, s.Spaces, s.Wiki, sp); err != nil {
 			return err
 		}
 	}
-	return seedNotes(ns)
+	if err := seedNotes(s.Notes); err != nil {
+		return err
+	}
+	return seedTasks(admin, s.Tasks)
 }
 
 var seedNoteBodies = map[string][]string{

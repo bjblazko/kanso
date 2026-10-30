@@ -77,7 +77,7 @@ test.describe('desktop', () => {
 });
 
 test('a family board: capture onto it, another member takes the task', async ({ page }) => {
-  const ben = unique('Ben');
+  const ben = unique('Benno');
   const ida = unique('Ida');
   await signIn(page, { sub: 'benno', name: ben }); // someone to add to the group
   await page.context().clearCookies();
