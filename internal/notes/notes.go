@@ -50,6 +50,8 @@ type Meta struct {
 	ID      string    `yaml:"id"`
 	Created time.Time `yaml:"created"`
 	Updated time.Time `yaml:"updated"`
+	// Task names the task made from this note, "<board-id>/<task-id>".
+	Task string `yaml:"task,omitempty"`
 }
 
 // Note is one note of one person.

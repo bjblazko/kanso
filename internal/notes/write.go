@@ -94,6 +94,20 @@ func (s *Store) Save(owner, id, body string, version time.Time) (Note, error) {
 	return n, nil
 }
 
+// LinkTask records the task made from a note; linking is not editing, so
+// Updated stays as it is.
+func (s *Store) LinkTask(owner, id, ref string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	n, err := s.Get(owner, id)
+	if err != nil {
+		return err
+	}
+	n.Meta.Task = ref
+	dir, _ := s.folder(owner, id)
+	return store.WriteDoc(filepath.Join(dir, noteFile), store.Doc[Meta]{Meta: n.Meta, Body: n.Body})
+}
+
 // AddAttachment stores a file next to an existing note.
 func (s *Store) AddAttachment(owner, id, filename string, r io.Reader, max int64) (string, error) {
 	s.mu.Lock()
