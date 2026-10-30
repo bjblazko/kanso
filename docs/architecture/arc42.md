@@ -53,6 +53,7 @@ leaves the host.
 - **Private notes outside Git, captured offline** ([ADR-004](../adr/004-notes-outside-git-offline-capture.md)).
 - **To-do lists outside Git, synced as operations** ([ADR-006](../adr/006-todo-lists-outside-git-synced-operations.md)).
 - **Every page says who can see it** ([ADR-007](../adr/007-say-who-can-see-it.md)).
+- **Page shares add rights to one page and its subpages** ([ADR-009](../adr/009-page-shares-add-rights.md)).
 - Server-rendered pages (`html/template`); JavaScript only where it helps
   (editor, drag and drop, offline, push).
 - Packages by domain capability, not by technical layer.
@@ -68,7 +69,7 @@ leaves the host.
 | `internal/auth` | OIDC, sessions, CSRF |
 | `internal/i18n` | UI strings (de, en) |
 | `internal/spaces` | Spaces and their members |
-| `internal/wiki` | Page tree, pages, attachments, locks, history |
+| `internal/wiki` | Page tree, pages, attachments, locks, history, members per page |
 | `internal/markdown` | Safe Markdown rendering |
 | `internal/notes` | Private notes per person, outside Git |
 | `internal/todos` | Shareable to-do lists outside Git, changed by operations |
@@ -126,6 +127,11 @@ is not overwritten (409).
 text; the task records the note's id, the note the task's path. The note
 stays where it is.
 
+**Reading a shared page:** the page role is the highest of the space role
+and the members of the page and its ancestors (from the in-memory index).
+Someone without a space role gets the space's tree cut down to the subtrees
+shared with them, listed under "Für dich freigegeben".
+
 **Note → wiki page:** the note's folder is moved into the space below the
 chosen page, gets a fresh page id and frontmatter, and is committed as a
 whole (text and photos).
@@ -160,6 +166,7 @@ Kopia jobs.
 | [006](../adr/006-todo-lists-outside-git-synced-operations.md) | To-do lists outside Git, synced as operations |
 | [007](../adr/007-say-who-can-see-it.md) | Every page says who can see it |
 | [008](../adr/008-tasks-in-git-offline-capture-only.md) | Tasks in Git, offline only for capture |
+| [009](../adr/009-page-shares-add-rights.md) | Page shares add rights |
 
 ## 10. Quality Requirements
 
