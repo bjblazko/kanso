@@ -37,6 +37,7 @@ All notable changes to this project are documented here. The format follows
 - Groups can be deleted; members who were never signed in are listed by their id.
 - Every page says who can see it (ADR-007): spaces, pages and the space list name the people with access plus admins; notes say only you; to-do lists name their owner and shares.
 - To-do lists show progress: a bar with percent between the heading and the items; the overview shows a short bar per list, whose shape tells open, partly done and done apart, green when done.
+- Tasks: one private board per person and boards per group, each task a Markdown file in the Git history (ADR-008).
 
 ### Security
 - GPS location is removed from JPEG photos on upload (notes and wiki pages); orientation and other EXIF data stay.

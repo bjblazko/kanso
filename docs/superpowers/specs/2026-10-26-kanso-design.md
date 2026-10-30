@@ -49,7 +49,8 @@ systemd + `DynamicUser` + `StateDirectory`, hinter Caddy. Familienkalender heute
 - **Aus Notiz wird …**: Task (Notiz bleibt, verlinkt) oder Wiki-Artikel (Notiz wird verschoben,
   Anhänge wandern mit, Git-Verlauf bleibt via `git mv`).
 - **Task-Ansichten**: ein Task hat `status` (Lane) **und** `urgent`/`important`; Kanban und
-  Eisenhower sind nur Ansichten derselben Dateien. Lanes pro Board konfigurierbar.
+  Eisenhower sind nur Ansichten derselben Dateien. Spalten fest (Offen, In Arbeit, Wartet, Erledigt; siehe
+  [Aufgaben-Spec](2026-10-30-tasks-design.md)).
 - **Wunschliste**: „Ich besorge das“ ist für die Person, der die Liste gehört, unsichtbar.
 - Telemetrie/Update-Check: keine. Einzige ausgehende Verbindungen: Authelia, Web-Push-Dienste
   (Apple/Google/Mozilla, verschlüsselte Payload), später CalDAV/ICS. Wird im Legal-Check dokumentiert.
@@ -68,8 +69,8 @@ data/
       <child-slug>/index.md      # Hierarchie = Ordnerhierarchie
   notes/<sub>/<note-id>/index.md (+ attachments/)
   boards/<board-id>/
-    board.yaml                   # Name, Besitzer (Person oder Gruppe), Lanes
-    tasks/<task-id>.md           # Frontmatter: status, urgent, important, due, assignee, recur, source
+    board.yaml                   # Name, Besitzer (Person oder Gruppe); Spalten fest
+    tasks/<task-id>.md           # Frontmatter: status, urgent, important, due, waiting_for, claimed, note
   lists/<list-id>/
     list.yaml                    # Art: shopping|wish|links|…, Besitzer, Freigaben
     items/<item-id>.md
@@ -117,7 +118,8 @@ selbst gebaut. Alle Lizenztexte kommen in die App („Lizenzen und Dank“) mit 
    Dazwischen: **To-do-Listen** (offline, teilbar; eigene Spec). *(fertig)*
 3. **Deployment** in homelab2 (Flake-Input, Modul, Authelia-Client, Caddy) und Parallelbetrieb zu Docmost.
    *(fertig)*
-4. **Tasks**: Boards (privat/Gruppe), Kanban + Eisenhower, Fälligkeiten, wiederkehrende Aufgaben; Notiz → Task.
+4. **Tasks**: Boards (privat/Gruppe), Kanban + Eisenhower, Fälligkeiten; Notiz → Task. Keine wiederkehrenden
+   Aufgaben ([Spec](2026-10-30-tasks-design.md)).
 5. **Listen**: Einkauf (eigener Listentyp, nicht die To-do-Listen), Wunschlisten (Freigabe, „Ich besorge das“), Links.
 6. **Kalender** nativ (.ics), Tasks mit Datum im Kalender, Geburtstage.
 7. **Mobil/Offline (PWA)** + **Web-Push**.

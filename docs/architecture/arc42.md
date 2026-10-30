@@ -1,7 +1,7 @@
 # Hüpattl! Kanso — Architecture (arc42)
 
 **Created:** 2026-10-26
-**Updated:** 2026-10-29
+**Updated:** 2026-10-30
 
 ## 1. Introduction and Goals
 
@@ -72,13 +72,14 @@ leaves the host.
 | `internal/markdown` | Safe Markdown rendering |
 | `internal/notes` | Private notes per person, outside Git |
 | `internal/todos` | Shareable to-do lists outside Git, changed by operations |
+| `internal/tasks` | Private and group boards of tasks in Git; Kanban and Eisenhower views |
 | `internal/photo` | Removes GPS data from JPEG uploads |
 | `internal/search` | In-memory search over pages and notes (scans all per query) |
 | `internal/devseed` | Made-up people, groups, spaces, pages and notes for development (`kanso seed`, dev login only) |
 | `internal/web` | HTTP routes, templates, static files |
 | `web/` | Templates, CSS, JS (editor, capture, to-dos, service worker), fonts, icons, vendored Mermaid |
 
-Later phases add `tasks`, `lists`, `calendar`, `push`.
+Later phases add `lists`, `calendar`, `push`.
 
 ## 6. Runtime View
 
@@ -140,6 +141,7 @@ Kopia jobs.
 | [005](../adr/005-navigation-parts-and-content.md) | Navigation: rail of parts, side bar for their content |
 | [006](../adr/006-todo-lists-outside-git-synced-operations.md) | To-do lists outside Git, synced as operations |
 | [007](../adr/007-say-who-can-see-it.md) | Every page says who can see it |
+| [008](../adr/008-tasks-in-git-offline-capture-only.md) | Tasks in Git, offline only for capture |
 
 ## 10. Quality Requirements
 
