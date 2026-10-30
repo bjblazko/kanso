@@ -133,51 +133,93 @@ func (w *Wiki) save(a store.Author, id, title, body, msg string) error {
 	return err
 }
 
-// Move puts id below newParentID ("" = top level) at position order.
+// Move puts id below newParentID ("" = top level) of its own space at position order.
 func (w *Wiki) Move(a store.Author, id, newParentID string, order int) error {
-	return w.repo.Locked(func() error {
+	p, ok := w.ByID(id)
+	if !ok {
+		return ErrNotFound
+	}
+	return w.MoveTo(a, id, p.Space, newParentID, order)
+}
+
+// MoveTo puts id with its subpages below newParentID ("" = top level) of
+// space at position order; the history follows the folder.
+func (w *Wiki) MoveTo(a store.Author, id, space, newParentID string, order int) error {
+	var moved []string
+	err := w.repo.Locked(func() error {
 		p, ok := w.ByID(id)
 		if !ok {
 			return ErrNotFound
 		}
 		w.mu.Lock()
 		defer w.mu.Unlock()
-		target, err := w.parentDir(p.Space, newParentID)
+		target, err := w.parentDir(space, newParentID)
 		if err != nil {
 			return err
 		}
-		if target == p.Dir || strings.HasPrefix(target+"/", p.Dir+"/") {
+		if space == p.Space && (target == p.Dir || strings.HasPrefix(target+"/", p.Dir+"/")) {
 			return ErrBadMove
 		}
-		return w.relocate(a, p, target, order)
+		if space != p.Space {
+			moved = w.subtree(p)
+		}
+		return w.relocate(a, p, space, target, order)
 	})
+	for _, mid := range moved { // the search index learns the new space
+		if p, ok := w.ByID(mid); ok && err == nil {
+			w.notify(p, false)
+		}
+	}
+	return err
 }
 
-// relocate moves p's folder below target and rewrites its order; the caller
-// holds the repo lock and w.mu.
-func (w *Wiki) relocate(a store.Author, p Page, target string, order int) error {
+// subtree lists the ids of p and its descendants; the caller holds w.mu.
+func (w *Wiki) subtree(p Page) []string {
+	ids := []string{p.Meta.ID}
+	for id, loc := range w.index {
+		if loc.space == p.Space && strings.HasPrefix(loc.dir, p.Dir+"/") {
+			ids = append(ids, id)
+		}
+	}
+	return ids
+}
+
+// relocate moves p's folder below target in space and rewrites its order;
+// the caller holds the repo lock and w.mu.
+func (w *Wiki) relocate(a store.Author, p Page, space, target string, order int) error {
 	newDir := p.Dir
-	if target != parentOf(p.Dir) {
-		abs := filepath.Join(pagesRoot(w.dataDir, p.Space), filepath.FromSlash(target))
+	if space != p.Space || target != parentOf(p.Dir) {
+		abs := filepath.Join(pagesRoot(w.dataDir, space), filepath.FromSlash(target))
 		newDir = path.Join(target, store.UniqueSlug(abs, path.Base(p.Dir)))
-		from, to := path.Dir(pagePath(p.Space, p.Dir)), path.Dir(pagePath(p.Space, newDir))
+		from, to := path.Dir(pagePath(p.Space, p.Dir)), path.Dir(pagePath(space, newDir))
 		if err := w.repo.Move(a, from, to, "Seite verschoben: "+p.Meta.Title); err != nil {
 			return err
 		}
-		w.reindexMoved(p.Space, p.Dir, newDir)
+		w.reindexMoved(p.Space, p.Dir, space, newDir)
 	}
-	p.Dir, p.Meta.Order = newDir, order
+	p.Space, p.Dir, p.Meta.Order = space, newDir, order
 	return w.write(a, p, "Seite einsortiert: "+p.Meta.Title)
 }
 
 // reindexMoved rewrites the locations of a moved folder and its descendants.
-func (w *Wiki) reindexMoved(space, oldDir, newDir string) {
+func (w *Wiki) reindexMoved(oldSpace, oldDir, newSpace, newDir string) {
 	for id, loc := range w.index {
-		if loc.space == space && (loc.dir == oldDir || strings.HasPrefix(loc.dir, oldDir+"/")) {
-			loc.dir = newDir + strings.TrimPrefix(loc.dir, oldDir)
+		if loc.space == oldSpace && (loc.dir == oldDir || strings.HasPrefix(loc.dir, oldDir+"/")) {
+			loc.space, loc.dir = newSpace, newDir+strings.TrimPrefix(loc.dir, oldDir)
 			w.index[id] = loc
 		}
 	}
+}
+
+// Subtree returns the ids of id and every page below it.
+func (w *Wiki) Subtree(id string) []string {
+	p, ok := w.ByID(id)
+	if !ok {
+		return nil
+	}
+	w.mu.RLock()
+	defer w.mu.RUnlock()
+	return w.subtree(p)
 }
 
 // Delete removes a page without sub-pages, including its attachments.
