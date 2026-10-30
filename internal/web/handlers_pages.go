@@ -74,7 +74,7 @@ func (s *Server) showPage(w http.ResponseWriter, r *http.Request) {
 // pageView is the view of the read page, placed in its space.
 func (s *Server) pageView(r *http.Request, pc pageCtx) view {
 	v := s.inSpace(s.newView(r, pc.Page.Meta.Title, pc), pc.Space.Slug, pc.Page.Meta.ID)
-	v.Audience = ptr(s.spaceAudienceFor(v, pc.Space, pc.Role))
+	v.Audience = ptr(s.pageAudience(v, pc))
 	return v
 }
 

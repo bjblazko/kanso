@@ -34,9 +34,14 @@ func onlyYou(v view) audience { return audience{Text: v.T("visibility.only_you")
 // then the others by name, members of a group as people. Admins read every
 // space; Kanso learns who they are only at their sign-in, so they stay a role.
 func (s *Server) spaceAudience(v view, sp spaces.Space) audience {
+	return s.membersAudience(v, sp.Members)
+}
+
+// membersAudience names everyone members give access, as spaceAudience does.
+func (s *Server) membersAudience(v view, members []access.Member) audience {
 	g := s.groups()
 	seen := map[string]bool{}
-	for _, m := range sp.Members {
+	for _, m := range members {
 		if m.User != "" {
 			seen[m.User] = true
 		}
@@ -68,6 +73,20 @@ func (s *Server) spaceAudienceFor(v view, sp spaces.Space, role access.Role) aud
 	a := s.spaceAudience(v, sp)
 	if access.Can(role, access.ManageSpace) {
 		a = a.changeAt(v, "/s/"+sp.Slug+"/settings")
+	}
+	return a
+}
+
+// pageAudience names who reads a page: the space's members plus everyone the
+// page or a page above it is shared with; managers get a link to the page's sharing.
+func (s *Server) pageAudience(v view, pc pageCtx) audience {
+	members := slices.Clone(pc.Space.Members)
+	for _, m := range s.Wiki.Chain(pc.Page.Meta.ID) {
+		members = append(members, m.Members...)
+	}
+	a := s.membersAudience(v, members)
+	if access.Can(pc.Role, access.ManageSpace) {
+		a = a.changeAt(v, "/p/"+pc.Page.Meta.ID+"/share")
 	}
 	return a
 }

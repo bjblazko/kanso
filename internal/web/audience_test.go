@@ -51,9 +51,9 @@ func TestNotesSayOnlyYou(t *testing.T) {
 func TestAudienceLinksToSharingForOwners(t *testing.T) {
 	ts, admin, anna := setupHaus(t) // anna is editor via familie, admin is owner everywhere
 	id := ts.createPage(t, anna, "haus", "", "Garten")
-	link := `href="/s/haus/settings">Freigabe ändern`
+	links := map[string]string{"/s/haus": `href="/s/haus/settings">Freigabe ändern`, "/p/" + id: `href="/p/` + id + `/share">Freigabe ändern`}
 	for _, path := range []string{"/s/haus", "/p/" + id} {
-		if _, body := get(t, admin, ts.URL+path); !strings.Contains(body, link) {
+		if _, body := get(t, admin, ts.URL+path); !strings.Contains(body, links[path]) {
 			t.Errorf("owner misses the link on %s", path)
 		}
 		if _, body := get(t, anna, ts.URL+path); strings.Contains(body, "Freigabe ändern") {
