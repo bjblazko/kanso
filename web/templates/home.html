@@ -4,6 +4,9 @@
 {{range .Nav}}<li><a href="/s/{{.Slug}}">{{template "icon" .Icon}} {{.Name}}</a>{{if .Description}}<br><span class="meta">{{.Description}}</span>{{end}}
 {{template "audience" (index $.Data .Slug)}}</li>
 {{end}}</ul>
-{{else}}<p class="empty">{{if .Admin}}{{.T "home.empty_admin"}}{{else}}{{.T "home.empty"}}{{end}}</p>{{end}}
+{{else if not .Shared}}<p class="empty">{{if .Admin}}{{.T "home.empty_admin"}}{{else}}{{.T "home.empty"}}{{end}}</p>{{end}}
+{{with .Shared}}<h2>{{$.T "nav.shared"}}</h2>
+<ul class="list-plain spaces">{{range .}}<li><a href="/p/{{.Node.Meta.ID}}">{{.Node.Meta.Title}}</a><br>
+<span class="meta">{{.SpaceName}}{{with .From}} · {{$.T "shared.from" .}}{{end}}</span></li>{{end}}</ul>{{end}}
 {{if .Admin}}<div class="actions"><a class="btn btn-primary" href="/admin/spaces/new">{{.T "space.create"}}</a></div>{{end}}
 </div>{{end}}

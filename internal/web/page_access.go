@@ -89,3 +89,51 @@ func (s *Server) writableTargets(p access.Principal, sp spaces.Space, g access.G
 	walk(s.Wiki.Tree(sp.Slug), sp.Name+" / ", s.Spaces.RoleOf(p, sp.Slug, g))
 	return out
 }
+
+// sharedEntry is a page shared with someone who cannot read its space.
+type sharedEntry struct {
+	Node      *wiki.Node
+	SpaceName string
+	From      string // the space's first owner by name; "" without one
+}
+
+// sharedWith lists the pages shared with p in spaces p cannot read, with their subtrees.
+func (s *Server) sharedWith(p access.Principal) []sharedEntry {
+	g := s.groups()
+	var out []sharedEntry
+	for _, sp := range s.Spaces.List() {
+		if access.Can(s.Spaces.RoleOf(p, sp.Slug, g), access.Read) {
+			continue
+		}
+		for _, n := range sharedNodes(p, s.Wiki.Tree(sp.Slug), g) {
+			out = append(out, sharedEntry{Node: n, SpaceName: sp.Name, From: s.ownerName(sp)})
+		}
+	}
+	return out
+}
+
+// ownerName names a space's first owner: a person by name, else a group.
+func (s *Server) ownerName(sp spaces.Space) string {
+	for _, m := range sp.Members {
+		if m.Role == access.Owner && m.User != "" {
+			return s.userName(m.User)
+		}
+	}
+	for _, m := range sp.Members {
+		if m.Role == access.Owner {
+			return m.Group
+		}
+	}
+	return ""
+}
+
+// readableAncestors keeps the pages above pc that its viewer may read.
+func (s *Server) readableAncestors(pc pageCtx, g access.Groups) []wiki.PageMeta {
+	var out []wiki.PageMeta
+	for _, a := range pc.Ancestors {
+		if access.Can(s.pageRole(pc.Who, pc.Space.Slug, a.ID, g), access.Read) {
+			out = append(out, a)
+		}
+	}
+	return out
+}

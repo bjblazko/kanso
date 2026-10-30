@@ -1,6 +1,6 @@
 {{define "content"}}{{$d := .Data}}<article class="content page">
 <nav class="breadcrumb" aria-label="{{.T "page.path"}}">
-  <a href="/s/{{$d.Space.Slug}}">{{$d.Space.Name}}</a>{{range $d.Ancestors}} <span aria-hidden="true">/</span> <a href="/p/{{.ID}}">{{.Title}}</a>{{end}}
+  {{if $d.SpaceReadable}}<a href="/s/{{$d.Space.Slug}}">{{$d.Space.Name}}</a>{{end}}{{range $i, $a := $d.Ancestors}}{{if or $i $d.SpaceReadable}} <span aria-hidden="true">/</span> {{end}}<a href="/p/{{$a.ID}}">{{$a.Title}}</a>{{end}}
 </nav>
 <h1>{{$d.Page.Meta.Title}}</h1>
 {{if $d.LockedBy}}<div class="notice notice-time" role="status">

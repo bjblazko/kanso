@@ -68,7 +68,11 @@
         {{range .Nav}}<li><a href="/s/{{.Slug}}"{{if and (eq $.Here .Slug) (not $.Page)}} aria-current="page"{{end}}>{{template "icon" .Icon}}<span>{{.Name}}</span></a>
           {{if and (eq $.Here .Slug) $.Tree}}{{template "tree" (treeArgs $.Tree $.Page)}}{{end}}</li>
         {{end}}
-      </ul>{{end}}
+      </ul>
+      {{with .Shared}}<p class="sidenav-sub">{{$.T "nav.shared"}}</p>
+      <ul class="navlist">{{range .}}<li><a href="/p/{{.Node.Meta.ID}}"{{if eq $.Page .Node.Meta.ID}} aria-current="page"{{end}}>{{.Node.Meta.Title}}</a>
+        {{if .Node.Children}}{{template "tree" (treeArgs .Node.Children $.Page)}}{{end}}</li>{{end}}
+      </ul>{{end}}{{end}}
     </details>
   </nav>{{end}}
   <main class="main" id="main">

@@ -29,6 +29,8 @@ type pageCtx struct {
 	LockedBy  string
 	// Who is the person asking; their rights below this page may differ (page shares).
 	Who access.Principal
+	// SpaceReadable is false for someone who reads the page only through a share.
+	SpaceReadable bool
 }
 
 // CanBreakLock tells templates whether to offer breaking an edit lock.
@@ -87,6 +89,9 @@ func (s *Server) fillPageView(pc *pageCtx) error {
 	pc.HTML, pc.Info = html, info
 	pc.Files = s.Wiki.ListAttachments(pc.Page.Meta.ID)
 	pc.Ancestors = s.Wiki.Ancestors(pc.Page.Meta.ID)
+	if pc.SpaceReadable = access.Can(s.Spaces.RoleOf(pc.Who, pc.Space.Slug, s.groups()), access.Read); !pc.SpaceReadable {
+		pc.Ancestors = s.readableAncestors(*pc, s.groups())
+	}
 	pc.Children = childrenOf(s.visibleTree(pc.Who, pc.Space.Slug, s.groups()), pc.Page.Meta.ID)
 	if pc.CanWrite() {
 		pc.Targets = s.moveTargets(*pc)
