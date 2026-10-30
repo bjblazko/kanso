@@ -73,6 +73,8 @@ members of the group on a group board (admins have no extra access). Tasks
 **are** kept in the Git history, so a deleted task is not gone without trace.
 A task captured without network waits in the browser's storage on that device
 (`kanso-tasks`) until it is uploaded.
+Each device also remembers, in its local storage, which board and which tab
+(Kanban or Matrix) you opened last; nothing of it leaves the device.
 
 ## License
 
