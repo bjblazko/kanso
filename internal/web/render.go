@@ -4,7 +4,6 @@ package web
 
 import (
 	"bytes"
-	"errors"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -111,8 +110,6 @@ func (s *Server) serverError(w http.ResponseWriter, r *http.Request, err error) 
 	slog.Error("request failed", "path", r.URL.Path, "err", err)
 	s.fail(w, r, http.StatusInternalServerError, "error.generic")
 }
-
-var errBadRequest = errors.New("bad request")
 
 // moduleOf names the part of Kanso a path belongs to.
 func moduleOf(path string) string {
