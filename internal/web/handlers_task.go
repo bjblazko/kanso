@@ -108,6 +108,24 @@ func editFromForm(r *http.Request) tasks.Edit {
 	}
 }
 
+// taskForm is a submitted edit form: the task as it was read, what was
+// typed, and the task as saved.
+type taskForm struct {
+	Task, Saved tasks.Task
+	Edit        tasks.Edit
+}
+
+// formRefusal is how a refused save is answered: status, JSON code, message key.
+type formRefusal struct {
+	status    int
+	code, key string
+}
+
+var (
+	refusedConflict = formRefusal{http.StatusConflict, "conflict", "tasks.conflict"}
+	refusedInvalid  = formRefusal{http.StatusBadRequest, "invalid", "tasks.invalid"}
+)
+
 // saveTask stores the edit form unless the task changed meanwhile, then moves
 // it when another board was chosen.
 func (s *Server) saveTask(w http.ResponseWriter, r *http.Request) {
@@ -115,46 +133,47 @@ func (s *Server) saveTask(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	a, e, to := s.actor(r), editFromForm(r), r.PostFormValue("board")
+	a, f, to := s.actor(r), taskForm{Task: t, Edit: editFromForm(r)}, r.PostFormValue("board")
 	if _, err := s.Tasks.Board(a, to); to != "" && err != nil {
 		s.notFound(w, r)
 		return
 	}
 	version, _ := time.Parse(time.RFC3339Nano, r.PostFormValue("version"))
-	saved, err := s.Tasks.Update(a, t.Board, t.Meta.ID, e, version)
+	var err error
+	f.Saved, err = s.Tasks.Update(a, t.Board, t.Meta.ID, f.Edit, version)
 	if err == nil && to != "" {
-		saved, err = s.Tasks.Move(a, t.Board, t.Meta.ID, to)
+		f.Saved, err = s.Tasks.Move(a, t.Board, t.Meta.ID, to)
 	}
-	s.taskSaved(w, r, t, e, saved, err)
+	s.taskSaved(w, r, f, err)
 }
 
 // taskSaved answers the edit form after saving.
-func (s *Server) taskSaved(w http.ResponseWriter, r *http.Request, t tasks.Task, e tasks.Edit, saved tasks.Task, err error) {
+func (s *Server) taskSaved(w http.ResponseWriter, r *http.Request, f taskForm, err error) {
 	switch {
 	case errors.Is(err, tasks.ErrConflict):
-		s.taskFormError(w, r, t, e, http.StatusConflict, "conflict", "tasks.conflict")
+		s.taskFormError(w, r, f, refusedConflict)
 	case errors.Is(err, tasks.ErrInvalid):
-		s.taskFormError(w, r, t, e, http.StatusBadRequest, "invalid", "tasks.invalid")
+		s.taskFormError(w, r, f, refusedInvalid)
 	case err != nil:
 		s.serverError(w, r, err)
 	case wantsJSON(r):
-		writeJSON(w, http.StatusOK, map[string]string{"status": "saved", "url": taskPath(saved)})
+		writeJSON(w, http.StatusOK, map[string]string{"status": "saved", "url": taskPath(f.Saved)})
 	default:
-		http.Redirect(w, r, taskPath(saved), http.StatusSeeOther)
+		http.Redirect(w, r, taskPath(f.Saved), http.StatusSeeOther)
 	}
 }
 
-// taskFormError answers a failed save; the form keeps what was typed.
-func (s *Server) taskFormError(w http.ResponseWriter, r *http.Request, t tasks.Task, e tasks.Edit, status int, code, key string) {
+// taskFormError answers a refused save; the form keeps what was typed.
+func (s *Server) taskFormError(w http.ResponseWriter, r *http.Request, f taskForm, why formRefusal) {
 	if wantsJSON(r) {
-		writeJSON(w, status, map[string]string{"error": code})
+		writeJSON(w, why.status, map[string]string{"error": why.code})
 		return
 	}
-	typed := t
+	typed, e := f.Task, f.Edit
 	typed.Body, typed.Meta.Title, typed.Meta.Status, typed.Meta.Due = e.Body, e.Title, e.Status, e.Due
 	typed.Meta.Urgent, typed.Meta.Important, typed.Meta.WaitingFor = e.Urgent, e.Important, e.WaitingFor
 	v := s.newView(r, "", nil)
-	s.renderTaskEditor(w, r, status, taskEdit{Task: typed, Version: t.Meta.Updated.Format(time.RFC3339Nano), Error: v.T(key)})
+	s.renderTaskEditor(w, r, why.status, taskEdit{Task: typed, Version: f.Task.Meta.Updated.Format(time.RFC3339Nano), Error: v.T(why.key)})
 }
 
 func (s *Server) claimTask(w http.ResponseWriter, r *http.Request) {
