@@ -153,18 +153,23 @@ func setField(l *List, op Op) (bool, error) {
 	if i < 0 {
 		return false, nil // deleted meanwhile
 	}
-	it := &l.Items[i]
+	return applyField(&l.Items[i], i == 0, op), nil
+}
+
+// applyField sets the field op names if op is not older than its last
+// change; the first item cannot become a sub-item.
+func applyField(it *Item, first bool, op Op) bool {
 	switch {
 	case op.Kind == "text" && op.At >= it.At.Text:
 		it.Text, it.At.Text = strings.TrimSpace(op.Text), op.At
 	case op.Kind == "done" && op.At >= it.At.Done:
 		it.Done, it.At.Done = op.Done, op.At
-	case op.Kind == "sub" && op.At >= it.At.Sub && (i > 0 || !op.Sub):
+	case op.Kind == "sub" && op.At >= it.At.Sub && (!first || !op.Sub):
 		it.Sub, it.At.Sub = op.Sub, op.At
 	default:
-		return false, nil
+		return false
 	}
-	return true, nil
+	return true
 }
 
 // deleteItem removes an item; a main item takes its sub-items with it.
