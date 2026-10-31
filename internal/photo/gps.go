@@ -55,21 +55,31 @@ func exifTIFF(b []byte) []byte {
 		return nil
 	}
 	for pos := 2; pos+4 <= len(b); {
-		marker := b[pos+1]
-		if b[pos] != 0xFF || marker == 0xDA || marker == 0xD9 {
+		marker, seg, end, ok := segment(b, pos)
+		if !ok {
 			return nil
 		}
-		end := pos + 2 + int(binary.BigEndian.Uint16(b[pos+2:]))
-		if end < pos+4 || end > len(b) {
-			return nil
-		}
-		seg := b[pos+4 : end]
 		if marker == 0xE1 && bytes.HasPrefix(seg, []byte("Exif\x00\x00")) {
 			return seg[6:]
 		}
 		pos = end
 	}
 	return nil
+}
+
+// segment reads the JPEG segment at pos: its marker, its data and where the
+// next one starts. ok is false at the image data (SOS), the end (EOI), and
+// for anything malformed.
+func segment(b []byte, pos int) (marker byte, seg []byte, end int, ok bool) {
+	marker = b[pos+1]
+	if b[pos] != 0xFF || marker == 0xDA || marker == 0xD9 {
+		return 0, nil, 0, false
+	}
+	end = pos + 2 + int(binary.BigEndian.Uint16(b[pos+2:]))
+	if end < pos+4 || end > len(b) {
+		return 0, nil, 0, false
+	}
+	return marker, b[pos+4 : end], end, true
 }
 
 // tiffData is the TIFF block of an EXIF segment with its byte order.
