@@ -168,3 +168,26 @@ func TestFixtureMatchesBuilder(t *testing.T) {
 		t.Error("testdata/gps.jpg differs from the builder")
 	}
 }
+
+// A segment whose length field is shorter than the field itself ends the
+// scan; it must not read out of bounds.
+func TestExifTIFFShortSegmentLength(t *testing.T) {
+	for _, n := range []byte{0, 1} {
+		b := []byte{0xFF, 0xD8, 0xFF, 0xE1, 0x00, n, 'E', 'x', 'i', 'f', 0, 0, 1, 2}
+		if got := exifTIFF(b); got != nil {
+			t.Errorf("length %d: %v", n, got)
+		}
+	}
+}
+
+// Only an APP1 segment holds EXIF; the same prefix in another segment is not it.
+func TestExifTIFFOnlyInAPP1(t *testing.T) {
+	b := []byte{0xFF, 0xD8, 0xFF, 0xE2, 0x00, 0x0A, 'E', 'x', 'i', 'f', 0, 0, 'I', 'I'}
+	if got := exifTIFF(b); got != nil {
+		t.Errorf("APP2 taken for EXIF: %v", got)
+	}
+	b[3] = 0xE1
+	if got := exifTIFF(b); string(got) != "II" {
+		t.Errorf("APP1 = %q", got)
+	}
+}
