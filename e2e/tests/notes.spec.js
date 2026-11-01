@@ -102,7 +102,7 @@ test('notes: the actions of a note share one height', async ({ page }) => {
   await expect(page.getByRole('status')).toHaveText('Gespeichert');
   await page.goto('/notes');
   await page.getByRole('link', { name: text }).click();
-  const heights = await page.locator('.actions .btn').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
+  const heights = await page.locator('.page-toolbar .btn').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
   expect(heights).toHaveLength(4);
   expect(new Set(heights).size).toBe(1);
 });

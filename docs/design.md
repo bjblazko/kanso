@@ -1,7 +1,7 @@
 # Design
 
 **Created:** 2026-10-26
-**Updated:** 2026-10-30
+**Updated:** 2026-11-01
 
 Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 `web/static/css/tokens.css`; components use only `var(--…)`.
@@ -32,6 +32,24 @@ Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 Mobile first: top bar (name, search, user menu), navigation below it as a
 collapsible block; from 60rem a fixed left navigation. Navigation entries are
 links with `aria-current`, actions are framed buttons.
+
+## Screen head (owner's rule, 2026-11-01)
+
+Every screen that shows content (wiki start, space, page, notes, note, to-do
+list, board, task) opens with a **screen head** that stays at the top while
+the content scrolls: a flat **toolbar**, then the path (breadcrumb) if there
+is one, then the **title**. No action buttons below the content.
+
+- Toolbar order: the primary action (the screen's only accent), further
+  actions as quiet framed buttons with icon and word, a hairline, then rare or
+  destructive actions (delete in red text), and at the right end **who sees
+  it** (ADR-007) — the button to the sharing for whoever may change it, plain
+  text for everyone else.
+- On phones the quiet actions show only their icon; the word stays for screen
+  readers. "Who sees it" takes its own row.
+- `scroll-padding-top` keeps focused or scrolled-to elements below the head.
+- Form pages (editors, settings, capture) keep their submit button at the end
+  of the form.
 
 ## Choices and actions
 

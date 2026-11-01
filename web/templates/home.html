@@ -1,5 +1,9 @@
-{{define "content"}}<div class="content">
-<h1>{{.T "nav.spaces"}}</h1>
+{{define "content"}}<header class="screen-head">
+{{if .Admin}}<div class="page-toolbar" role="toolbar" aria-label="{{.T "nav.spaces"}}">
+  <a class="btn btn-primary btn-sm" href="/admin/spaces/new">{{template "icon" "plus"}}<span>{{.T "space.create"}}</span></a>
+</div>{{end}}
+<h1>{{.T "nav.spaces"}}</h1></header>
+<div class="content">
 {{if .Nav}}<ul class="list-plain spaces">
 {{range .Nav}}<li><a href="/s/{{.Slug}}">{{template "icon" .Icon}} {{.Name}}</a>{{if .Description}}<br><span class="meta">{{.Description}}</span>{{end}}
 {{template "audience" (index $.Data .Slug)}}</li>
@@ -8,5 +12,4 @@
 {{with .Shared}}<h2>{{$.T "nav.shared"}}</h2>
 <ul class="list-plain spaces">{{range .}}<li><a href="/p/{{.Node.Meta.ID}}">{{.Node.Meta.Title}}</a><br>
 <span class="meta">{{.SpaceName}}{{with .From}} · {{$.T "shared.from" .}}{{end}}</span></li>{{end}}</ul>{{end}}
-{{if .Admin}}<div class="actions"><a class="btn btn-primary" href="/admin/spaces/new">{{.T "space.create"}}</a></div>{{end}}
 </div>{{end}}

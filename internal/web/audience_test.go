@@ -51,7 +51,7 @@ func TestNotesSayOnlyYou(t *testing.T) {
 func TestAudienceLinksToSharingForOwners(t *testing.T) {
 	ts, admin, anna := setupHaus(t) // anna is editor via familie, admin is owner everywhere
 	id := ts.createPage(t, anna, "haus", "", "Garten")
-	links := map[string]string{"/s/haus": `href="/s/haus/settings">Freigabe ändern`, "/p/" + id: `href="/p/` + id + `/share"`}
+	links := map[string]string{"/s/haus": `tb-audience" href="/s/haus/settings"`, "/p/" + id: `tb-audience" href="/p/` + id + `/share"`}
 	for _, path := range []string{"/s/haus", "/p/" + id} {
 		if _, body := get(t, admin, ts.URL+path); !strings.Contains(body, links[path]) {
 			t.Errorf("owner misses the link on %s", path)
@@ -67,7 +67,7 @@ func TestBoardAudienceLinksAdminsToBoards(t *testing.T) {
 	anna := ts.client(t, "anna", "Anna", true) // admin and member of familie
 	ben := ts.client(t, "ben", "Ben", false)
 	fam := familyBoardID(t, ts)
-	if _, body := get(t, anna, ts.URL+"/tasks/b/"+fam); !strings.Contains(body, `href="/admin/groups">Freigabe ändern`) {
+	if _, body := get(t, anna, ts.URL+"/tasks/b/"+fam); !strings.Contains(body, `tb-audience" href="/admin/groups"`) {
 		t.Fatal("admin misses the link")
 	}
 	if _, body := get(t, ben, ts.URL+"/tasks/b/"+fam); strings.Contains(body, "Freigabe ändern") {

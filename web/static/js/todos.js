@@ -15,6 +15,7 @@ const status = document.getElementById('todos-status');
 const msg = JSON.parse(document.getElementById('todo-messages').textContent);
 const ME = root.dataset.sub;
 const ICONS = [...document.getElementById('todo-icons').content.children];
+const ICON_NAMES = ['lock', 'users', 'edit', 'trash']; // the order of #todo-icons
 const titleSuffix = document.title.slice(document.title.indexOf(' · '));
 
 const state = {
@@ -313,7 +314,7 @@ function overview(all) {
     h('button', { className: 'btn btn-primary', type: 'submit' }, msg.create));
   let body = h('ul', { className: 'list-plain todo-lists' }, all.map(listRow));
   if (all.length === 0) body = h('p', { className: 'empty' }, state.offline ? msg.offline_empty : (state.loaded ? msg.empty : ''));
-  return [h('h1', {}, msg.title), form, body];
+  return [h('header', { className: 'screen-head' }, h('h1', {}, msg.title)), form, body];
 }
 
 function counts(l) {
@@ -327,19 +328,32 @@ function progress(l) {
   return parts.join(' · ');
 }
 
-// audience says who sees the list: its owner and everyone it is shared with,
-// the viewer as "you"; drawn like the server's line on the other pages. On the
-// list itself its owner gets a link to change who sees it.
-function audience(l, offerChange = false) {
+// audienceText says who sees the list: its owner and everyone it is shared
+// with, the viewer as "you"; the same words as the server's line elsewhere.
+function audienceText(l) {
   const you = (name, i) => (l.shared[i]?.user === ME ? msg.you : name);
   const names = [l.mine ? msg.you : l.ownerName, ...l.sharedNames.map(you)];
   const priv = names.length === 1;
-  const icon = ICONS[priv ? 0 : 1].cloneNode(true);
-  const change = offerChange && l.mine
-    ? [' · ', h('a', { href: `/todos/${l.id}/share` }, msg.change_sharing)] : [];
-  return h('p', { className: 'meta audience' }, icon,
-    h('span', {}, priv ? msg.only_you : fill(msg.visible_to, { names: names.join(', ') })), ...change);
+  return { priv, text: priv ? msg.only_you : fill(msg.visible_to, { names: names.join(', ') }) };
 }
+
+// audience is the line in a row of the overview.
+function audience(l) {
+  const { priv, text } = audienceText(l);
+  return h('p', { className: 'meta audience' }, icon(priv ? 'lock' : 'users'), h('span', {}, text));
+}
+
+// toolbarAudience ends the toolbar of a list: the button to its sharing for
+// the owner, plain text for everyone else (ADR-007).
+function toolbarAudience(l) {
+  const { priv, text } = audienceText(l);
+  const inner = [icon(priv ? 'lock' : 'users'), h('span', { className: 'tb-audience-text' }, text)];
+  if (!l.mine) return h('span', { className: 'meta tb-audience' }, ...inner);
+  return h('a', { className: 'btn btn-secondary btn-sm tb-audience', href: `/todos/${l.id}/share` },
+    ...inner, h('span', { className: 'visually-hidden' }, ` – ${msg.change_sharing}`));
+}
+
+const icon = (name) => ICONS[ICON_NAMES.indexOf(name)].cloneNode(true);
 
 // meter is a bar whose shape alone tells empty, partial and full apart; a
 // list without items has nothing to measure and gets none. Rounding down keeps
@@ -381,10 +395,11 @@ async function createList(event) {
 // ---- One list --------------------------------------------------------------
 
 function listPage(l) {
-  const back = h('p', { className: 'breadcrumb' }, h('a', { href: '/todos' }, msg.all));
+  const back = h('nav', { className: 'breadcrumb', 'aria-label': msg.path }, h('a', { href: '/todos' }, msg.all));
   if (!l) return [back, state.loaded ? h('p', { className: 'empty' }, msg.not_found) : ''];
-  return [back, heading(l), listProgress(l), h('p', { className: 'meta' }, progress(l)), audience(l, true),
-    h('ul', { className: 'todo-items' }, rows(l)), addForm(l), l.mine ? ownerActions(l) : ''];
+  return [h('header', { className: 'screen-head' }, toolbar(l), back, heading(l)),
+    listProgress(l), h('p', { className: 'meta' }, progress(l)),
+    h('ul', { className: 'todo-items' }, rows(l)), addForm(l)];
 }
 
 function heading(l) {
@@ -520,12 +535,22 @@ function addForm(l) {
     h('button', { className: 'btn btn-primary', type: 'submit' }, msg.add));
 }
 
-function ownerActions(l) {
+// toolbar heads a list: the owner renames, shares and deletes it; everyone
+// sees who else sees it.
+function toolbar(l) {
+  return h('div', { className: 'page-toolbar', role: 'toolbar', 'aria-label': msg.toolbar },
+    l.mine ? ownerTools(l) : [], h('span', { className: 'tb-grow' }), toolbarAudience(l));
+}
+
+function ownerTools(l) {
   const rename = () => { state.renaming = { id: l.id, text: l.name }; state.focus = 'rename'; draw(); };
-  return h('div', { className: 'actions' },
-    button(msg.rename, rename),
-    h('a', { className: 'btn btn-secondary btn-sm', href: `/todos/${l.id}/share` }, msg.share),
-    h('a', { className: 'btn btn-quiet btn-sm', href: `/todos/${l.id}/delete` }, msg.delete_list));
+  const label = (text) => h('span', { className: 'tb-label' }, text);
+  return [
+    h('button', { className: 'btn btn-quiet btn-sm', type: 'button', onclick: rename }, icon('edit'), label(msg.rename)),
+    h('a', { className: 'btn btn-quiet btn-sm', href: `/todos/${l.id}/share` }, icon('users'), label(msg.share)),
+    h('span', { className: 'tb-sep', 'aria-hidden': 'true' }),
+    h('a', { className: 'btn btn-quiet btn-sm tb-danger', href: `/todos/${l.id}/delete` }, icon('trash'), label(msg.delete_list)),
+  ];
 }
 
 // ---- Wiring ----------------------------------------------------------------

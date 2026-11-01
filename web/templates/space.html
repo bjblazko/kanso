@@ -1,10 +1,12 @@
-{{define "content"}}{{$d := .Data}}<div class="content">
-<h1>{{template "icon" $d.Space.Icon}} {{$d.Space.Name}}</h1>
-{{if $d.Space.Description}}<p class="meta">{{$d.Space.Description}}</p>{{end}}
-{{template "audience" .Audience}}
-{{if .Tree}}{{template "tree" (treeArgs .Tree "")}}{{else}}<p class="empty">{{.T "space.no_pages"}}</p>{{end}}
-<div class="actions">
-  {{if $d.CanWrite}}<a class="btn btn-primary" href="/s/{{$d.Space.Slug}}/new">{{.T "page.create"}}</a>{{end}}
-  {{if $d.CanManage}}<a class="btn btn-secondary" href="/s/{{$d.Space.Slug}}/settings">{{.T "space.settings"}}</a>{{end}}
+{{define "content"}}{{$d := .Data}}<header class="screen-head">
+<div class="page-toolbar" role="toolbar" aria-label="{{.T "space.toolbar"}}">
+  {{if $d.CanWrite}}<a class="btn btn-primary btn-sm" href="/s/{{$d.Space.Slug}}/new">{{template "icon" "plus"}}<span>{{.T "page.create"}}</span></a>{{end}}
+  {{if $d.CanManage}}<a class="btn btn-quiet btn-sm" href="/s/{{$d.Space.Slug}}/settings">{{template "icon" "settings"}}<span class="tb-label">{{.T "space.settings"}}</span></a>{{end}}
+  <span class="tb-grow"></span>
+  {{template "tb-audience" .Audience}}
 </div>
+<h1>{{template "icon" $d.Space.Icon}} {{$d.Space.Name}}</h1></header>
+<div class="content">
+{{if $d.Space.Description}}<p class="meta">{{$d.Space.Description}}</p>{{end}}
+{{if .Tree}}{{template "tree" (treeArgs .Tree "")}}{{else}}<p class="empty">{{.T "space.no_pages"}}</p>{{end}}
 </div>{{end}}
