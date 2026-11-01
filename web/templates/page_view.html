@@ -1,8 +1,9 @@
-{{define "content"}}{{$d := .Data}}{{template "page-toolbar" .}}<article class="content page">
+{{define "content"}}{{$d := .Data}}<header class="screen-head">{{template "page-toolbar" .}}
 <nav class="breadcrumb" aria-label="{{.T "page.path"}}">
   {{if $d.SpaceReadable}}<a href="/s/{{$d.Space.Slug}}">{{$d.Space.Name}}</a>{{end}}{{range $i, $a := $d.Ancestors}}{{if or $i $d.SpaceReadable}} <span aria-hidden="true">/</span> {{end}}<a href="/p/{{$a.ID}}">{{$a.Title}}</a>{{end}}
 </nav>
-<h1>{{$d.Page.Meta.Title}}</h1>
+<h1>{{$d.Page.Meta.Title}}</h1></header>
+<article class="content page">
 {{if $d.LockedBy}}<div class="notice notice-time" role="status">
   <p>{{.T "lock.held_by" $d.LockedBy}}</p>
   {{if $d.CanBreakLock}}<form method="post" action="/p/{{$d.Page.Meta.ID}}/lock/break">
@@ -34,6 +35,5 @@
   <a class="btn btn-quiet btn-sm" href="/p/{{$id}}/history">{{template "icon" "history"}}<span class="tb-label">{{.T "history.link"}}</span></a>
   {{if $d.CanWrite}}<a class="btn btn-quiet btn-sm tb-danger" href="/p/{{$id}}/delete">{{template "icon" "trash"}}<span class="tb-label">{{.T "page.delete_short"}}</span></a>{{end}}
   <span class="tb-grow"></span>
-  {{with .Audience}}{{if .Change}}<a class="btn btn-secondary btn-sm tb-audience" href="{{.Change}}">{{if .Private}}{{template "icon" "lock"}}{{else}}{{template "icon" "users"}}{{end}}<span class="tb-audience-text">{{.Text}}</span><span class="visually-hidden"> – {{.ChangeText}}</span></a>
-  {{else}}<span class="meta tb-audience">{{if .Private}}{{template "icon" "lock"}}{{else}}{{template "icon" "users"}}{{end}}<span class="tb-audience-text">{{.Text}}</span></span>{{end}}{{end}}
+  {{template "tb-audience" .Audience}}
 </div>{{end}}

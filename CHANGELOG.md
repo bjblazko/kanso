@@ -60,7 +60,7 @@ All notable changes to this project are documented here. The format follows
 - Uploads share one path (`store.SaveUpload`) for safe names, size limit and photo cleaning.
 - The Markdown editor serves pages and notes; it reads its URLs from the form.
 - Select fields look like fields (frame plus chevron), no longer like buttons.
-- Wiki pages have a toolbar above the title that stays in view: Bearbeiten, Unterseite, Verschieben (now its own page), Verlauf, Löschen, and who sees the page as the button to its sharing; on phones the secondary actions show as icons.
+- Every content screen (wiki start, space, page, notes, note, to-do list, board, task) has a fixed screen head: a toolbar with the actions and who sees it, the path and the title stay at the top while the content scrolls; no buttons below the content any more. On phones the secondary actions show as icons. Pages: Verschieben is its own page.
 
 ### Fixed
 - Signing in failed with "Bad Request" when a second login started meanwhile (the service worker refreshing a page while signed out); each login now keeps its own cookie.
