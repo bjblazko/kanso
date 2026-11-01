@@ -12,7 +12,7 @@ Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 |---|---|
 | Rail (all screens) | Switch between the parts of Kanso; bottom bar on phones, left column on wide screens (ADR-005). |
 | Start (wiki) | Get into a wiki space. |
-| Page view | Read a page. |
+| Page view | Read a page. A flat toolbar above the title stays in view while scrolling: Bearbeiten (the only accent), Unterseite, then Verschieben, Verlauf, Löschen (red text); right, who sees the page as a button to its sharing (or plain text for readers). On phones the quiet actions show only their icon, the word stays for screen readers. |
 | Page editor | Change a page and save it. |
 | Space settings | Decide who may read and write. |
 | Licenses and thanks | Show whose work Kanso contains. |

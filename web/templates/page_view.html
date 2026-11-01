@@ -1,4 +1,4 @@
-{{define "content"}}{{$d := .Data}}<article class="content page">
+{{define "content"}}{{$d := .Data}}{{template "page-toolbar" .}}<article class="content page">
 <nav class="breadcrumb" aria-label="{{.T "page.path"}}">
   {{if $d.SpaceReadable}}<a href="/s/{{$d.Space.Slug}}">{{$d.Space.Name}}</a>{{end}}{{range $i, $a := $d.Ancestors}}{{if or $i $d.SpaceReadable}} <span aria-hidden="true">/</span> {{end}}<a href="/p/{{$a.ID}}">{{$a.Title}}</a>{{end}}
 </nav>
@@ -10,8 +10,7 @@
     <button class="btn btn-secondary btn-sm" type="submit">{{.T "lock.break"}}</button>
   </form>{{end}}
 </div>{{end}}
-{{template "audience" .Audience}}
-<p class="meta">{{.T "page.updated_by" $d.Page.Meta.Author}} <time datetime="{{$d.Page.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Page.Meta.Updated.Format "02.01.2006 15:04"}}</time> · <a href="/p/{{$d.Page.Meta.ID}}/history">{{.T "history.link"}}</a></p>
+<p class="meta">{{.T "page.updated_by" $d.Page.Meta.Author}} <time datetime="{{$d.Page.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Page.Meta.Updated.Format "02.01.2006 15:04"}}</time></p>
 <div class="prose">{{if $d.Page.Body}}{{$d.HTML}}{{else}}<p class="empty">{{.T "page.empty"}}</p>{{end}}</div>
 
 {{if $d.Files}}<section class="files"><h2>{{.T "page.attachments"}}</h2><ul class="list-plain">
@@ -22,22 +21,19 @@
 
 {{if $d.Children}}<section class="children"><h2>{{.T "page.children"}}</h2>{{template "tree" (treeArgs $d.Children "")}}</section>{{end}}
 
-{{if $d.CanWrite}}<div class="actions">
-  {{if not $d.LockedBy}}<a class="btn btn-primary" href="/p/{{$d.Page.Meta.ID}}/edit">{{.T "page.edit"}}</a>{{end}}
-  <a class="btn btn-secondary" href="/s/{{$d.Space.Slug}}/new?parent={{$d.Page.Meta.ID}}">{{.T "page.create_child"}}</a>
-</div>
-<details class="more">
-  <summary class="btn btn-quiet btn-sm">{{.T "page.more"}}</summary>
-  <form method="post" action="/p/{{$d.Page.Meta.ID}}/move" class="form form-row">
-    <input type="hidden" name="csrf" value="{{.CSRF}}">
-    <div class="field"><label for="parent">{{.T "page.move_below"}}</label>
-      <select id="parent" name="parent">{{range $d.Targets}}<option value="{{.ID}}">{{.Label}}</option>{{end}}</select></div>
-    <div class="field"><label for="order">{{.T "page.position"}}</label>
-      <input id="order" name="order" type="number" min="0" value="{{$d.Page.Meta.Order}}" class="num"></div>
-    <button class="btn btn-secondary" type="submit">{{.T "page.move"}}</button>
-  </form>
-  <p><a class="btn btn-destructive btn-sm" href="/p/{{$d.Page.Meta.ID}}/delete">{{.T "page.delete"}}</a></p>
-</details>{{end}}
 </article>{{end}}
 
 {{define "scripts"}}{{if .Data.Info.HasMermaid}}<script type="module" src="{{.Asset "js/mermaid-loader.js"}}" data-mermaid-src="{{.Asset "vendor/mermaid/mermaid.esm.min.mjs"}}"></script>{{end}}{{end}}
+{{/* The page's toolbar: what to do with the page, and who sees it (ADR-007).
+   On phones the quiet actions show only their icon; the word stays for screen readers. */}}
+{{define "page-toolbar"}}{{$d := .Data}}{{$id := $d.Page.Meta.ID}}<div class="page-toolbar" role="toolbar" aria-label="{{.T "page.toolbar"}}">
+  {{if $d.CanWrite}}{{if not $d.LockedBy}}<a class="btn btn-primary btn-sm" href="/p/{{$id}}/edit">{{template "icon" "edit"}}<span>{{.T "page.edit"}}</span></a>{{end}}
+  <a class="btn btn-quiet btn-sm" href="/s/{{$d.Space.Slug}}/new?parent={{$id}}">{{template "icon" "plus"}}<span class="tb-label">{{.T "page.child_short"}}<span class="visually-hidden"> {{.T "page.child_short_rest"}}</span></span></a>
+  <span class="tb-sep" aria-hidden="true"></span>
+  <a class="btn btn-quiet btn-sm" href="/p/{{$id}}/move">{{template "icon" "move"}}<span class="tb-label">{{.T "page.move_short"}}</span></a>{{end}}
+  <a class="btn btn-quiet btn-sm" href="/p/{{$id}}/history">{{template "icon" "history"}}<span class="tb-label">{{.T "history.link"}}</span></a>
+  {{if $d.CanWrite}}<a class="btn btn-quiet btn-sm tb-danger" href="/p/{{$id}}/delete">{{template "icon" "trash"}}<span class="tb-label">{{.T "page.delete_short"}}</span></a>{{end}}
+  <span class="tb-grow"></span>
+  {{with .Audience}}{{if .Change}}<a class="btn btn-secondary btn-sm tb-audience" href="{{.Change}}">{{if .Private}}{{template "icon" "lock"}}{{else}}{{template "icon" "users"}}{{end}}<span class="tb-audience-text">{{.Text}}</span><span class="visually-hidden"> – {{.ChangeText}}</span></a>
+  {{else}}<span class="meta tb-audience">{{if .Private}}{{template "icon" "lock"}}{{else}}{{template "icon" "users"}}{{end}}<span class="tb-audience-text">{{.Text}}</span></span>{{end}}{{end}}
+</div>{{end}}

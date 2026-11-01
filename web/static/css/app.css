@@ -423,3 +423,24 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
   margin: 0; padding: var(--space-4) var(--space-5) var(--space-1);
   color: var(--fg-3); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
 }
+
+/* Page toolbar (variant C): one flat bar above the title that stays in view
+   while scrolling; actions left, grouped by a hairline, who sees the page right. */
+.page-toolbar {
+  position: sticky; top: 0; z-index: 1;
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1);
+  max-width: var(--container); margin: 0 0 var(--space-4); padding: var(--space-1);
+  background: var(--bg-2); border: 1px solid var(--line); border-radius: var(--radius-md);
+}
+.page-toolbar .btn { gap: var(--space-1); }
+.page-toolbar .icon { width: 16px; height: 16px; }
+.tb-sep { align-self: stretch; width: 1px; margin: var(--space-1) var(--space-1); background: var(--line); }
+.tb-grow { flex: 1; }
+.tb-danger { color: var(--warning-ink); }
+.tb-audience { display: inline-flex; align-items: center; gap: var(--space-1); max-width: 100%; min-width: 0; }
+.tb-audience-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+span.tb-audience { padding: 0 var(--space-2); }
+@media (max-width: 39.99rem) {
+  .tb-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .tb-audience { flex-basis: 100%; }
+}

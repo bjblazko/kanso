@@ -32,6 +32,7 @@ func (s *Server) wikiRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /p/{id}/attachments", s.uploadAttachment)
 	mux.HandleFunc("GET /p/{id}/attachments/{name}", s.serveAttachment)
 	mux.HandleFunc("POST /p/{id}/attachments/{name}/delete", s.deleteAttachment)
+	mux.HandleFunc("GET /p/{id}/move", s.movePageForm)
 	mux.HandleFunc("POST /p/{id}/move", s.movePage)
 	mux.HandleFunc("GET /p/{id}/share", s.pageShare)
 	mux.HandleFunc("POST /p/{id}/share", s.updatePageShare)

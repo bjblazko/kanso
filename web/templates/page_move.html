@@ -1,0 +1,16 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/p/{{$d.Page.Meta.ID}}">{{$d.Page.Meta.Title}}</a></nav>
+<h1>{{.T "page.move_title" $d.Page.Meta.Title}}</h1>
+<form method="post" action="/p/{{$d.Page.Meta.ID}}/move" class="form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <div class="field"><label for="parent">{{.T "page.move_below"}}</label>
+    <select id="parent" name="parent">{{range $d.Targets}}<option value="{{.ID}}">{{.Label}}</option>{{end}}</select></div>
+  <div class="field"><label for="order">{{.T "page.position"}}</label>
+    <input id="order" name="order" type="number" min="0" value="{{$d.Page.Meta.Order}}" class="num"></div>
+  <p class="meta">{{.T "page.move_hint"}}</p>
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">{{.T "page.move"}}</button>
+    <a class="btn btn-secondary" href="/p/{{$d.Page.Meta.ID}}">{{.T "action.cancel"}}</a>
+  </div>
+</form>
+</div>{{end}}
