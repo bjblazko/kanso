@@ -17,7 +17,7 @@ test('a page shared on its own: the other person finds it and nothing else of th
 
   await page.getByRole('link', { name: space }).first().click();
   await page.locator('main').getByRole('link', { name: 'Wunschliste' }).click();
-  await page.locator('.audience').getByRole('link', { name: 'Freigabe ändern' }).click();
+  await page.getByRole('toolbar').getByRole('link', { name: /Freigabe ändern/ }).click();
   await expect(page.getByText('Gilt auch für 1 Unterseite.')).toBeVisible();
   await page.getByLabel('Wer').selectOption({ label: christa });
   await page.getByLabel('Rolle').selectOption({ label: 'Lesen' });
@@ -50,7 +50,7 @@ test('a page moves to another space, after saying who will see it then', async (
   await createPage(page, 'Wartung', { child: true });
   await page.getByRole('link', { name: 'Heizung' }).first().click();
 
-  await page.locator('details.more summary').click();
+  await page.getByRole('toolbar').getByRole('link', { name: 'Verschieben' }).click();
   await page.getByLabel('Verschieben nach').selectOption({ label: to });
   await page.getByRole('button', { name: 'Seite verschieben' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(`„Heizung“ nach „${to}“ verschieben?`);

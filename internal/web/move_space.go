@@ -5,6 +5,8 @@ package web
 import (
 	"net/http"
 	"slices"
+
+	"github.com/bjblazko/kanso/internal/access"
 )
 
 // moveConfirm asks before a page leaves its space for one with other readers.
@@ -51,4 +53,15 @@ func (s *Server) audienceAt(v view, pc pageCtx, space, parent string) audience {
 		members = append(members, m.Members...)
 	}
 	return s.membersAudience(v, append(members, pc.Page.Meta.Members...))
+}
+
+// movePageForm asks where the page should go.
+func (s *Server) movePageForm(w http.ResponseWriter, r *http.Request) {
+	pc, ok := s.pageFor(w, r, access.Write)
+	if !ok {
+		return
+	}
+	pc.Targets = s.moveTargets(pc)
+	v := s.newView(r, pc.Page.Meta.Title, pc)
+	s.render(w, r, http.StatusOK, "page_move", s.inSpace(v, pc.Space.Slug, pc.Page.Meta.ID))
 }

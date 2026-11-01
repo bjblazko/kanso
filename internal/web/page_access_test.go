@@ -86,7 +86,7 @@ func TestShareEditorWritesInSubtree(t *testing.T) {
 	if resp := w.ts.postForm(t, w.christina, "/p/"+w.list, "/s/haus/new", url.Values{"title": {"Oben"}, "parent": {""}}); resp.StatusCode != http.StatusNotFound {
 		t.Fatalf("top-level page: %d", resp.StatusCode)
 	}
-	_, body := get(t, w.christina, w.ts.URL+"/p/"+child)
+	_, body := get(t, w.christina, w.ts.URL+"/p/"+child+"/move")
 	if strings.Contains(body, `value="haus/`+w.secret+`"`) || strings.Contains(body, `value="haus/"`) {
 		t.Fatalf("move targets outside the share:\n%s", body)
 	}

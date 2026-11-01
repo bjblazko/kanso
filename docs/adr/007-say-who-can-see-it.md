@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Created:** 2026-10-29
-**Updated:** 2026-10-30
+**Updated:** 2026-11-01
 
 ## Context
 
@@ -23,6 +23,8 @@ will read it, also where nothing can be shared at all.
   line (2026-10-30): space owners → space settings (on a page: the page's sharing, ADR-009), the owner of a to-do
   list → its share page, admins on a group board → groups. Where nothing can
   be shared (notes, private boards) there is no link.
+- On a wiki page the line sits at the right end of the page toolbar and is
+  itself the button to the page's sharing (2026-11-01).
 - **Spaces and pages:** people with a role, members of a group listed as the
   people they are, sorted by name, the viewer first as "dich", and always
   "und Admins": admins read every space, but Kanso learns who they are only at

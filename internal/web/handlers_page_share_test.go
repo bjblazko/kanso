@@ -76,7 +76,7 @@ func TestPageAudienceNamesSharedPeople(t *testing.T) {
 
 func TestPageAudienceLinksToPageShare(t *testing.T) {
 	w := setupWishlist(t, access.Viewer)
-	if _, body := get(t, w.admin, w.ts.URL+"/p/"+w.books); !strings.Contains(body, `href="/p/`+w.books+`/share">Freigabe ändern`) {
+	if _, body := get(t, w.admin, w.ts.URL+"/p/"+w.books); !strings.Contains(toolbarOf(body), `href="/p/`+w.books+`/share"`) {
 		t.Fatal("page link missing")
 	}
 	if _, body := get(t, w.christina, w.ts.URL+"/p/"+w.list); strings.Contains(body, "Freigabe ändern") {

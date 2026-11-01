@@ -94,9 +94,6 @@ func (s *Server) fillPageView(pc *pageCtx) error {
 		pc.Ancestors = s.readableAncestors(*pc, s.groups())
 	}
 	pc.Children = childrenOf(s.visibleTree(pc.Who, pc.Space.Slug, s.groups()), pc.Page.Meta.ID)
-	if pc.CanWrite() {
-		pc.Targets = s.moveTargets(*pc)
-	}
 	return nil
 }
 

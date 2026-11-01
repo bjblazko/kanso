@@ -27,10 +27,10 @@ func movePost(t *testing.T, ts *testServer, c *http.Client, id string, f url.Val
 func TestMoveTargetsListOtherSpaces(t *testing.T) {
 	ts, admin, anna := setupKeller(t)
 	id := ts.createPage(t, anna, "haus", "", "Heizung")
-	if _, body := get(t, admin, ts.URL+"/p/"+id); !strings.Contains(body, `value="keller/"`) {
+	if _, body := get(t, admin, ts.URL+"/p/"+id+"/move"); !strings.Contains(body, `value="keller/"`) {
 		t.Fatalf("admin misses Keller as a target:\n%s", body)
 	}
-	if _, body := get(t, anna, ts.URL+"/p/"+id); strings.Contains(body, `value="keller/`) {
+	if _, body := get(t, anna, ts.URL+"/p/"+id+"/move"); strings.Contains(body, `value="keller/`) {
 		t.Fatal("anna gets a space she cannot write")
 	}
 }
