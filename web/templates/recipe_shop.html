@@ -5,7 +5,7 @@
 </div>
 <h1>{{.T "shop.title" $d.Page.Meta.Title}}</h1></header>
 <div class="content">
-<form method="get" action="/recipes/{{$id}}/shop" class="form shop-choice" data-autosubmit>
+<form method="get" action="/recipes/{{$id}}/shop" class="form form-row shop-choice" data-autosubmit>
   <div class="field"><label for="servings">{{.T "recipe.servings"}}</label>
     <input id="servings" name="servings" value="{{$d.Servings}}" type="number" min="1" max="99" inputmode="numeric"></div>
   <div class="field"><label for="list">{{.T "shop.list"}}</label>

@@ -121,7 +121,7 @@ selbst gebaut. Alle Lizenztexte kommen in die App („Lizenzen und Dank“) mit 
 4. **Tasks**: Boards (privat/Gruppe), Kanban + Eisenhower, Fälligkeiten; Notiz → Task. Keine wiederkehrenden
    Aufgaben ([Spec](2026-10-30-tasks-design.md)).
 4a. **Rezepte** ([Spec](2026-11-06-recipes-design.md)): Wiki-Seiten mit Konvention, Küche, Kochansicht. *(fertig)*
-5. **Listen**: Einkauf (eigener Listentyp, nicht die To-do-Listen), Wunschlisten (Freigabe, „Ich besorge das“), Links.
+5. **Listen**: Einkaufslisten fertig ([Spec](2026-11-07-shopping-lists-design.md), als Art der Todo-Listen, ADR-011); offen: Einkauf (eigener Listentyp, nicht die To-do-Listen), Wunschlisten (Freigabe, „Ich besorge das“), Links.
 6. **Kalender** nativ (.ics), Tasks mit Datum im Kalender, Geburtstage.
 7. **Mobil/Offline (PWA)** + **Web-Push**.
 8. **Extras**: Essensplan → Einkauf, Haus-Inventar (Wartung erzeugt Tasks), Kind & Kontakte.
