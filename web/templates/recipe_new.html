@@ -1,0 +1,17 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.T "recipe.new"}}</h1>
+{{if $d.Spaces}}<form method="post" action="/recipes/new" class="form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <div class="field">
+    <label for="title">{{.T "page.title"}}</label>
+    <input id="title" name="title" required maxlength="200" autofocus value="{{$d.Title}}" placeholder="{{.T "recipe.title_example"}}"{{if $d.Error}} aria-invalid="true" aria-describedby="title-error"{{end}}>
+    {{if $d.Error}}<span class="hint" id="title-error" data-error>{{$d.Error}}</span>{{end}}
+  </div>
+  <div class="field">
+    <label for="space">{{.T "recipe.space"}}</label>
+    <select id="space" name="space">{{range $d.Spaces}}<option value="{{.Slug}}"{{if eq .Slug $d.Space}} selected{{end}}>{{.Name}}</option>{{end}}</select>
+  </div>
+  <div class="actions"><button class="btn btn-primary" type="submit">{{.T "recipe.create"}}</button>
+  <a class="btn btn-quiet" href="/recipes">{{.T "action.cancel"}}</a></div>
+</form>{{else}}<p class="empty">{{.T "recipe.no_space"}}</p>{{end}}
+</div>{{end}}

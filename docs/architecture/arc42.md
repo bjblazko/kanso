@@ -1,7 +1,7 @@
 # Hüpattl! Kanso — Architecture (arc42)
 
 **Created:** 2026-10-26
-**Updated:** 2026-10-30
+**Updated:** 2026-11-06
 
 ## 1. Introduction and Goals
 
@@ -74,6 +74,7 @@ leaves the host.
 | `internal/notes` | Private notes per person, outside Git |
 | `internal/todos` | Shareable to-do lists outside Git, changed by operations |
 | `internal/tasks` | Private and group boards of tasks in Git; Kanban and Eisenhower views |
+| `internal/recipes` | Reads recipe pages (ingredients, groups, steps), scales and formats amounts; pure, no files ([ADR-010](../adr/010-recipes-are-wiki-pages.md)) |
 | `internal/photo` | Removes GPS data from JPEG uploads |
 | `internal/search` | In-memory search over pages and notes (scans all per query) |
 | `internal/devseed` | Made-up people, groups, spaces, pages, notes and tasks for development (`kanso seed`, dev login only) |
@@ -172,6 +173,7 @@ Kopia jobs.
 | [007](../adr/007-say-who-can-see-it.md) | Every page says who can see it |
 | [008](../adr/008-tasks-in-git-offline-capture-only.md) | Tasks in Git, offline only for capture |
 | [009](../adr/009-page-shares-add-rights.md) | Page shares add rights |
+| [010](../adr/010-recipes-are-wiki-pages.md) | Recipes are wiki pages with a convention |
 
 ## 10. Quality Requirements
 

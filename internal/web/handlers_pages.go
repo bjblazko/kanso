@@ -37,6 +37,15 @@ type pageCtx struct {
 // CanBreakLock tells templates whether to offer breaking an edit lock.
 func (c pageCtx) CanBreakLock() bool { return access.Can(c.Role, access.BreakLock) }
 
+// SourceURL is a recipe's source when it is a web address, for a link; "" otherwise.
+func (c pageCtx) SourceURL() string {
+	src := c.Page.Meta.Source
+	if strings.HasPrefix(src, "https://") || strings.HasPrefix(src, "http://") {
+		return src
+	}
+	return ""
+}
+
 // CanWrite tells templates whether to offer changes.
 func (c pageCtx) CanWrite() bool { return access.Can(c.Role, access.Write) }
 
@@ -251,5 +260,26 @@ func (s *Server) preview(w http.ResponseWriter, r *http.Request) {
 	if _, ok := s.pageFor(w, r, access.Write); !ok {
 		return
 	}
-	s.writePreview(w, r.PostFormValue("body"), markdown.PageCtx{Base: "/p/" + r.PathValue("id")})
+	if r.PostFormValue("recipe") == "" {
+		s.writePreview(w, r.PostFormValue("body"), markdown.PageCtx{Base: "/p/" + r.PathValue("id")})
+		return
+	}
+	s.writeRecipePreview(w, r)
+}
+
+// writeRecipePreview is the preview plus how Kanso read the ingredients.
+func (s *Server) writeRecipePreview(w http.ResponseWriter, r *http.Request) {
+	body := r.PostFormValue("body")
+	html, _, err := s.MD.Render([]byte(body), markdown.PageCtx{Base: "/p/" + r.PathValue("id")})
+	if err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	parsed, err := s.recognised(r, body)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	_, _ = w.Write([]byte(html + parsed))
 }

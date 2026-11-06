@@ -1,0 +1,25 @@
+{{define "content"}}{{$d := .Data}}{{$id := $d.Page.Meta.ID}}<div class="cook" data-recipe="{{$id}}">
+<header class="screen-head">
+<div class="page-toolbar" role="toolbar" aria-label="{{.T "recipe.cook"}}">
+  <a class="btn btn-quiet btn-sm" href="/p/{{$id}}">{{template "icon" "book"}}<span class="tb-label">{{.T "recipe.back"}}</span></a>
+  <button class="btn btn-quiet btn-sm" type="button" data-reset hidden>{{template "icon" "history"}}<span class="tb-label">{{.T "recipe.reset"}}</span></button>
+  <span class="tb-grow"></span>
+  <div class="servings" role="group" aria-label="{{.T "recipe.servings"}}">
+    {{with $d.Fewer}}<a class="btn btn-quiet btn-sm" href="{{.}}" aria-label="{{$.T "recipe.fewer"}}">−</a>{{else}}<span class="btn btn-quiet btn-sm" aria-disabled="true">−</span>{{end}}
+    <output class="servings-n">{{$d.Servings}}</output><span class="servings-label">{{.T "recipe.servings"}}</span>
+    {{with $d.More}}<a class="btn btn-quiet btn-sm" href="{{.}}" aria-label="{{$.T "recipe.more"}}">+</a>{{else}}<span class="btn btn-quiet btn-sm" aria-disabled="true">+</span>{{end}}
+  </div>
+</div>
+<h1>{{$d.Page.Meta.Title}}</h1></header>
+<article class="content cook-body">
+{{if not $d.HasServings}}<p class="hint">{{.T "recipe.no_servings"}}</p>{{end}}
+{{if not (or $d.Groups $d.Steps)}}<p class="notice">{{.T "recipe.no_sections"}}{{if $d.CanWrite}} <a href="/p/{{$id}}/edit">{{.T "page.edit"}}</a>{{end}}</p>{{end}}
+{{if $d.Groups}}<section aria-labelledby="cook-ing"><h2 id="cook-ing">{{.T "recipe.ingredients"}}</h2>
+{{range $d.Groups}}{{with .Name}}<h3>{{.}}</h3>{{end}}<ul class="cook-list">
+{{range .Items}}<li><label><input type="checkbox" data-tick="{{.Tick}}"> <span>{{with .Ing.Qty}}{{.Text}} {{end}}{{if .Ing.Qty}}{{with .Ing.UnitText}}{{.}} {{end}}{{end}}{{.Ing.Name}}{{with .Ing.Note}}<span class="hint">, {{.}}</span>{{end}}</span></label></li>
+{{end}}</ul>{{end}}</section>{{end}}
+{{if $d.Steps}}<section aria-labelledby="cook-steps"><h2 id="cook-steps">{{.T "recipe.steps"}}</h2><ol class="cook-steps">
+{{range $i, $s := $d.Steps}}<li><label><input type="checkbox" data-tick="{{$s.Tick}}"> <span>{{$s.Step}}</span></label></li>
+{{end}}</ol></section>{{end}}
+</article></div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/cook.js"}}"></script>{{end}}

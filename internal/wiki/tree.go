@@ -27,7 +27,19 @@ type PageMeta struct {
 	Author  string    `yaml:"author"`
 	// Members are shared this page and its subpages on top of the space (ADR-009).
 	Members []access.Member `yaml:"members,omitempty"`
+	// Recipe fields (ADR-010); empty on ordinary pages.
+	Type     string   `yaml:"type,omitempty"` // TypeRecipe or ""
+	Servings int      `yaml:"servings,omitempty"`
+	Tags     []string `yaml:"tags,omitempty"`
+	Source   string   `yaml:"source,omitempty"`
+	Time     int      `yaml:"time,omitempty"` // minutes
 }
+
+// TypeRecipe marks a page as a recipe.
+const TypeRecipe = "recipe"
+
+// IsRecipe tells whether the page is a recipe.
+func (m PageMeta) IsRecipe() bool { return m.Type == TypeRecipe }
 
 // Page is a page with its location: Dir is relative to the space's pages
 // folder and uses forward slashes, e.g. "garten/rasen".

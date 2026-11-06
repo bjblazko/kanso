@@ -106,10 +106,15 @@ func (w *Wiki) write(a store.Author, p Page, msg string) error {
 
 // Save stores a new title and body; the folder name stays.
 func (w *Wiki) Save(a store.Author, id, title, body string) error {
-	return w.save(a, id, title, body, "Seite geändert: ")
+	return w.SaveWith(a, id, title, body, nil)
 }
 
-func (w *Wiki) save(a store.Author, id, title, body, msg string) error {
+// SaveWith is Save that also lets set change the page's frontmatter (nil = keep it).
+func (w *Wiki) SaveWith(a store.Author, id, title, body string, set func(*PageMeta)) error {
+	return w.save(a, id, title, body, "Seite geändert: ", set)
+}
+
+func (w *Wiki) save(a store.Author, id, title, body, msg string, set func(*PageMeta)) error {
 	title = strings.TrimSpace(title)
 	if title == "" {
 		return ErrNoTitle
@@ -119,6 +124,9 @@ func (w *Wiki) save(a store.Author, id, title, body, msg string) error {
 		p, ok := w.ByID(id)
 		if !ok {
 			return ErrNotFound
+		}
+		if set != nil {
+			set(&p.Meta)
 		}
 		p.Meta.Title, p.Body = title, body
 		p.Meta.Updated, p.Meta.Author = time.Now().UTC().Truncate(time.Second), a.Name

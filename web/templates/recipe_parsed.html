@@ -1,0 +1,8 @@
+{{define "content"}}{{template "recipe-parsed" .}}{{end}}
+{{/* How Kanso read the ingredients: shown under the editor preview of a recipe. */}}
+{{define "recipe-parsed"}}<section class="recipe-parsed" aria-labelledby="recipe-parsed-h">
+<h2 id="recipe-parsed-h">{{.T "recipe.parsed"}}</h2>
+{{if .Data}}<ul class="list-plain">{{range .Data}}{{if .Qty}}<li>{{.Qty.Text}} · {{.Unit}} · {{.Name}}{{with .Note}} <span class="hint">({{.}})</span>{{end}}</li>
+{{else}}<li class="parsed-none">{{.Name}} <span class="hint">– {{$.T "recipe.parsed_no_qty"}}</span></li>
+{{end}}{{end}}</ul>{{else}}<p class="hint">{{.T "recipe.no_sections"}}</p>{{end}}
+</section>{{end}}
