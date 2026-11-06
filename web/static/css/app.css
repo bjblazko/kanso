@@ -469,3 +469,7 @@ html { scroll-padding-top: 9rem; }
 .recipe-parsed { margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--line); }
 .recipe-parsed h2 { font-size: var(--text-sm); color: var(--fg-2); }
 .recipe-parsed .parsed-none { color: var(--fg-2); }
+.recipe-meta { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); align-items: baseline; color: var(--fg-2); font-size: var(--text-sm); }
+.tag { display: inline-block; padding: 0 var(--space-2); border: 1px solid var(--line); border-radius: var(--radius-md); color: var(--fg-2); text-decoration: none; }
+.tag:hover { border-color: var(--line-strong); color: var(--fg); }
+.tag[aria-pressed="true"] { border-color: var(--fg); color: var(--fg); font-weight: 500; }

@@ -47,7 +47,11 @@ func buildIndex(w *wiki.Wiki, n *notes.Store) *search.Index {
 func BuildIndex(w *wiki.Wiki, n *notes.Store) *search.Index { return buildIndex(w, n) }
 
 func docOf(p wiki.Page) search.Doc {
-	return search.Doc{ID: p.Meta.ID, Space: p.Space, Title: p.Meta.Title, Body: p.Body}
+	body := p.Body
+	if len(p.Meta.Tags) > 0 {
+		body += "\n\n" + strings.Join(p.Meta.Tags, " ")
+	}
+	return search.Doc{ID: p.Meta.ID, Space: p.Space, Title: p.Meta.Title, Body: body}
 }
 
 func docOfNote(n notes.Note) search.Doc {

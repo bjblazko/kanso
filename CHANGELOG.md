@@ -49,6 +49,7 @@ All notable changes to this project are documented here. The format follows
 - Share a single wiki page (and its subpages) with people or groups, with a role, as an exception to its space (ADR-009): "Freigabe ändern" on a page opens the page's sharing, with a hint how many subpages it covers. Whoever gets a page this way finds it under "Für dich freigegeben" in the wiki navigation and on the wiki start page, and sees nothing else of the space.
 - Move a page with its subpages, attachments and history to another space ("Verschieben nach" lists every space you may write); a confirmation shows who sees the page until now and afterwards when that changes; a page being edited stays where it is.
 - Recipes (ADR-010): a wiki page becomes a recipe with "Ist ein Rezept" in the editor, with servings, time, tags and source in its frontmatter. Kanso reads `## Zutaten` (amount, unit, name, note; `###` groups) and `## Zubereitung`, and the editor preview shows how it read each ingredient; lines it does not understand stay as they are.
+- A recipe page shows servings, time, source and its tags (links into "Küche"), and "Kochen" in its toolbar; search finds recipes by their tags.
 
 ### Security
 - GPS location is removed from JPEG photos on upload (notes and wiki pages); orientation and other EXIF data stay.

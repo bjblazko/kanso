@@ -37,6 +37,15 @@ type pageCtx struct {
 // CanBreakLock tells templates whether to offer breaking an edit lock.
 func (c pageCtx) CanBreakLock() bool { return access.Can(c.Role, access.BreakLock) }
 
+// SourceURL is a recipe's source when it is a web address, for a link; "" otherwise.
+func (c pageCtx) SourceURL() string {
+	src := c.Page.Meta.Source
+	if strings.HasPrefix(src, "https://") || strings.HasPrefix(src, "http://") {
+		return src
+	}
+	return ""
+}
+
 // CanWrite tells templates whether to offer changes.
 func (c pageCtx) CanWrite() bool { return access.Can(c.Role, access.Write) }
 
