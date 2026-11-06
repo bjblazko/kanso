@@ -96,5 +96,7 @@ func (w *Wiki) Restore(a store.Author, id, hash string) error {
 	if err != nil {
 		return err
 	}
-	return w.save(a, id, old.Meta.Title, old.Body, "Wiederhergestellt ("+hash[:7]+"): ")
+	return w.save(a, id, old.Meta.Title, old.Body, "Wiederhergestellt ("+hash[:7]+"): ", func(m *PageMeta) {
+		m.Type, m.Servings, m.Tags, m.Source, m.Time = old.Meta.Type, old.Meta.Servings, old.Meta.Tags, old.Meta.Source, old.Meta.Time
+	})
 }
