@@ -41,6 +41,7 @@ type Stamps struct {
 	Text int64 `json:"text"`
 	Done int64 `json:"done"`
 	Sub  int64 `json:"sub"`
+	Note int64 `json:"note,omitempty"`
 }
 
 // Item is one line of a list. Sub marks a sub-item of the main item above it.
@@ -50,7 +51,20 @@ type Item struct {
 	Done bool   `json:"done"`
 	Sub  bool   `json:"sub"`
 	At   Stamps `json:"at"`
+	// Shopping lists only (ADR-011): a hint for whoever shops, and the recipes the item is for.
+	Note string   `json:"note,omitempty"`
+	For  []Source `json:"for,omitempty"`
 }
+
+// Source says which recipe asked for an item and how much of it.
+type Source struct {
+	Recipe string `json:"recipe"`
+	Title  string `json:"title"`
+	Amount string `json:"amount,omitempty"`
+}
+
+// KindShopping marks a shopping list; "" is a plain todo list.
+const KindShopping = "shopping"
 
 // Share gives one person or one group access to a list.
 type Share struct {
@@ -62,6 +76,7 @@ type Share struct {
 type List struct {
 	ID      string    `json:"id"`
 	Name    string    `json:"name"`
+	Kind    string    `json:"kind,omitempty"` // "" or KindShopping
 	Owner   string    `json:"owner"`
 	Shared  []Share   `json:"shared"`
 	Created time.Time `json:"created"`
@@ -199,3 +214,38 @@ func Done(l List) (done, total int) {
 	}
 	return done, len(l.Items)
 }
+
+// Create makes a new list owned by owner; kind is "" or KindShopping.
+func (s *Store) Create(owner, name, kind string) (List, error) {
+	if !validText(name, MaxName) || !validKind(kind) {
+		return List{}, errRejected
+	}
+	now := s.now().UTC().Truncate(time.Millisecond)
+	l := List{ID: store.NewID(), Name: strings.TrimSpace(name), Kind: kind, Owner: owner, Created: now, Updated: now}
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return l, s.write(l)
+}
+
+// Change lets fn change list id, if sub may see it, and stores the result.
+func (s *Store) Change(sub string, g access.Groups, id string, fn func(*List) error) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	l, err := s.read(id)
+	if err != nil || !canSee(l, sub, g) {
+		return ErrNotFound
+	}
+	if err := fn(&l); err != nil {
+		return err
+	}
+	l.Updated = s.now().UTC().Truncate(time.Millisecond)
+	return s.write(l)
+}
+
+// NewItem makes an item made on the server, with all fields stamped now.
+func NewItem(text, note string, now time.Time) Item {
+	at := now.UnixMilli()
+	return Item{ID: store.NewID(), Text: text, Note: note, At: Stamps{Text: at, Done: at, Sub: at, Note: at}}
+}
+
+func validKind(kind string) bool { return kind == "" || kind == KindShopping }

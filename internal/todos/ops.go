@@ -18,6 +18,7 @@ const (
 	MaxText      = 500
 	maxItems     = 1000
 	MaxOps       = 500
+	MaxNote      = 300
 	tombstoneAge = 30 * 24 * time.Hour
 )
 
@@ -25,7 +26,7 @@ const (
 // field of an item the later change wins. Sending an op twice does no harm.
 type Op struct {
 	ID    string `json:"id"`
-	Kind  string `json:"kind"` // create, rename, add, text, done, sub, delete
+	Kind  string `json:"kind"` // create, rename, add, text, done, sub, note, delete
 	List  string `json:"list"`
 	Item  string `json:"item,omitempty"`
 	After string `json:"after,omitempty"` // add: insert below this item; "" = at the end
@@ -33,6 +34,8 @@ type Op struct {
 	Done  bool   `json:"done,omitempty"`
 	Sub   bool   `json:"sub,omitempty"`
 	At    int64  `json:"at"`
+	// ListKind is the kind of a list made by create: "" or KindShopping.
+	ListKind string `json:"listKind,omitempty"`
 }
 
 var errRejected = errors.New("operation rejected")
@@ -71,7 +74,10 @@ func (s *Store) listFor(sub string, g access.Groups, op Op, lists map[string]*Li
 	switch {
 	case errors.Is(err, ErrNotFound) && op.Kind == "create" && idPattern.MatchString(op.List):
 		now := s.now().UTC().Truncate(time.Millisecond)
-		l = List{ID: op.List, Owner: sub, Created: now, Updated: now}
+		if !validKind(op.ListKind) {
+			return nil, errRejected
+		}
+		l = List{ID: op.List, Kind: op.ListKind, Owner: sub, Created: now, Updated: now}
 	case err != nil:
 		return nil, err
 	case !canSee(l, sub, g):
@@ -97,7 +103,7 @@ func applyOp(l *List, sub string, op Op, now time.Time) (bool, error) {
 		return rename(l, sub, op)
 	case "add":
 		return addItem(l, op)
-	case "text", "done", "sub":
+	case "text", "done", "sub", "note":
 		return setField(l, op)
 	case "delete":
 		return deleteItem(l, op, now), nil
@@ -146,7 +152,7 @@ func addItem(l *List, op Op) (bool, error) {
 
 // setField changes one field of an item if op is the later change.
 func setField(l *List, op Op) (bool, error) {
-	if op.Kind == "text" && !validText(op.Text, MaxText) {
+	if op.Kind == "text" && !validText(op.Text, MaxText) || op.Kind == "note" && utf8.RuneCountInString(op.Text) > MaxNote {
 		return false, errRejected
 	}
 	i := l.index(op.Item)
@@ -166,6 +172,8 @@ func applyField(it *Item, first bool, op Op) bool {
 		it.Done, it.At.Done = op.Done, op.At
 	case op.Kind == "sub" && op.At >= it.At.Sub && (!first || !op.Sub):
 		it.Sub, it.At.Sub = op.Sub, op.At
+	case op.Kind == "note" && op.At >= it.At.Note:
+		it.Note, it.At.Note = strings.TrimSpace(op.Text), op.At
 	default:
 		return false
 	}
