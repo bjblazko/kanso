@@ -14,6 +14,7 @@ Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 | Start (wiki) | Get into a wiki space. |
 | Page view | Read a page. A flat toolbar above the title stays in view while scrolling: Bearbeiten (the only accent), Kochen (recipes only, also for readers), Unterseite, then Verschieben, Verlauf, Löschen (red text); right, who sees the page as a button to its sharing (or plain text for readers). On phones the quiet actions show only their icon, the word stays for screen readers. |
 | Recipe page | A page view; above the meta line a quiet line with servings, time, source (a link only for web addresses) and the tags as small framed links into Küche. |
+| Cook view | Cook from the phone at the stove. Toolbar: "Zur Seite" and the servings stepper (− number + as links, so it works without script); no accent. Below only ingredients (by group) and steps, large, each to tick off; ticks are kept on the device, the screen stays on (Wake Lock) while visible. |
 | Page editor | Change a page and save it. A box "Ist ein Rezept" below the title; while ticked, Portionen, Zeit, Tags and Quelle appear (CSS `:has`, values kept) and the preview ends with "So versteht Kanso die Zutaten" (amount · unit · name; lines without an amount muted). |
 | Space settings | Decide who may read and write. |
 | Licenses and thanks | Show whose work Kanso contains. |
