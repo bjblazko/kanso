@@ -30,7 +30,8 @@
    On phones the quiet actions show only their icon; the word stays for screen readers. */}}
 {{define "page-toolbar"}}{{$d := .Data}}{{$id := $d.Page.Meta.ID}}<div class="page-toolbar" role="toolbar" aria-label="{{.T "page.toolbar"}}">
   {{if $d.CanWrite}}{{if not $d.LockedBy}}<a class="btn btn-primary btn-sm" href="/p/{{$id}}/edit">{{template "icon" "edit"}}<span>{{.T "page.edit"}}</span></a>{{end}}{{end}}
-  {{if $d.Page.Meta.IsRecipe}}<a class="btn btn-quiet btn-sm" href="/recipes/{{$id}}/cook">{{template "icon" "pot"}}<span class="tb-label">{{.T "recipe.cook"}}</span></a>{{end}}
+  {{if $d.Page.Meta.IsRecipe}}<a class="btn btn-quiet btn-sm" href="/recipes/{{$id}}/cook">{{template "icon" "pot"}}<span class="tb-label">{{.T "recipe.cook"}}</span></a>
+  <a class="btn btn-quiet btn-sm" href="/recipes/{{$id}}/shop">{{template "icon" "cart"}}<span class="tb-label">{{.T "shop.action"}}</span></a>{{end}}
   {{if $d.CanWrite}}<a class="btn btn-quiet btn-sm" href="/s/{{$d.Space.Slug}}/new?parent={{$id}}">{{template "icon" "plus"}}<span class="tb-label">{{.T "page.child_short"}}<span class="visually-hidden"> {{.T "page.child_short_rest"}}</span></span></a>
   <span class="tb-sep" aria-hidden="true"></span>
   <a class="btn btn-quiet btn-sm" href="/p/{{$id}}/move">{{template "icon" "move"}}<span class="tb-label">{{.T "page.move_short"}}</span></a>{{end}}

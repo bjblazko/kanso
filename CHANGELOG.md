@@ -53,6 +53,7 @@ All notable changes to this project are documented here. The format follows
 - Cook view for recipes (`/recipes/<id>/cook`): servings up and down with amounts scaled and rounded sensibly, ingredients and steps to tick off (kept on the device), screen kept on while it is open.
 - "Küche" in the rail: every recipe the person may read, with a search over title, ingredients and tags and tag filters that switch on and off; "Neues Rezept" creates a recipe page from a template in a chosen space.
 - Browser test for recipes: create, find by tag, cook with more servings, tick off, clear ticks.
+- Shopping lists (ADR-011): "Einkaufen" on a recipe (and in the cook view, with its servings) previews every ingredient ticked and adds them to an existing or a new shopping list; amounts of the same ingredient add up in compatible units (g/kg, ml/l, same counted unit), never into an item already bought, and every item remembers which recipe it is for.
 
 ### Security
 - GPS location is removed from JPEG photos on upload (notes and wiki pages); orientation and other EXIF data stay.

@@ -1,0 +1,34 @@
+{{define "content"}}{{$d := .Data}}{{$id := $d.Page.Meta.ID}}<div class="shop">
+<header class="screen-head">
+<div class="page-toolbar" role="toolbar" aria-label="{{.T "shop.action"}}">
+  <a class="btn btn-quiet btn-sm" href="/p/{{$id}}">{{template "icon" "book"}}<span class="tb-label">{{.T "recipe.back"}}</span></a>
+</div>
+<h1>{{.T "shop.title" $d.Page.Meta.Title}}</h1></header>
+<div class="content">
+<form method="get" action="/recipes/{{$id}}/shop" class="form shop-choice" data-autosubmit>
+  <div class="field"><label for="servings">{{.T "recipe.servings"}}</label>
+    <input id="servings" name="servings" value="{{$d.Servings}}" type="number" min="1" max="99" inputmode="numeric"></div>
+  <div class="field"><label for="list">{{.T "shop.list"}}</label>
+    <select id="list" name="list">{{range $d.Lists}}<option value="{{.ID}}"{{if eq .ID $d.List}} selected{{end}}>{{.Name}}</option>{{end}}
+      <option value="new"{{if eq $d.List "new"}} selected{{end}}>{{.T "shop.new_list"}}</option></select></div>
+  {{if eq $d.List "new"}}<div class="field"><label for="name">{{.T "shop.name"}}</label>
+    <input id="name" name="name" value="{{$d.Name}}" maxlength="80"></div>{{end}}
+  <button class="btn btn-secondary" type="submit">{{.T "shop.refresh"}}</button>
+</form>
+<form method="post" action="/recipes/{{$id}}/shop" class="form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <input type="hidden" name="servings" value="{{$d.Servings}}">
+  <input type="hidden" name="list" value="{{$d.List}}">
+  <input type="hidden" name="name" value="{{$d.Name}}">
+  <fieldset class="field-set"><legend>{{.T "shop.preview"}}</legend>
+  {{if $d.Lines}}<ul class="shop-lines">{{range $i, $l := $d.Lines}}<li><label><input type="checkbox" name="take" value="{{$i}}" checked> <span>
+    {{- if $l.Item}}{{if ne $l.Old $l.Text}}{{$l.Old}} → {{$l.Text}}{{else}}{{$l.Text}}{{end}} <span class="hint">{{$.T "shop.on_list"}}</span>
+    {{- else}}{{$l.Text}}{{with $l.Note}} <span class="hint">({{.}})</span>{{end}}{{end}}</span></label></li>
+  {{end}}</ul>{{else}}<p class="empty">{{.T "recipe.no_sections"}}</p>{{end}}
+  </fieldset>
+  <p class="hint">{{.T "shop.untick"}}</p>
+  <div class="actions"><button class="btn btn-primary" type="submit">{{.T "shop.take"}}</button>
+  <a class="btn btn-quiet" href="/p/{{$id}}">{{.T "action.cancel"}}</a></div>
+</form>
+</div></div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/shop.js"}}"></script>{{end}}
