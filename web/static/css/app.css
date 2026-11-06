@@ -490,8 +490,9 @@ html { scroll-padding-top: 9rem; }
 .cook input:checked + span { color: var(--fg-3); text-decoration: line-through; }
 
 /* Kitchen: all recipes, search and tag filter. */
-.kitchen-search { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); }
-.kitchen-search input { flex: 1; min-width: 0; }
+.kitchen-search { display: flex; align-items: flex-end; gap: var(--space-2); max-width: 40rem; margin-bottom: var(--space-4); }
+.kitchen-search .field { flex: 1; min-width: 0; margin: 0; }
 .tag-filter { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-5); }
 .recipe-list .row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-1) var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--line); }
 .recipe-row-meta { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); color: var(--fg-2); font-size: var(--text-sm); }
+@media (pointer: coarse) { .kitchen-search .field input { height: var(--target-min); } } /* one row, one height */

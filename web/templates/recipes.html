@@ -6,8 +6,8 @@
 <h1>{{.T "nav.kitchen"}}</h1></header>
 <div class="content">
 {{if $d.Any}}<form method="get" action="/recipes" class="kitchen-search" role="search">
-  <label class="visually-hidden" for="recipe-q">{{.T "recipe.search"}}</label>
-  <input id="recipe-q" name="q" type="search" value="{{$d.Query}}" placeholder="{{.T "recipe.search_hint"}}">
+  <div class="field"><label for="recipe-q">{{.T "recipe.search_hint"}}</label>
+  <input id="recipe-q" name="q" type="search" value="{{$d.Query}}"></div>
   {{range $d.Selected}}<input type="hidden" name="tag" value="{{.}}">{{end}}
   <button class="btn btn-secondary" type="submit">{{.T "nav.search"}}</button>
 </form>

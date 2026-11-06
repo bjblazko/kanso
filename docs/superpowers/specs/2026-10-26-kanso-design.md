@@ -120,7 +120,7 @@ selbst gebaut. Alle Lizenztexte kommen in die App („Lizenzen und Dank“) mit 
    *(fertig)*
 4. **Tasks**: Boards (privat/Gruppe), Kanban + Eisenhower, Fälligkeiten; Notiz → Task. Keine wiederkehrenden
    Aufgaben ([Spec](2026-10-30-tasks-design.md)).
-4a. **Rezepte** ([Spec](2026-11-06-recipes-design.md)): Wiki-Seiten mit Konvention, Küche, Kochansicht.
+4a. **Rezepte** ([Spec](2026-11-06-recipes-design.md)): Wiki-Seiten mit Konvention, Küche, Kochansicht. *(fertig)*
 5. **Listen**: Einkauf (eigener Listentyp, nicht die To-do-Listen), Wunschlisten (Freigabe, „Ich besorge das“), Links.
 6. **Kalender** nativ (.ics), Tasks mit Datum im Kalender, Geburtstage.
 7. **Mobil/Offline (PWA)** + **Web-Push**.
