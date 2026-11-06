@@ -1,0 +1,20 @@
+{{define "content"}}{{$d := .Data}}<div class="kitchen">
+<header class="screen-head">
+<div class="page-toolbar" role="toolbar" aria-label="{{.T "nav.kitchen"}}">
+  <a class="btn btn-primary btn-sm" href="/recipes/new">{{template "icon" "plus"}}<span>{{.T "recipe.new"}}</span></a>
+</div>
+<h1>{{.T "nav.kitchen"}}</h1></header>
+<div class="content">
+{{if $d.Any}}<form method="get" action="/recipes" class="kitchen-search" role="search">
+  <label class="visually-hidden" for="recipe-q">{{.T "recipe.search"}}</label>
+  <input id="recipe-q" name="q" type="search" value="{{$d.Query}}" placeholder="{{.T "recipe.search_hint"}}">
+  {{range $d.Selected}}<input type="hidden" name="tag" value="{{.}}">{{end}}
+  <button class="btn btn-secondary" type="submit">{{.T "nav.search"}}</button>
+</form>
+{{if $d.Tags}}<nav class="tag-filter" aria-label="{{.T "recipe.tags"}}">{{range $d.Tags}}<a class="tag" href="{{.Href}}" aria-pressed="{{if .Pressed}}true{{else}}false{{end}}">{{.Name}}</a>{{end}}</nav>{{end}}
+{{if $d.Rows}}<ul class="recipe-list list-plain">
+{{range $d.Rows}}<li class="row"><a href="/p/{{.ID}}">{{.Title}}</a>
+  <span class="recipe-row-meta">{{range .Tags}}<span class="tag-text">{{.}}</span>{{end}}{{with .Time}}<span>{{$.T "recipe.minutes_n" .}}</span>{{end}}<span>{{.Space}}</span></span></li>
+{{end}}</ul>{{else}}<p class="empty">{{.T "recipe.no_match"}}</p>{{end}}
+{{else}}<p class="empty">{{.T "recipe.empty"}}</p>{{end}}
+</div></div>{{end}}

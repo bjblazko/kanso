@@ -51,6 +51,7 @@ All notable changes to this project are documented here. The format follows
 - Recipes (ADR-010): a wiki page becomes a recipe with "Ist ein Rezept" in the editor, with servings, time, tags and source in its frontmatter. Kanso reads `## Zutaten` (amount, unit, name, note; `###` groups) and `## Zubereitung`, and the editor preview shows how it read each ingredient; lines it does not understand stay as they are.
 - A recipe page shows servings, time, source and its tags (links into "Küche"), and "Kochen" in its toolbar; search finds recipes by their tags.
 - Cook view for recipes (`/recipes/<id>/cook`): servings up and down with amounts scaled and rounded sensibly, ingredients and steps to tick off (kept on the device), screen kept on while it is open.
+- "Küche" in the rail: every recipe the person may read, with a search over title, ingredients and tags and tag filters that switch on and off; "Neues Rezept" creates a recipe page from a template in a chosen space.
 
 ### Security
 - GPS location is removed from JPEG photos on upload (notes and wiki pages); orientation and other EXIF data stay.

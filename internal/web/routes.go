@@ -99,5 +99,8 @@ func (s *Server) adminRoutes(mux *http.ServeMux) {
 
 // kitchenRoutes registers recipes: the kitchen and the cook view (ADR-010).
 func (s *Server) kitchenRoutes(mux *http.ServeMux) {
+	mux.HandleFunc("GET /recipes", s.kitchen)
+	mux.HandleFunc("GET /recipes/new", s.newRecipeForm)
+	mux.HandleFunc("POST /recipes/new", s.createRecipe)
 	mux.HandleFunc("GET /recipes/{id}/cook", s.cookRecipe)
 }
