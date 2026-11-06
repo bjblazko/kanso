@@ -1,6 +1,6 @@
 # Hüpattl! Kanso – Rezepte
 
-**Status:** Entwurf · **Created:** 2026-11-06 · **Updated:** 2026-11-06
+**Status:** freigegeben · **Created:** 2026-11-06 · **Updated:** 2026-11-06
 
 Baut auf dem Gesamtdesign auf: [2026-10-26-kanso-design.md](2026-10-26-kanso-design.md) und dem
 Wiki (Phase 1). Erster von drei aufeinander aufbauenden Teilen:
