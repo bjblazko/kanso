@@ -34,9 +34,11 @@ function showStatus(message) {
 // ---- Preview ---------------------------------------------------------------
 
 let previewTimer;
+const recipeBox = form.querySelector('#recipe'); // wiki pages only
 
 async function refreshPreview() {
   const data = new URLSearchParams({ [previewKey]: previewId, body: body.value });
+  if (recipeBox?.checked) data.set('recipe', '1');
   const response = await post('/api/preview', data);
   if (!response.ok) return;
   preview.innerHTML = await response.text(); // server-rendered, sanitised HTML
@@ -120,6 +122,8 @@ function filesFrom(dataTransfer) {
 // ---- Wiring ----------------------------------------------------------------
 
 body.addEventListener('input', () => { dirty = true; schedulePreview(); });
+recipeBox?.addEventListener('change', () => { dirty = true; refreshPreview(); });
+form.querySelector('.recipe-fields')?.addEventListener('input', () => { dirty = true; });
 form.addEventListener('input', (e) => { if (e.target !== body) dirty = true; });
 form.addEventListener('submit', save);
 for (const tab of form.querySelectorAll('[role="tab"]')) {

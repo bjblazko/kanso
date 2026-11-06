@@ -459,3 +459,13 @@ span.tb-audience { padding: 0 var(--space-2); }
 /* What gets focus or is scrolled to lands below the fixed screen head, not under it. */
 html { scroll-padding-top: 9rem; }
 @media (max-width: 39.99rem) { html { scroll-padding-top: 13rem; } }
+
+/* Recipes (ADR-010): fields in the editor, shown while "Ist ein Rezept" is ticked. */
+.field-check label { display: inline-flex; gap: var(--space-2); align-items: center; font-weight: 400; }
+.recipe-fields { border: 0; padding: 0; margin: 0 0 var(--space-4); display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.recipe-fields .field { min-width: 8rem; }
+.recipe-fields .field-wide { flex: 1 1 18rem; }
+.editor:not(:has(#recipe:checked)) .recipe-fields { display: none; }
+.recipe-parsed { margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--line); }
+.recipe-parsed h2 { font-size: var(--text-sm); color: var(--fg-2); }
+.recipe-parsed .parsed-none { color: var(--fg-2); }

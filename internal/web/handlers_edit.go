@@ -18,6 +18,9 @@ type editPage struct {
 	Lock string
 }
 
+// TagsText is the page's tags as the editor shows them.
+func (e editPage) TagsText() string { return strings.Join(e.Page.Meta.Tags, ", ") }
+
 func (s *Server) editPage(w http.ResponseWriter, r *http.Request) {
 	pc, ok := s.pageFor(w, r, access.Write)
 	if !ok {
@@ -58,7 +61,11 @@ func (s *Server) savePage(w http.ResponseWriter, r *http.Request) {
 	}
 	u, _ := auth.UserFrom(r.Context())
 	body := strings.ReplaceAll(r.PostFormValue("body"), "\r\n", "\n")
-	if err := s.Wiki.Save(u.Author(), id, r.PostFormValue("title"), body); err != nil {
+	var set func(*wiki.PageMeta)
+	if r.PostFormValue("meta") != "" {
+		set = recipeMetaFrom(r)
+	}
+	if err := s.Wiki.SaveWith(u.Author(), id, r.PostFormValue("title"), body, set); err != nil {
 		s.saveFailed(w, r, http.StatusBadRequest, "invalid")
 		return
 	}

@@ -94,8 +94,13 @@ func TestPageViewRendersMarkdown(t *testing.T) {
 
 func postPreview(t *testing.T, ts *testServer, c *http.Client, id, md string) (*http.Response, string) {
 	t.Helper()
-	_, page := get(t, c, ts.URL+"/p/"+id)
-	req, _ := http.NewRequest("POST", ts.URL+"/api/preview", strings.NewReader(url.Values{"page": {id}, "body": {md}}.Encode()))
+	return postPreviewWith(t, ts, c, url.Values{"page": {id}, "body": {md}})
+}
+
+func postPreviewWith(t *testing.T, ts *testServer, c *http.Client, form url.Values) (*http.Response, string) {
+	t.Helper()
+	_, page := get(t, c, ts.URL+"/p/"+form.Get("page"))
+	req, _ := http.NewRequest("POST", ts.URL+"/api/preview", strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Origin", ts.URL)
 	req.Header.Set("X-CSRF-Token", between(page, `<meta name="csrf" content="`, `"`))

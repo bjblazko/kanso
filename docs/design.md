@@ -1,7 +1,7 @@
 # Design
 
 **Created:** 2026-10-26
-**Updated:** 2026-11-01
+**Updated:** 2026-11-06
 
 Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 `web/static/css/tokens.css`; components use only `var(--…)`.
@@ -13,7 +13,7 @@ Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 | Rail (all screens) | Switch between the parts of Kanso; bottom bar on phones, left column on wide screens (ADR-005). |
 | Start (wiki) | Get into a wiki space. |
 | Page view | Read a page. A flat toolbar above the title stays in view while scrolling: Bearbeiten (the only accent), Unterseite, then Verschieben, Verlauf, Löschen (red text); right, who sees the page as a button to its sharing (or plain text for readers). On phones the quiet actions show only their icon, the word stays for screen readers. |
-| Page editor | Change a page and save it. |
+| Page editor | Change a page and save it. A box "Ist ein Rezept" below the title; while ticked, Portionen, Zeit, Tags and Quelle appear (CSS `:has`, values kept) and the preview ends with "So versteht Kanso die Zutaten" (amount · unit · name; lines without an amount muted). |
 | Space settings | Decide who may read and write. |
 | Licenses and thanks | Show whose work Kanso contains. |
 | Note capture | Write something down, now. The field fills the screen, buttons sit below it; "Speichern" is the only accent. |
