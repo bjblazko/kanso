@@ -15,7 +15,9 @@ const status = document.getElementById('todos-status');
 const msg = JSON.parse(document.getElementById('todo-messages').textContent);
 const ME = root.dataset.sub;
 const ICONS = [...document.getElementById('todo-icons').content.children];
-const ICON_NAMES = ['lock', 'users', 'edit', 'trash']; // the order of #todo-icons
+const ICON_NAMES = ['lock', 'users', 'edit', 'trash', 'cart']; // the order of #todo-icons
+const SHOPPING = 'shopping';
+const LEADING_NUMBER = /^(\d+)(\s.*)$/;
 const titleSuffix = document.title.slice(document.title.indexOf(' · '));
 
 const state = {
@@ -24,7 +26,7 @@ const state = {
   loaded: false, // a sync has finished (or failed) at least once
   offline: false,
   needsLogin: false,
-  editing: null, // { id, text }: the item being edited
+  editing: null, // { id, text, note }: the item being edited (note: shopping lists only)
   draft: null, // { list, after, text }: a new sub-item being written
   renaming: null, // { id, text }
   newItem: '',
@@ -117,7 +119,7 @@ function newID() {
 
 function applyOp(lists, op) {
   if (op.kind === 'create' && !lists.has(op.list)) {
-    lists.set(op.list, { id: op.list, name: op.text, mine: true, items: [], shared: [], sharedNames: [] });
+    lists.set(op.list, { id: op.list, name: op.text, kind: op.listKind || '', mine: true, items: [], shared: [], sharedNames: [] });
   }
   const l = lists.get(op.list);
   if (!l) return;
@@ -141,6 +143,7 @@ function setField(l, op) {
   if (op.kind === 'text') l.items[i].text = op.text;
   if (op.kind === 'done') l.items[i].done = op.done;
   if (op.kind === 'sub' && (i > 0 || !op.sub)) l.items[i].sub = op.sub;
+  if (op.kind === 'note') l.items[i].note = op.text;
 }
 
 // deleteItem removes an item; a main item takes its sub-items along.
@@ -300,6 +303,7 @@ function field(key, attrs) {
 
 function setText(key, value) {
   if (key === 'edit') state.editing.text = value;
+  else if (key === 'note-edit') state.editing.note = value;
   else if (key === 'draft') state.draft.text = value;
   else if (key === 'rename') state.renaming.text = value;
   else state[key === 'new-item' ? 'newItem' : 'newList'] = value;
@@ -311,7 +315,8 @@ function overview(all) {
   const form = h('form', { className: 'form form-row todo-new', onsubmit: createList },
     h('div', { className: 'field' }, h('label', { for: 'new-list' }, msg.new_list),
       field('new-list', { id: 'new-list', maxlength: 80, value: state.newList })),
-    h('button', { className: 'btn btn-primary', type: 'submit' }, msg.create));
+    h('button', { className: 'btn btn-primary', type: 'submit' }, msg.create),
+    h('button', { className: 'btn btn-secondary', type: 'submit', value: SHOPPING }, msg.create_shopping));
   let body = h('ul', { className: 'list-plain todo-lists' }, all.map(listRow));
   if (all.length === 0) body = h('p', { className: 'empty' }, state.offline ? msg.offline_empty : (state.loaded ? msg.empty : ''));
   return [h('header', { className: 'screen-head' }, h('h1', {}, msg.title)), form, body];
@@ -368,7 +373,8 @@ function meter(l, attrs = {}) {
 }
 
 function listRow(l) {
-  return h('li', {}, h('a', { href: `/todos/${l.id}` }, l.name), h('br'),
+  const name = l.kind === SHOPPING ? [icon('cart'), h('span', {}, l.name)] : l.name;
+  return h('li', {}, h('a', { href: `/todos/${l.id}`, className: l.kind === SHOPPING ? 'todo-shop-link' : null }, name), h('br'),
     h('span', { className: 'meta todo-summary' }, meter(l, { 'aria-hidden': 'true' }), progress(l)), audience(l));
 }
 
@@ -386,10 +392,11 @@ async function createList(event) {
   const name = state.newList.trim();
   if (!name) return;
   const id = newID();
+  const listKind = event.submitter?.value === SHOPPING ? SHOPPING : '';
   state.newList = '';
   history.pushState(null, '', `/todos/${id}`);
   state.focus = 'new-item';
-  await change({ kind: 'create', list: id, text: name });
+  await change({ kind: 'create', list: id, text: name, listKind });
 }
 
 // ---- One list --------------------------------------------------------------
@@ -419,6 +426,7 @@ function heading(l) {
 }
 
 function rows(l) {
+  if (l.kind === SHOPPING) return l.items.map((it) => shopRow(l, it));
   const out = [];
   l.items.forEach((it, i) => {
     out.push(itemRow(l, it, i));
@@ -461,7 +469,7 @@ function tools(l, it, i) {
 function startEdit(l, it) {
   commitEdit(l);
   state.draft = null;
-  state.editing = { id: it.id, text: it.text };
+  state.editing = { id: it.id, text: it.text, note: l.kind === SHOPPING ? (it.note || '') : undefined };
   state.focus = 'edit';
   draw();
 }
@@ -476,6 +484,8 @@ function commitEdit(l) {
   const text = e.text.trim();
   if (!text) change({ kind: 'delete', list: l.id, item: it.id });
   else if (text !== it.text) change({ kind: 'text', list: l.id, item: it.id, text });
+  const note = e.note?.trim();
+  if (text && note !== undefined && note !== (it.note || '')) change({ kind: 'note', list: l.id, item: it.id, text: note });
 }
 
 function editKey(event, l) {
@@ -530,7 +540,7 @@ function addForm(l) {
     change({ kind: 'add', list: l.id, item: newID(), after: '', text, sub: false });
   };
   return h('form', { className: 'form form-row todo-add', onsubmit: submit },
-    h('div', { className: 'field' }, h('label', { for: 'new-item' }, msg.new_item),
+    h('div', { className: 'field' }, h('label', { for: 'new-item' }, l.kind === SHOPPING ? msg.shop_new_item : msg.new_item),
       field('new-item', { id: 'new-item', maxlength: 500, value: state.newItem })),
     h('button', { className: 'btn btn-primary', type: 'submit' }, msg.add));
 }
@@ -551,6 +561,64 @@ function ownerTools(l) {
     h('span', { className: 'tb-sep', 'aria-hidden': 'true' }),
     h('a', { className: 'btn btn-quiet btn-sm tb-danger', href: `/todos/${l.id}/delete` }, icon('trash'), label(msg.delete_list)),
   ];
+}
+
+// ---- Shopping lists (ADR-011) ----------------------------------------------
+
+// shopRow is an item of a shopping list: its text with − and + for a leading
+// number, below it the note and the recipes it is for.
+function shopRow(l, it) {
+  const editing = state.editing?.id === it.id;
+  const cls = ['todo-item', 'shop-item', it.done && 'done', editing && 'editing'].filter(Boolean).join(' ');
+  const box = h('label', { className: 'todo-check' }, h('input', {
+    type: 'checkbox', 'aria-label': it.text, checked: it.done,
+    onchange: (e) => change({ kind: 'done', list: l.id, item: it.id, done: e.target.checked }),
+  }));
+  if (editing) return h('li', { className: cls }, box, shopEdit(l, it));
+  const body = h('div', { className: 'shop-body' },
+    h('button', { type: 'button', className: 'todo-text', onclick: () => startEdit(l, it) }, it.text), shopMeta(it));
+  return h('li', { className: cls }, box, body, stepper(l, it));
+}
+
+function shopMeta(it) {
+  const recipes = [...new Map((it.for || []).map((s) => [s.recipe, s])).values()];
+  const parts = [];
+  if (it.note) parts.push(h('span', { className: 'shop-note' }, it.note));
+  if (recipes.length) {
+    const links = recipes.flatMap((s, i) => [i ? ', ' : '', h('a', { href: `/p/${s.recipe}` }, s.title)]);
+    parts.push(h('span', {}, msg.for, ' ', ...links));
+  }
+  return parts.length ? h('p', { className: 'meta shop-meta' }, ...parts) : null;
+}
+
+// stepper changes the number an item starts with; never below 1.
+function stepper(l, it) {
+  const m = it.text.match(LEADING_NUMBER);
+  if (!m) return null;
+  const n = Number(m[1]);
+  const set = (k) => () => change({ kind: 'text', list: l.id, item: it.id, text: `${k}${m[2]}` });
+  return h('div', { className: 'shop-stepper' },
+    h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': msg.less, disabled: n <= 1, onclick: set(n - 1) }, '−'),
+    h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': msg.more, onclick: set(n + 1) }, '+'));
+}
+
+// shopEdit changes text and note of an item; Enter saves, Escape cancels.
+function shopEdit(l, it) {
+  const save = (event) => { event.preventDefault(); commitEdit(l); draw(); };
+  const key = (event) => {
+    if (event.key !== 'Escape') return;
+    state.editing = null;
+    state.focus = null;
+    draw();
+  };
+  return h('form', { className: 'shop-edit', onsubmit: save, onkeydown: key },
+    h('div', { className: 'field' }, h('label', { for: 'shop-text' }, msg.item),
+      field('edit', { id: 'shop-text', className: 'todo-edit', maxlength: 500, value: state.editing.text })),
+    h('div', { className: 'field' }, h('label', { for: 'shop-note' }, msg.note),
+      field('note-edit', { id: 'shop-note', className: 'todo-edit', maxlength: 300, value: state.editing.note, placeholder: msg.note_hint })),
+    h('div', { className: 'todo-tools' },
+      h('button', { type: 'submit', className: 'btn btn-secondary btn-sm' }, msg.save),
+      button(msg.delete_item, () => { state.editing = null; change({ kind: 'delete', list: l.id, item: it.id }); }, 'btn-destructive')));
 }
 
 // ---- Wiring ----------------------------------------------------------------

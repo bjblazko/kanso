@@ -54,12 +54,14 @@ All notable changes to this project are documented here. The format follows
 - "Küche" in the rail: every recipe the person may read, with a search over title, ingredients and tags and tag filters that switch on and off; "Neues Rezept" creates a recipe page from a template in a chosen space.
 - Browser test for recipes: create, find by tag, cook with more servings, tick off, clear ticks.
 - Shopping lists (ADR-011): "Einkaufen" on a recipe (and in the cook view, with its servings) previews every ingredient ticked and adds them to an existing or a new shopping list; amounts of the same ingredient add up in compatible units (g/kg, ml/l, same counted unit), never into an item already bought, and every item remembers which recipe it is for.
+- Shopping lists under "Todos" ("Einkaufsliste anlegen"): type the amount with the item ("2 l Milch"), change a leading number with − and +, add a note with alternatives; items from recipes show what they are for. Offline, sharing and syncing work as for any list.
 
 ### Security
 - GPS location is removed from JPEG photos on upload (notes and wiki pages); orientation and other EXIF data stay.
 - Requires Go 1.27.3 (`go.mod`), which fixes GO-2026-6809 in `crypto/x509`.
 
 ### Changed
+- The button that creates a to-do list says "Liste anlegen" (was "Anlegen"), next to the new "Einkaufsliste anlegen".
 - Navigation (ADR-005): a rail names the parts of Kanso — Notizen, Todos and Wiki — at the bottom on phones and at the left on wide screens; the side bar shows only the wiki's spaces and pages, under "Wiki-Bereiche"; group management moved to the user menu.
 - The page tree shows guide lines for every level, so nested pages stay apart on narrow screens.
 - Keeping a folder out of the history is one helper (`Repo.Ignore`) for notes and to-do lists.
