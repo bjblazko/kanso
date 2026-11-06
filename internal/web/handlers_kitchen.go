@@ -57,11 +57,12 @@ func (s *Server) visibleRecipes(who access.Principal) []recipeRow {
 }
 
 func (s *Server) rowOf(p wiki.Page) recipeRow {
-	row := recipeRow{ID: p.Meta.ID, Title: p.Meta.Title, Tags: p.Meta.Tags, Time: p.Meta.Time, Space: p.Space}
+	tags := recipes.NormalizeTags(strings.Join(p.Meta.Tags, ",")) // files edited outside Kanso may say "Deftig"
+	row := recipeRow{ID: p.Meta.ID, Title: p.Meta.Title, Tags: tags, Time: p.Meta.Time, Space: p.Space}
 	if sp, ok := s.Spaces.Get(p.Space); ok {
 		row.Space = sp.Name
 	}
-	row.words = append(strings.Fields(strings.ToLower(p.Meta.Title)), p.Meta.Tags...)
+	row.words = append(strings.Fields(strings.ToLower(p.Meta.Title)), tags...)
 	for _, ing := range recipes.Parse(p.Body).Ingredients() {
 		row.words = append(row.words, strings.Fields(ing.Key)...)
 	}

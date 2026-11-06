@@ -91,3 +91,12 @@ func TestCookViewNoIngredients(t *testing.T) {
 	}
 	_ = anna
 }
+
+func TestCookViewOffersReset(t *testing.T) {
+	ts, admin, _ := setupHaus(t)
+	id := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
+	_, body := get(t, admin, ts.URL+"/recipes/"+id+"/cook")
+	if !strings.Contains(toolbarOf(body), `data-reset`) || !strings.Contains(body, "Häkchen entfernen") {
+		t.Fatal("no reset action")
+	}
+}

@@ -100,3 +100,25 @@ func TestKansoRezeptSkillFormat(t *testing.T) {
 		t.Fatalf("%+v %q", ings, r.Steps)
 	}
 }
+
+func TestParagraphStepsAndLooseIngredients(t *testing.T) {
+	r := Parse("## Zutaten\n200 g Mehl\n1 Prise Salz\n\n## Zubereitung\nMehl sieben.\nDann salzen.\n\nBacken.\n")
+	if ings := r.Ingredients(); len(ings) != 2 || ings[0].Name != "Mehl" || ings[1].Unit != "Prise" {
+		t.Errorf("loose ingredients %+v", ings)
+	}
+	if len(r.Steps) != 2 || r.Steps[0] != "Mehl sieben. Dann salzen." || r.Steps[1] != "Backen." {
+		t.Errorf("paragraph steps %q", r.Steps)
+	}
+}
+
+func TestHeadingVariantsAndHashtags(t *testing.T) {
+	for _, h := range []string{"## Zutaten (für 4 Personen)", "## Zutaten:", "## Zutaten für den Teig", "# Ingredients"} {
+		if r := Parse(h + "\n- 1 Ei\n"); len(r.Ingredients()) != 1 {
+			t.Errorf("%q not recognised", h)
+		}
+	}
+	r := Parse("## Zutaten\n- 1 Ei\n#vegan #schnell\n- 200 g Mehl\n")
+	if len(r.Ingredients()) != 2 {
+		t.Errorf("hashtag ended the section: %+v", r.Ingredients())
+	}
+}

@@ -361,3 +361,4 @@ recipe.empty: "Noch keine Rezepte. Ein Rezept ist eine Wiki-Seite mit Zutaten un
 recipe.no_match: "Kein Rezept passt dazu."
 recipe.no_space: "Du darfst in keinem Wiki-Bereich schreiben, darum kannst du hier kein Rezept anlegen."
 recipe.skeleton: "Kurz beschreiben, was es ist.\n\n## Zutaten\n\n- 200 g Beispiel\n\n## Zubereitung\n\n1. Erster Schritt."
+recipe.reset: "Häkchen entfernen"

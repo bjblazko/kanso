@@ -31,6 +31,7 @@ var (
 	ingredientHeadings = map[string]bool{"zutaten": true, "ingredients": true}
 	stepHeadings       = map[string]bool{"zubereitung": true, "schritte": true, "steps": true, "method": true}
 	numberedRE         = regexp.MustCompile(`^\d+[.)]\s+`)
+	headingRE          = regexp.MustCompile(`^(#{1,6})(?:\s+(.*))?$`)
 )
 
 // parser walks a page line by line.
@@ -38,7 +39,7 @@ type parser struct {
 	r       Recipe
 	sec     section
 	fence   bool
-	lastNew bool // the previous line started a step, so an indented line continues it
+	lastNew bool // the previous line belongs to a step, so a following plain line continues it
 }
 
 // Parse reads the ingredients and steps of a recipe page's Markdown text.
@@ -60,28 +61,32 @@ func (p *parser) line(line string) {
 	case p.fence:
 	case p.heading(trimmed):
 	case trimmed == "":
+		p.lastNew = false
+	case strings.HasPrefix(trimmed, "#"): // a hashtag line, not a heading
 	case trimmed == "---" || trimmed == "***":
 		p.sec = sectionNone
 	case p.sec == sectionIngredients:
 		p.ingredient(trimmed)
 	case p.sec == sectionSteps:
-		p.step(line, trimmed)
+		p.step(trimmed)
 	}
 }
 
-// heading handles a Markdown heading and reports whether the line was one.
+// heading handles a Markdown heading ("#" to "######" and a space) and
+// reports whether the line was one.
 func (p *parser) heading(s string) bool {
-	if !strings.HasPrefix(s, "#") {
+	m := headingRE.FindStringSubmatch(s)
+	if m == nil {
 		return false
 	}
-	level := len(s) - len(strings.TrimLeft(s, "#"))
-	text := strings.TrimSpace(s[level:])
+	level, text := len(m[1]), strings.TrimSpace(m[2])
+	word := strings.ToLower(strings.Trim(strings.SplitN(text+" ", " ", 2)[0], ":()."))
 	switch {
 	case level == 3 && p.sec == sectionIngredients:
 		p.r.Groups = append(p.r.Groups, Group{Name: text})
-	case level <= 2 && ingredientHeadings[strings.ToLower(text)]:
+	case level <= 2 && ingredientHeadings[word]:
 		p.sec = sectionIngredients
-	case level <= 2 && stepHeadings[strings.ToLower(text)]:
+	case level <= 2 && stepHeadings[word]:
 		p.sec = sectionSteps
 	case level <= 2:
 		p.sec = sectionNone
@@ -90,10 +95,8 @@ func (p *parser) heading(s string) bool {
 	return true
 }
 
+// ingredient takes a list item, or a plain line, as one ingredient.
 func (p *parser) ingredient(s string) {
-	if !isListItem(s) {
-		return
-	}
 	if len(p.r.Groups) == 0 {
 		p.r.Groups = append(p.r.Groups, Group{})
 	}
@@ -101,14 +104,17 @@ func (p *parser) ingredient(s string) {
 	g.Ingredients = append(g.Ingredients, ParseIngredient(s))
 }
 
-func (p *parser) step(line, s string) {
+// step starts a step with a list item or a new paragraph; other lines continue the step.
+func (p *parser) step(s string) {
 	switch {
 	case isListItem(s):
 		p.r.Steps = append(p.r.Steps, strings.TrimSpace(numberedRE.ReplaceAllString(stripMarker(s), "")))
-		p.lastNew = true
-	case p.lastNew && line != s && len(p.r.Steps) > 0:
+	case p.lastNew && len(p.r.Steps) > 0:
 		p.r.Steps[len(p.r.Steps)-1] += " " + s
+	default:
+		p.r.Steps = append(p.r.Steps, s)
 	}
+	p.lastNew = true
 }
 
 func isListItem(s string) bool {

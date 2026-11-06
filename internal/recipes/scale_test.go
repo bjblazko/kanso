@@ -22,7 +22,7 @@ func TestFormatAmount(t *testing.T) {
 		{2.0, FamilyVolume, "l", "de", "2"},
 		{0.5, FamilyCount, "Dose", "de", "½"},
 		{1.5, FamilyCount, "Dose", "de", "1½"},
-		{1.3, FamilyCount, "Stück", "de", "1¼"},
+		{1.3, FamilyCount, "Stück", "de", "1⅓"},
 		{2, FamilyCount, "Stück", "de", "2"},
 		{0.1, FamilyCount, "TL", "de", "¼"},
 		{0.75, FamilyCount, "TL", "de", "¾"},
@@ -68,5 +68,39 @@ func TestClampServings(t *testing.T) {
 		if got := ClampServings(c.raw, c.fallback); got != c.want {
 			t.Errorf("ClampServings(%q, %d) = %d, want %d", c.raw, c.fallback, got, c.want)
 		}
+	}
+}
+
+func TestScaleKeepsAmountsAtFactorOne(t *testing.T) {
+	for _, line := range []string{"- ⅓ TL Zimt", "- 2,5 g Trockenhefe", "- 0,2 g Safran", "- ⅔ Tasse Milch", "- 2-3 Zehen Knoblauch"} {
+		orig := ParseIngredient(line)
+		if got := orig.Scale(1, "de"); got.Qty.Text != orig.Qty.Text {
+			t.Errorf("%s: %q, want %q", line, got.Qty.Text, orig.Qty.Text)
+		}
+	}
+}
+
+func TestFormatSmallAndThirds(t *testing.T) {
+	cases := []struct {
+		v    float64
+		f    Family
+		unit string
+		want string
+	}{
+		{0.4, FamilyMass, "g", "0,4"},
+		{0.02, FamilyMass, "g", "0,02"},
+		{2.5, FamilyMass, "g", "2,5"},
+		{7.0, FamilyVolume, "ml", "7"},
+		{1.0 / 3, FamilyCount, "TL", "⅓"},
+		{2.0 / 3, FamilyCount, "TL", "⅔"},
+		{4.0 / 3, FamilyCount, "Tasse", "1⅓"},
+	}
+	for _, c := range cases {
+		if got := FormatAmount(c.v, c.f, c.unit, "de"); got != c.want {
+			t.Errorf("%v %s: %q, want %q", c.v, c.unit, got, c.want)
+		}
+	}
+	if got := ParseIngredient("- 0,2 g Safran").Scale(2, "de"); got.Qty.Text != "0,4" {
+		t.Errorf("safran ×2: %q", got.Qty.Text)
 	}
 }

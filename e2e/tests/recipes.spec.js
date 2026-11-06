@@ -37,4 +37,8 @@ test('recipe: create, find by tag, cook with more servings, tick off', async ({ 
   await first.check();
   await page.reload();
   await expect(page.locator('.cook-list input[type="checkbox"]').first()).toBeChecked();
+
+  await page.getByRole('button', { name: 'Häkchen entfernen' }).click();
+  await page.reload();
+  await expect(page.locator('.cook-list input[type="checkbox"]').first()).not.toBeChecked();
 });

@@ -109,3 +109,12 @@ func TestNewRecipe(t *testing.T) {
 		t.Errorf("empty title: %d", resp.StatusCode)
 	}
 }
+
+func TestKitchenTagsFromFilesAreNormalised(t *testing.T) {
+	ts, admin, _ := setupHaus(t)
+	id := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4, "Deftig")
+	_, body := get(t, admin, ts.URL+"/recipes?tag=Deftig")
+	if !strings.Contains(listOf(body), id) || !strings.Contains(between(body, `<nav class="tag-filter"`, `</nav>`), `aria-pressed="true">deftig`) {
+		t.Fatalf("hand-written tag:\n%s", body)
+	}
+}

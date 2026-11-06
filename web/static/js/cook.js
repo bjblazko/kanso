@@ -29,6 +29,12 @@ if (root) {
     box.checked = ticked.has(box.dataset.tick);
     box.addEventListener('change', save);
   }
+  const reset = root.querySelector('[data-reset]');
+  reset.hidden = false;
+  reset.addEventListener('click', () => {
+    for (const box of boxes) box.checked = false;
+    save();
+  });
   keepAwake();
   document.addEventListener('visibilitychange', () => { if (!lock || lock.released) keepAwake(); });
 }

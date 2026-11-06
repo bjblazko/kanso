@@ -361,3 +361,4 @@ recipe.empty: "No recipes yet. A recipe is a wiki page with ingredients and a me
 recipe.no_match: "No recipe matches."
 recipe.no_space: "You may not write in any wiki space, so you cannot create a recipe here."
 recipe.skeleton: "Describe it in one line.\n\n## Ingredients\n\n- 200 g example\n\n## Method\n\n1. First step."
+recipe.reset: "Clear ticks"

@@ -2,6 +2,7 @@
 <header class="screen-head">
 <div class="page-toolbar" role="toolbar" aria-label="{{.T "recipe.cook"}}">
   <a class="btn btn-quiet btn-sm" href="/p/{{$id}}">{{template "icon" "book"}}<span class="tb-label">{{.T "recipe.back"}}</span></a>
+  <button class="btn btn-quiet btn-sm" type="button" data-reset hidden>{{template "icon" "history"}}<span class="tb-label">{{.T "recipe.reset"}}</span></button>
   <span class="tb-grow"></span>
   <div class="servings" role="group" aria-label="{{.T "recipe.servings"}}">
     {{with $d.Fewer}}<a class="btn btn-quiet btn-sm" href="{{.}}" aria-label="{{$.T "recipe.fewer"}}">−</a>{{else}}<span class="btn btn-quiet btn-sm" aria-disabled="true">−</span>{{end}}
