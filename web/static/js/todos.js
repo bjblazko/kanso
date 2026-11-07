@@ -30,6 +30,7 @@ const state = {
   editing: null, // { id, text, note }: the item being edited (note: shopping lists only)
   draft: null, // { list, after, text }: a new sub-item being written
   renaming: null, // { id, text }
+  amount: null, // { id, value }: the amount of a shopping item being typed
   newItem: '',
   newList: '',
   focus: null, // data-focus of the field to focus after drawing
@@ -305,6 +306,7 @@ function field(key, attrs) {
 function setText(key, value) {
   if (key === 'edit') state.editing.text = value;
   else if (key === 'note-edit') state.editing.note = value;
+  else if (key === 'amount-edit') state.amount.value = value;
   else if (key === 'draft') state.draft.text = value;
   else if (key === 'rename') state.renaming.text = value;
   else state[key === 'new-item' ? 'newItem' : 'newList'] = value;
@@ -614,10 +616,36 @@ function stepper(l, it) {
   };
   const up = Math.floor(value / step.up + 1e-9) * step.up + step.up;
   const down = Math.ceil(value / step.down - 1e-9) * step.down - step.down;
-  const set = (v) => () => change({ kind: 'text', list: l.id, item: it.id, text: write(v) });
+  const save = (v) => change({ kind: 'text', list: l.id, item: it.id, text: write(v) });
+  const set = (v) => () => save(v);
+  const typing = state.amount?.id === it.id;
   return h('div', { className: 'shop-stepper' },
     h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': `${msg.less}: ${it.text}`, disabled: value <= step.min, onclick: set(Math.max(down, step.min)) }, '−'),
+    typing ? amountField(save) : h('button', { type: 'button', className: 'btn btn-quiet btn-sm shop-amount',
+      'aria-label': `${msg.edit_amount}: ${it.text}`, onclick: () => startAmount(it, m[1]) }, m[1]),
     h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': `${msg.more}: ${it.text}`, onclick: set(up) }, '+'));
+}
+
+function startAmount(it, value) {
+  state.editing = null;
+  state.amount = { id: it.id, value };
+  state.focus = 'amount-edit';
+  draw();
+}
+
+// amountField takes an exact amount; Enter or leaving the field keeps it, Escape does not.
+function amountField(save) {
+  const done = (keep) => {
+    const v = Number(String(state.amount?.value ?? '').trim().replace(',', '.'));
+    state.amount = null;
+    state.focus = null;
+    if (keep && v > 0) save(v);
+    else drawSoon();
+  };
+  return h('form', { className: 'shop-amount-form', onsubmit: (e) => { e.preventDefault(); done(true); } },
+    field('amount-edit', { className: 'todo-edit', inputmode: 'decimal', size: 5, 'aria-label': msg.amount, value: state.amount.value,
+      onkeydown: (e) => { if (e.key === 'Escape') done(false); },
+      onblur: (e) => { if (!drawing && e.target.isConnected && state.amount) done(true); } }));
 }
 
 // shopEdit changes text and note of an item; Enter saves, Escape cancels.

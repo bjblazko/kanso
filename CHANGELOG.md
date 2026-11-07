@@ -54,7 +54,7 @@ All notable changes to this project are documented here. The format follows
 - "Küche" in the rail: every recipe the person may read, with a search over title, ingredients and tags and tag filters that switch on and off; "Neues Rezept" creates a recipe page from a template in a chosen space.
 - Browser test for recipes: create, find by tag, cook with more servings, tick off, clear ticks.
 - Shopping lists (ADR-011): "Einkaufen" on a recipe (and in the cook view, with its servings) previews every ingredient ticked and adds them to an existing or a new shopping list; amounts of the same ingredient add up in compatible units (g/kg, ml/l, same counted unit), never into an item already bought, and every item remembers which recipe it is for.
-- Shopping lists under "Todos" ("Einkaufsliste anlegen"): type the amount with the item ("2 l Milch"), change the amount with − and + in steps that suit the unit (10 g below 100 g, then 50 g; ½ kg or l; 1 for counted things), add a note with alternatives; items from recipes show what they are for. Offline, sharing and syncing work as for any list.
+- Shopping lists under "Todos" ("Einkaufsliste anlegen"): type the amount with the item ("2 l Milch"), change the amount with − and + in steps that suit the unit (10 g below 100 g, then 50 g; ½ kg or l; 1 for counted things) or tap the amount between them to type an exact one, add a note with alternatives; items from recipes show what they are for. Offline, sharing and syncing work as for any list.
 - Filling keeps your words after the amount, takes the amount for an item that had none, shows per recipe how much it asked for ("für Brot (500 g)"), adds nothing twice on a double tap, and never ticks an amount that grew after an offline tick.
 
 ### Security

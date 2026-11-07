@@ -35,6 +35,10 @@ test('shopping list: amounts with − and + in sensible steps, a note, filled fr
   await shows('90 g Parmesan');
   await step('90 g Parmesan', 'Eins weniger');
   await shows('80 g Parmesan');
+  await step('300 g Butter', 'Menge ändern');
+  await page.getByLabel('Menge', { exact: true }).fill('275');
+  await page.getByLabel('Menge', { exact: true }).press('Enter');
+  await shows('275 g Butter');
   await add('1,5 kg Mehl');
   await step('1,5 kg Mehl', 'Eins mehr');
   await shows('2 kg Mehl');
