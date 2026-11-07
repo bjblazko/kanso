@@ -98,6 +98,3 @@ First numbered release: everything Kanso can do so far.
 - Design review: button links no longer underlined, navigation folded on phones, neutral checkboxes.
 - ECDSA keys parsed with the non-deprecated standard-library API.
 - Documentation: arc42 architecture, ADRs 000–003, feature descriptions.
-
-[Unreleased]: https://github.com/bjblazko/kanso/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/bjblazko/kanso/releases/tag/v0.1.0
