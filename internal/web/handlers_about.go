@@ -3,6 +3,7 @@
 package web
 
 import (
+	"github.com/bjblazko/kanso/internal/buildinfo"
 	"io/fs"
 	"net/http"
 
@@ -28,9 +29,15 @@ func loadLicenses(static fs.FS) ([]license, error) {
 	return list, yaml.Unmarshal(b, &list)
 }
 
-func (s *Server) showLicenses(w http.ResponseWriter, r *http.Request) {
-	v := s.newView(r, "", s.licenses)
-	v.Title = v.T("licenses.title")
+// aboutPage is "Über Kanso": version, copyright, links, what goes where, licenses and thanks.
+type aboutPage struct {
+	Version  string
+	Licenses []license
+}
+
+func (s *Server) showAbout(w http.ResponseWriter, r *http.Request) {
+	v := s.newView(r, "", aboutPage{Version: buildinfo.Version, Licenses: s.licenses})
+	v.Title = v.T("about.title")
 	s.render(w, r, http.StatusOK, "licenses", v)
 }
 

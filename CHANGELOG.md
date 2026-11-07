@@ -1,11 +1,18 @@
 # Changelog
 
 All notable changes to this project are documented here. The format follows
-[Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html). The version lives in
+`internal/buildinfo/VERSION`; Kanso shows it in the footer and under "Über Kanso".
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-07
+
+First numbered release: everything Kanso can do so far.
+
 ### Added
+- Version number and "Über Kanso" (`/about`): version, copyright, licence (Apache-2.0), links to GitHub and huepattl.de, what Kanso sends where, and the licenses and thanks; the footer of every page reads "Hüpattl! Kanso 0.1.0 · Über Kanso".
 - Functions that use the AI carry a mark "KI · extern: host" or "KI · im eigenen Netz: host" (import form, the draft made with AI, the AI connection page); Kanso resolves the host to tell which.
 - Repository skeleton, configuration from environment, `/healthz`.
 - Safe file paths, slugs, atomic Markdown documents with YAML frontmatter.
@@ -91,3 +98,6 @@ All notable changes to this project are documented here. The format follows
 - Design review: button links no longer underlined, navigation folded on phones, neutral checkboxes.
 - ECDSA keys parsed with the non-deprecated standard-library API.
 - Documentation: arc42 architecture, ADRs 000–003, feature descriptions.
+
+[Unreleased]: https://github.com/bjblazko/kanso/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/bjblazko/kanso/releases/tag/v0.1.0

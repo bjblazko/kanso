@@ -10,6 +10,7 @@ import (
 
 	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/auth"
+	"github.com/bjblazko/kanso/internal/buildinfo"
 	"github.com/bjblazko/kanso/internal/i18n"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/users"
@@ -38,8 +39,10 @@ type view struct {
 	Module string
 	// Shared are the pages shared with the person in spaces they cannot read (wiki only).
 	Shared []sharedEntry
-	Dev    bool   // dev login: offer to switch person
-	Path   string // request URI, to come back after switching
+	Dev    bool // dev login: offer to switch person
+	// AppVersion is Kanso's release, shown in the footer.
+	AppVersion string
+	Path       string // request URI, to come back after switching
 
 	bundle  *i18n.Bundle
 	version string
@@ -58,8 +61,8 @@ func (s *Server) newView(r *http.Request, title string, data any) view {
 		User: u, CSRF: auth.CSRFToken(r.Context()), Query: r.URL.Query().Get("q"), Data: data,
 		Admin: p.Admin, Nav: s.Spaces.Visible(p, s.groups()),
 		Module: moduleOf(r.URL.Path), Dev: s.Cfg.DevLogin, Path: r.URL.RequestURI(),
-		AvatarVersion: s.Users.AvatarVersion(u.Sub),
-		bundle:        s.I18n, version: s.version,
+		AvatarVersion: s.Users.AvatarVersion(u.Sub), AppVersion: buildinfo.Version,
+		bundle: s.I18n, version: s.version,
 	}
 	if v.Module == "wiki" {
 		v.Shared = s.sharedWith(p)

@@ -28,7 +28,7 @@ Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 | Cook view | Cook from the phone at the stove. Toolbar: "Zur Seite", "Häkchen entfernen" (shown only with script) and the servings stepper (− number + as links, so it works without script); no accent. Below only ingredients (by group) and steps, large, each to tick off, a step's photo right below it; ticks are kept on the device, the screen stays on (Wake Lock) while visible. |
 | Page editor | Change a page and save it. A box "Ist ein Rezept" below the title; while ticked, Portionen, Zeit, Tags and Quelle appear (CSS `:has`, values kept) and the preview ends with "So versteht Kanso die Zutaten" (amount · unit · name; lines without an amount muted). |
 | Space settings | Decide who may read and write. |
-| Licenses and thanks | Show whose work Kanso contains. |
+| About Kanso | Say what Kanso is and whose work it contains: name and version, copyright, licence, links to GitHub and huepattl.de, the disclaimer, "Was Kanso wohin schickt", then licenses and thanks. Reached from the footer line "Hüpattl! Kanso 0.1.0 · Über Kanso" on every page; `/about/licenses` shows the same page. |
 | Note capture | Write something down, now. The field fills the screen, buttons sit below it; "Speichern" is the only accent. |
 | Notes list | Find a note to sort. |
 | Note → wiki page | Choose where the note goes. |

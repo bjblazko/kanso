@@ -17,7 +17,7 @@ test('language can be switched to English', async ({ page }) => {
 
 test('licenses page lists shipped third-party work', async ({ page }) => {
   await signIn(page, { sub: 'carl', name: 'Carl' });
-  await page.getByRole('link', { name: 'Lizenzen und Dank' }).click();
+  await page.getByRole('link', { name: 'Über Kanso' }).click();
   await expect(page.getByRole('link', { name: 'IBM Plex Sans and IBM Plex Mono' })).toBeVisible();
   await expect(page.getByText('go.yaml.in/yaml/v3')).toBeVisible();
 });

@@ -40,6 +40,8 @@ just lint   # gofmt + go vet
 Update these in the same commit as the change they describe:
 
 - `CHANGELOG.md` — [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), entries under `[Unreleased]`.
+  A release moves them under `## [x.y.z] - date` and sets the same number in
+  `internal/buildinfo/VERSION` (SemVer; the flake and the footer read it).
 - `docs/adr/NNN-slug.md` — one per significant decision: Context, Decision,
   Alternatives Considered, Consequences; header `**Status:**`, `**Created:**`,
   `**Updated:**`. Next sequential number; list it in arc42 chapter 9.

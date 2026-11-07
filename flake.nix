@@ -16,7 +16,8 @@
         # go.mod needs Go 1.27.3 (GO-2026-6809 in crypto/x509).
         kanso = (pkgs.buildGoModule.override { go = pkgs.go_1_27; }) {
           pname = "kanso";
-          version = self.shortRev or self.dirtyShortRev or "dev";
+          # The release from internal/buildinfo/VERSION, plus the commit for deploys between releases.
+          version = "${pkgs.lib.trim (builtins.readFile ./internal/buildinfo/VERSION)}-${self.shortRev or self.dirtyShortRev or "dev"}";
           src = pkgs.lib.cleanSource self;
           vendorHash = "sha256-Xug6p3J4aSPZqVcbVW42L2TvV9xx4b4M49jsGeMHIRI=";
           subPackages = [ "cmd/kanso" ];
