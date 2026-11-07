@@ -3,6 +3,7 @@
 package web
 
 import (
+	"html"
 	"net/http"
 	"testing"
 	"time"
@@ -47,3 +48,5 @@ func mustDay(t *testing.T, day string) time.Time {
 	}
 	return d
 }
+
+func htmlUnescape(s string) string { return html.UnescapeString(s) }

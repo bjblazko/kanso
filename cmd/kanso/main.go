@@ -14,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/bjblazko/kanso/internal/ai"
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/config"
 	"github.com/bjblazko/kanso/internal/devseed"
@@ -21,6 +22,7 @@ import (
 	"github.com/bjblazko/kanso/internal/markdown"
 	"github.com/bjblazko/kanso/internal/mealplan"
 	"github.com/bjblazko/kanso/internal/notes"
+	"github.com/bjblazko/kanso/internal/recipeimport"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/tasks"
@@ -120,7 +122,7 @@ func buildDeps(cfg config.Config) (web.Deps, error) {
 		return web.Deps{}, err
 	}
 	bundle, err := i18n.Load()
-	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, Notes: ns, Todos: td, Tasks: tasks.NewStore(cfg.DataDir, repo), MealPlans: mealplan.NewStore(cfg.DataDir, repo),
+	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, Notes: ns, Todos: td, Tasks: tasks.NewStore(cfg.DataDir, repo), MealPlans: mealplan.NewStore(cfg.DataDir, repo), AI: ai.NewStore(cfg.StateDir), Fetch: recipeimport.NewFetcher(),
 		MD: markdown.New(), Locks: wiki.NewLocks(5*time.Minute, time.Now), Search: web.BuildIndex(wk, ns)}, err
 }
 

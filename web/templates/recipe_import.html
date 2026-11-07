@@ -1,0 +1,15 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.T "import.title"}}</h1>
+{{if $d.Error}}<p class="notice notice-warning" role="alert">{{$d.Error}}</p>{{end}}
+{{if $d.Spaces}}<form method="post" action="/recipes/import" class="form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <div class="field"><label for="url">{{.T "import.url"}}</label>
+    <input id="url" name="url" type="url" inputmode="url" required value="{{$d.URL}}" placeholder="https://"></div>
+  <div class="field"><label for="space">{{.T "recipe.space"}}</label>
+    <select id="space" name="space">{{range $d.Spaces}}<option value="{{.Slug}}"{{if eq .Slug $d.Space}} selected{{end}}>{{.Name}}</option>{{end}}</select></div>
+  <p class="hint">{{if $d.AIHost}}{{.T "import.goes_to" $d.AIHost}}{{else}}{{.T "import.no_ai"}}{{end}}</p>
+  <div class="actions"><button class="btn btn-primary" type="submit" data-wait="{{if $d.AIHost}}{{.T "import.wait_ai"}}{{else}}{{.T "import.wait"}}{{end}}">{{.T "import.fetch"}}</button>
+  <a class="btn btn-quiet" href="/recipes">{{.T "action.cancel"}}</a></div>
+</form>{{else}}<p class="empty">{{.T "recipe.no_space"}}</p>{{end}}
+</div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/wait.js"}}"></script>{{end}}

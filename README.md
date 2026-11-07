@@ -47,8 +47,9 @@ Architecture: [docs/architecture/arc42.md](docs/architecture/arc42.md).
 ## Privacy
 
 Kanso sends no telemetry and checks for no updates. It talks only to your
-OIDC provider and, if the provider names a profile picture (`picture`), to
-the address of that picture: Kanso fetches it once per sign-in over HTTPS and
+OIDC provider, to an AI an admin registered (see below), to a recipe page
+someone asks it to import, and, if the provider names a profile picture
+(`picture`), to the address of that picture: Kanso fetches it once per sign-in over HTTPS and
 serves its copy (in `avatars/`, outside the history), so browsers never load
 it from elsewhere. It stores the name and e-mail address the provider sends, in
 `users/<id>.yaml` in the data directory, and writes them into the history as
@@ -75,6 +76,21 @@ A task captured without network waits in the browser's storage on that device
 (`kanso-tasks`) until it is uploaded.
 Each device also remembers, in its local storage, which board and which tab
 (Kanban or Matrix) you opened last; nothing of it leaves the device.
+
+Recipes, shopping lists and meal plans: the cook view remembers ticked
+ingredients and steps in the device's local storage. Shopping lists are to-do
+lists (above); meal plans belong to a group and **are** kept in the history.
+
+**AI and recipe import.** An admin may register one AI (any OpenAI-compatible
+service, e.g. your own Ollama or OpenRouter); its token stays in the state
+directory and is never shown again. Nothing goes to the AI unless someone
+uses an AI function, and each function says beforehand where text goes.
+Whoever runs that AI processes what is sent; with a third-party service you
+may need a data processing agreement. Kanso logs no text it sends to or gets
+from the AI. "Von Webseite" fetches the page you name from the server (public
+http/https addresses only, never your own network), with the user agent
+`Kanso (+https://github.com/bjblazko/kanso)` and no cookies. Imported recipes
+are copied for **private** use: keep them in your Kanso, do not publish them.
 
 ## License
 
