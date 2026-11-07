@@ -74,18 +74,25 @@ func (s *Server) shopForm(w http.ResponseWriter, r *http.Request) (shopView, boo
 
 // chosenItems picks the list (the newest one when none is chosen) and returns its items.
 func (sv *shopView) chosenItems() ([]todos.Item, bool) {
-	if sv.List == "" && len(sv.Lists) > 0 {
-		sv.List = sv.Lists[0].ID
+	var items []todos.Item
+	var ok bool
+	sv.List, items, ok = pickList(sv.Lists, sv.List)
+	return items, ok
+}
+
+// pickList resolves the chosen list among lists: "" means the newest, newList a new one.
+func pickList(lists []todos.List, id string) (string, []todos.Item, bool) {
+	if id == "" && len(lists) > 0 {
+		id = lists[0].ID
 	}
-	if sv.List == "" || sv.List == newList {
-		sv.List = newList
-		return nil, true
+	if id == "" || id == newList {
+		return newList, nil, true
 	}
-	i := slices.IndexFunc(sv.Lists, func(l todos.List) bool { return l.ID == sv.List })
+	i := slices.IndexFunc(lists, func(l todos.List) bool { return l.ID == id })
 	if i < 0 {
-		return nil, false
+		return id, nil, false
 	}
-	return sv.Lists[i].Items, true
+	return id, slices.Clone(lists[i].Items), true
 }
 
 func (s *Server) shoppingLists(sub string) []todos.List {
@@ -127,7 +134,7 @@ func (s *Server) addToList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u, _ := auth.UserFrom(r.Context())
-	id, err := s.targetList(sv, u.Sub)
+	id, err := s.targetList(sv.Lists, sv.List, sv.Name, sv.Fill, u.Sub)
 	if err == nil {
 		take := r.PostForm["take"]
 		src := todos.Source{Recipe: sv.Page.Meta.ID, Title: sv.Page.Meta.Title, Fill: sv.Fill}
@@ -147,16 +154,16 @@ func (s *Server) addToList(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// targetList is the chosen list, the list this fill already went to, or a new one.
-func (s *Server) targetList(sv shopView, sub string) (string, error) {
-	for _, l := range sv.Lists {
-		if shopping.Filled([]todos.List{l}, sv.Fill) {
+// targetList is the list this fill already went to, the chosen list, or a new one.
+func (s *Server) targetList(lists []todos.List, list, name, fill, sub string) (string, error) {
+	for _, l := range lists {
+		if shopping.Filled([]todos.List{l}, fill) {
 			return l.ID, nil
 		}
 	}
-	if sv.List != newList {
-		return sv.List, nil
+	if list != newList {
+		return list, nil
 	}
-	l, err := s.Todos.Create(sub, sv.Name, todos.KindShopping)
+	l, err := s.Todos.Create(sub, name, todos.KindShopping)
 	return l.ID, err
 }

@@ -113,6 +113,8 @@ func (s *Server) kitchenRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /mealplan/{plan}", s.mealplanWeek)
 	mux.HandleFunc("GET /mealplan/{plan}/add", s.addMealForm)
 	mux.HandleFunc("POST /mealplan/{plan}/add", s.addMeal)
+	mux.HandleFunc("GET /mealplan/{plan}/shop", s.planShop)
+	mux.HandleFunc("POST /mealplan/{plan}/shop", s.addPlanToList)
 	mux.HandleFunc("GET /mealplan/{plan}/remove", s.removeMealForm)
 	mux.HandleFunc("POST /mealplan/{plan}/remove", s.removeMeal)
 }

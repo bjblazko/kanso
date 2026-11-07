@@ -530,3 +530,4 @@ html { scroll-padding-top: 9rem; }
 .week-meals { list-style: none; padding: 0 0 0 calc(1.25rem + var(--space-3)); margin: var(--space-2) 0 0; }
 .week-meals li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-1) 0; }
 .week-meal { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); align-items: baseline; }
+.shop-meal h2 { font-size: var(--text-base); margin: var(--space-4) 0 var(--space-2); }
