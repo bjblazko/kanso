@@ -42,14 +42,28 @@ type planShopView struct {
 	Name    string
 	Fill    string
 	Taken   []string
+	Changed bool // the week changed since the preview was shown
 	Meals   []mealSection
 	Shopped []shoppedMeal
 	Skipped []mealplan.Entry
 }
 
-// Takes tells the template whether line i of meal k is ticked.
-func (v planShopView) Takes(k, i int) bool {
-	return v.Taken == nil || slices.Contains(v.Taken, fmt.Sprintf("e%d-%d", k, i))
+// Takes tells the template whether line i of a meal is ticked.
+func (v planShopView) Takes(meal string, i int) bool {
+	return v.Taken == nil || slices.Contains(v.Taken, takeName(meal, i))
+}
+
+// takeName names line i of a meal in the form; by entry id, so a meal
+// added or removed by someone else meanwhile cannot shift the ticks.
+func takeName(meal string, i int) string { return fmt.Sprintf("%s-%d", meal, i) }
+
+// mealIDs are the entries of the meals to shop, in order.
+func (v planShopView) mealIDs() []string {
+	var ids []string
+	for _, m := range v.Meals {
+		ids = append(ids, m.Entry.ID)
+	}
+	return ids
 }
 
 func fillOf(base string, e mealplan.Entry) string { return base + "-" + e.ID }
@@ -73,13 +87,15 @@ func (s *Server) planShopForm(w http.ResponseWriter, r *http.Request) (planShopV
 		v.Fill = store.NewID()
 	}
 	slices.Sort(v.Days)
+	v.Days = slices.Compact(v.Days)
 	var items []todos.Item
 	if v.List, items, ok = pickList(v.Lists, r.FormValue("list")); !ok {
 		s.notFound(w, r)
 		return planShopView{}, false
 	}
-	s.collectMeals(&v, wk, who, s.newView(r, "", nil).Lang)
-	v.preview(items)
+	lang := s.newView(r, "", nil).Lang
+	s.collectMeals(&v, wk, who, lang)
+	v.preview(items, lang)
 	return v, true
 }
 
@@ -92,7 +108,7 @@ func (s *Server) collectMeals(v *planShopView, wk mealplan.Week, who access.Prin
 		}
 		for _, e := range wk.Days[day] {
 			switch {
-			case e.Fill != "":
+			case e.Fill != "" && shopping.Filled(v.Lists, e.Fill):
 				v.Shopped = append(v.Shopped, shoppedMeal{Entry: e, ListName: listName(v.Lists, e.List)})
 			case !s.recipeReadable(who, e.Recipe):
 				v.Skipped = append(v.Skipped, e)
@@ -121,10 +137,10 @@ func listName(lists []todos.List, id string) string {
 }
 
 // preview plans each meal against the list as the meals before it left it.
-func (v *planShopView) preview(items []todos.Item) {
+func (v *planShopView) preview(items []todos.Item, lang string) {
 	work := &todos.List{Items: items}
 	for k := range v.Meals {
-		v.Meals[k].Lines = shopping.Plan(work.Items, v.Meals[k].ings, "de")
+		v.Meals[k].Lines = shopping.Plan(work.Items, v.Meals[k].ings, lang)
 		shopping.Apply(work, v.Meals[k].Lines, func(int) bool { return true }, todos.Source{}, time.Now())
 	}
 }
@@ -151,21 +167,23 @@ func (s *Server) addPlanToList(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	if r.PostFormValue("refresh") != "" || len(v.Meals) == 0 {
+	v.Changed = !slices.Equal(r.PostForm["meal"], v.mealIDs())
+	if r.PostFormValue("refresh") != "" || len(v.Meals) == 0 || v.Changed {
 		v.Taken = append([]string{}, r.PostForm["take"]...)
 		s.renderPlanShop(w, r, v)
 		return
 	}
 	u, _ := auth.UserFrom(r.Context())
 	id, err := s.targetList(v.Lists, v.List, v.Name, fillOf(v.Fill, v.Meals[0].Entry), u.Sub)
+	var landed []string
 	if err == nil {
 		err = s.Todos.Change(u.Sub, s.groups(), id, func(l *todos.List) error {
-			v.apply(l, r.PostForm["take"], s.newView(r, "", nil).Lang)
+			landed = v.apply(l, r.PostForm["take"], s.newView(r, "", nil).Lang)
 			return nil
 		})
 	}
 	if err == nil {
-		err = s.markShopped(u.Author(), v, id)
+		err = s.markShopped(u.Author(), v, id, landed)
 	}
 	switch {
 	case errors.Is(err, todos.ErrNotFound):
@@ -177,20 +195,27 @@ func (s *Server) addPlanToList(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (v planShopView) apply(l *todos.List, take []string, lang string) {
-	for k, m := range v.Meals {
+// apply adds each meal's ticked lines and returns the meals now on the list.
+func (v planShopView) apply(l *todos.List, take []string, lang string) []string {
+	var landed []string
+	for _, m := range v.Meals {
 		lines := shopping.Plan(l.Items, m.ings, lang)
-		src := todos.Source{Recipe: m.Entry.Recipe, Title: m.Entry.Title, Fill: fillOf(v.Fill, m.Entry)}
-		shopping.Apply(l, lines, func(i int) bool { return slices.Contains(take, fmt.Sprintf("e%d-%d", k, i)) }, src, time.Now())
+		fill := fillOf(v.Fill, m.Entry)
+		src := todos.Source{Recipe: m.Entry.Recipe, Title: m.Entry.Title, Fill: fill}
+		shopping.Apply(l, lines, func(i int) bool { return slices.Contains(take, takeName(m.Entry.ID, i)) }, src, time.Now())
+		if shopping.Filled([]todos.List{*l}, fill) {
+			landed = append(landed, m.Entry.ID)
+		}
 	}
+	return landed
 }
 
-// markShopped records in the plan which fill and list each meal went to.
-func (s *Server) markShopped(a store.Author, v planShopView, listID string) error {
+// markShopped records in the plan which fill and list the meals that
+// landed on the list went to; older marks of a list now gone are replaced.
+func (s *Server) markShopped(a store.Author, v planShopView, listID string, landed []string) error {
 	return s.MealPlans.Update(a, v.Plan.ID, v.Week, func(wk *mealplan.Week) error {
 		for _, m := range v.Meals {
-			e, _, ok := wk.Find(m.Entry.ID)
-			if ok && e.Fill == "" {
+			if e, _, ok := wk.Find(m.Entry.ID); ok && slices.Contains(landed, e.ID) {
 				e.Fill, e.List = fillOf(v.Fill, m.Entry), listID
 				wk.Set(e)
 			}

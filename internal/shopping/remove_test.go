@@ -52,3 +52,15 @@ func TestRemoveKeepsChangedAndBought(t *testing.T) {
 		t.Errorf("zwiebeln: %+v", list.Items[2])
 	}
 }
+
+func TestRemoveLeavesWhatWasTypedByHand(t *testing.T) {
+	list := &todos.List{Items: items("200 g Mehl", "Salz", "Mehl Typ 1050")}
+	fillList(t, list, "a", "500 g Mehl", "1 TL Salz")
+	if list.Items[0].Text != "700 g Mehl" || list.Items[1].Text != "1 TL Salz" {
+		t.Fatalf("setup %+v", list.Items)
+	}
+	Remove(list, "a", "de", now)
+	if len(list.Items) != 3 || list.Items[0].Text != "200 g Mehl" || list.Items[1].Text != "Salz" || len(list.Items[0].For) != 0 {
+		t.Fatalf("%+v", list.Items)
+	}
+}

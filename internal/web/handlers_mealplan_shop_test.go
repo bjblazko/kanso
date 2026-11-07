@@ -13,14 +13,14 @@ func TestPlanShopPreview(t *testing.T) {
 	ts, admin, anna := setupHaus(t)
 	plan := ts.familyPlan(t)
 	curry := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
-	ts.planMeal(t, plan, "2026-11-10", curry, "Curry", 4)
-	ts.planMeal(t, plan, "2026-11-12", curry, "Curry", 4)
+	a := ts.planMeal(t, plan, "2026-11-10", curry, "Curry", 4)
+	b := ts.planMeal(t, plan, "2026-11-12", curry, "Curry", 4)
 	ts.planMeal(t, plan, "2026-11-12", "aaaaaaaaaaaa", "Geheimsuppe", 2)
 	resp, body := get(t, anna, ts.URL+"/mealplan/"+plan+"/shop?week=2026-W46&day=2026-11-10&day=2026-11-12")
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("%d", resp.StatusCode)
 	}
-	for _, want := range []string{"800 g Kartoffeln", "800 g Kartoffeln → 1,6 kg Kartoffeln", `name="take" value="e0-0" checked`, `name="take" value="e1-0" checked`, "Geheimsuppe"} {
+	for _, want := range []string{"800 g Kartoffeln", "800 g Kartoffeln → 1,6 kg Kartoffeln", `name="take" value="` + a + `-0" checked`, `name="take" value="` + b + `-0" checked`, `name="meal" value="` + a + `"`, "Geheimsuppe"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("preview lacks %q", want)
 		}
@@ -48,11 +48,12 @@ func TestPlanShopApplyRemoveSubtract(t *testing.T) {
 	curry := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
 	first := ts.planMeal(t, plan, "2026-11-10", curry, "Curry", 4)
 	second := ts.planMeal(t, plan, "2026-11-12", curry, "Curry", 4)
-	resp := shopDays(t, ts, anna, plan, url.Values{"take": {"e0-0", "e1-0"}})
+	take := url.Values{"take": {first + "-0", second + "-0"}, "meal": {first, second}}
+	resp := shopDays(t, ts, anna, plan, take)
 	if resp.StatusCode != http.StatusSeeOther || !strings.HasPrefix(resp.Header.Get("Location"), "/todos/") {
 		t.Fatalf("%d %q", resp.StatusCode, resp.Header.Get("Location"))
 	}
-	shopDays(t, ts, anna, plan, url.Values{"take": {"e0-0", "e1-0"}}) // a second tap adds nothing
+	shopDays(t, ts, anna, plan, take) // a second tap adds nothing
 	lists := ts.shoppingLists(t, "anna")
 	if len(lists) != 1 || len(lists[0].Items) != 1 || lists[0].Items[0].Text != "1,6 kg Kartoffeln" || len(lists[0].Items[0].For) != 2 {
 		t.Fatalf("%+v", lists)
@@ -80,10 +81,65 @@ func TestPlanShopSkipsShopped(t *testing.T) {
 	ts, admin, anna := setupHaus(t)
 	plan := ts.familyPlan(t)
 	curry := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
-	ts.planMeal(t, plan, "2026-11-10", curry, "Curry", 4)
-	shopDays(t, ts, anna, plan, url.Values{"day": {"2026-11-10"}, "take": {"e0-0"}})
+	id := ts.planMeal(t, plan, "2026-11-10", curry, "Curry", 4)
+	shopDays(t, ts, anna, plan, url.Values{"day": {"2026-11-10"}, "take": {id + "-0"}, "meal": {id}})
 	_, body := get(t, anna, ts.URL+"/mealplan/"+plan+"/shop?week=2026-W46&day=2026-11-10")
 	if strings.Contains(body, `<section class="shop-meal"`) || !strings.Contains(body, "schon auf") {
 		t.Fatal("shopped meal offered again")
+	}
+}
+
+func TestPlanShopWeekChangedMeanwhile(t *testing.T) {
+	ts, admin, anna := setupHaus(t)
+	plan := ts.familyPlan(t)
+	curry := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
+	a := ts.planMeal(t, plan, "2026-11-10", curry, "Curry", 4)
+	ts.planMeal(t, plan, "2026-11-10", curry, "Curry", 2) // added by someone else after the preview
+	resp, body := ts.postFormBody(t, anna, "/mealplan/"+plan+"/shop?week=2026-W46&day=2026-11-10", "/mealplan/"+plan+"/shop",
+		url.Values{"week": {"2026-W46"}, "day": {"2026-11-10"}, "list": {"new"}, "name": {"W"}, "take": {a + "-0"}, "meal": {a}})
+	if resp.StatusCode != http.StatusOK || !strings.Contains(body, "hat sich geändert") || len(ts.shoppingLists(t, "anna")) != 0 {
+		t.Fatalf("%d, lists %d", resp.StatusCode, len(ts.shoppingLists(t, "anna")))
+	}
+}
+
+func TestPlanShopUntickedAndDeletedListOfferedAgain(t *testing.T) {
+	ts, admin, anna := setupHaus(t)
+	plan := ts.familyPlan(t)
+	curry := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
+	id := ts.planMeal(t, plan, "2026-11-10", curry, "Curry", 4)
+	shopDays(t, ts, anna, plan, url.Values{"day": {"2026-11-10"}, "meal": {id}}) // nothing ticked
+	if w, _ := ts.deps.MealPlans.Week(plan, "2026-W46"); w.Days["2026-11-10"][0].Fill != "" {
+		t.Fatal("marked as shopped although nothing went on the list")
+	}
+	shopDays(t, ts, anna, plan, url.Values{"day": {"2026-11-10"}, "meal": {id}, "take": {id + "-0"}, "fill": {"fillcccccccc"}})
+	l := ts.shoppingLists(t, "anna")[0]
+	_ = ts.deps.Todos.Delete("anna", l.ID)
+	_, body := get(t, anna, ts.URL+"/mealplan/"+plan+"/shop?week=2026-W46&day=2026-11-10")
+	if !strings.Contains(body, `<section class="shop-meal"`) {
+		t.Fatal("meal of a deleted list not offered again")
+	}
+}
+
+func TestRemoveMealOnAListOthersCannotOpen(t *testing.T) {
+	ts, admin, anna := setupHaus(t)
+	ben := ts.client(t, "ben", "Ben", false)
+	ts.postForm(t, admin, "/admin/groups", "/admin/groups", url.Values{"action": {"add"}, "group": {"familie"}, "sub": {"ben"}})
+	plan := ts.familyPlan(t)
+	curry := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
+	id := ts.planMeal(t, plan, "2026-11-10", curry, "Curry", 4)
+	shopDays(t, ts, anna, plan, url.Values{"day": {"2026-11-10"}, "meal": {id}, "take": {id + "-0"}})
+	_, body := get(t, ben, ts.URL+"/mealplan/"+plan+"/remove?week=2026-W46&entry="+id)
+	if !strings.Contains(body, "nicht öffnen") {
+		t.Fatal("no word about the list ben cannot open")
+	}
+	first := ts.postForm(t, anna, "/mealplan/"+plan+"/remove?week=2026-W46&entry="+id, "/mealplan/"+plan+"/remove",
+		url.Values{"week": {"2026-W46"}, "entry": {id}, "subtract": {"1"}})
+	again := ts.postForm(t, anna, "/mealplan/"+plan+"/remove?week=2026-W46&entry="+id, "/mealplan/"+plan+"/remove",
+		url.Values{"week": {"2026-W46"}, "entry": {id}, "subtract": {"1"}})
+	if first.StatusCode != http.StatusSeeOther || again.StatusCode != http.StatusSeeOther {
+		t.Fatalf("%d %d", first.StatusCode, again.StatusCode)
+	}
+	if l := ts.shoppingLists(t, "anna")[0]; len(l.Items) != 0 {
+		t.Fatalf("not subtracted: %+v", l.Items)
 	}
 }

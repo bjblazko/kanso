@@ -10,22 +10,25 @@ import (
 	"github.com/bjblazko/kanso/internal/todos"
 )
 
-// Remove takes what the fill named fill added off the list again: an item
-// only it asked for goes, otherwise its amount shrinks by the fill's share
-// where the units still compare. Ticked (bought) items stay as they are.
-// It reports how many items it changed.
+// Remove takes what the fill named fill added off the list again. An item
+// the fill made and nobody else asked for goes; otherwise its amount
+// shrinks by the fill's share where the units still compare, and what a
+// person typed stays. Ticked (bought) items stay as they are. It reports
+// how many items it changed.
 func Remove(list *todos.List, fill, lang string, now time.Time) int {
 	n := 0
 	kept := list.Items[:0]
 	for _, it := range list.Items {
 		i := slices.IndexFunc(it.For, func(s todos.Source) bool { return s.Fill == fill })
-		switch {
-		case i < 0 || it.Done:
+		if i < 0 || it.Done {
 			kept = append(kept, it)
 			continue
-		case len(it.For) == 1 || !shrink(&it, it.For[i].Amount, lang, now):
+		}
+		src := it.For[i]
+		left := shrink(&it, src.Amount, lang, now)
+		if src.New && (len(it.For) == 1 || !left) {
 			tombstone(list, it.ID, now)
-		default:
+		} else {
 			it.For = slices.Delete(it.For, i, i+1)
 			kept = append(kept, it)
 		}
@@ -35,7 +38,8 @@ func Remove(list *todos.List, fill, lang string, now time.Time) int {
 	return n
 }
 
-// shrink takes amount off the item's amount; false means nothing is left.
+// shrink takes amount off the item's amount; false means nothing is left,
+// and the text keeps only what follows the amount ("500 g Mehl" → "Mehl").
 // An amount that no longer compares leaves the text as it is.
 func shrink(it *todos.Item, amount, lang string, now time.Time) bool {
 	if amount == "" {
@@ -54,6 +58,7 @@ func shrink(it *todos.Item, amount, lang string, now time.Time) bool {
 		return true
 	}
 	if left.Qty.High <= 0 {
+		it.Text, it.At.Text = have.Rest, max(now.UnixMilli(), it.At.Text+1)
 		return false
 	}
 	it.Text, it.At.Text = text(left, have.Rest), max(now.UnixMilli(), it.At.Text+1)

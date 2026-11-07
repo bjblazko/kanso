@@ -111,3 +111,13 @@ func TestParseWeek(t *testing.T) {
 		t.Error("Shift")
 	}
 }
+
+func TestWeekRejectsBadKeys(t *testing.T) {
+	s := newStore(t)
+	p, _ := s.Create(admin, "Küche", "familie")
+	for _, key := range []string{"../../../x", "2026-W99", ""} {
+		if _, err := s.Week(p.ID, key); !errors.Is(err, ErrInvalid) {
+			t.Errorf("%q: %v", key, err)
+		}
+	}
+}

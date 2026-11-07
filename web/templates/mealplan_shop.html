@@ -10,6 +10,8 @@
   <input type="hidden" name="fill" value="{{$d.Fill}}">
   <input type="hidden" name="week" value="{{$d.Week}}">
   {{range $d.Days}}<input type="hidden" name="day" value="{{.}}">{{end}}
+  {{range $d.Meals}}<input type="hidden" name="meal" value="{{.Entry.ID}}">{{end}}
+  {{if $d.Changed}}<p class="notice notice-warning" role="alert">{{.T "plan.changed"}}</p>{{end}}
   <div class="form-row shop-choice">
     <div class="field"><label for="list">{{.T "shop.list"}}</label>
       <select id="list" name="list">{{range $d.Lists}}<option value="{{.ID}}"{{if eq .ID $d.List}} selected{{end}}>{{.Name}}</option>{{end}}
@@ -20,7 +22,7 @@
   </div>
   {{range $k, $m := $d.Meals}}<section class="shop-meal" aria-labelledby="meal-{{$k}}">
     <h2 id="meal-{{$k}}">{{$.T (printf "day.%d" $m.Weekday)}} · {{$m.Entry.Title}} <span class="hint">{{$.T "recipe.servings_n" $m.Entry.Servings}}</span></h2>
-    {{if $m.Lines}}<ul class="shop-lines">{{range $i, $l := $m.Lines}}<li><label><input type="checkbox" name="take" value="e{{$k}}-{{$i}}"{{if $d.Takes $k $i}} checked{{end}}> <span>
+    {{if $m.Lines}}<ul class="shop-lines">{{range $i, $l := $m.Lines}}<li><label><input type="checkbox" name="take" value="{{$m.Entry.ID}}-{{$i}}"{{if $d.Takes $m.Entry.ID $i}} checked{{end}}> <span>
       {{- if $l.Item}}{{if ne $l.Old $l.Text}}{{$l.Old}} → {{$l.Text}}{{else}}{{$l.Text}}{{end}} <span class="hint">{{$.T "shop.on_list"}}</span>
       {{- else}}{{$l.Text}}{{with $l.Note}} <span class="hint">({{.}})</span>{{end}}{{end}}</span></label></li>
     {{end}}</ul>{{else}}<p class="hint">{{$.T "recipe.no_sections"}}</p>{{end}}

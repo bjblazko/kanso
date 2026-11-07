@@ -83,7 +83,11 @@ func (s *Server) mealplanWeek(w http.ResponseWriter, r *http.Request) {
 	for _, d := range mealplan.Days(start) {
 		day := planDay{Weekday: (int(d.Weekday()) + 6) % 7, Date: d, Key: d.Format(dayLayout), Today: d.Format(dayLayout) == today}
 		for _, e := range week.Days[day.Key] {
-			day.Entries = append(day.Entries, planEntry{Entry: e, Readable: s.recipeReadable(who, e.Recipe)})
+			pe := planEntry{Entry: e, Readable: s.recipeReadable(who, e.Recipe)}
+			if page, ok := s.Wiki.ByID(e.Recipe); pe.Readable && ok {
+				pe.Title = page.Meta.Title // renamed since it was planned
+			}
+			day.Entries = append(day.Entries, pe)
 		}
 		wp.Days = append(wp.Days, day)
 	}
@@ -182,10 +186,11 @@ func (s *Server) planRecipe(w http.ResponseWriter, r *http.Request) {
 }
 
 type removeMealPage struct {
-	Plan     mealplan.Plan
-	Week     string
-	Entry    mealplan.Entry
-	ListName string // the shopping list its ingredients went to; "" = none or gone
+	Plan       mealplan.Plan
+	Week       string
+	Entry      mealplan.Entry
+	ListName   string // the shopping list its ingredients went to; "" = none or gone
+	ListHidden bool   // they went to a list the person cannot open
 }
 
 // removeMealForm asks before a meal leaves the plan.
@@ -203,8 +208,9 @@ func (s *Server) removeMealForm(w http.ResponseWriter, r *http.Request) {
 	}
 	u, _ := auth.UserFrom(r.Context())
 	page := removeMealPage{Plan: p, Week: week, Entry: e}
-	if l, err := s.Todos.Get(u.Sub, e.List, s.groups()); e.Fill != "" && err == nil {
-		page.ListName = l.Name
+	if e.Fill != "" {
+		l, err := s.Todos.Get(u.Sub, e.List, s.groups())
+		page.ListName, page.ListHidden = l.Name, errors.Is(err, todos.ErrNotFound) && s.listExists(e.List)
 	}
 	v := s.newView(r, "", page)
 	v.Title = v.T("plan.remove_title", e.Title)
@@ -217,29 +223,33 @@ func (s *Server) removeMeal(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u, _ := auth.UserFrom(r.Context())
-	week, id := r.PostFormValue("week"), r.PostFormValue("entry")
-	var removed mealplan.Entry
-	err := s.MealPlans.Update(u.Author(), p.ID, week, func(wk *mealplan.Week) error {
-		e, _, found := wk.Find(id)
-		if !found {
-			return mealplan.ErrNotFound
-		}
-		removed = e
-		wk.Remove(id)
-		return nil
-	})
-	if errors.Is(err, mealplan.ErrNotFound) || errors.Is(err, mealplan.ErrInvalid) {
-		s.notFound(w, r)
-		return
-	} else if err != nil {
-		s.serverError(w, r, err)
+	_, week := mealplan.ParseWeek(r.PostFormValue("week"), time.Now())
+	back := "/mealplan/" + p.ID + "?week=" + week
+	wk, err := s.MealPlans.Week(p.ID, week)
+	e, _, found := wk.Find(r.PostFormValue("entry"))
+	if err != nil || !found { // gone already, e.g. a second tap
+		http.Redirect(w, r, back, http.StatusSeeOther)
 		return
 	}
 	if r.PostFormValue("subtract") != "" {
-		s.subtractMeal(u.Sub, s.newView(r, "", nil).Lang, removed)
+		if err := s.subtractMeal(u.Sub, s.newView(r, "", nil).Lang, e); err != nil {
+			s.fail(w, r, http.StatusConflict, "plan.subtract_failed")
+			return
+		}
 	}
-	http.Redirect(w, r, "/mealplan/"+p.ID+"?week="+week, http.StatusSeeOther)
+	err = s.MealPlans.Update(u.Author(), p.ID, week, func(wk *mealplan.Week) error {
+		wk.Remove(e.ID)
+		return nil
+	})
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	http.Redirect(w, r, back, http.StatusSeeOther)
 }
+
+// listExists tells whether a list exists at all, whoever may see it.
+func (s *Server) listExists(id string) bool { return s.Todos.Exists(id) }
 
 // Dates of a week page, for the template.
 func (wp weekPage) Range() string {
@@ -252,12 +262,13 @@ func (wp weekPage) WeekNumber() string {
 	return strconv.Itoa(n)
 }
 
-// subtractMeal takes what a removed meal put on its shopping list off again.
-func (s *Server) subtractMeal(sub, lang string, e mealplan.Entry) {
-	if e.Fill == "" || e.List == "" {
-		return
+// subtractMeal takes what a removed meal put on its shopping list off again;
+// a list that is gone has nothing left to take off.
+func (s *Server) subtractMeal(sub, lang string, e mealplan.Entry) error {
+	if e.Fill == "" || e.List == "" || !s.Todos.Exists(e.List) {
+		return nil
 	}
-	_ = s.Todos.Change(sub, s.groups(), e.List, func(l *todos.List) error {
+	return s.Todos.Change(sub, s.groups(), e.List, func(l *todos.List) error {
 		shopping.Remove(l, e.Fill, lang, time.Now())
 		return nil
 	})

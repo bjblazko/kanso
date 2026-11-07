@@ -8,7 +8,7 @@
   <div class="actions"><button class="btn btn-primary" type="submit" name="subtract" value="1">{{.T "plan.remove_subtract"}}</button>
     <button class="btn btn-secondary" type="submit">{{.T "plan.remove_only"}}</button>
     <a class="btn btn-quiet" href="/mealplan/{{$d.Plan.ID}}?week={{$d.Week}}">{{.T "action.cancel"}}</a></div>
-  {{else}}<div class="actions"><button class="btn btn-destructive" type="submit">{{.T "plan.remove_only"}}</button>
+  {{else}}{{if $d.ListHidden}}<p>{{.T "plan.remove_hidden"}}</p>{{end}}<div class="actions"><button class="btn btn-destructive" type="submit">{{.T "plan.remove_only"}}</button>
     <a class="btn btn-quiet" href="/mealplan/{{$d.Plan.ID}}?week={{$d.Week}}">{{.T "action.cancel"}}</a></div>{{end}}
 </form>
 </div>{{end}}

@@ -39,3 +39,11 @@ group boards (ADR-008).
   shop still works offline.
 - A recipe a member cannot read shows in the plan by title only and is
   skipped when shopping.
+- Taking a meal off deletes only items its fill made (`new` on the source);
+  an item a person typed keeps its words and its own amount. When the list
+  is one the person cannot open, the page says so instead of doing less
+  silently; a failed subtraction keeps the meal in the plan.
+- The shopping preview names its meals by entry id, so a meal added or
+  removed meanwhile by someone else shows the preview again instead of
+  shifting ticks; a meal counts as shopped only when something of it
+  landed on a list that still exists.

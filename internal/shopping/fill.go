@@ -131,6 +131,7 @@ func Apply(list *todos.List, lines []Line, take func(i int) bool, src todos.Sour
 			it.For = append(it.For, s)
 		} else {
 			it := todos.NewItem(line.Text, line.Note, now)
+			s.New = true
 			it.For = []todos.Source{s}
 			list.Items = append(list.Items, it)
 		}

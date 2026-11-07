@@ -160,6 +160,9 @@ func (s *Store) weekPath(planID, key string) string {
 
 // Week reads one week of a plan; a week nobody planned is empty.
 func (s *Store) Week(planID, key string) (Week, error) {
+	if _, ok := parseKey(key); !ok {
+		return Week{}, ErrInvalid
+	}
 	if _, err := s.read(planID); err != nil {
 		return Week{}, err
 	}
