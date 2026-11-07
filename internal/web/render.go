@@ -120,7 +120,7 @@ func moduleOf(path string) string {
 		return "todos"
 	case path == "/tasks" || strings.HasPrefix(path, "/tasks/"):
 		return "tasks"
-	case path == "/recipes" || strings.HasPrefix(path, "/recipes/"):
+	case path == "/recipes" || strings.HasPrefix(path, "/recipes/"), path == "/mealplan" || strings.HasPrefix(path, "/mealplan/"):
 		return "kitchen"
 	case path == "/", strings.HasPrefix(path, "/s/"), strings.HasPrefix(path, "/p/"), strings.HasPrefix(path, "/admin/spaces/"):
 		return "wiki"

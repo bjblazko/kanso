@@ -1,0 +1,24 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.Title}}</h1>
+{{if $d.Recipe}}{{if $d.Plans}}<form method="post" action="/recipes/{{$d.Recipe.ID}}/plan" class="form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <div class="field"><label for="plan">{{.T "plan.which"}}</label>
+    <select id="plan" name="plan">{{range $d.Plans}}<option value="{{.ID}}">{{.Name}}</option>{{end}}</select></div>
+  <div class="field"><label for="day">{{.T "plan.day"}}</label><input id="day" name="day" type="date" required value="{{$d.Day}}"></div>
+  <div class="field"><label for="servings">{{.T "recipe.servings"}}</label>
+    <input id="servings" name="servings" value="{{with $d.Servings}}{{.}}{{end}}" type="number" min="1" max="99" inputmode="numeric"></div>
+  <div class="actions"><button class="btn btn-primary" type="submit">{{.T "plan.plan_action"}}</button>
+  <a class="btn btn-quiet" href="/p/{{$d.Recipe.ID}}">{{.T "action.cancel"}}</a></div>
+</form>{{else}}<p class="empty">{{.T "plan.none"}}</p>{{end}}
+{{else}}{{if $d.Recipes}}<form method="post" action="/mealplan/{{$d.Plan.ID}}/add" class="form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <div class="field"><label for="day">{{.T "plan.day"}}</label><input id="day" name="day" type="date" required value="{{$d.Day}}"></div>
+  <div class="field"><label for="recipe">{{.T "plan.recipe"}}</label>
+    <select id="recipe" name="recipe" required>{{range $d.Recipes}}<option value="{{.ID}}">{{.Title}}</option>{{end}}</select></div>
+  <div class="field"><label for="servings">{{.T "recipe.servings"}}</label>
+    <input id="servings" name="servings" type="number" min="1" max="99" inputmode="numeric" aria-describedby="servings-hint">
+    <span class="hint" id="servings-hint">{{.T "plan.servings_hint"}}</span></div>
+  <div class="actions"><button class="btn btn-primary" type="submit">{{.T "plan.add"}}</button>
+  <a class="btn btn-quiet" href="/mealplan/{{$d.Plan.ID}}">{{.T "action.cancel"}}</a></div>
+</form>{{else}}<p class="empty">{{.T "recipe.empty"}}</p>{{end}}{{end}}
+</div>{{end}}

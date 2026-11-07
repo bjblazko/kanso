@@ -16,6 +16,7 @@ import (
 	"github.com/bjblazko/kanso/internal/config"
 	"github.com/bjblazko/kanso/internal/i18n"
 	"github.com/bjblazko/kanso/internal/markdown"
+	"github.com/bjblazko/kanso/internal/mealplan"
 	"github.com/bjblazko/kanso/internal/notes"
 	"github.com/bjblazko/kanso/internal/search"
 	"github.com/bjblazko/kanso/internal/spaces"
@@ -39,9 +40,11 @@ type Deps struct {
 	Notes  *notes.Store
 	Todos  *todos.Store
 	Tasks  *tasks.Store
-	MD     *markdown.Renderer
-	Locks  *wiki.Locks
-	Search *search.Index
+	// MealPlans are the groups' cooking plans (ADR-012).
+	MealPlans *mealplan.Store
+	MD        *markdown.Renderer
+	Locks     *wiki.Locks
+	Search    *search.Index
 }
 
 // Server renders pages and routes requests.
@@ -73,7 +76,7 @@ func New(d Deps) (*Server, error) {
 }
 
 var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "admin_groups", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search",
-	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote", "todos", "todo_share", "todo_delete", "tasks_board", "task_view", "task_edit", "task_delete", "task_new", "admin_boards", "note_task", "page_share", "page_move_confirm", "page_move", "recipe_parsed", "recipe_cook", "recipes", "recipe_new", "recipe_shop"}
+	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote", "todos", "todo_share", "todo_delete", "tasks_board", "task_view", "task_edit", "task_delete", "task_new", "admin_boards", "note_task", "page_share", "page_move_confirm", "page_move", "recipe_parsed", "recipe_cook", "recipes", "recipe_new", "recipe_shop", "mealplan", "mealplan_add", "mealplan_remove", "admin_mealplans"}
 
 func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}
@@ -94,8 +97,9 @@ type treeArgs struct {
 }
 
 var templateFuncs = template.FuncMap{
-	"treeArgs": func(nodes []*wiki.Node, current string) treeArgs { return treeArgs{nodes, current} },
-	"cardArgs": func(c card, v view) cardArgs { return cardArgs{c, v} },
+	"treeArgs":  func(nodes []*wiki.Node, current string) treeArgs { return treeArgs{nodes, current} },
+	"cardArgs":  func(c card, v view) cardArgs { return cardArgs{c, v} },
+	"hasPrefix": strings.HasPrefix,
 }
 
 // hashFS fingerprints the static files for cache-busting URLs.

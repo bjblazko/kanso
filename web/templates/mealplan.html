@@ -1,0 +1,35 @@
+{{define "content"}}{{$d := .Data}}<div class="mealplan">
+<header class="screen-head">
+<div class="page-toolbar" role="toolbar" aria-label="{{.T "plan.title"}}">
+  {{if $d.Plan.ID}}<button class="btn btn-primary btn-sm" type="submit" form="shop-days">{{template "icon" "cart"}}<span>{{.T "plan.shop"}}</span></button>
+  <span class="tb-sep" aria-hidden="true"></span>{{end}}
+  {{template "kitchen-tabs" .}}
+</div>
+<h1>{{if $d.Plan.ID}}{{$d.Plan.Name}}{{else}}{{.T "plan.title"}}{{end}}</h1></header>
+<div class="content">
+{{if not $d.Plan.ID}}<p class="empty">{{.T "plan.none"}}</p>{{else}}
+{{if gt (len $d.Plans) 1}}<nav class="board-switch" aria-label="{{.T "plan.title"}}"><ul class="tabs">
+{{range $d.Plans}}<li><a href="/mealplan/{{.ID}}"{{if eq .ID $d.Plan.ID}} aria-current="page"{{end}}>{{.Name}}</a></li>{{end}}
+</ul></nav>{{end}}
+<nav class="week-nav" aria-label="{{.T "plan.weeks"}}">
+  <a class="btn btn-quiet btn-sm" href="/mealplan/{{$d.Plan.ID}}?week={{$d.Prev}}">‹ {{.T "plan.prev"}}</a>
+  <span class="week-label">{{.T "plan.week" $d.WeekNumber}} · {{$d.Range}}</span>
+  <a class="btn btn-quiet btn-sm" href="/mealplan/{{$d.Plan.ID}}?week={{$d.Next}}">{{.T "plan.next"}} ›</a>
+</nav>
+<form id="shop-days" method="get" action="/mealplan/{{$d.Plan.ID}}/shop">
+<input type="hidden" name="week" value="{{$d.Week}}">
+<ol class="week">{{range $d.Days}}<li class="week-day{{if .Today}} today{{end}}" id="day-{{.Key}}">
+  <div class="week-day-head">
+    <label class="week-pick"><input type="checkbox" name="day" value="{{.Key}}"{{if not .Entries}} disabled{{end}}>
+      <span><b>{{$.T (printf "day.%d" .Weekday)}}</b> {{.Date.Format "2.1."}}{{if .Today}} <span class="hint">{{$.T "plan.today"}}</span>{{end}}</span></label>
+    <a class="btn btn-quiet btn-sm" href="/mealplan/{{$d.Plan.ID}}/add?day={{.Key}}">{{template "icon" "plus"}}<span class="tb-label">{{$.T "plan.add_short"}}</span></a>
+  </div>
+  {{if .Entries}}<ul class="week-meals">{{range .Entries}}<li>
+    <span class="week-meal">{{if .Readable}}<a href="/p/{{.Recipe}}">{{.Title}}</a>{{else}}{{.Title}}{{end}}
+      <span class="hint">{{$.T "recipe.servings_n" .Servings}}{{if .Fill}} · {{$.T "plan.shopped"}}{{end}}</span></span>
+    <a class="btn btn-quiet btn-sm" href="/mealplan/{{$d.Plan.ID}}/remove?week={{$d.Week}}&amp;entry={{.ID}}" aria-label="{{$.T "plan.remove"}}: {{.Title}}">{{template "icon" "trash"}}</a>
+  </li>{{end}}</ul>{{end}}
+</li>{{end}}</ol>
+</form>
+<p class="hint">{{.T "plan.shop_hint"}}</p>{{end}}
+</div></div>{{end}}

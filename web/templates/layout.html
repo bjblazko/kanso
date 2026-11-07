@@ -43,7 +43,8 @@
       </form>
       {{if or .Admin .Dev}}<ul class="navlist menu-links">
         {{if .Admin}}<li><a href="/admin/groups">{{template "icon" "users"}}<span>{{.T "user.groups"}}</span></a></li>
-        <li><a href="/admin/boards">{{template "icon" "board"}}<span>{{.T "tasks.admin_boards"}}</span></a></li>{{end}}
+        <li><a href="/admin/boards">{{template "icon" "board"}}<span>{{.T "tasks.admin_boards"}}</span></a></li>
+        <li><a href="/admin/mealplans">{{template "icon" "calendar"}}<span>{{.T "plan.admin"}}</span></a></li>{{end}}
         {{if .Dev}}<li><a href="/auth/dev?next={{.Path}}">{{template "icon" "switch"}}<span>{{.T "user.switch"}}</span></a></li>{{end}}
       </ul>{{end}}
       <form class="menu-end" method="post" action="/auth/logout">
@@ -89,3 +90,9 @@
 {{block "scripts" .}}{{end}}
 </body>
 </html>{{end}}
+
+{{/* The two parts of the kitchen: recipes and the meal plan (ADR-012). */}}
+{{define "kitchen-tabs"}}<nav aria-label="{{.T "nav.kitchen"}}"><ul class="tabs tabs-quiet">
+  <li><a href="/recipes"{{if hasPrefix .Path "/recipes"}} aria-current="page"{{end}}>{{.T "plan.tab_recipes"}}</a></li>
+  <li><a href="/mealplan"{{if hasPrefix .Path "/mealplan"}} aria-current="page"{{end}}>{{.T "plan.title"}}</a></li>
+</ul></nav>{{end}}
