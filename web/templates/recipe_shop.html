@@ -13,9 +13,8 @@
       <input id="servings" name="servings" value="{{$d.Servings}}" type="number" min="1" max="99" inputmode="numeric"></div>
     <div class="field"><label for="list">{{.T "shop.list"}}</label>
       <select id="list" name="list">{{range $d.Lists}}<option value="{{.ID}}"{{if eq .ID $d.List}} selected{{end}}>{{.Name}}</option>{{end}}
-        <option value="new"{{if eq $d.List "new"}} selected{{end}}>{{.T "shop.new_list"}}</option></select></div>
-    {{if eq $d.List "new"}}<div class="field"><label for="name">{{.T "shop.name"}}</label>
-      <input id="name" name="name" value="{{$d.Name}}" maxlength="80"></div>{{end}}
+        <option value="new"{{if eq $d.List "new"}} selected{{end}}>{{.T "shop.new_named" $d.Name}}</option></select>
+      <input type="hidden" name="name" value="{{$d.Name}}"></div>
     <button class="btn btn-secondary" type="submit" name="refresh" value="1" data-refresh>{{.T "shop.refresh"}}</button>
   </div>
   <fieldset class="field-set"><legend>{{.T "shop.preview"}}</legend>

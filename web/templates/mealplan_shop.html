@@ -15,9 +15,8 @@
   <div class="form-row shop-choice">
     <div class="field"><label for="list">{{.T "shop.list"}}</label>
       <select id="list" name="list">{{range $d.Lists}}<option value="{{.ID}}"{{if eq .ID $d.List}} selected{{end}}>{{.Name}}</option>{{end}}
-        <option value="new"{{if eq $d.List "new"}} selected{{end}}>{{.T "shop.new_list"}}</option></select></div>
-    {{if eq $d.List "new"}}<div class="field"><label for="name">{{.T "shop.name"}}</label>
-      <input id="name" name="name" value="{{$d.Name}}" maxlength="80"></div>{{end}}
+        <option value="new"{{if eq $d.List "new"}} selected{{end}}>{{.T "shop.new_named" $d.Name}}</option></select>
+      <input type="hidden" name="name" value="{{$d.Name}}"></div>
     <button class="btn btn-secondary" type="submit" name="refresh" value="1" data-refresh>{{.T "shop.refresh"}}</button>
   </div>
   {{range $k, $m := $d.Meals}}<section class="shop-meal" aria-labelledby="meal-{{$k}}">
@@ -26,7 +25,7 @@
       {{- if $l.Item}}{{if ne $l.Old $l.Text}}{{$l.Old}} → {{$l.Text}}{{else}}{{$l.Text}}{{end}} <span class="hint">{{$.T "shop.on_list"}}</span>
       {{- else}}{{$l.Text}}{{with $l.Note}} <span class="hint">({{.}})</span>{{end}}{{end}}</span></label></li>
     {{end}}</ul>{{else}}<p class="hint">{{$.T "recipe.no_sections"}}</p>{{end}}
-  </section>{{else}}<p class="empty">{{.T "plan.shop_nothing"}}</p>{{end}}
+  </section>{{else}}<p class="empty">{{if $d.WeekEmpty}}{{.T "plan.shop_empty_week"}}{{else}}{{.T "plan.shop_nothing"}}{{end}}</p>{{end}}
   {{if $d.Shopped}}<p class="hint">{{range $i, $m := $d.Shopped}}{{if $i}} · {{end}}{{$m.Entry.Title}}: {{$.T "plan.already_on" $m.ListName}}{{end}}</p>{{end}}
   {{if $d.Skipped}}<p class="hint">{{.T "plan.skipped"}} {{range $i, $e := $d.Skipped}}{{if $i}}, {{end}}{{$e.Title}}{{end}}</p>{{end}}
   {{if $d.Meals}}<p class="hint">{{.T "shop.untick"}}</p>{{end}}

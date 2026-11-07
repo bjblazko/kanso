@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"slices"
+	"strconv"
 	"strings"
 	"time"
 
@@ -34,18 +35,19 @@ type shoppedMeal struct {
 
 // planShopView adds the meals of chosen days to a shopping list (ADR-011, ADR-012).
 type planShopView struct {
-	Plan    mealplan.Plan
-	Week    string
-	Days    []string
-	Lists   []todos.List
-	List    string
-	Name    string
-	Fill    string
-	Taken   []string
-	Changed bool // the week changed since the preview was shown
-	Meals   []mealSection
-	Shopped []shoppedMeal
-	Skipped []mealplan.Entry
+	Plan      mealplan.Plan
+	Week      string
+	Days      []string
+	Lists     []todos.List
+	List      string
+	Name      string
+	Fill      string
+	Taken     []string
+	Changed   bool // the week changed since the preview was shown
+	WeekEmpty bool // no meal planned in the whole week
+	Meals     []mealSection
+	Shopped   []shoppedMeal
+	Skipped   []mealplan.Entry
 }
 
 // Takes tells the template whether line i of a meal is ticked.
@@ -68,13 +70,22 @@ func (v planShopView) mealIDs() []string {
 
 func fillOf(base string, e mealplan.Entry) string { return base + "-" + e.ID }
 
+// weekRange writes the days of a week short: "9.–15.11.", across months "28.10.–3.11.".
+func weekRange(start time.Time) string {
+	end := start.AddDate(0, 0, 6)
+	if start.Month() == end.Month() {
+		return start.Format("2.") + "–" + end.Format("2.1.")
+	}
+	return start.Format("2.1.") + "–" + end.Format("2.1.")
+}
+
 // planShopForm reads the chosen days and list and plans every meal in turn.
 func (s *Server) planShopForm(w http.ResponseWriter, r *http.Request) (planShopView, bool) {
 	p, ok := s.planFor(w, r, r.PathValue("plan"))
 	if !ok {
 		return planShopView{}, false
 	}
-	_, key := mealplan.ParseWeek(r.FormValue("week"), time.Now())
+	start, key := mealplan.ParseWeek(r.FormValue("week"), time.Now())
 	wk, err := s.MealPlans.Week(p.ID, key)
 	if err != nil {
 		s.serverError(w, r, err)
@@ -86,14 +97,25 @@ func (s *Server) planShopForm(w http.ResponseWriter, r *http.Request) (planShopV
 	if v.Fill == "" {
 		v.Fill = store.NewID()
 	}
+	if len(v.Days) == 0 { // nothing ticked: every day with meals
+		for day := range wk.Days {
+			v.Days = append(v.Days, day)
+		}
+	}
 	slices.Sort(v.Days)
 	v.Days = slices.Compact(v.Days)
+	v.WeekEmpty = len(wk.Days) == 0
+	vw := s.newView(r, "", nil)
+	if v.Name == "" {
+		_, n := start.ISOWeek()
+		v.Name = vw.T("plan.list_name", strconv.Itoa(n), weekRange(start)) // derived, not asked for
+	}
 	var items []todos.Item
 	if v.List, items, ok = pickList(v.Lists, r.FormValue("list")); !ok {
 		s.notFound(w, r)
 		return planShopView{}, false
 	}
-	lang := s.newView(r, "", nil).Lang
+	lang := vw.Lang
 	s.collectMeals(&v, wk, who, lang)
 	v.preview(items, lang)
 	return v, true
@@ -153,9 +175,6 @@ func (s *Server) planShop(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) renderPlanShop(w http.ResponseWriter, r *http.Request, v planShopView) {
 	vw := s.newView(r, "", nil)
-	if v.Name == "" {
-		v.Name = vw.T("shop.default_name")
-	}
 	vw.Title, vw.Data = vw.T("plan.shop_title"), v
 	s.render(w, r, http.StatusOK, "mealplan_shop", vw)
 }

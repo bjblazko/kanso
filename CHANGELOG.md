@@ -68,6 +68,7 @@ All notable changes to this project are documented here. The format follows
 - Requires Go 1.27.3 (`go.mod`), which fixes GO-2026-6809 in `crypto/x509`.
 
 ### Changed
+- A new shopping list gets its name from where it comes from ("Einkauf: Kartoffelcurry", "Einkauf KW 46 (9.–15.11.)") instead of asking for one; "Einkaufen" in the meal plan without ticked days takes every day of the week with meals, and an empty week says so.
 - The button that creates a to-do list says "Liste anlegen" (was "Anlegen"), next to the new "Einkaufsliste anlegen".
 - Navigation (ADR-005): a rail names the parts of Kanso — Notizen, Todos and Wiki — at the bottom on phones and at the left on wide screens; the side bar shows only the wiki's spaces and pages, under "Wiki-Bereiche"; group management moved to the user menu.
 - The page tree shows guide lines for every level, so nested pages stay apart on narrow screens.

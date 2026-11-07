@@ -127,7 +127,7 @@ func TestShopOneFormCarriesWhatIsTyped(t *testing.T) {
 	id := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
 	_, body := get(t, admin, ts.URL+"/recipes/"+id+"/shop")
 	post := between(body, `<form method="post"`, `</form>`)
-	for _, want := range []string{`id="servings" name="servings"`, `id="list" name="list"`, `id="name" name="name"`, `name="fill" value="`, `name="refresh"`} {
+	for _, want := range []string{`id="servings" name="servings"`, `id="list" name="list"`, `name="fill" value="`, `name="refresh"`, `Neue Liste „Einkauf: Curry“`} {
 		if !strings.Contains(post, want) {
 			t.Errorf("post form lacks %s", want)
 		}
@@ -176,4 +176,17 @@ func (ts *testServer) shoppingLists(t *testing.T, sub string) []todos.List {
 		}
 	}
 	return out
+}
+
+func TestShopNoNameToType(t *testing.T) {
+	ts, admin, _ := setupHaus(t)
+	id := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
+	_, body := get(t, admin, ts.URL+"/recipes/"+id+"/shop")
+	if strings.Contains(body, `type="text" id="name"`) || strings.Contains(body, `<input id="name"`) || strings.Contains(body, "Name der neuen Liste") {
+		t.Fatal("still asks for a name")
+	}
+	postShop(t, ts, admin, id, url.Values{"list": {"new"}, "take": {"0"}})
+	if l := ts.shoppingLists(t, "admin"); len(l) != 1 || l[0].Name != "Einkauf: Curry" {
+		t.Fatalf("%+v", l)
+	}
 }

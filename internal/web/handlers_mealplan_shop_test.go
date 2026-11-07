@@ -143,3 +143,27 @@ func TestRemoveMealOnAListOthersCannotOpen(t *testing.T) {
 		t.Fatalf("not subtracted: %+v", l.Items)
 	}
 }
+
+func TestPlanShopWithoutDaysTakesTheWeek(t *testing.T) {
+	ts, admin, anna := setupHaus(t)
+	plan := ts.familyPlan(t)
+	curry := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
+	ts.planMeal(t, plan, "2026-11-10", curry, "Curry", 4)
+	ts.planMeal(t, plan, "2026-11-13", curry, "Curry", 2)
+	_, body := get(t, anna, ts.URL+"/mealplan/"+plan+"/shop?week=2026-W46")
+	if strings.Count(body, `<section class="shop-meal"`) != 2 || !strings.Contains(body, "Neue Liste „Einkauf KW 46 (9.–15.11.)“") {
+		t.Fatalf("%s", between(body, "<main", "</main>"))
+	}
+	if strings.Contains(body, "Name der neuen Liste") {
+		t.Error("still asks for a name")
+	}
+}
+
+func TestPlanShopNothingSaysWhy(t *testing.T) {
+	ts, _, anna := setupHaus(t)
+	plan := ts.familyPlan(t)
+	_, body := get(t, anna, ts.URL+"/mealplan/"+plan+"/shop?week=2026-W46")
+	if !strings.Contains(body, "In dieser Woche steht noch kein Gericht") {
+		t.Fatal("no reason for an empty week")
+	}
+}
