@@ -97,12 +97,17 @@ func (s *Server) adminRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /admin/boards", s.updateBoards)
 	mux.HandleFunc("GET /admin/mealplans", s.mealplansAdmin)
 	mux.HandleFunc("POST /admin/mealplans", s.updateMealplans)
+	mux.HandleFunc("GET /admin/ai", s.aiAdmin)
+	mux.HandleFunc("POST /admin/ai", s.updateAI)
 }
 
 // kitchenRoutes registers recipes: the kitchen and the cook view (ADR-010).
 func (s *Server) kitchenRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /recipes", s.kitchen)
 	mux.HandleFunc("GET /recipes/new", s.newRecipeForm)
+	mux.HandleFunc("GET /recipes/import", s.importForm)
+	mux.HandleFunc("POST /recipes/import", s.importRecipe)
+	mux.HandleFunc("POST /recipes/import/create", s.createImported)
 	mux.HandleFunc("POST /recipes/new", s.createRecipe)
 	mux.HandleFunc("GET /recipes/{id}/cook", s.cookRecipe)
 	mux.HandleFunc("GET /recipes/{id}/shop", s.shopRecipe)

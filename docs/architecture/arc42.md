@@ -77,6 +77,8 @@ leaves the host.
 | `internal/recipes` | Reads recipe pages (ingredients, groups, steps), scales and formats amounts; pure, no files ([ADR-010](../adr/010-recipes-are-wiki-pages.md)) |
 | `internal/shopping` | Plans and applies filling a shopping list from a recipe, adding up amounts ([ADR-011](../adr/011-shopping-lists-are-lists.md)) |
 | `internal/mealplan` | Group cooking plans: a file per ISO week in Git with meals per day ([ADR-012](../adr/012-meal-plans-belong-to-groups.md)) |
+| `internal/ai` | One OpenAI-compatible language model: configuration in the state directory, chat completions ([ADR-013](../adr/013-ai-openai-compatible-through-kanso-services.md)) |
+| `internal/recipeimport` | Fetches a recipe page safely (no internal addresses) and makes a recipe draft from its JSON-LD or with the AI |
 | `internal/photo` | Removes GPS data from JPEG uploads |
 | `internal/search` | In-memory search over pages and notes (scans all per query) |
 | `internal/devseed` | Made-up people, groups, spaces, pages, notes and tasks for development (`kanso seed`, dev login only) |
@@ -178,6 +180,7 @@ Kopia jobs.
 | [010](../adr/010-recipes-are-wiki-pages.md) | Recipes are wiki pages with a convention |
 | [011](../adr/011-shopping-lists-are-lists.md) | Shopping lists are a kind of list |
 | [012](../adr/012-meal-plans-belong-to-groups.md) | Meal plans belong to groups and live in Git |
+| [013](../adr/013-ai-openai-compatible-through-kanso-services.md) | AI through an OpenAI-compatible API, content only through Kanso's services |
 
 ## 10. Quality Requirements
 
@@ -194,6 +197,13 @@ Verified by unit tests (`go test ./...`) and browser end-to-end tests
 - Build with Go ≥ 1.27.3 (GO-2026-6809, `crypto/x509`).
 
 - Write throughput is limited by one global lock; fine for a household.
+- Outbound connections (ADR-013): recipe import fetches pages named by users
+  from the server — guarded against the own network at connect time (also
+  NAT64/6to4/special ranges), with size, time and redirect limits; the AI
+  connection goes wherever an admin points it, including the own network
+  (intended for a local Ollama). Hosted AI services process what is sent.
+- AI answers are untrusted: they only ever become a draft a person checks;
+  thinking and fences are stripped, the result goes through the recipe parser.
 - Notes waiting offline live in browser storage, which a browser may evict;
   Kanso asks for persistent storage and shows what is waiting.
 - To-do conflicts are decided by device clocks; a badly wrong clock can lose

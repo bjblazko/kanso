@@ -40,6 +40,7 @@ type parser struct {
 	sec     section
 	fence   bool
 	lastNew bool // the previous line belongs to a step, so a following plain line continues it
+	listed  bool // the steps are a list: a paragraph after it is no step ("Guten Appetit!")
 }
 
 // Parse reads the ingredients and steps of a recipe page's Markdown text.
@@ -87,7 +88,7 @@ func (p *parser) heading(s string) bool {
 	case level <= 2 && ingredientHeadings[word]:
 		p.sec = sectionIngredients
 	case level <= 2 && stepHeadings[word]:
-		p.sec = sectionSteps
+		p.sec, p.listed = sectionSteps, false
 	case level <= 2:
 		p.sec = sectionNone
 	}
@@ -109,8 +110,11 @@ func (p *parser) step(s string) {
 	switch {
 	case isListItem(s):
 		p.r.Steps = append(p.r.Steps, strings.TrimSpace(numberedRE.ReplaceAllString(stripMarker(s), "")))
+		p.listed = true
 	case p.lastNew && len(p.r.Steps) > 0:
 		p.r.Steps[len(p.r.Steps)-1] += " " + s
+	case p.listed:
+		return
 	default:
 		p.r.Steps = append(p.r.Steps, s)
 	}

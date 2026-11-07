@@ -1,0 +1,22 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.T "ai.title"}}</h1>
+<p class="meta">{{.T "ai.intro"}}</p>
+<p class="notice">{{.T "ai.privacy"}}</p>
+{{with $d.Result}}<p class="notice{{if $d.Failed}} notice-warning{{end}}" role="status">{{.}}</p>{{end}}
+<form method="post" action="/admin/ai" class="form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <div class="field field-check"><label><input type="checkbox" name="enabled" value="1"{{if $d.Config.Enabled}} checked{{end}}> {{.T "ai.enabled"}}</label></div>
+  <div class="field"><label for="base_url">{{.T "ai.base_url"}}</label>
+    <input id="base_url" name="base_url" value="{{$d.Config.BaseURL}}" type="url" inputmode="url" aria-describedby="base-hint" placeholder="https://openrouter.ai/api/v1">
+    <span class="hint" id="base-hint">{{.T "ai.base_hint"}}</span></div>
+  <div class="field"><label for="model">{{.T "ai.model"}}</label>
+    <input id="model" name="model" value="{{$d.Config.Model}}" aria-describedby="model-hint"><span class="hint" id="model-hint">{{.T "ai.model_hint"}}</span></div>
+  <div class="field"><label for="token">{{.T "ai.token"}}</label>
+    <input id="token" name="token" type="password" autocomplete="new-password" aria-describedby="token-hint">
+    <span class="hint" id="token-hint">{{if $d.HasToken}}{{.T "ai.token_set"}}{{else}}{{.T "ai.token_hint"}}{{end}}</span></div>
+  {{if $d.HasToken}}<div class="field field-check"><label><input type="checkbox" name="remove_token" value="1"> {{.T "ai.token_remove"}}</label></div>{{end}}
+  <div class="actions"><button class="btn btn-primary" type="submit" name="action" value="save">{{.T "ai.save"}}</button>
+    <button class="btn btn-secondary" type="submit" name="action" value="test" data-wait="{{.T "ai.testing"}}">{{.T "ai.test"}}</button></div>
+</form>
+</div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/wait.js"}}"></script>{{end}}

@@ -193,6 +193,8 @@ englische Abschnittsnamen und Einheiten unabhängig von der Sprache der Person.
 
 ## Stufe 2: KI-Erfassung (optional)
 
+*Ersetzt durch [KI-Anbindung und Rezept von Webseite](2026-11-07-ai-recipe-import-design.md).*
+
 Wird erst nach Teil 1 gebaut und nach einem **huepattl-legal-check** (Inhalte verlassen den
 Server).
 

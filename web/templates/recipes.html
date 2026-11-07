@@ -2,6 +2,7 @@
 <header class="screen-head">
 <div class="page-toolbar" role="toolbar" aria-label="{{.T "nav.kitchen"}}">
   <a class="btn btn-primary btn-sm" href="/recipes/new">{{template "icon" "plus"}}<span>{{.T "recipe.new"}}</span></a>
+  <a class="btn btn-quiet btn-sm" href="/recipes/import">{{template "icon" "globe"}}<span class="tb-label">{{.T "import.action"}}</span></a>
   <span class="tb-sep" aria-hidden="true"></span>
   {{template "kitchen-tabs" .}}
 </div>
