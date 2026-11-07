@@ -86,3 +86,12 @@ func TestImportCreateNeedsWrite(t *testing.T) {
 		t.Fatalf("%d", resp.StatusCode)
 	}
 }
+
+func TestImportNeedsAWritableSpace(t *testing.T) {
+	ts, admin, anna := setupHaus(t)
+	ts.postForm(t, admin, "/", "/admin/spaces/new", url.Values{"name": {"Geheim"}})
+	site := recipeSite(t, ldPage)
+	if resp, _ := ts.postFormBody(t, anna, "/recipes/import", "/recipes/import", url.Values{"url": {site}, "space": {"geheim"}}); resp.StatusCode != http.StatusForbidden {
+		t.Fatalf("%d", resp.StatusCode)
+	}
+}

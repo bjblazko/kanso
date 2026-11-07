@@ -61,3 +61,12 @@ func TestAdminAIKeepsTokenHidden(t *testing.T) {
 		t.Fatal("no error for an unreachable AI")
 	}
 }
+
+func TestAdminAIDropsTokenForANewHost(t *testing.T) {
+	ts, admin, _ := setupHaus(t)
+	ts.postForm(t, admin, "/admin/ai", "/admin/ai", url.Values{"action": {"save"}, "enabled": {"1"}, "base_url": {"https://openrouter.ai/api/v1"}, "model": {"m"}, "token": {tokenValue}})
+	ts.postForm(t, admin, "/admin/ai", "/admin/ai", url.Values{"action": {"save"}, "enabled": {"1"}, "base_url": {"http://ollama:11434/v1"}, "model": {"m"}})
+	if got := ts.deps.AI.Load().Token; got != "" {
+		t.Fatalf("token went along to a new host: %q", got)
+	}
+}

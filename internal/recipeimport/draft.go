@@ -53,7 +53,7 @@ var (
 )
 
 func init() {
-	for _, tag := range []string{"script", "style", "nav", "header", "footer", "noscript", "svg", "form", "aside", "template"} {
+	for _, tag := range []string{"script", "style", "nav", "header", "footer", "noscript", "svg", "aside", "template"} {
 		dropBlocks = append(dropBlocks, regexp.MustCompile(`(?is)<`+tag+`\b.*?</`+tag+`>`))
 	}
 }

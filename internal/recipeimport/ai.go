@@ -6,7 +6,7 @@ import (
 	"context"
 	_ "embed"
 	"errors"
-	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -22,8 +22,6 @@ const maxText = 30000
 
 //go:embed prompt.md
 var prompt string
-
-var fence = regexp.MustCompile("(?s)^```[a-zA-Z]*\\n(.*?)\\n?```$")
 
 // FromAI asks the AI to write the page's recipe in Kanso's format.
 func FromAI(ctx context.Context, c ai.Client, cfg ai.Config, page Page) (Draft, error) {
@@ -49,10 +47,7 @@ func FromAI(ctx context.Context, c ai.Client, cfg ai.Config, page Page) (Draft, 
 // parseAnswer reads "# Titel", "Portionen:", "Zeit:", a description and the
 // recipe sections; anything else in front of the sections becomes the description.
 func parseAnswer(answer string) Draft {
-	answer = strings.TrimSpace(answer)
-	if m := fence.FindStringSubmatch(answer); m != nil {
-		answer = m[1]
-	}
+	answer = cleanAnswer(answer)
 	var d Draft
 	var body, desc []string
 	for _, line := range strings.Split(answer, "\n") {
@@ -79,6 +74,26 @@ func parseAnswer(answer string) Draft {
 	}
 	d.Steps = r.Steps
 	return d
+}
+
+// cleanAnswer drops thinking (also an unpaired </think> or a cut-off
+// <think>), any words before a fenced block and the fences themselves.
+func cleanAnswer(s string) string {
+	if i := strings.LastIndex(s, "</think>"); i >= 0 {
+		s = s[i+len("</think>"):]
+	} else if i := strings.Index(s, "<think>"); i >= 0 {
+		s = s[:i]
+	}
+	lines := strings.Split(strings.TrimSpace(s), "\n")
+	start := slices.IndexFunc(lines, func(l string) bool { return strings.HasPrefix(strings.TrimSpace(l), "```") })
+	if start < 0 {
+		return strings.TrimSpace(s)
+	}
+	lines = lines[start+1:]
+	if end := slices.IndexFunc(lines, func(l string) bool { return strings.HasPrefix(strings.TrimSpace(l), "```") }); end >= 0 {
+		lines = lines[:end]
+	}
+	return strings.TrimSpace(strings.Join(lines, "\n"))
 }
 
 func number(line string) int {

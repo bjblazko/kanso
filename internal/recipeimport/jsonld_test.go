@@ -68,3 +68,12 @@ func TestText(t *testing.T) {
 		t.Fatalf("%q", got)
 	}
 }
+
+func TestJSONLDRawNewlinesAndEmptySteps(t *testing.T) {
+	page := "<script type=\"application/ld+json\">{\"@type\":\"Recipe\",\"name\":\"Brei\",\"recipeIngredient\":[\"1 l Milch\"],\n" +
+		"\"recipeInstructions\":[{\"@type\":\"HowToStep\",\"text\":\"\"},{\"@type\":\"HowToStep\",\"text\":\"Rühren,\nbis es dick ist.\"}]}</script>"
+	d, ok := FromJSONLD(page, "https://x.example")
+	if !ok || !slices.Equal(d.Steps, []string{"Rühren, bis es dick ist."}) {
+		t.Fatalf("%v %+v", ok, d)
+	}
+}

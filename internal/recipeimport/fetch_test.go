@@ -82,3 +82,24 @@ func TestDialGuardBlocksLoopback(t *testing.T) {
 		t.Fatalf("dial guard: %v", err)
 	}
 }
+
+func TestIsPublicSpecialRanges(t *testing.T) {
+	for _, addr := range []string{"64:ff9b::a00:1", "2002:c0a8:101::1", "::7f00:1", "fec0::1", "0.1.2.3", "192.0.0.8", "198.18.0.1", "240.0.0.1", "255.255.255.255"} {
+		if isPublic(netip.MustParseAddr(addr)) {
+			t.Errorf("%s counted as public", addr)
+		}
+	}
+}
+
+func TestFetchLatin1AndSourceWithoutCredentials(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=ISO-8859-1")
+		_, _ = w.Write([]byte("<p>M\xf6hren</p>"))
+	}))
+	defer srv.Close()
+	u := strings.Replace(srv.URL, "http://", "http://user:pass@", 1)
+	p, err := NewTestFetcher().Fetch(context.Background(), u)
+	if err != nil || !strings.Contains(p.HTML, "Möhren") || strings.Contains(p.URL, "pass") {
+		t.Fatalf("%+v %v", p, err)
+	}
+}

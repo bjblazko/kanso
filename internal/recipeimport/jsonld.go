@@ -29,7 +29,9 @@ var (
 func FromJSONLD(page, source string) (Draft, bool) {
 	for _, m := range ldScript.FindAllStringSubmatch(page, -1) {
 		var v any
-		if json.Unmarshal([]byte(m[1]), &v) != nil {
+		// Raw line breaks inside strings are invalid JSON but common; as spaces they are harmless.
+		raw := strings.NewReplacer("\n", " ", "\r", " ", "\t", " ").Replace(m[1])
+		if json.Unmarshal([]byte(raw), &v) != nil {
 			continue
 		}
 		if r := findRecipe(v); r != nil {
@@ -140,15 +142,25 @@ func steps(v any) []string {
 	}
 	var out []string
 	for _, e := range asList(v) {
-		if m, ok := e.(map[string]any); ok && m["itemListElement"] != nil {
+		m, ok := e.(map[string]any)
+		switch {
+		case ok && m["itemListElement"] != nil:
 			out = append(out, steps(m["itemListElement"])...)
-		} else if ok {
-			out = append(out, stepText(m))
-		} else if c := clean(e); c != "" {
-			out = append(out, c)
+		case ok:
+			out = appendText(out, stepText(m))
+		default:
+			out = appendText(out, clean(e))
 		}
 	}
 	return out
+}
+
+// appendText adds t unless it is empty (an empty HowToStep is no step).
+func appendText(out []string, t string) []string {
+	if t == "" {
+		return out
+	}
+	return append(out, t)
 }
 
 func stepText(m map[string]any) string {

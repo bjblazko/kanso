@@ -38,8 +38,12 @@ func (s *Server) updateAI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cfg := s.AI.Load()
+	oldHost := cfg.Host()
 	cfg.Enabled = r.PostFormValue("enabled") != ""
-	cfg.BaseURL, cfg.Model = r.PostFormValue("base_url"), r.PostFormValue("model")
+	cfg.BaseURL, cfg.Model = strings.TrimSpace(r.PostFormValue("base_url")), r.PostFormValue("model")
+	if cfg.Host() != oldHost {
+		cfg.Token = "" // a token never goes along to a host it was not entered for
+	}
 	if t := strings.TrimSpace(r.PostFormValue("token")); t != "" {
 		cfg.Token = t
 	}

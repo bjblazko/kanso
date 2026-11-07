@@ -17,6 +17,7 @@ import (
 	"net/url"
 	"slices"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -75,11 +76,24 @@ func newFetcher(allow func(netip.AddrPort) bool, ports []int) *Fetcher {
 	return f
 }
 
+// special are ranges that are no ordinary internet hosts, or that can hide
+// an address of an own network (NAT64, 6to4, IPv4-compatible).
+var special = func() []netip.Prefix {
+	var out []netip.Prefix
+	for _, p := range []string{"0.0.0.0/8", "100.64.0.0/10", "192.0.0.0/24", "198.18.0.0/15", "240.0.0.0/4",
+		"64:ff9b::/96", "64:ff9b:1::/48", "2002::/16", "::/96", "fec0::/10", "2001:db8::/32"} {
+		out = append(out, netip.MustParsePrefix(p))
+	}
+	return out
+}()
+
 // isPublic tells whether a is an address on the internet, not in an own network.
 func isPublic(a netip.Addr) bool {
 	a = a.Unmap()
-	cgnat := netip.MustParsePrefix("100.64.0.0/10")
-	return a.IsGlobalUnicast() && !a.IsPrivate() && !a.IsLoopback() && !a.IsLinkLocalUnicast() && !cgnat.Contains(a)
+	if !a.IsGlobalUnicast() || a.IsPrivate() || a.IsLoopback() || a.IsLinkLocalUnicast() {
+		return false
+	}
+	return !slices.ContainsFunc(special, func(p netip.Prefix) bool { return p.Contains(a) })
 }
 
 // check allows http and https on the allowed ports.
@@ -124,12 +138,28 @@ func read(resp *http.Response) (Page, error) {
 	if resp.StatusCode >= 400 {
 		return Page{}, fmt.Errorf("%w: HTTP %d", ErrFetch, resp.StatusCode)
 	}
-	if mt, _, _ := mime.ParseMediaType(resp.Header.Get("Content-Type")); mt != "text/html" && mt != "application/xhtml+xml" {
+	mt, params, _ := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+	if mt != "text/html" && mt != "application/xhtml+xml" {
 		return Page{}, ErrNotHTML
 	}
 	b, err := io.ReadAll(io.LimitReader(resp.Body, maxPage+1))
 	if err != nil || len(b) > maxPage {
 		return Page{}, ErrFetch
 	}
-	return Page{URL: resp.Request.URL.String(), HTML: string(b)}, nil
+	u := *resp.Request.URL
+	u.User = nil // no credentials in the recipe's source
+	return Page{URL: u.String(), HTML: decode(b, params["charset"])}, nil
+}
+
+// decode reads Latin-1 pages (ISO-8859-1, windows-1252) as such; everything else as UTF-8.
+func decode(b []byte, charset string) string {
+	switch strings.ToLower(charset) {
+	case "iso-8859-1", "iso-8859-15", "latin1", "windows-1252", "cp1252":
+		r := make([]rune, len(b))
+		for i, c := range b {
+			r[i] = rune(c)
+		}
+		return string(r)
+	}
+	return string(b)
 }

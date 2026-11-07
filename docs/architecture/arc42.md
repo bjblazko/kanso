@@ -197,6 +197,13 @@ Verified by unit tests (`go test ./...`) and browser end-to-end tests
 - Build with Go ≥ 1.27.3 (GO-2026-6809, `crypto/x509`).
 
 - Write throughput is limited by one global lock; fine for a household.
+- Outbound connections (ADR-013): recipe import fetches pages named by users
+  from the server — guarded against the own network at connect time (also
+  NAT64/6to4/special ranges), with size, time and redirect limits; the AI
+  connection goes wherever an admin points it, including the own network
+  (intended for a local Ollama). Hosted AI services process what is sent.
+- AI answers are untrusted: they only ever become a draft a person checks;
+  thinking and fences are stripped, the result goes through the recipe parser.
 - Notes waiting offline live in browser storage, which a browser may evict;
   Kanso asks for persistent storage and shows what is waiting.
 - To-do conflicts are decided by device clocks; a badly wrong clock can lose

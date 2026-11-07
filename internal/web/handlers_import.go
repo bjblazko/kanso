@@ -52,6 +52,10 @@ func (s *Server) renderImportForm(w http.ResponseWriter, r *http.Request, status
 // importRecipe fetches the page and shows a draft: from its recipe data, else from the AI.
 func (s *Server) importRecipe(w http.ResponseWriter, r *http.Request) {
 	page := importPage{URL: strings.TrimSpace(r.PostFormValue("url")), Space: r.PostFormValue("space")}
+	if _, who := auth.UserFrom(r.Context()); !access.Can(s.Spaces.RoleOf(who, page.Space, s.groups()), access.Write) {
+		s.forbidden(w, r) // fetching and asking the AI only for a recipe one may create
+		return
+	}
 	v := s.newView(r, "", nil)
 	draft, withAI, err := s.draftFrom(r.Context(), page.URL)
 	if err != nil {

@@ -12,7 +12,7 @@
   <div class="field"><label for="model">{{.T "ai.model"}}</label>
     <input id="model" name="model" value="{{$d.Config.Model}}" aria-describedby="model-hint"><span class="hint" id="model-hint">{{.T "ai.model_hint"}}</span></div>
   <div class="field"><label for="token">{{.T "ai.token"}}</label>
-    <input id="token" name="token" type="password" autocomplete="off" aria-describedby="token-hint">
+    <input id="token" name="token" type="password" autocomplete="new-password" aria-describedby="token-hint">
     <span class="hint" id="token-hint">{{if $d.HasToken}}{{.T "ai.token_set"}}{{else}}{{.T "ai.token_hint"}}{{end}}</span></div>
   {{if $d.HasToken}}<div class="field field-check"><label><input type="checkbox" name="remove_token" value="1"> {{.T "ai.token_remove"}}</label></div>{{end}}
   <div class="actions"><button class="btn btn-primary" type="submit" name="action" value="save">{{.T "ai.save"}}</button>

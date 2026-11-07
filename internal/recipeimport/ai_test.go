@@ -71,3 +71,27 @@ func TestFromAICutsLongPages(t *testing.T) {
 		t.Errorf("sent %d bytes", len(seen))
 	}
 }
+
+func TestCleanAnswer(t *testing.T) {
+	want := "# Kuchen\n\n## Zutaten\n\n- 1 Ei"
+	for _, in := range []string{
+		"Hier ist das Rezept:\n\n```markdown\n# Kuchen\n\n## Zutaten\n\n- 1 Ei\n```\nGuten Appetit!",
+		"Okay, let me think.\n</think>\n# Kuchen\n\n## Zutaten\n\n- 1 Ei",
+		"<think>a</think>\n```\n# Kuchen\n\n## Zutaten\n\n- 1 Ei\n```",
+		"# Kuchen\n\n## Zutaten\n\n- 1 Ei",
+	} {
+		if got := cleanAnswer(in); got != want {
+			t.Errorf("%q\n→ %q", in, got)
+		}
+	}
+	if got := cleanAnswer("<think>endless thinking cut off"); got != "" {
+		t.Errorf("unclosed think: %q", got)
+	}
+}
+
+func TestTrailingTextIsNoStep(t *testing.T) {
+	d := parseAnswer("# Kuchen\n\n## Zutaten\n\n- 1 Ei\n\n## Zubereitung\n\n1. Backen.\n\nGuten Appetit!")
+	if !slices.Equal(d.Steps, []string{"Backen."}) {
+		t.Fatalf("%q", d.Steps)
+	}
+}
