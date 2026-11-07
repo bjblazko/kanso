@@ -6,7 +6,7 @@
 
 ## Context
 
-Docmost lets several people edit one page live. Kanso stores plain Markdown
+Many wikis let several people edit one page live. Kanso stores plain Markdown
 files and is built without frontend frameworks; live co-editing (CRDT/OT)
 would be large and fit plain files poorly.
 

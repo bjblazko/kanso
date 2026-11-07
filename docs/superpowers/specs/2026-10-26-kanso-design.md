@@ -4,14 +4,13 @@
 
 ## Context
 
-Docmost (0.96, Postgres + Redis, auf delorean/RPi5) soll abgelöst werden – und Kanso soll mehr werden: ein
+Ein bestehendes Wiki mit Datenbank soll abgelöst werden – und Kanso soll mehr werden: ein
 Familien-Allrounder für Wissen, Termine, Haus, Kind, Einkauf, Wünsche und Links. Kleines System, wenige
 Nutzer → keine Datenbank, alles im Dateisystem, lesbar auch ohne Kanso. Go-Backend, reines HTML/CSS/JS.
 Leitbild: Dieter Rams, *weniger, aber besser*.
 
-Ist-Stand (aus `../homelab2`): Docmost hat 6 Spaces (General, Ideen Timo, Homelab, Familie, Haus,
-Gesundheit Timo), ~46 Seiten, 74 Anhänge; eigener Login, alle sehen alles. Authelia (file backend
-`users.yml`, OIDC aktiv, Grafana nutzt `groups`-Scope). Eigene Apps laufen nach ADR-017 als Flake-Input,
+Ist-Stand (aus `../homelab2`): Authelia (file backend `users.yml`, OIDC aktiv, Grafana nutzt
+`groups`-Scope). Eigene Apps laufen nach ADR-017 als Flake-Input,
 systemd + `DynamicUser` + `StateDirectory`, hinter Caddy. Familienkalender heute in iCloud.
 
 ## Entscheidungen (vom Nutzer)
@@ -43,9 +42,7 @@ systemd + `DynamicUser` + `StateDirectory`, hinter Caddy. Familienkalender heute
 - **Listen, Boards, Tasks**: eine Datei pro Eintrag statt einer großen Datei → keine Sperren nötig,
   wenig Konflikte, Offline-Abgleich pro Eintrag (last-write-wins pro Eintrag + Revision).
 - **Suche**: In-Memory-Index beim Start, aktualisiert beim Speichern (kein externer Index).
-- **Docmost-Migration**: nicht Teil des Projekts (Nutzer). Kanso startet normalerweise leer; die
-  eigene Migration wird später einmalig und separat gemacht. Das Spaces/Seiten-Modell orientiert sich
-  grob an Docmost, damit das dann leicht fällt.
+- **Migration aus einem anderen Wiki**: nicht Teil des Projekts (Nutzer). Kanso startet leer.
 - **Aus Notiz wird …**: Task (Notiz bleibt, verlinkt) oder Wiki-Artikel (Notiz wird verschoben,
   Anhänge wandern mit, Git-Verlauf bleibt via `git mv`).
 - **Task-Ansichten**: ein Task hat `status` (Lane) **und** `urgent`/`important`; Kanban und
@@ -105,7 +102,7 @@ IDs: kurze, zufällige, URL-sichere IDs; Slugs nur für lesbare Ordnernamen bei 
 | `mermaid` (ESM-Build) | 12.2.0 | MIT (+ MIT/ISC/BSD/Apache-Abhängigkeiten, DOMPurify unter Apache-2.0 gewählt, robust-predicates Unlicense) | Diagramme, lokal, lazy | **ohne ELK-Chunk** (elkjs = EPL-2.0), Layout fest `dagre` |
 | IBM Plex Sans/Mono | aktuell | OFL-1.1 | Schrift | selbst gehostet, in „Lizenzen und Dank“ |
 
-Abgelehnt: `pgx` (Docmost-Migration ist kein Projektteil). Neue Abhängigkeiten nur nach gleicher Prüfung
+Abgelehnt: `pgx` (Migration aus einem anderen Wiki ist kein Projektteil). Neue Abhängigkeiten nur nach gleicher Prüfung
 und Freigabe. OIDC, Web-Push (VAPID, RFC 8291 via `crypto/ecdh`, `crypto/hkdf`), iCalendar, Git (CLI):
 selbst gebaut. Alle Lizenztexte kommen in die App („Lizenzen und Dank“) mit Test auf Vollständigkeit.
 
@@ -116,8 +113,7 @@ selbst gebaut. Alle Lizenztexte kommen in die App („Lizenzen und Dank“) mit 
    Sperren, Git-Verlauf + Vergleich, Suche, i18n DE/EN, Design-System. *(fertig)*
 2. **Notizen** (privat) → Wiki-Artikel; schnelles Erfassen am Handy, auch offline, mit Fotos. *(fertig)*
    Dazwischen: **To-do-Listen** (offline, teilbar; eigene Spec). *(fertig)*
-3. **Deployment** in homelab2 (Flake-Input, Modul, Authelia-Client, Caddy) und Parallelbetrieb zu Docmost.
-   *(fertig)*
+3. **Deployment** in homelab2 (Flake-Input, Modul, Authelia-Client, Caddy). *(fertig)*
 4. **Tasks**: Boards (privat/Gruppe), Kanban + Eisenhower, Fälligkeiten; Notiz → Task. Keine wiederkehrenden
    Aufgaben ([Spec](2026-10-30-tasks-design.md)).
 4a. **Rezepte** ([Spec](2026-11-06-recipes-design.md)): Wiki-Seiten mit Konvention, Küche, Kochansicht. *(fertig)*
@@ -127,7 +123,6 @@ selbst gebaut. Alle Lizenztexte kommen in die App („Lizenzen und Dank“) mit 
 8. **Extras**: Essensplan → Einkauf *(fertig, [Spec](2026-11-07-meal-plan-design.md))*, Haus-Inventar (Wartung erzeugt Tasks), Kind & Kontakte.
 9. **Kalender extern**: ICS-Abo, CalDAV-Client (iCloud), später CalDAV-Server.
 
-Docmost wird erst abgeschaltet, wenn Kanso im Alltag besteht und die separate Migration gelaufen ist.
 
 ## Verifikation
 

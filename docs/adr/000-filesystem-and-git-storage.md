@@ -6,9 +6,9 @@
 
 ## Context
 
-Kanso is for small systems with few users (a family). Docmost, which it
-replaces, needs Postgres and Redis. Content should stay readable and
-recoverable without the application.
+Kanso is for small systems with few users (a family). Typical wikis need a
+database server and a cache. Content should stay readable and recoverable
+without the application.
 
 ## Decision
 

@@ -8,7 +8,7 @@ updated: 2026-10-30
 
 Runs on the homelab NAS as a Nix flake input (`flake.nix`, `buildGoModule`)
 with a NixOS module, an Authelia OIDC client and Caddy in front; in daily use
-next to Docmost. The host configuration lives in the private homelab
+The host configuration lives in the private homelab
 repository, not here.
 
 ## Related

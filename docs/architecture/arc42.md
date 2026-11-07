@@ -7,8 +7,8 @@
 
 Kanso is a self-hosted organiser for a family or a small team: a Markdown
 wiki organised in spaces, private notes, tasks (Kanban and Eisenhower),
-shared lists (shopping, wishes, links) and calendars. It replaces Docmost on
-a Raspberry Pi 5 NAS and goes beyond it.
+shared lists (shopping, wishes, links) and calendars. It runs on small
+hardware such as a Raspberry Pi 5 NAS.
 
 | Priority | Quality goal | Meaning |
 |---|---|---|

@@ -23,7 +23,7 @@ Approved on 2026-10-26:
 | IBM Plex Sans/Mono | OFL-1.1 | self-hosted |
 | `@playwright/test` 1.64.1 (dev only) | Apache-2.0 | end-to-end tests in `e2e/`; never shipped; GHSA-7mvr-c777-76hp fixed long before this version |
 
-Rejected: `pgx` (the Docmost migration is not part of the project).
+Rejected: `pgx` (migrating from another wiki is not part of the project).
 OIDC, Web Push, iCalendar and Git access are built on the standard library
 and the `git` program.
 
