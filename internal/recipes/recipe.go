@@ -15,8 +15,9 @@ type Group struct {
 
 // Recipe is what Kanso understands of a recipe page's text.
 type Recipe struct {
-	Groups []Group
-	Steps  []string
+	Groups     []Group
+	Steps      []string
+	StepImages []string // per step the address of a photo below it; "" = none
 }
 
 type section int
@@ -31,6 +32,7 @@ var (
 	ingredientHeadings = map[string]bool{"zutaten": true, "ingredients": true}
 	stepHeadings       = map[string]bool{"zubereitung": true, "schritte": true, "steps": true, "method": true}
 	numberedRE         = regexp.MustCompile(`^\d+[.)]\s+`)
+	imageLineRE        = regexp.MustCompile(`^!\[[^\]]*\]\(([^)\s]+)\)$`)
 	headingRE          = regexp.MustCompile(`^(#{1,6})(?:\s+(.*))?$`)
 )
 
@@ -66,10 +68,18 @@ func (p *parser) line(line string) {
 	case strings.HasPrefix(trimmed, "#"): // a hashtag line, not a heading
 	case trimmed == "---" || trimmed == "***":
 		p.sec = sectionNone
-	case p.sec == sectionIngredients:
-		p.ingredient(trimmed)
-	case p.sec == sectionSteps:
-		p.step(trimmed)
+	default:
+		p.content(trimmed)
+	}
+}
+
+// content hands a line of text to the section it is in.
+func (p *parser) content(s string) {
+	switch p.sec {
+	case sectionIngredients:
+		p.ingredient(s)
+	case sectionSteps:
+		p.step(s)
 	}
 }
 
@@ -107,9 +117,16 @@ func (p *parser) ingredient(s string) {
 
 // step starts a step with a list item or a new paragraph; other lines continue the step.
 func (p *parser) step(s string) {
+	if m := imageLineRE.FindStringSubmatch(s); m != nil && len(p.r.Steps) > 0 {
+		if last := len(p.r.Steps) - 1; p.r.StepImages[last] == "" {
+			p.r.StepImages[last] = m[1] // a photo below a step belongs to it
+		}
+		return
+	}
 	switch {
 	case isListItem(s):
 		p.r.Steps = append(p.r.Steps, strings.TrimSpace(numberedRE.ReplaceAllString(stripMarker(s), "")))
+		p.r.StepImages = append(p.r.StepImages, "")
 		p.listed = true
 	case p.lastNew && len(p.r.Steps) > 0:
 		p.r.Steps[len(p.r.Steps)-1] += " " + s
@@ -117,6 +134,7 @@ func (p *parser) step(s string) {
 		return
 	default:
 		p.r.Steps = append(p.r.Steps, s)
+		p.r.StepImages = append(p.r.StepImages, "")
 	}
 	p.lastNew = true
 }

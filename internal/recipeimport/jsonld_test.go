@@ -77,3 +77,31 @@ func TestJSONLDRawNewlinesAndEmptySteps(t *testing.T) {
 		t.Fatalf("%v %+v", ok, d)
 	}
 }
+
+func TestRecipeImage(t *testing.T) {
+	cases := map[string]string{
+		`"image":"https://cdn.example/a.jpg"`:                               "https://cdn.example/a.jpg",
+		`"image":{"@type":"ImageObject","url":"https://cdn.example/b.jpg"}`: "https://cdn.example/b.jpg",
+		`"image":["https://cdn.example/c.jpg","https://cdn.example/d.jpg"]`: "https://cdn.example/c.jpg",
+		`"image":[{"url":"/bilder/e.jpg"}]`:                                 "https://site.example/bilder/e.jpg",
+	}
+	for img, want := range cases {
+		page := `<script type="application/ld+json">{"@type":"Recipe","name":"X","recipeIngredient":["1 Ei"],` + img + `}</script>`
+		if d, ok := FromJSONLD(page, "https://site.example/rezept/x"); !ok || d.Image != want {
+			t.Errorf("%s → %q", img, d.Image)
+		}
+	}
+}
+
+func TestPageImageFallback(t *testing.T) {
+	page := `<head><meta property="og:image" content="https://static.example/m.jpeg?x=1&amp;y=2"><meta name="twitter:image" content="https://t.example/t.jpg"></head>`
+	if got := PageImage(page, "https://site.example/p"); got != "https://static.example/m.jpeg?x=1&y=2" {
+		t.Errorf("og: %q", got)
+	}
+	if got := PageImage(`<meta name="twitter:image" content="/t.jpg">`, "https://site.example/p"); got != "https://site.example/t.jpg" {
+		t.Errorf("twitter: %q", got)
+	}
+	if got := PageImage(`<meta property="og:image" content="javascript:alert(1)">`, "https://site.example/p"); got != "" {
+		t.Errorf("javascript: %q", got)
+	}
+}

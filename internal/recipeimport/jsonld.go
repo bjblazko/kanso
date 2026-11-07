@@ -15,7 +15,9 @@ type Draft struct {
 	Title, Description string
 	Servings, Time     int // Time in minutes
 	Source             string
+	Image              string // address of a photo of the dish; "" = none
 	Ingredients, Steps []string
+	StepImages         []string // per step the address of its photo; "" = none
 }
 
 var (
@@ -75,7 +77,7 @@ func isType(v any, want string) bool {
 
 func draftOf(r map[string]any, source string) Draft {
 	d := Draft{Title: clean(r["name"]), Description: clean(r["description"]), Source: source,
-		Servings: servings(r["recipeYield"]), Time: minutes(r["totalTime"])}
+		Servings: servings(r["recipeYield"]), Time: minutes(r["totalTime"]), Image: imageURL(r["image"], source)}
 	if d.Time == 0 {
 		d.Time = minutes(r["prepTime"]) + minutes(r["cookTime"])
 	}
@@ -84,7 +86,7 @@ func draftOf(r map[string]any, source string) Draft {
 			d.Ingredients = append(d.Ingredients, c)
 		}
 	}
-	d.Steps = steps(r["recipeInstructions"])
+	d.Steps, d.StepImages = steps(r["recipeInstructions"], source)
 	return d
 }
 
@@ -129,38 +131,39 @@ func minutes(v any) int {
 	return n(1)*24*60 + n(2)*60 + n(3)
 }
 
-// steps reads plain text, a list of texts, HowToSteps and HowToSections.
-func steps(v any) []string {
-	if s, ok := v.(string); ok {
-		var out []string
-		for _, line := range strings.Split(html.UnescapeString(s), "\n") {
-			if c := clean(line); c != "" {
-				out = append(out, c)
-			}
-		}
-		return out
+// stepList collects steps and, aligned with them, their photos.
+type stepList struct{ texts, images []string }
+
+// add keeps a step unless its text is empty (an empty HowToStep is no step).
+func (l *stepList) add(text, image string) {
+	if text != "" {
+		l.texts, l.images = append(l.texts, text), append(l.images, image)
 	}
-	var out []string
+}
+
+// steps reads plain text, a list of texts, HowToSteps (with their image)
+// and HowToSections; it returns the texts and, aligned, the photos.
+func steps(v any, base string) ([]string, []string) {
+	var l stepList
+	if s, ok := v.(string); ok {
+		for _, line := range strings.Split(html.UnescapeString(s), "\n") {
+			l.add(clean(line), "")
+		}
+		return l.texts, l.images
+	}
 	for _, e := range asList(v) {
 		m, ok := e.(map[string]any)
 		switch {
 		case ok && m["itemListElement"] != nil:
-			out = append(out, steps(m["itemListElement"])...)
+			t, i := steps(m["itemListElement"], base)
+			l.texts, l.images = append(l.texts, t...), append(l.images, i...)
 		case ok:
-			out = appendText(out, stepText(m))
+			l.add(stepText(m), imageURL(m["image"], base))
 		default:
-			out = appendText(out, clean(e))
+			l.add(clean(e), "")
 		}
 	}
-	return out
-}
-
-// appendText adds t unless it is empty (an empty HowToStep is no step).
-func appendText(out []string, t string) []string {
-	if t == "" {
-		return out
-	}
-	return append(out, t)
+	return l.texts, l.images
 }
 
 func stepText(m map[string]any) string {

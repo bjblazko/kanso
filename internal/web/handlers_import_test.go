@@ -95,3 +95,85 @@ func TestImportNeedsAWritableSpace(t *testing.T) {
 		t.Fatalf("%d", resp.StatusCode)
 	}
 }
+
+var fakeJPEG = []byte("\xff\xd8\xff\xe0\x00\x10JFIF fake photo")
+
+// photoSite serves a recipe page without recipe data that names a photo, and the photo.
+func photoSite(t *testing.T) string {
+	t.Helper()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/bild.jpeg" {
+			w.Header().Set("Content-Type", "image/jpeg")
+			_, _ = w.Write(fakeJPEG)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html")
+		_, _ = w.Write([]byte(strings.Replace(ldPage, "<head>", `<head><meta property="og:image" content="/bild.jpeg">`, 1)))
+	}))
+	t.Cleanup(srv.Close)
+	return srv.URL + "/rezept"
+}
+
+func TestImportTakesThePhoto(t *testing.T) {
+	ts, _, anna := setupHaus(t)
+	site := photoSite(t)
+	_, body := ts.postFormBody(t, anna, "/recipes/import", "/recipes/import", url.Values{"url": {site}, "space": {"haus"}})
+	if !strings.Contains(body, `src="data:image/jpeg;base64,`) || !strings.Contains(body, `name="place_0"`) || !strings.Contains(body, `<option value="top" selected>`) {
+		t.Fatal("no photo with its place in the preview")
+	}
+	form := url.Values{"space": {"haus"}, "title": {"Kartoffelcurry"}, "servings": {"4"}, "source": {site}, "place_0": {"step-1"},
+		"photo_url_0": {htmlUnescape(between(body, `name="photo_url_0" value="`, `"`))},
+		"body":        {htmlUnescape(between(body, `name="body" rows="16">`, `</textarea>`))}}
+	resp := ts.postForm(t, anna, "/recipes/import", "/recipes/import/create", form)
+	id := strings.TrimSuffix(strings.TrimPrefix(resp.Header.Get("Location"), "/p/"), "/edit")
+	p, _ := ts.deps.Wiki.ByID(id)
+	if p.Meta.Image == "" || !strings.Contains(p.Body, "   ![Kartoffelcurry](attachments/"+p.Meta.Image+")") {
+		t.Fatalf("%+v\n%s", p.Meta, p.Body)
+	}
+	if files := ts.deps.Wiki.ListAttachments(id); len(files) != 1 || files[0] != p.Meta.Image {
+		t.Fatalf("attachments %v", files)
+	}
+	_, list := get(t, anna, ts.URL+"/recipes")
+	if !strings.Contains(list, `src="/p/`+id+`/attachments/`+p.Meta.Image+`"`) {
+		t.Fatal("no thumbnail in the kitchen")
+	}
+	_, cook := get(t, anna, ts.URL+"/recipes/"+id+"/cook")
+	if !strings.Contains(between(cook, `<ol class="cook-steps">`, `</ol>`), `src="/p/`+id+`/attachments/`+p.Meta.Image+`"`) {
+		t.Fatal("no step photo in the cook view")
+	}
+}
+
+func TestImportWithoutPhotoWhenSkipped(t *testing.T) {
+	ts, _, anna := setupHaus(t)
+	site := photoSite(t)
+	form := url.Values{"space": {"haus"}, "title": {"Curry"}, "source": {site}, "place_0": {"skip"},
+		"photo_url_0": {strings.Replace(site, "/rezept", "/bild.jpeg", 1)}, "body": {"## Zutaten\n- 1 Ei\n"}}
+	resp := ts.postForm(t, anna, "/recipes/import", "/recipes/import/create", form)
+	id := strings.TrimSuffix(strings.TrimPrefix(resp.Header.Get("Location"), "/p/"), "/edit")
+	if p, _ := ts.deps.Wiki.ByID(id); p.Meta.Image != "" || len(ts.deps.Wiki.ListAttachments(id)) != 0 {
+		t.Fatal("photo taken although skipped")
+	}
+}
+
+func TestKitchenThumbnailFromBody(t *testing.T) {
+	ts, admin, anna := setupHaus(t)
+	id := ts.makeRecipe(t, admin, "haus", "Curry", "![Teller](attachments/teller.jpg)\n\n"+curryBody, 4)
+	_, list := get(t, anna, ts.URL+"/recipes")
+	if !strings.Contains(list, `src="/p/`+id+`/attachments/teller.jpg"`) {
+		t.Fatal("no thumbnail from the first photo in the text")
+	}
+}
+
+func TestImportPhotoOnTopIsTheKitchenPhoto(t *testing.T) {
+	ts, _, anna := setupHaus(t)
+	site := photoSite(t)
+	img := strings.Replace(site, "/rezept", "/bild.jpeg", 1)
+	form := url.Values{"space": {"haus"}, "title": {"Curry"}, "source": {site}, "body": {"## Zutaten\n- 1 Ei\n\n## Zubereitung\n\n1. Kochen.\n"},
+		"place_0": {"step-1"}, "photo_url_0": {img}, "place_1": {"top"}, "photo_url_1": {img + "?gross"}}
+	resp := ts.postForm(t, anna, "/recipes/import", "/recipes/import/create", form)
+	id := strings.TrimSuffix(strings.TrimPrefix(resp.Header.Get("Location"), "/p/"), "/edit")
+	p, _ := ts.deps.Wiki.ByID(id)
+	if !strings.HasPrefix(p.Body, "![Curry](attachments/"+p.Meta.Image+")") || len(ts.deps.Wiki.ListAttachments(id)) != 2 {
+		t.Fatalf("%+v\n%s", p.Meta, p.Body)
+	}
+}

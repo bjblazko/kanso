@@ -87,8 +87,8 @@ directory and is never shown again. Nothing goes to the AI unless someone
 uses an AI function, and each function says beforehand where text goes.
 Whoever runs that AI processes what is sent; with a third-party service you
 may need a data processing agreement. Kanso logs no text it sends to or gets
-from the AI. "Von Webseite" fetches the page you name from the server (public
-http/https addresses only, never your own network), with the user agent
+from the AI. "Von Webseite" fetches the page you name, and the photos you choose from it,
+from the server (public http/https addresses only, never your own network), with the user agent
 `Kanso (+https://github.com/bjblazko/kanso)` and no cookies. Imported recipes
 are copied for **private** use: keep them in your Kanso, do not publish them.
 

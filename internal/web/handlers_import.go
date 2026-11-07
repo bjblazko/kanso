@@ -32,6 +32,8 @@ type importPreview struct {
 	Body        string
 	WithAI      bool
 	Ingredients []recipes.Ingredient
+	Photos      []previewPhoto
+	Places      []string // "top", "step-1" … "step-n", "end"
 }
 
 func (s *Server) importForm(w http.ResponseWriter, r *http.Request) {
@@ -57,7 +59,7 @@ func (s *Server) importRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v := s.newView(r, "", nil)
-	draft, withAI, err := s.draftFrom(r.Context(), page.URL)
+	draft, fetched, withAI, err := s.draftFrom(r.Context(), page.URL)
 	if err != nil {
 		page.Error = v.T(importErrorKey(err))
 		s.renderImportForm(w, r, http.StatusBadRequest, page)
@@ -65,30 +67,31 @@ func (s *Server) importRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 	body := draft.Markdown(v.Lang)
 	v.Title, v.Data = draft.Title, importPreview{Space: page.Space, Draft: draft, Body: body, WithAI: withAI,
-		Ingredients: recipes.Parse(body).Ingredients()}
+		Ingredients: recipes.Parse(body).Ingredients(), Photos: s.previewPhotos(r.Context(), draft, fetched),
+		Places: places(len(draft.Steps))}
 	s.render(w, r, http.StatusOK, "recipe_import_preview", v)
 }
 
 var errNoData = errors.New("no recipe data and no AI")
 
-func (s *Server) draftFrom(ctx context.Context, url string) (recipeimport.Draft, bool, error) {
+func (s *Server) draftFrom(ctx context.Context, url string) (recipeimport.Draft, recipeimport.Page, bool, error) {
 	fctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	p, err := s.Fetch.Fetch(fctx, url)
 	if err != nil {
-		return recipeimport.Draft{}, false, err
+		return recipeimport.Draft{}, p, false, err
 	}
 	if d, ok := recipeimport.FromJSONLD(p.HTML, p.URL); ok {
-		return d, false, nil
+		return d, p, false, nil
 	}
 	cfg := s.AI.Load()
 	if !cfg.Ready() {
-		return recipeimport.Draft{}, false, errNoData
+		return recipeimport.Draft{}, p, false, errNoData
 	}
 	actx, cancel2 := context.WithTimeout(ctx, ai.Timeout)
 	defer cancel2()
 	d, err := recipeimport.FromAI(actx, ai.Client{}, cfg, p)
-	return d, true, err
+	return d, p, true, err
 }
 
 func importErrorKey(err error) string {
@@ -118,9 +121,11 @@ func (s *Server) createImported(w http.ResponseWriter, r *http.Request) {
 	p, err := s.Wiki.Create(u.Author(), space, "", r.PostFormValue("title"))
 	if err == nil {
 		body := strings.ReplaceAll(r.PostFormValue("body"), "\r\n", "\n")
+		placed, image := s.attachPhotos(r, u.Author(), p.Meta)
+		body = recipeimport.InsertPhotos(body, placed)
 		err = s.Wiki.SaveWith(u.Author(), p.Meta.ID, p.Meta.Title, body, func(m *wiki.PageMeta) {
 			m.Type, m.Servings, m.Time = wiki.TypeRecipe, min(positive(r.PostFormValue("servings")), recipes.MaxServings), positive(r.PostFormValue("time"))
-			m.Source = strings.TrimSpace(r.PostFormValue("source"))
+			m.Source, m.Image = strings.TrimSpace(r.PostFormValue("source")), image
 		})
 	}
 	if err != nil {

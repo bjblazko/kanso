@@ -103,3 +103,28 @@ func TestFetchLatin1AndSourceWithoutCredentials(t *testing.T) {
 		t.Fatalf("%+v %v", p, err)
 	}
 }
+
+func TestFetchImage(t *testing.T) {
+	jpeg := []byte("\xff\xd8\xff\xe0 fake jpeg")
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/a.jpg":
+			w.Header().Set("Content-Type", "image/jpeg")
+			_, _ = w.Write(jpeg)
+		case "/svg":
+			w.Header().Set("Content-Type", "image/svg+xml")
+			_, _ = w.Write([]byte("<svg/>"))
+		}
+	}))
+	defer srv.Close()
+	img, err := NewTestFetcher().FetchImage(context.Background(), srv.URL+"/a.jpg")
+	if err != nil || img.Ext != ".jpg" || string(img.Data) != string(jpeg) || img.Type != "image/jpeg" {
+		t.Fatalf("%+v %v", img, err)
+	}
+	if _, err := NewTestFetcher().FetchImage(context.Background(), srv.URL+"/svg"); !errors.Is(err, ErrNotImage) {
+		t.Fatalf("svg: %v", err)
+	}
+	if _, err := NewFetcher().FetchImage(context.Background(), srv.URL+"/a.jpg"); !errors.Is(err, ErrBlocked) {
+		t.Fatalf("internal: %v", err)
+	}
+}

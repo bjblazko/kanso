@@ -5,6 +5,7 @@ package web
 import (
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/recipes"
@@ -12,9 +13,10 @@ import (
 
 // cookItem is an ingredient or step with the key its tick is kept under on the device.
 type cookItem struct {
-	Tick string
-	Ing  recipes.Ingredient
-	Step string
+	Tick  string
+	Ing   recipes.Ingredient
+	Step  string
+	Photo string // address of the step's photo; "" = none
 }
 
 type cookGroup struct {
@@ -74,6 +76,10 @@ func (c *cookView) fill(rec recipes.Recipe, factor float64, lang string) {
 		c.Groups = append(c.Groups, cg)
 	}
 	for i, step := range rec.Steps {
-		c.Steps = append(c.Steps, cookItem{Tick: "s" + strconv.Itoa(i), Step: step})
+		item := cookItem{Tick: "s" + strconv.Itoa(i), Step: step}
+		if img := rec.StepImages[i]; strings.HasPrefix(img, "attachments/") {
+			item.Photo = "/p/" + c.Page.Meta.ID + "/" + img
+		}
+		c.Steps = append(c.Steps, item)
 	}
 }

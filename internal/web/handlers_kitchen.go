@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"regexp"
 	"slices"
 	"sort"
 	"strings"
@@ -17,12 +18,16 @@ import (
 	"github.com/bjblazko/kanso/internal/wiki"
 )
 
+// firstPhoto finds the first attached photo in a page's text.
+var firstPhoto = regexp.MustCompile(`!\[[^\]]*\]\(attachments/([^)\s]+)\)`)
+
 // newRecipeServings is what a new recipe starts with.
 const newRecipeServings = 4
 
 // recipeRow is one recipe in the kitchen, with the words it can be found by.
 type recipeRow struct {
 	ID, Title, Space string
+	Image            string // attachment name of its photo; "" = none
 	Tags             []string
 	Time             int
 	words            []string // title, tags and ingredient names, lower case
@@ -58,7 +63,10 @@ func (s *Server) visibleRecipes(who access.Principal) []recipeRow {
 
 func (s *Server) rowOf(p wiki.Page) recipeRow {
 	tags := recipes.NormalizeTags(strings.Join(p.Meta.Tags, ",")) // files edited outside Kanso may say "Deftig"
-	row := recipeRow{ID: p.Meta.ID, Title: p.Meta.Title, Tags: tags, Time: p.Meta.Time, Space: p.Space}
+	row := recipeRow{ID: p.Meta.ID, Title: p.Meta.Title, Tags: tags, Time: p.Meta.Time, Space: p.Space, Image: p.Meta.Image}
+	if m := firstPhoto.FindStringSubmatch(p.Body); row.Image == "" && m != nil {
+		row.Image = m[1] // recipes typed by hand: their first photo
+	}
 	if sp, ok := s.Spaces.Get(p.Space); ok {
 		row.Space = sp.Name
 	}

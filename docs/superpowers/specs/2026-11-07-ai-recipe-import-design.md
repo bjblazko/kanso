@@ -71,9 +71,18 @@ Wiki helfen (aufräumen, zusammenfassen, finden). Kanso soll als öffentliches P
 - Lange Wartezeit: Der Knopf zeigt „Wird abgerufen … (mit KI bis zu 3 Minuten)“ und wird
   gesperrt; ohne JS lädt die Seite einfach länger.
 
+## Nachtrag 2026-11-07: Fotos (Nutzer)
+
+„Mindestens ein Foto übernehmen, auch als Vorschau in der Liste; mehrere gern, Schrittbilder in
+die Schritte.“ Umgesetzt: Hauptfoto (JSON-LD `image`, sonst `og:image`/`twitter:image`) oben,
+Schrittbilder (HowToStep `image`) unter ihrem Schritt, weitere Fotos der Seite wählbar (Oben, nach
+Schritt n, am Ende, nicht übernehmen). Fotos holt der Server mit denselben Schutzregeln (nur
+JPEG/PNG/WebP/GIF, ≤ 8 MB); die Vorschau zeigt sie als `data:`-Adressen (≤ 2 MB), der Browser lädt
+nichts von fremden Seiten. Gespeichert als Anhänge, JPEG ohne GPS, `image` im Frontmatter.
+
 ## Nicht-Ziele
 
-Instagram/Foto, mehrere Anbindungen, Rechte pro Gruppe, Streaming, Kosten-Anzeige,
+Instagram, Foto als Eingabe (statt URL), mehrere Anbindungen, Rechte pro Gruppe, Streaming, Kosten-Anzeige,
 Wiki-Werkzeuge (nur der Grundstein), Bilder des Rezepts übernehmen.
 
 ## Anti-Ziele

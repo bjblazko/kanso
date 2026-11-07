@@ -20,7 +20,7 @@
 {{range .Items}}<li><label><input type="checkbox" data-tick="{{.Tick}}"> <span>{{with .Ing.Qty}}{{.Text}} {{end}}{{if .Ing.Qty}}{{with .Ing.UnitText}}{{.}} {{end}}{{end}}{{.Ing.Name}}{{with .Ing.Note}}<span class="hint">, {{.}}</span>{{end}}</span></label></li>
 {{end}}</ul>{{end}}</section>{{end}}
 {{if $d.Steps}}<section aria-labelledby="cook-steps"><h2 id="cook-steps">{{.T "recipe.steps"}}</h2><ol class="cook-steps">
-{{range $i, $s := $d.Steps}}<li><label><input type="checkbox" data-tick="{{$s.Tick}}"> <span>{{$s.Step}}</span></label></li>
+{{range $i, $s := $d.Steps}}<li><label><input type="checkbox" data-tick="{{$s.Tick}}"> <span>{{$s.Step}}</span></label>{{with $s.Photo}}<img class="cook-photo" src="{{.}}" alt="" loading="lazy">{{end}}</li>
 {{end}}</ol></section>{{end}}
 </article></div>{{end}}
 {{define "scripts"}}<script type="module" src="{{.Asset "js/cook.js"}}"></script>{{end}}
