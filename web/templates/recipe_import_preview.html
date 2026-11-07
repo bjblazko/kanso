@@ -1,7 +1,8 @@
 {{define "content"}}{{$d := .Data}}<div class="content">
 <h1>{{$d.Draft.Title}}</h1>
 <p class="recipe-meta">{{with $d.Draft.Servings}}<span>{{$.T "recipe.servings_n" .}}</span>{{end}}{{with $d.Draft.Time}}<span>{{$.T "recipe.minutes_n" .}}</span>{{end}}
-  <span>{{if $d.WithAI}}{{.T "import.made_ai"}}{{else}}{{.T "import.made_data"}}{{end}}</span></p>
+  <span>{{if $d.WithAI}}{{.T "import.made_ai"}}{{else}}{{.T "import.made_data"}}{{end}}</span>
+  {{if $d.WithAI}}{{with $d.AI}}{{template "ai-mark" (aiMark . $)}}{{end}}{{end}}</p>
 <p class="hint">{{.T "import.check"}}</p>
 <form method="post" action="/recipes/import/create" class="form">
   <input type="hidden" name="csrf" value="{{.CSRF}}">

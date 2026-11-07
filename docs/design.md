@@ -40,6 +40,15 @@ Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 | Move confirmation | Decide whether a page may go where other people read it: "Bisher" and "Danach" readers side by side, "Verschieben" as the accent, "Abbrechen" beside it. |
 | App icon | Three note lines and one accent dot on the dark ink colour; mark inside the central 60 % (maskable safe zone). |
 
+## AI mark (ADR-013)
+
+Functions that send text to the AI are marked with a word, not a colour (no
+rainbow or gradient buttons, no second accent): a frameless badge on the
+surface step, `[↗ KI · extern: openrouter.ai]` or `[↗ KI · im eigenen Netz:
+ollama.intranet…]`, inside the sentence that says what happens — never framed
+like a button, never in the row of actions. Works in greyscale; the host is the
+honest part.
+
 ## Layout
 
 Mobile first: top bar (name, search, user menu), navigation below it as a

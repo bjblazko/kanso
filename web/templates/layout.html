@@ -92,6 +92,9 @@
 </body>
 </html>{{end}}
 
+{{/* Marks a function that uses the AI and says where text goes (ADR-013): a word, not a colour. */}}
+{{define "ai-mark"}}<span class="ai-mark" title="{{.V.T "ai.mark_title"}}">{{template "icon" "send"}}<span>{{.V.T "ai.mark"}} · {{if .T.External}}{{.V.T "ai.mark_external"}}{{else}}{{.V.T "ai.mark_internal"}}{{end}}: {{.T.Host}}</span></span>{{end}}
+
 {{/* The two parts of the kitchen: recipes and the meal plan (ADR-012). */}}
 {{define "kitchen-tabs"}}<nav aria-label="{{.T "nav.kitchen"}}"><ul class="tabs tabs-quiet">
   <li><a href="/recipes"{{if hasPrefix .Path "/recipes"}} aria-current="page"{{end}}>{{.T "plan.tab_recipes"}}</a></li>

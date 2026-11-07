@@ -22,7 +22,7 @@ type importPage struct {
 	Spaces []spaces.Space
 	Space  string
 	URL    string
-	AIHost string // where page text goes when there is no recipe data; "" = no AI
+	AI     *aiTarget // where page text goes when there is no recipe data; nil = no AI
 	Error  string
 }
 
@@ -31,6 +31,7 @@ type importPreview struct {
 	Draft       recipeimport.Draft
 	Body        string
 	WithAI      bool
+	AI          *aiTarget
 	Ingredients []recipes.Ingredient
 	Photos      []previewPhoto
 	Places      []string // "top", "step-1" … "step-n", "end"
@@ -43,9 +44,7 @@ func (s *Server) importForm(w http.ResponseWriter, r *http.Request) {
 func (s *Server) renderImportForm(w http.ResponseWriter, r *http.Request, status int, page importPage) {
 	_, who := auth.UserFrom(r.Context())
 	page.Spaces = s.writableSpaces(who)
-	if cfg := s.AI.Load(); cfg.Ready() {
-		page.AIHost = cfg.Host()
-	}
+	page.AI = s.aiTarget(r.Context())
 	v := s.newView(r, "", page)
 	v.Title = v.T("import.title")
 	s.render(w, r, status, "recipe_import", v)
@@ -67,7 +66,7 @@ func (s *Server) importRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 	body := draft.Markdown(v.Lang)
 	v.Title, v.Data = draft.Title, importPreview{Space: page.Space, Draft: draft, Body: body, WithAI: withAI,
-		Ingredients: recipes.Parse(body).Ingredients(), Photos: s.previewPhotos(r.Context(), draft, fetched),
+		Ingredients: recipes.Parse(body).Ingredients(), Photos: s.previewPhotos(r.Context(), draft, fetched), AI: s.aiTarget(r.Context()),
 		Places: places(len(draft.Steps))}
 	s.render(w, r, http.StatusOK, "recipe_import_preview", v)
 }

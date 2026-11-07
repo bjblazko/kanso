@@ -17,6 +17,7 @@
   {{if $d.HasToken}}<div class="field field-check"><label><input type="checkbox" name="remove_token" value="1"> {{.T "ai.token_remove"}}</label></div>{{end}}
   <div class="actions"><button class="btn btn-primary" type="submit" name="action" value="save">{{.T "ai.save"}}</button>
     <button class="btn btn-secondary" type="submit" name="action" value="test" data-wait="{{.T "ai.testing"}}">{{.T "ai.test"}}</button></div>
+  {{with $d.Target}}<p class="hint">{{$.T "ai.mark_admin"}} {{template "ai-mark" (aiMark . $)}}</p>{{end}}
 </form>
 </div>{{end}}
 {{define "scripts"}}<script type="module" src="{{.Asset "js/wait.js"}}"></script>{{end}}

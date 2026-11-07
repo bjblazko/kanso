@@ -89,6 +89,9 @@ var special = func() []netip.Prefix {
 	return out
 }()
 
+// IsPublic tells whether a is an address on the internet, not in an own network.
+func IsPublic(a netip.Addr) bool { return isPublic(a) }
+
 // isPublic tells whether a is an address on the internet, not in an own network.
 func isPublic(a netip.Addr) bool {
 	a = a.Unmap()

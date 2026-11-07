@@ -16,6 +16,7 @@ type aiAdminPage struct {
 	HasToken bool
 	Result   string // outcome of a connection test
 	Failed   bool
+	Target   *aiTarget
 }
 
 func (s *Server) aiAdmin(w http.ResponseWriter, r *http.Request) {
@@ -27,6 +28,7 @@ func (s *Server) aiAdmin(w http.ResponseWriter, r *http.Request) {
 func (s *Server) renderAIAdmin(w http.ResponseWriter, r *http.Request, status int, page aiAdminPage) {
 	page.Config = s.AI.Load()
 	page.HasToken, page.Config.Token = page.Config.Token != "", "" // the token never reaches a page
+	page.Target = s.aiTarget(r.Context())
 	v := s.newView(r, "", page)
 	v.Title = v.T("ai.title")
 	s.render(w, r, status, "admin_ai", v)

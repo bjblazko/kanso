@@ -29,7 +29,10 @@ person asking may see, and must not change content on its own.
   function — the same checks as the web pages; never the file system. What
   the model produces becomes a draft the person confirms; it writes nothing
   by itself. Later features expose read-only services as tools.
-- **Say where text goes:** every AI function names the host before sending.
+- **Say where text goes:** every AI function names the host before sending,
+  as a mark "KI · extern: host" or "KI · im eigenen Netz: host" (a word, not a
+  colour — no rainbow buttons); Kanso resolves the host to tell the two apart,
+  and a host it cannot resolve counts as external.
 - When an AI connection is on, every signed-in person may use it.
 
 ## Alternatives Considered

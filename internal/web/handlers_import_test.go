@@ -177,3 +177,22 @@ func TestImportPhotoOnTopIsTheKitchenPhoto(t *testing.T) {
 		t.Fatalf("%+v\n%s", p.Meta, p.Body)
 	}
 }
+
+func TestAIMarkSaysWhereTextGoes(t *testing.T) {
+	ts, _, anna := setupHaus(t)
+	_ = ts.deps.AI.Save(ai.Config{Enabled: true, BaseURL: "http://127.0.0.1:1/v1", Model: "m"})
+	_, form := get(t, anna, ts.URL+"/recipes/import")
+	mark := between(form, `<span class="ai-mark"`, `</span>`)
+	if !strings.Contains(mark, "KI") || !strings.Contains(mark, "im eigenen Netz") || !strings.Contains(mark, "127.0.0.1") {
+		t.Fatalf("mark: %q", mark)
+	}
+	_ = ts.deps.AI.Save(ai.Config{Enabled: true, BaseURL: "https://8.8.8.8/v1", Model: "m"})
+	_, form = get(t, anna, ts.URL+"/recipes/import")
+	if mark = between(form, `<span class="ai-mark"`, `</span>`); !strings.Contains(mark, "extern") || !strings.Contains(mark, "8.8.8.8") {
+		t.Fatalf("external mark: %q", mark)
+	}
+	_ = ts.deps.AI.Save(ai.Config{})
+	if _, form = get(t, anna, ts.URL+"/recipes/import"); strings.Contains(form, `class="ai-mark"`) {
+		t.Fatal("mark without AI")
+	}
+}

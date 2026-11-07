@@ -6,6 +6,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- Functions that use the AI carry a mark "KI · extern: host" or "KI · im eigenen Netz: host" (import form, the draft made with AI, the AI connection page); Kanso resolves the host to tell which.
 - Repository skeleton, configuration from environment, `/healthz`.
 - Safe file paths, slugs, atomic Markdown documents with YAML frontmatter.
 - Git history for the data directory: commit per change with author, log, show, diff, move.

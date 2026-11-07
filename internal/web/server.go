@@ -105,6 +105,7 @@ var templateFuncs = template.FuncMap{
 	"treeArgs":  func(nodes []*wiki.Node, current string) treeArgs { return treeArgs{nodes, current} },
 	"cardArgs":  func(c card, v view) cardArgs { return cardArgs{c, v} },
 	"hasPrefix": strings.HasPrefix,
+	"aiMark":    func(t *aiTarget, v view) aiMarkArgs { return aiMarkArgs{T: t, V: v} },
 	// placeKind and placeStep split a photo place like "step-3" for its label.
 	"placeKind": func(p string) string { k, _, _ := strings.Cut(p, "-"); return k },
 	"placeStep": func(p string) string { _, n, _ := strings.Cut(p, "-"); return n },
