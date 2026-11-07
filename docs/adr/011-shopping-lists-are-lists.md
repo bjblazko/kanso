@@ -21,7 +21,7 @@ as their own list type with one file per item.
   characters, changed by the new operation `note`) and `for`, the recipes
   they come from with the amount each asked for. Only the server sets `for`.
 - The amount stays in the item's text ("2 l Milch"): one field, no separate
-  amount field. The page offers − and + for a leading whole number.
+  amount field. The page offers − and + for a leading amount, in steps that suit its unit: grams and millilitres by 10 below 100 and by 50 from there, kilograms and litres by ½, counted things by 1.
 - Filling from a recipe is a server page (`/recipes/{id}/shop`): a preview
   with every ingredient ticked, then one change to the list. The pure package
   `internal/shopping` plans it and adds up amounts of the same ingredient in

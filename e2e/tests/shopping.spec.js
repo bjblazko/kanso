@@ -4,7 +4,7 @@ import { signIn, unique, createSpace } from './helpers.js';
 
 const item = (page, text) => page.locator('.todo-item', { has: page.getByRole('checkbox', { name: text }) });
 
-test('shopping list: amounts with − and +, a note, filled from a recipe', async ({ page }) => {
+test('shopping list: amounts with − and + in sensible steps, a note, filled from a recipe', async ({ page }) => {
   await signIn(page, { sub: 'sina', name: 'Sina', admin: true });
   const name = unique('Wocheneinkauf');
   await page.goto('/todos');
@@ -12,18 +12,39 @@ test('shopping list: amounts with − and +, a note, filled from a recipe', asyn
   await page.getByRole('button', { name: 'Einkaufsliste anlegen' }).click();
   await expect(page.getByRole('heading', { level: 1, name })).toBeVisible();
 
-  await page.getByLabel('Was fehlt?').fill('2 l Milch');
-  await page.getByLabel('Was fehlt?').press('Enter');
-  await expect(page.getByRole('checkbox', { name: '2 l Milch' })).toBeVisible();
-  await item(page, '2 l Milch').getByRole('button', { name: 'Eins mehr' }).click();
-  await expect(page.getByRole('checkbox', { name: '3 l Milch' })).toBeVisible();
-  await item(page, '3 l Milch').getByRole('button', { name: 'Eins weniger' }).click();
-  await item(page, '2 l Milch').getByRole('button', { name: 'Eins weniger' }).click();
-  await expect(item(page, '1 l Milch').getByRole('button', { name: 'Eins weniger' })).toBeDisabled();
+  const add = async (text) => {
+    await page.getByLabel('Was fehlt?').fill(text);
+    await page.getByLabel('Was fehlt?').press('Enter');
+    await expect(page.getByRole('checkbox', { name: text })).toBeVisible();
+  };
+  const step = async (text, which) => item(page, text).getByRole('button', { name: which }).click();
+  const shows = (text) => expect(page.getByRole('checkbox', { name: text })).toBeVisible();
 
+  await add('2 Zitronen');
+  await step('2 Zitronen', 'Eins mehr');
+  await shows('3 Zitronen');
+  await step('3 Zitronen', 'Eins weniger');
+  await step('2 Zitronen', 'Eins weniger');
+  await expect(item(page, '1 Zitronen').getByRole('button', { name: 'Eins weniger' })).toBeDisabled();
+
+  await add('250 g Butter');
+  await step('250 g Butter', 'Eins mehr');
+  await shows('300 g Butter');
+  await add('87 g Parmesan');
+  await step('87 g Parmesan', 'Eins mehr');
+  await shows('90 g Parmesan');
+  await step('90 g Parmesan', 'Eins weniger');
+  await shows('80 g Parmesan');
+  await add('1,5 kg Mehl');
+  await step('1,5 kg Mehl', 'Eins mehr');
+  await shows('2 kg Mehl');
+
+  await add('1 l Milch');
   await page.getByRole('button', { name: '1 l Milch', exact: true }).click();
   await page.getByLabel('Notiz').fill('laktosefrei, sonst Hafermilch');
   await page.getByLabel('Notiz').press('Enter');
+  await expect(item(page, '1 l Milch')).toContainText('laktosefrei, sonst Hafermilch');
+  await expect(page.locator('#todos-status')).toHaveText(''); // synced, nothing waiting
   await page.reload();
   await expect(item(page, '1 l Milch')).toContainText('laktosefrei, sonst Hafermilch');
 

@@ -17,7 +17,8 @@ const ME = root.dataset.sub;
 const ICONS = [...document.getElementById('todo-icons').content.children];
 const ICON_NAMES = ['lock', 'users', 'edit', 'trash', 'cart']; // the order of #todo-icons
 const SHOPPING = 'shopping';
-const LEADING_NUMBER = /^(\d+)(\s+(?![-–]).*)$/; // "2 Eier", not "2 - 3 Eier"
+// An item's leading amount: "2 Eier", "250 g Butter", "1,5 kg Mehl" – not "2 - 3 Eier".
+const LEADING_AMOUNT = /^(\d+(?:[.,]\d+)?)(\s*)(?:(g|ml|kg|l)(?=\s))?(\s+(?![-–]).*)$/i;
 const titleSuffix = document.title.slice(document.title.indexOf(' · '));
 
 const state = {
@@ -591,15 +592,32 @@ function shopMeta(it) {
   return parts.length ? h('p', { className: 'meta shop-meta' }, ...parts) : null;
 }
 
-// stepper changes the number an item starts with; never below 1.
+// stepUnit is how − and + move an amount: grams and millilitres by 10
+// below 100 and by 50 from there, kilograms and litres by ½, the rest by 1.
+function stepUnit(value, unit) {
+  const u = (unit || '').toLowerCase();
+  if (u === 'g' || u === 'ml') return { up: value < 100 ? 10 : 50, down: value <= 100 ? 10 : 50, min: 10 };
+  if (u === 'kg' || u === 'l') return { up: 0.5, down: 0.5, min: 0.5 };
+  return Number.isInteger(value) ? { up: 1, down: 1, min: 1 } : null;
+}
+
+// stepper changes the amount an item starts with, to the next step of its unit.
 function stepper(l, it) {
-  const m = it.text.match(LEADING_NUMBER);
-  if (!m) return null;
-  const n = Number(m[1]);
-  const set = (k) => () => change({ kind: 'text', list: l.id, item: it.id, text: `${k}${m[2]}` });
+  const m = it.text.match(LEADING_AMOUNT);
+  const value = m && Number(m[1].replace(',', '.'));
+  const step = m && stepUnit(value, m[3]);
+  if (!step) return null;
+  const comma = m[1].includes(',') || document.documentElement.lang !== 'en';
+  const write = (v) => {
+    const n = String(Math.round(v * 100) / 100);
+    return `${comma ? n.replace('.', ',') : n}${m[2]}${m[3] || ''}${m[4]}`;
+  };
+  const up = Math.floor(value / step.up + 1e-9) * step.up + step.up;
+  const down = Math.ceil(value / step.down - 1e-9) * step.down - step.down;
+  const set = (v) => () => change({ kind: 'text', list: l.id, item: it.id, text: write(v) });
   return h('div', { className: 'shop-stepper' },
-    h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': `${msg.less}: ${it.text}`, disabled: n <= 1, onclick: set(n - 1) }, '−'),
-    h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': `${msg.more}: ${it.text}`, onclick: set(n + 1) }, '+'));
+    h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': `${msg.less}: ${it.text}`, disabled: value <= step.min, onclick: set(Math.max(down, step.min)) }, '−'),
+    h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': `${msg.more}: ${it.text}`, onclick: set(up) }, '+'));
 }
 
 // shopEdit changes text and note of an item; Enter saves, Escape cancels.

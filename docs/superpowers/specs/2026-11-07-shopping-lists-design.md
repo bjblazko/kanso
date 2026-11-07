@@ -32,8 +32,9 @@ das Gewünschte nicht gibt.
   „Neue Liste“. *(Weicht vom früheren Satz „eigener Listentyp, nicht die To-do-Listen“ ab, soweit
   es den Code betrifft: in der Oberfläche ist es eine eigene Art mit eigener Darstellung.)*
 - **Die Menge steht im Text** des Eintrags: „2 l Milch“, „Milch 3“ ist auch erlaubt (dann ohne
-  Erkennung). Ein Feld, Enter, fertig. Am Eintrag **− / +**, wenn der Text mit einer Zahl
-  beginnt (ändert nur diese Zahl, ganze Schritte, nicht unter 1).
+  Erkennung). Ein Feld, Enter, fertig. Am Eintrag **− / +**, wenn der Text mit einer Menge
+  beginnt: g/ml unter 100 in 10er-, ab 100 in 50er-Schritten (Nutzer, 2026-11-07: „bei Gramm muss feiner
+  gearbeitet werden“), kg/l in ½, Stückzahlen in 1ern; krumme Werte springen auf die nächste Stufe.
 - Jeder Eintrag einer Einkaufsliste hat zusätzlich eine **Notiz** (Alternativen, Hinweise; frei,
   bis 300 Zeichen) und **Herkunft** (`for`: Rezept-ID, Titel, Menge als Text) – nur vom Server
   beim Füllen gesetzt, in der Liste als „für Kartoffelcurry“ gezeigt (Link aufs Rezept).
