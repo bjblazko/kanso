@@ -213,6 +213,11 @@ Verified by unit tests (`go test ./...`) and browser end-to-end tests
   service workers); iOS is checked by hand.
 - Tasks are committed on every change, including every drag; the history
   grows with use. A deleted task stays in the history (README).
+- Browser tests with offline lists (to-do and shopping lists) fail now and
+  then when the whole suite runs, one different test each time; alone they
+  pass. Probably timing between the device copy, the outbox and the sync
+  under load. Until fixed, a red test there is re-run alone before judging
+  (backlog item 1).
 - `go.yaml.in/yaml/v3` is frozen; move to v4 once it is stable.
 - Mermaid is large (3.9 MB, lazy-loaded); its ELK layout is deliberately left out.
 - Mermaid briefly puts label text into the DOM to measure it; hostile HTML

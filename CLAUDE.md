@@ -47,5 +47,7 @@ Update these in the same commit as the change they describe:
   `**Updated:**`. Next sequential number; list it in arc42 chapter 9.
 - `docs/architecture/arc42.md` — when building blocks, runtime flows,
   deployment, quality goals or risks change; bump `**Updated:**`.
+- `docs/BACKLOG.md` — technical debt, review follow-ups and ideas not planned yet;
+  remove an item when it is done.
 - `docs/features/YYYY-MM-DD name.md` — one per feature, frontmatter `status`
   (planned/active/done), `created`, `updated`; link ADRs under `## Related`.
