@@ -62,7 +62,7 @@ func TestSaveUncheckRecipe(t *testing.T) {
 	id := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4, "deftig")
 	saveForm(t, ts, admin, id, url.Values{"meta": {"1"}, "servings": {"4"}, "tags": {"deftig"}})
 	p, _ := ts.deps.Wiki.ByID(id)
-	if p.Meta.Type != "" || p.Meta.Servings != 0 || p.Meta.Tags != nil || p.Meta.Time != 0 || p.Body != curryBody {
+	if p.Meta.Type != "" || p.Meta.Servings != 0 || !slices.Equal(p.Meta.Tags, []string{"deftig"}) || p.Meta.Time != 0 || p.Body != curryBody { // tags belong to the page
 		t.Fatalf("%+v", p.Meta)
 	}
 }

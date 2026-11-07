@@ -121,3 +121,22 @@ func TestWeekRejectsBadKeys(t *testing.T) {
 		}
 	}
 }
+
+func TestCookedOn(t *testing.T) {
+	s := newStore(t)
+	p, _ := s.Create(admin, "Küche", "familie")
+	other, _ := s.Create(admin, "Garten", "garten")
+	for _, d := range []struct{ week, day, recipe string }{
+		{"2026-W45", "2026-11-03", "r1"}, {"2026-W46", "2026-11-12", "r1"}, {"2026-W46", "2026-11-10", "r2"},
+	} {
+		_ = s.Update(admin, p.ID, d.week, func(w *Week) error { w.Add(d.day, Entry{Recipe: d.recipe, Title: "X", Servings: 2}); return nil })
+	}
+	_ = s.Update(admin, other.ID, "2026-W46", func(w *Week) error { w.Add("2026-11-11", Entry{Recipe: "r1", Title: "X", Servings: 2}); return nil })
+	got := s.CookedOn(family, "anna", "r1", 10)
+	if len(got) != 2 || got[0].Day != "2026-11-12" || got[1].Day != "2026-11-03" || got[0].Plan.ID != p.ID || got[0].Week != "2026-W46" {
+		t.Fatalf("%+v", got)
+	}
+	if len(s.CookedOn(family, "anna", "r1", 1)) != 1 {
+		t.Error("limit")
+	}
+}

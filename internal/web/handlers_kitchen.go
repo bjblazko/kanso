@@ -21,6 +21,18 @@ import (
 // firstPhoto finds the first attached photo in a page's text.
 var firstPhoto = regexp.MustCompile(`!\[[^\]]*\]\(attachments/([^)\s]+)\)`)
 
+// recipePhoto is the attachment name of a recipe's photo: its image, else
+// the first photo in its text (recipes typed by hand); "" = none.
+func recipePhoto(p wiki.Page) string {
+	if p.Meta.Image != "" {
+		return p.Meta.Image
+	}
+	if m := firstPhoto.FindStringSubmatch(p.Body); m != nil {
+		return m[1]
+	}
+	return ""
+}
+
 // newRecipeServings is what a new recipe starts with.
 const newRecipeServings = 4
 
@@ -63,10 +75,7 @@ func (s *Server) visibleRecipes(who access.Principal) []recipeRow {
 
 func (s *Server) rowOf(p wiki.Page) recipeRow {
 	tags := recipes.NormalizeTags(strings.Join(p.Meta.Tags, ",")) // files edited outside Kanso may say "Deftig"
-	row := recipeRow{ID: p.Meta.ID, Title: p.Meta.Title, Tags: tags, Time: p.Meta.Time, Space: p.Space, Image: p.Meta.Image}
-	if m := firstPhoto.FindStringSubmatch(p.Body); row.Image == "" && m != nil {
-		row.Image = m[1] // recipes typed by hand: their first photo
-	}
+	row := recipeRow{ID: p.Meta.ID, Title: p.Meta.Title, Tags: tags, Time: p.Meta.Time, Space: p.Space, Image: recipePhoto(p)}
 	if sp, ok := s.Spaces.Get(p.Space); ok {
 		row.Space = sp.Name
 	}

@@ -8,10 +8,12 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/markdown"
+	"github.com/bjblazko/kanso/internal/mealplan"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/wiki"
 )
@@ -32,6 +34,16 @@ type pageCtx struct {
 	Who access.Principal
 	// SpaceReadable is false for someone who reads the page only through a share.
 	SpaceReadable bool
+	// Cooked are the days a recipe is on the meal plans of the person's groups, latest first.
+	Cooked []cookedDay
+}
+
+// cookedDay is one day a recipe was or will be cooked.
+type cookedDay struct {
+	mealplan.Cooked
+	Date    time.Time
+	Weekday int  // 0 = Monday
+	Planned bool // still ahead
 }
 
 // CanBreakLock tells templates whether to offer breaking an edit lock.
@@ -103,7 +115,25 @@ func (s *Server) fillPageView(pc *pageCtx) error {
 		pc.Ancestors = s.readableAncestors(*pc, s.groups())
 	}
 	pc.Children = childrenOf(s.visibleTree(pc.Who, pc.Space.Slug, s.groups()), pc.Page.Meta.ID)
+	if pc.Page.Meta.IsRecipe() {
+		pc.Cooked = s.cookedDays(pc.Who.Sub, pc.Page.Meta.ID)
+	}
 	return nil
+}
+
+// maxCooked is how many cooked days a recipe page lists.
+const maxCooked = 12
+
+func (s *Server) cookedDays(sub, recipe string) []cookedDay {
+	today := time.Now().Format(dayLayout)
+	var out []cookedDay
+	for _, c := range s.MealPlans.CookedOn(s.groups(), sub, recipe, maxCooked) {
+		d, err := time.Parse(dayLayout, c.Day)
+		if err == nil {
+			out = append(out, cookedDay{Cooked: c, Date: d, Weekday: (int(d.Weekday()) + 6) % 7, Planned: c.Day > today})
+		}
+	}
+	return out
 }
 
 func childrenOf(nodes []*wiki.Node, id string) []*wiki.Node {

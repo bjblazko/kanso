@@ -16,11 +16,12 @@ import (
 // recipeMetaFrom reads the editor's recipe fields; without the "recipe" box
 // the page is no recipe and all recipe fields go.
 func recipeMetaFrom(r *http.Request) func(*wiki.PageMeta) {
+	tags := recipes.NormalizeTags(r.PostFormValue("tags")) // every page may have tags
 	if r.PostFormValue("recipe") == "" {
-		return func(m *wiki.PageMeta) { m.Type, m.Servings, m.Tags, m.Source, m.Time = "", 0, nil, "", 0 }
+		return func(m *wiki.PageMeta) { m.Type, m.Servings, m.Tags, m.Source, m.Time = "", 0, tags, "", 0 }
 	}
 	servings, minutes := positive(r.PostFormValue("servings")), positive(r.PostFormValue("time"))
-	tags, source := recipes.NormalizeTags(r.PostFormValue("tags")), strings.TrimSpace(r.PostFormValue("source"))
+	source := strings.TrimSpace(r.PostFormValue("source"))
 	return func(m *wiki.PageMeta) {
 		m.Type, m.Servings, m.Tags, m.Source, m.Time = wiki.TypeRecipe, min(servings, recipes.MaxServings), tags, source, minutes
 	}

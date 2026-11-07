@@ -237,3 +237,37 @@ func (w *Week) Remove(id string) bool {
 	}
 	return ok
 }
+
+// Cooked is a day a recipe was (or is) on a plan.
+type Cooked struct {
+	Plan Plan
+	Week string
+	Day  string // "2006-01-02"
+}
+
+// CookedOn lists the days recipe is on the plans of sub's groups, latest first.
+func (s *Store) CookedOn(g access.Groups, sub, recipe string, limit int) []Cooked {
+	var out []Cooked
+	for _, p := range s.For(g, sub) {
+		files, _ := filepath.Glob(filepath.Join(s.dataDir, Dir, p.ID, "*-W*.yaml"))
+		for _, f := range files {
+			out = append(out, s.cookedIn(p, strings.TrimSuffix(filepath.Base(f), ".yaml"), recipe)...)
+		}
+	}
+	slices.SortFunc(out, func(a, b Cooked) int { return cmp.Compare(b.Day, a.Day) })
+	return out[:min(limit, len(out))]
+}
+
+func (s *Store) cookedIn(p Plan, key, recipe string) []Cooked {
+	w, err := s.Week(p.ID, key)
+	if err != nil {
+		return nil
+	}
+	var out []Cooked
+	for day, es := range w.Days {
+		if slices.ContainsFunc(es, func(e Entry) bool { return e.Recipe == recipe }) {
+			out = append(out, Cooked{Plan: p, Week: key, Day: day})
+		}
+	}
+	return out
+}

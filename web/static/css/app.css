@@ -547,3 +547,5 @@ html { scroll-padding-top: 9rem; }
 .ai-mark { display: inline-flex; align-items: center; gap: var(--space-1); padding: 0 var(--space-2); vertical-align: middle;
   background: var(--bg-3); border-radius: var(--radius-sm); color: var(--fg); font-size: var(--text-sm); white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 .ai-mark .icon { width: 16px; height: 16px; flex: none; }
+.week-meals .recipe-thumb { width: 40px; height: 40px; }
+.week-meals .week-meal { flex: 1; }

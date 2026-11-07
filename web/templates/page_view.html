@@ -11,9 +11,13 @@
     <button class="btn btn-secondary btn-sm" type="submit">{{.T "lock.break"}}</button>
   </form>{{end}}
 </div>{{end}}
-{{if $d.Page.Meta.IsRecipe}}{{template "recipe-meta" .}}{{end}}
+{{if $d.Page.Meta.IsRecipe}}{{template "recipe-meta" .}}{{else}}{{with $d.Page.Meta.Tags}}<p class="recipe-meta">{{range .}}<a class="tag" href="/search?q={{urlquery .}}">{{.}}</a>{{end}}</p>{{end}}{{end}}
 <p class="meta">{{.T "page.updated_by" $d.Page.Meta.Author}} <time datetime="{{$d.Page.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Page.Meta.Updated.Format "02.01.2006 15:04"}}</time></p>
 <div class="prose">{{if $d.Page.Body}}{{$d.HTML}}{{else}}<p class="empty">{{.T "page.empty"}}</p>{{end}}</div>
+
+{{if $d.Cooked}}<section class="cooked" aria-labelledby="cooked-h"><h2 id="cooked-h">{{.T "recipe.cooked"}}</h2><ul class="list-plain">
+{{range $d.Cooked}}<li><a href="/mealplan/{{.Plan.ID}}?week={{.Week}}#day-{{.Day}}">{{$.T (printf "day.%d" .Weekday)}} {{.Date.Format "2.1.2006"}}</a> <span class="meta">· {{.Plan.Name}}{{if .Planned}} · {{$.T "recipe.planned"}}{{end}}</span></li>
+{{end}}</ul></section>{{end}}
 
 {{if $d.Files}}<section class="files"><h2>{{.T "page.attachments"}}</h2><ul class="list-plain">
 {{range $d.Files}}<li class="row"><span><a href="/p/{{$d.Page.Meta.ID}}/attachments/{{.}}">{{.}}</a></span>

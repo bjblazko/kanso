@@ -23,6 +23,7 @@ const dayLayout = "2006-01-02"
 type planEntry struct {
 	mealplan.Entry
 	Readable bool
+	Photo    string // address of the recipe's photo; "" = none
 }
 
 type planDay struct {
@@ -86,6 +87,9 @@ func (s *Server) mealplanWeek(w http.ResponseWriter, r *http.Request) {
 			pe := planEntry{Entry: e, Readable: s.recipeReadable(who, e.Recipe)}
 			if page, ok := s.Wiki.ByID(e.Recipe); pe.Readable && ok {
 				pe.Title = page.Meta.Title // renamed since it was planned
+				if img := recipePhoto(page); img != "" {
+					pe.Photo = "/p/" + page.Meta.ID + "/attachments/" + img
+				}
 			}
 			day.Entries = append(day.Entries, pe)
 		}

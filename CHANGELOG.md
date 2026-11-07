@@ -7,6 +7,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+- Tags for every wiki page, not only recipes: free words typed in the editor, created on save, shown on the page as links (recipes into the kitchen, other pages into the search). Unticking "Ist ein Rezept" keeps them.
+- The meal plan shows each meal's photo; a recipe page lists the days it is on the meal plans of one's groups ("Im Kochplan"), latest first, each a jump into that week.
+
 ### Fixed
 - Shopping previews no longer show "Vorschau aktualisieren" when the page updates by itself (only without script), and choices wrap with room between rows.
 - Elements marked hidden stay hidden even when a component sets its own display (e.g. "Häkchen entfernen" without script).

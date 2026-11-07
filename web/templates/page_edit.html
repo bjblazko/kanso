@@ -11,6 +11,9 @@
     <input id="title" name="title" required maxlength="200" value="{{$d.Page.Meta.Title}}">
   </div>
   <input type="hidden" name="meta" value="1">
+  <div class="field"><label for="tags">{{.T "recipe.tags"}}</label>
+    <input id="tags" name="tags" value="{{$d.TagsText}}" maxlength="300" aria-describedby="tags-hint">
+    <span class="hint" id="tags-hint">{{.T "recipe.tags_hint"}}</span></div>
   <div class="field field-check"><label><input type="checkbox" id="recipe" name="recipe" value="1"{{if $d.Page.Meta.IsRecipe}} checked{{end}}> {{.T "recipe.is_recipe"}}</label></div>
   <fieldset class="recipe-fields">
     <legend class="visually-hidden">{{.T "recipe.fields"}}</legend>
@@ -18,9 +21,6 @@
       <input id="servings" name="servings" value="{{with $d.Page.Meta.Servings}}{{.}}{{end}}" type="number" min="1" max="99" inputmode="numeric"></div>
     <div class="field"><label for="time">{{.T "recipe.time"}}</label>
       <input id="time" name="time" value="{{with $d.Page.Meta.Time}}{{.}}{{end}}" type="number" min="0" inputmode="numeric"></div>
-    <div class="field field-wide"><label for="tags">{{.T "recipe.tags"}}</label>
-      <input id="tags" name="tags" value="{{$d.TagsText}}" maxlength="300" aria-describedby="tags-hint">
-      <span class="hint" id="tags-hint">{{.T "recipe.tags_hint"}}</span></div>
     <div class="field field-wide"><label for="source">{{.T "recipe.source"}}</label>
       <input id="source" name="source" maxlength="500" value="{{$d.Page.Meta.Source}}"></div>
   </fieldset>

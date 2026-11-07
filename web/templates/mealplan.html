@@ -25,6 +25,7 @@
     <a class="btn btn-quiet btn-sm" href="/mealplan/{{$d.Plan.ID}}/add?day={{.Key}}">{{template "icon" "plus"}}<span class="tb-label">{{$.T "plan.add_short"}}</span></a>
   </div>
   {{if .Entries}}<ul class="week-meals">{{range .Entries}}<li>
+    {{if .Photo}}<img class="recipe-thumb" src="{{.Photo}}" alt="" loading="lazy" width="40" height="40">{{else}}<span class="recipe-thumb" aria-hidden="true"></span>{{end}}
     <span class="week-meal">{{if .Readable}}<a href="/p/{{.Recipe}}">{{.Title}}</a>{{else}}{{.Title}}{{end}}
       <span class="hint">{{$.T "recipe.servings_n" .Servings}}{{if .Fill}} · {{$.T "plan.shopped"}}{{end}}</span></span>
     <a class="btn btn-quiet btn-sm" href="/mealplan/{{$d.Plan.ID}}/remove?week={{$d.Week}}&amp;entry={{.ID}}" aria-label="{{$.T "plan.remove"}}: {{.Title}}">{{template "icon" "trash"}}</a>
