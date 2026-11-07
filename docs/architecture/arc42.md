@@ -77,6 +77,8 @@ leaves the host.
 | `internal/recipes` | Reads recipe pages (ingredients, groups, steps), scales and formats amounts; pure, no files ([ADR-010](../adr/010-recipes-are-wiki-pages.md)) |
 | `internal/shopping` | Plans and applies filling a shopping list from a recipe, adding up amounts ([ADR-011](../adr/011-shopping-lists-are-lists.md)) |
 | `internal/mealplan` | Group cooking plans: a file per ISO week in Git with meals per day ([ADR-012](../adr/012-meal-plans-belong-to-groups.md)) |
+| `internal/ai` | One OpenAI-compatible language model: configuration in the state directory, chat completions ([ADR-013](../adr/013-ai-openai-compatible-through-kanso-services.md)) |
+| `internal/recipeimport` | Fetches a recipe page safely (no internal addresses) and makes a recipe draft from its JSON-LD or with the AI |
 | `internal/photo` | Removes GPS data from JPEG uploads |
 | `internal/search` | In-memory search over pages and notes (scans all per query) |
 | `internal/devseed` | Made-up people, groups, spaces, pages, notes and tasks for development (`kanso seed`, dev login only) |
@@ -178,6 +180,7 @@ Kopia jobs.
 | [010](../adr/010-recipes-are-wiki-pages.md) | Recipes are wiki pages with a convention |
 | [011](../adr/011-shopping-lists-are-lists.md) | Shopping lists are a kind of list |
 | [012](../adr/012-meal-plans-belong-to-groups.md) | Meal plans belong to groups and live in Git |
+| [013](../adr/013-ai-openai-compatible-through-kanso-services.md) | AI through an OpenAI-compatible API, content only through Kanso's services |
 
 ## 10. Quality Requirements
 
