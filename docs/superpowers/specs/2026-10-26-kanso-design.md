@@ -124,7 +124,7 @@ selbst gebaut. Alle Lizenztexte kommen in die App („Lizenzen und Dank“) mit 
 5. **Listen**: Einkaufslisten fertig ([Spec](2026-11-07-shopping-lists-design.md), als Art der Todo-Listen, ADR-011); offen: Wunschlisten (Freigabe, „Ich besorge das“), Links.
 6. **Kalender** nativ (.ics), Tasks mit Datum im Kalender, Geburtstage.
 7. **Mobil/Offline (PWA)** + **Web-Push**.
-8. **Extras**: Essensplan → Einkauf, Haus-Inventar (Wartung erzeugt Tasks), Kind & Kontakte.
+8. **Extras**: Essensplan → Einkauf *(fertig, [Spec](2026-11-07-meal-plan-design.md))*, Haus-Inventar (Wartung erzeugt Tasks), Kind & Kontakte.
 9. **Kalender extern**: ICS-Abo, CalDAV-Client (iCloud), später CalDAV-Server.
 
 Docmost wird erst abgeschaltet, wenn Kanso im Alltag besteht und die separate Migration gelaufen ist.

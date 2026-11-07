@@ -518,3 +518,16 @@ html { scroll-padding-top: 9rem; }
   padding: 0 var(--space-3); font-variant-numeric: tabular-nums; text-align: center;
 }
 .shop-amount-form .todo-edit { height: var(--control-h-sm); }
+
+/* Meal plan (ADR-012): a week from Monday to Sunday. */
+.week-nav { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-4); }
+.week-label { font-variant-numeric: tabular-nums; color: var(--fg-2); }
+.week { list-style: none; padding: 0; margin: 0 0 var(--space-4); }
+.week-day { padding: var(--space-3) 0; border-bottom: 1px solid var(--line); }
+.week-day.today .week-pick b { text-decoration: underline; }
+.week-day-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); }
+.week-pick { display: flex; gap: var(--space-3); align-items: center; }
+.week-meals { list-style: none; padding: 0 0 0 calc(1.25rem + var(--space-3)); margin: var(--space-2) 0 0; }
+.week-meals li { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-1) 0; }
+.week-meal { display: flex; flex-wrap: wrap; gap: 0 var(--space-2); align-items: baseline; }
+.shop-meal h2 { font-size: var(--text-base); margin: var(--space-4) 0 var(--space-2); }

@@ -5,6 +5,7 @@ package web
 import (
 	"net/http"
 	"testing"
+	"time"
 
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/wiki"
@@ -36,4 +37,13 @@ func (ts *testServer) makeRecipe(t *testing.T, c *http.Client, space, title, bod
 		t.Fatal(err)
 	}
 	return id
+}
+
+func mustDay(t *testing.T, day string) time.Time {
+	t.Helper()
+	d, err := time.Parse("2006-01-02", day)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return d
 }

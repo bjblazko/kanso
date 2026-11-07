@@ -1,0 +1,27 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.T "plan.admin"}}</h1>
+<p class="meta">{{.T "plan.admin_intro"}}</p>
+{{if $d.Error}}<p class="notice notice-warning" role="alert">{{$d.Error}}</p>{{end}}
+{{with $d.Confirm}}<section class="notice notice-warning" role="alert">
+  <p><strong>{{$.T "plan.delete_confirm" .Name}}</strong></p>
+  <form method="post" action="/admin/mealplans" class="actions">
+    <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="delete_confirmed"><input type="hidden" name="id" value="{{.ID}}">
+    <button class="btn btn-destructive" type="submit">{{$.T "plan.delete_named" .Name}}</button>
+    <a class="btn btn-secondary" href="/admin/mealplans">{{$.T "action.cancel"}}</a>
+  </form>
+</section>{{end}}
+{{if $d.Groups}}<form method="post" action="/admin/mealplans" class="form form-row group-new">
+  <input type="hidden" name="csrf" value="{{.CSRF}}"><input type="hidden" name="action" value="create">
+  <div class="field"><label for="plan-name">{{.T "plan.name"}}</label><input id="plan-name" name="name" required maxlength="80"></div>
+  <div class="field"><label for="plan-group">{{.T "settings.group"}}</label>
+    <select id="plan-group" name="group">{{range $d.Groups}}<option value="{{.}}">{{.}}</option>{{end}}</select></div>
+  <button class="btn btn-primary" type="submit">{{.T "plan.create"}}</button>
+</form>{{else}}<p class="empty">{{.T "tasks.admin_no_groups"}} <a href="/admin/groups">{{.T "nav.groups"}}</a></p>{{end}}
+{{range $d.Plans}}<section class="group">
+  <h2>{{template "icon" "calendar"}} {{.Name}} <span class="meta">{{$.T "plan.of_group" .Group}}</span></h2>
+  <form method="post" action="/admin/mealplans" class="actions">
+    <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{.ID}}">
+    <button class="btn btn-destructive btn-sm" type="submit">{{$.T "plan.delete_named" .Name}}</button>
+  </form>
+</section>{{end}}
+</div>{{end}}

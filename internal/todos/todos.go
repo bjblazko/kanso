@@ -63,6 +63,8 @@ type Source struct {
 	Amount string `json:"amount,omitempty"`
 	// Fill names one "add to list" from a recipe, so sending it twice adds nothing.
 	Fill string `json:"fill,omitempty"`
+	// New marks the fill that made the item; taking it off may then delete the item.
+	New bool `json:"new,omitempty"`
 }
 
 // KindShopping marks a shopping list; "" is a plain todo list.
@@ -215,6 +217,12 @@ func Done(l List) (done, total int) {
 		}
 	}
 	return done, len(l.Items)
+}
+
+// Exists tells whether list id exists, whoever owns it.
+func (s *Store) Exists(id string) bool {
+	_, err := s.read(id)
+	return err == nil
 }
 
 // Create makes a new list owned by owner; kind is "" or KindShopping.
