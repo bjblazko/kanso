@@ -44,3 +44,11 @@ as their own list type with one file per item.
 - Adding up relies on the recipe parser understanding the item text; an item
   it cannot read is never changed, a new one is added instead.
 - `for` prepares the cooking plan (part 3), which will take amounts off again.
+- Adding up keeps what the person wrote after the amount ("200 g Mehl, Typ
+  405" + 500 g → "700 g Mehl, Typ 405"); an item without an amount takes the
+  recipe's amount.
+- Each fill carries an id; sending it twice (double tap, Back) adds nothing.
+  It is planned again under the list's lock, against the list as it is then.
+- On a shopping list a tick older than the item's last text change is
+  ignored: the amount may have grown since, so it was not bought. A tick made
+  after the change counts as usual.

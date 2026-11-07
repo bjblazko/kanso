@@ -61,6 +61,8 @@ type Source struct {
 	Recipe string `json:"recipe"`
 	Title  string `json:"title"`
 	Amount string `json:"amount,omitempty"`
+	// Fill names one "add to list" from a recipe, so sending it twice adds nothing.
+	Fill string `json:"fill,omitempty"`
 }
 
 // KindShopping marks a shopping list; "" is a plain todo list.
@@ -242,10 +244,10 @@ func (s *Store) Change(sub string, g access.Groups, id string, fn func(*List) er
 	return s.write(l)
 }
 
-// NewItem makes an item made on the server, with all fields stamped now.
+// NewItem makes an item on the server. Only the text is stamped: a device
+// whose clock runs behind can still tick it or change its note.
 func NewItem(text, note string, now time.Time) Item {
-	at := now.UnixMilli()
-	return Item{ID: store.NewID(), Text: text, Note: note, At: Stamps{Text: at, Done: at, Sub: at, Note: at}}
+	return Item{ID: store.NewID(), Text: text, Note: note, At: Stamps{Text: now.UnixMilli()}}
 }
 
 func validKind(kind string) bool { return kind == "" || kind == KindShopping }

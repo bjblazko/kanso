@@ -121,3 +121,59 @@ func TestRecipeToolbarHasShop(t *testing.T) {
 		t.Error("cook toolbar lacks Einkaufen with servings")
 	}
 }
+
+func TestShopOneFormCarriesWhatIsTyped(t *testing.T) {
+	ts, admin, _ := setupHaus(t)
+	id := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
+	_, body := get(t, admin, ts.URL+"/recipes/"+id+"/shop")
+	post := between(body, `<form method="post"`, `</form>`)
+	for _, want := range []string{`id="servings" name="servings"`, `id="list" name="list"`, `id="name" name="name"`, `name="fill" value="`, `name="refresh"`} {
+		if !strings.Contains(post, want) {
+			t.Errorf("post form lacks %s", want)
+		}
+	}
+	if strings.Contains(body, `<form method="get"`) {
+		t.Error("a second form holds the choices")
+	}
+}
+
+func TestShopRefreshKeepsUnticks(t *testing.T) {
+	ts, admin, _ := setupHaus(t)
+	id := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
+	resp, body := ts.postFormBody(t, admin, "/recipes/"+id+"/shop", "/recipes/"+id+"/shop",
+		url.Values{"servings": {"8"}, "list": {"new"}, "name": {"Samstag"}, "refresh": {"1"}, "take": {"1"}})
+	if resp.StatusCode != http.StatusOK || !strings.Contains(body, "1600 g Kartoffeln") || !strings.Contains(body, `value="Samstag"`) {
+		t.Fatalf("%d", resp.StatusCode)
+	}
+	if strings.Contains(body, `name="take" value="0" checked`) || !strings.Contains(body, `name="take" value="1" checked`) {
+		t.Error("refresh lost the unticks")
+	}
+	if len(ts.shoppingLists(t, "admin")) != 0 {
+		t.Error("refresh created a list")
+	}
+}
+
+func TestShopTwiceAddsOnce(t *testing.T) {
+	ts, admin, _ := setupHaus(t)
+	id := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
+	form := url.Values{"servings": {"4"}, "list": {"new"}, "name": {"Samstag"}, "take": {"0"}, "fill": {"fillaaaaaaaa"}}
+	first := postShop(t, ts, admin, id, form)
+	second := postShop(t, ts, admin, id, form)
+	if lists := ts.shoppingLists(t, "admin"); len(lists) != 1 || len(lists[0].Items) != 1 || lists[0].Items[0].Text != "800 g Kartoffeln" {
+		t.Fatalf("%+v", lists)
+	}
+	if first.Header.Get("Location") != second.Header.Get("Location") {
+		t.Error("second post does not lead to the same list")
+	}
+}
+
+func (ts *testServer) shoppingLists(t *testing.T, sub string) []todos.List {
+	t.Helper()
+	var out []todos.List
+	for _, l := range ts.deps.Todos.Visible(sub, nil) {
+		if l.Kind == todos.KindShopping {
+			out = append(out, l)
+		}
+	}
+	return out
+}

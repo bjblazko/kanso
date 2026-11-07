@@ -5,29 +5,27 @@
 </div>
 <h1>{{.T "shop.title" $d.Page.Meta.Title}}</h1></header>
 <div class="content">
-<form method="get" action="/recipes/{{$id}}/shop" class="form form-row shop-choice" data-autosubmit>
-  <div class="field"><label for="servings">{{.T "recipe.servings"}}</label>
-    <input id="servings" name="servings" value="{{$d.Servings}}" type="number" min="1" max="99" inputmode="numeric"></div>
-  <div class="field"><label for="list">{{.T "shop.list"}}</label>
-    <select id="list" name="list">{{range $d.Lists}}<option value="{{.ID}}"{{if eq .ID $d.List}} selected{{end}}>{{.Name}}</option>{{end}}
-      <option value="new"{{if eq $d.List "new"}} selected{{end}}>{{.T "shop.new_list"}}</option></select></div>
-  {{if eq $d.List "new"}}<div class="field"><label for="name">{{.T "shop.name"}}</label>
-    <input id="name" name="name" value="{{$d.Name}}" maxlength="80"></div>{{end}}
-  <button class="btn btn-secondary" type="submit">{{.T "shop.refresh"}}</button>
-</form>
-<form method="post" action="/recipes/{{$id}}/shop" class="form">
+<form method="post" action="/recipes/{{$id}}/shop" class="form" data-shop>
   <input type="hidden" name="csrf" value="{{.CSRF}}">
-  <input type="hidden" name="servings" value="{{$d.Servings}}">
-  <input type="hidden" name="list" value="{{$d.List}}">
-  <input type="hidden" name="name" value="{{$d.Name}}">
+  <input type="hidden" name="fill" value="{{$d.Fill}}">
+  <div class="form-row shop-choice">
+    <div class="field"><label for="servings">{{.T "recipe.servings"}}</label>
+      <input id="servings" name="servings" value="{{$d.Servings}}" type="number" min="1" max="99" inputmode="numeric"></div>
+    <div class="field"><label for="list">{{.T "shop.list"}}</label>
+      <select id="list" name="list">{{range $d.Lists}}<option value="{{.ID}}"{{if eq .ID $d.List}} selected{{end}}>{{.Name}}</option>{{end}}
+        <option value="new"{{if eq $d.List "new"}} selected{{end}}>{{.T "shop.new_list"}}</option></select></div>
+    {{if eq $d.List "new"}}<div class="field"><label for="name">{{.T "shop.name"}}</label>
+      <input id="name" name="name" value="{{$d.Name}}" maxlength="80"></div>{{end}}
+    <button class="btn btn-secondary" type="submit" name="refresh" value="1" data-refresh>{{.T "shop.refresh"}}</button>
+  </div>
   <fieldset class="field-set"><legend>{{.T "shop.preview"}}</legend>
-  {{if $d.Lines}}<ul class="shop-lines">{{range $i, $l := $d.Lines}}<li><label><input type="checkbox" name="take" value="{{$i}}" checked> <span>
+  {{if $d.Lines}}<ul class="shop-lines">{{range $i, $l := $d.Lines}}<li><label><input type="checkbox" name="take" value="{{$i}}"{{if $d.Takes $i}} checked{{end}}> <span>
     {{- if $l.Item}}{{if ne $l.Old $l.Text}}{{$l.Old}} → {{$l.Text}}{{else}}{{$l.Text}}{{end}} <span class="hint">{{$.T "shop.on_list"}}</span>
     {{- else}}{{$l.Text}}{{with $l.Note}} <span class="hint">({{.}})</span>{{end}}{{end}}</span></label></li>
   {{end}}</ul>{{else}}<p class="empty">{{.T "recipe.no_sections"}}</p>{{end}}
   </fieldset>
-  <p class="hint">{{.T "shop.untick"}}</p>
-  <div class="actions"><button class="btn btn-primary" type="submit">{{.T "shop.take"}}</button>
+  {{if $d.Lines}}<p class="hint">{{.T "shop.untick"}}</p>{{end}}
+  <div class="actions">{{if $d.Lines}}<button class="btn btn-primary" type="submit" data-take>{{.T "shop.take"}}</button>{{end}}
   <a class="btn btn-quiet" href="/p/{{$id}}">{{.T "action.cancel"}}</a></div>
 </form>
 </div></div>{{end}}

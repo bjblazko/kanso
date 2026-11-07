@@ -83,3 +83,11 @@ func TestUnitFamilies(t *testing.T) {
 		t.Error("Zwiebeln is no unit")
 	}
 }
+
+func TestIngredientRest(t *testing.T) {
+	for in, want := range map[string]string{"- 200 g Mehl, Typ 405": "Mehl, Typ 405", "- 2 Eier (Größe M)": "Eier (Größe M)", "- Salz": "Salz"} {
+		if got := ParseIngredient(in).Rest; got != want {
+			t.Errorf("%s: %q", in, got)
+		}
+	}
+}

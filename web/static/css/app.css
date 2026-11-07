@@ -508,6 +508,7 @@ html { scroll-padding-top: 9rem; }
 .shop-body { flex: 1; min-width: 0; }
 .shop-meta { margin: 0; display: flex; flex-wrap: wrap; gap: 0 var(--space-3); }
 .shop-note { color: var(--fg); }
-.shop-stepper { display: flex; gap: var(--space-1); flex: none; }
+.shop-stepper { display: flex; gap: var(--space-2); flex: none; }
+.shop-stepper .btn { min-width: var(--target-min); }
 .shop-edit { flex: 1; display: flex; flex-direction: column; gap: var(--space-2); }
 .todo-shop-link { display: inline-flex; gap: var(--space-2); align-items: center; }

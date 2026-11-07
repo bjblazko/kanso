@@ -14,6 +14,7 @@ import (
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/recipes"
 	"github.com/bjblazko/kanso/internal/shopping"
+	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/todos"
 )
 
@@ -28,6 +29,16 @@ type shopView struct {
 	List     string       // chosen list id or newList
 	Name     string       // name of a new list
 	Lines    []shopping.Line
+	Fill     string   // names this "add to list", so sending it twice adds nothing
+	Taken    []string // line numbers ticked when the preview was refreshed; nil = all
+
+	ings []recipes.Ingredient // scaled to Servings
+	lang string
+}
+
+// Takes tells the template whether line i is ticked.
+func (sv shopView) Takes(i int) bool {
+	return sv.Taken == nil || slices.Contains(sv.Taken, strconv.Itoa(i))
 }
 
 // shopForm reads the choice from a request and plans the lines; ok is false
@@ -50,12 +61,14 @@ func (s *Server) shopForm(w http.ResponseWriter, r *http.Request) (shopView, boo
 		s.notFound(w, r)
 		return shopView{}, false
 	}
-	var ings []recipes.Ingredient
-	lang := s.newView(r, "", nil).Lang
+	sv.lang = s.newView(r, "", nil).Lang
 	for _, ing := range recipes.Parse(pc.Page.Body).Ingredients() {
-		ings = append(ings, ing.Scale(float64(sv.Servings)/float64(base), lang))
+		sv.ings = append(sv.ings, ing.Scale(float64(sv.Servings)/float64(base), sv.lang))
 	}
-	sv.Lines = shopping.Plan(items, ings, lang)
+	sv.Lines = shopping.Plan(items, sv.ings, sv.lang)
+	if sv.Fill = r.PostFormValue("fill"); sv.Fill == "" {
+		sv.Fill = store.NewID()
+	}
 	return sv, true
 }
 
@@ -86,10 +99,12 @@ func (s *Server) shoppingLists(sub string) []todos.List {
 }
 
 func (s *Server) shopRecipe(w http.ResponseWriter, r *http.Request) {
-	sv, ok := s.shopForm(w, r)
-	if !ok {
-		return
+	if sv, ok := s.shopForm(w, r); ok {
+		s.renderShop(w, r, sv)
 	}
+}
+
+func (s *Server) renderShop(w http.ResponseWriter, r *http.Request, sv shopView) {
 	v := s.newView(r, "", nil)
 	if sv.Name == "" {
 		sv.Name = v.T("shop.default_name")
@@ -98,19 +113,27 @@ func (s *Server) shopRecipe(w http.ResponseWriter, r *http.Request) {
 	s.render(w, r, http.StatusOK, "recipe_shop", v)
 }
 
-// addToList applies the chosen lines to the chosen or a new list and opens it.
+// addToList refreshes the preview, or applies the chosen lines to the chosen
+// or a new list and opens it. The lines are planned again under the list's
+// lock, against the list as it is then.
 func (s *Server) addToList(w http.ResponseWriter, r *http.Request) {
 	sv, ok := s.shopForm(w, r)
 	if !ok {
+		return
+	}
+	if r.PostFormValue("refresh") != "" {
+		sv.Taken = append([]string{}, r.PostForm["take"]...)
+		s.renderShop(w, r, sv)
 		return
 	}
 	u, _ := auth.UserFrom(r.Context())
 	id, err := s.targetList(sv, u.Sub)
 	if err == nil {
 		take := r.PostForm["take"]
-		src := todos.Source{Recipe: sv.Page.Meta.ID, Title: sv.Page.Meta.Title}
+		src := todos.Source{Recipe: sv.Page.Meta.ID, Title: sv.Page.Meta.Title, Fill: sv.Fill}
 		err = s.Todos.Change(u.Sub, s.groups(), id, func(l *todos.List) error {
-			shopping.Apply(l, sv.Lines, func(i int) bool { return slices.Contains(take, strconv.Itoa(i)) }, src, time.Now())
+			lines := shopping.Plan(l.Items, sv.ings, sv.lang)
+			shopping.Apply(l, lines, func(i int) bool { return slices.Contains(take, strconv.Itoa(i)) }, src, time.Now())
 			return nil
 		})
 	}
@@ -124,7 +147,13 @@ func (s *Server) addToList(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+// targetList is the chosen list, the list this fill already went to, or a new one.
 func (s *Server) targetList(sv shopView, sub string) (string, error) {
+	for _, l := range sv.Lists {
+		if shopping.Filled([]todos.List{l}, sv.Fill) {
+			return l.ID, nil
+		}
+	}
 	if sv.List != newList {
 		return sv.List, nil
 	}

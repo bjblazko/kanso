@@ -156,8 +156,8 @@ func setField(l *List, op Op) (bool, error) {
 		return false, errRejected
 	}
 	i := l.index(op.Item)
-	if i < 0 {
-		return false, nil // deleted meanwhile
+	if i < 0 || staleTick(l, l.Items[i], op) {
+		return false, nil // deleted meanwhile, or a tick of an amount since raised
 	}
 	return applyField(&l.Items[i], i == 0, op), nil
 }
@@ -198,4 +198,10 @@ func deleteItem(l *List, op Op, now time.Time) bool {
 	}
 	l.Items = slices.Delete(l.Items, i, end)
 	return true
+}
+
+// staleTick tells a tick on a shopping list that is older than the item's
+// last text change: the amount may have grown since, so it was not bought.
+func staleTick(l *List, it Item, op Op) bool {
+	return l.Kind == KindShopping && op.Kind == "done" && op.Done && op.At < it.At.Text
 }

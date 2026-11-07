@@ -86,3 +86,30 @@ func TestStoreCreateAndChange(t *testing.T) {
 		t.Fatalf("stranger: %v", err)
 	}
 }
+
+// An offline tick older than a later change of the amount must not tick the larger amount.
+func TestOldTickDoesNotTickRaisedAmount(t *testing.T) {
+	s := newStore(t)
+	l, _ := s.Create("anna", "Einkauf", KindShopping)
+	it := NewItem("200 g Mehl", "", time.UnixMilli(1000))
+	_ = s.Change("anna", noGroups, l.ID, func(l *List) error { l.Items = append(l.Items, it); return nil })
+	_ = s.Change("anna", noGroups, l.ID, func(l *List) error {
+		l.Items[0].Text, l.Items[0].At.Text = "700 g Mehl", 3000
+		return nil
+	})
+	apply(t, s, "anna", Op{ID: opID(5), Kind: "done", List: l.ID, Item: it.ID, Done: true, At: 2000})
+	if got := mustGet(t, s, "anna", l.ID); got.Items[0].Done {
+		t.Fatal("old tick ticked the raised amount")
+	}
+	apply(t, s, "anna", Op{ID: opID(6), Kind: "done", List: l.ID, Item: it.ID, Done: true, At: 4000})
+	if got := mustGet(t, s, "anna", l.ID); !got.Items[0].Done {
+		t.Fatal("a newer tick is lost")
+	}
+}
+
+func TestNewItemLeavesDeviceFieldsUnstamped(t *testing.T) {
+	it := NewItem("x", "", time.UnixMilli(5000))
+	if it.At.Text != 5000 || it.At.Done != 0 || it.At.Note != 0 {
+		t.Fatalf("%+v", it.At)
+	}
+}

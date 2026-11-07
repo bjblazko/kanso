@@ -37,7 +37,10 @@ func TestPlanMerges(t *testing.T) {
 		{"800 ml Milch", "0,5 l Milch", "1,3 l Milch", "800 ml Milch"},
 		{"2 Zwiebeln", "3 Zwiebeln", "5 Zwiebeln", "2 Zwiebeln"},
 		{"1 Dose Tomaten", "2 Dosen Tomaten", "3 Dose Tomaten", "1 Dose Tomaten"},
-		{"Salz", "1 TL Salz", "Salz", "Salz"},
+		{"Salz", "1 TL Salz", "1 TL Salz", "Salz"},
+		{"Mehl", "500 g Mehl", "500 g Mehl", "Mehl"},
+		{"200 g Mehl, Typ 405", "500 g Mehl", "700 g Mehl, Typ 405", "200 g Mehl, Typ 405"},
+		{"200 g Mehl (Typ 405)", "0,5 kg Mehl", "700 g Mehl (Typ 405)", "200 g Mehl (Typ 405)"},
 		{"1 TL Salz", "Salz", "1 TL Salz", "1 TL Salz"},
 		{"600 g Mehl", "0,5 kg Mehl", "1,1 kg Mehl", "600 g Mehl"},
 	}
@@ -94,7 +97,7 @@ func TestApply(t *testing.T) {
 		t.Fatalf("%d %+v", n, list.Items)
 	}
 	mehl, zwiebeln := list.Items[0], list.Items[2]
-	if mehl.Text != "700 g Mehl" || mehl.For[0] != (todos.Source{Recipe: "r1", Title: "Brot", Amount: "500 g"}) || mehl.At.Text != 5000 {
+	if mehl.Text != "700 g Mehl" || mehl.For[0] != (todos.Source{Recipe: "r1", Title: "Brot", Amount: "500 g"}) || mehl.At.Text < 5000 {
 		t.Errorf("mehl %+v", mehl)
 	}
 	if zwiebeln.Text != "2 Zwiebeln" || zwiebeln.For[0].Amount != "2" {
@@ -102,5 +105,35 @@ func TestApply(t *testing.T) {
 	}
 	if !list.Items[1].Done || list.Items[1].Text != "Kaffee" {
 		t.Error("bought item touched")
+	}
+}
+
+func TestPlanAmountWinsInOneRecipe(t *testing.T) {
+	l := Plan(nil, ings("- Butter, für die Form", "- 50 g Butter"), "de")
+	if len(l) != 1 || l[0].Text != "50 g Butter" || l[0].Amount != "50 g" {
+		t.Fatalf("%+v", l)
+	}
+}
+
+func TestApplyNeverLowersAStamp(t *testing.T) {
+	list := &todos.List{Items: items("200 g Mehl")}
+	list.Items[0].At.Text = 9000 // a device clock ahead of the server
+	Apply(list, Plan(list.Items, ings("500 g Mehl"), "de"), func(int) bool { return true }, todos.Source{}, now)
+	if list.Items[0].At.Text <= 9000 {
+		t.Fatalf("stamp %d", list.Items[0].At.Text)
+	}
+}
+
+func TestApplySkipsAFillTwice(t *testing.T) {
+	list := &todos.List{Items: items("200 g Mehl")}
+	src := todos.Source{Recipe: "r1", Title: "Brot", Fill: "fill1"}
+	for range 2 {
+		Apply(list, Plan(list.Items, ings("500 g Mehl", "1 Ei"), "de"), func(int) bool { return true }, src, now)
+	}
+	if len(list.Items) != 2 || list.Items[0].Text != "700 g Mehl" || len(list.Items[0].For) != 1 {
+		t.Fatalf("%+v", list.Items)
+	}
+	if !Filled([]todos.List{*list}, "fill1") || Filled([]todos.List{*list}, "other") {
+		t.Fatal("Filled")
 	}
 }

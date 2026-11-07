@@ -17,7 +17,7 @@ const ME = root.dataset.sub;
 const ICONS = [...document.getElementById('todo-icons').content.children];
 const ICON_NAMES = ['lock', 'users', 'edit', 'trash', 'cart']; // the order of #todo-icons
 const SHOPPING = 'shopping';
-const LEADING_NUMBER = /^(\d+)(\s.*)$/;
+const LEADING_NUMBER = /^(\d+)(\s+(?![-–]).*)$/; // "2 Eier", not "2 - 3 Eier"
 const titleSuffix = document.title.slice(document.title.indexOf(' · '));
 
 const state = {
@@ -581,11 +581,11 @@ function shopRow(l, it) {
 }
 
 function shopMeta(it) {
-  const recipes = [...new Map((it.for || []).map((s) => [s.recipe, s])).values()];
+  const sources = it.for || [];
   const parts = [];
   if (it.note) parts.push(h('span', { className: 'shop-note' }, it.note));
-  if (recipes.length) {
-    const links = recipes.flatMap((s, i) => [i ? ', ' : '', h('a', { href: `/p/${s.recipe}` }, s.title)]);
+  if (sources.length) {
+    const links = sources.flatMap((s, i) => [i ? ', ' : '', h('a', { href: `/p/${s.recipe}` }, s.title), s.amount ? ` (${s.amount})` : '']);
     parts.push(h('span', {}, msg.for, ' ', ...links));
   }
   return parts.length ? h('p', { className: 'meta shop-meta' }, ...parts) : null;
@@ -598,19 +598,15 @@ function stepper(l, it) {
   const n = Number(m[1]);
   const set = (k) => () => change({ kind: 'text', list: l.id, item: it.id, text: `${k}${m[2]}` });
   return h('div', { className: 'shop-stepper' },
-    h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': msg.less, disabled: n <= 1, onclick: set(n - 1) }, '−'),
-    h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': msg.more, onclick: set(n + 1) }, '+'));
+    h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': `${msg.less}: ${it.text}`, disabled: n <= 1, onclick: set(n - 1) }, '−'),
+    h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': `${msg.more}: ${it.text}`, onclick: set(n + 1) }, '+'));
 }
 
 // shopEdit changes text and note of an item; Enter saves, Escape cancels.
 function shopEdit(l, it) {
   const save = (event) => { event.preventDefault(); commitEdit(l); draw(); };
-  const key = (event) => {
-    if (event.key !== 'Escape') return;
-    state.editing = null;
-    state.focus = null;
-    draw();
-  };
+  const cancel = () => { state.editing = null; state.focus = null; draw(); };
+  const key = (event) => { if (event.key === 'Escape') cancel(); };
   return h('form', { className: 'shop-edit', onsubmit: save, onkeydown: key },
     h('div', { className: 'field' }, h('label', { for: 'shop-text' }, msg.item),
       field('edit', { id: 'shop-text', className: 'todo-edit', maxlength: 500, value: state.editing.text })),
@@ -618,6 +614,7 @@ function shopEdit(l, it) {
       field('note-edit', { id: 'shop-note', className: 'todo-edit', maxlength: 300, value: state.editing.note, placeholder: msg.note_hint })),
     h('div', { className: 'todo-tools' },
       h('button', { type: 'submit', className: 'btn btn-secondary btn-sm' }, msg.save),
+      button(msg.cancel, cancel, 'btn-quiet'),
       button(msg.delete_item, () => { state.editing = null; change({ kind: 'delete', list: l.id, item: it.id }); }, 'btn-destructive')));
 }
 

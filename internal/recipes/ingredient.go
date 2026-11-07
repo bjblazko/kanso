@@ -26,6 +26,7 @@ type Ingredient struct {
 	Name     string // without the note
 	Note     string // after the first comma, or a bracket at the end
 	Key      string // lower-case name with single spaces, for adding up
+	Rest     string // everything after amount and unit, as written ("Mehl, Typ 405")
 }
 
 const number = `(?:\d+/\d+|\d+(?:[.,]\d+)?|[¼½¾⅓⅔])`
@@ -44,7 +45,8 @@ func ParseIngredient(line string) Ingredient {
 		ing.Qty = quantityOf(rest, m)
 		rest = ing.readUnit(rest[m[1]:])
 	}
-	ing.Name, ing.Note = splitNote(strings.TrimSpace(rest))
+	ing.Rest = strings.TrimSpace(rest)
+	ing.Name, ing.Note = splitNote(ing.Rest)
 	ing.Key = strings.ToLower(strings.Join(strings.Fields(ing.Name), " "))
 	return ing
 }

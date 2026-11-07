@@ -21,7 +21,7 @@ test('shopping list: amounts with − and +, a note, filled from a recipe', asyn
   await item(page, '2 l Milch').getByRole('button', { name: 'Eins weniger' }).click();
   await expect(item(page, '1 l Milch').getByRole('button', { name: 'Eins weniger' })).toBeDisabled();
 
-  await page.getByRole('button', { name: '1 l Milch' }).click();
+  await page.getByRole('button', { name: '1 l Milch', exact: true }).click();
   await page.getByLabel('Notiz').fill('laktosefrei, sonst Hafermilch');
   await page.getByLabel('Notiz').press('Enter');
   await page.reload();
