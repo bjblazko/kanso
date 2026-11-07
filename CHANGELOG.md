@@ -7,6 +7,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+- Shopping previews no longer show "Vorschau aktualisieren" when the page updates by itself (only without script), and choices wrap with room between rows.
+- Elements marked hidden stay hidden even when a component sets its own display (e.g. "Häkchen entfernen" without script).
+
 ## [0.1.0] - 2026-11-07
 
 First numbered release: everything Kanso can do so far.

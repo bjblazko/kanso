@@ -60,6 +60,7 @@ test('shopping list: amounts with − and + in sensible steps, a note, filled fr
   await page.getByRole('textbox', { name: 'Quelltext' }).fill('## Zutaten\n\n- 1 l Milch\n- 250 g Milchreis\n');
   await page.getByRole('button', { name: 'Speichern' }).click();
   await page.getByRole('link', { name: 'Einkaufen' }).click();
+  await expect(page.getByRole('button', { name: 'Vorschau aktualisieren' })).toBeHidden(); // updates by itself
   await page.getByLabel('Auf welche Einkaufsliste?').selectOption({ label: name });
   await expect(page.locator('.shop-lines')).toContainText('1 l Milch → 2 l Milch');
   await page.getByRole('button', { name: 'Auf die Liste' }).click();

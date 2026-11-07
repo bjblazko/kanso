@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: Apache-2.0
  * Kanso layout and components. Only var(--…) tokens from tokens.css. */
 
+/* The hidden attribute wins over any display a component sets (buttons, rows). */
+[hidden] { display: none !important; }
+
 * { box-sizing: border-box; }
 html, body { margin: 0; }
 a { color: var(--fg); text-underline-offset: 2px; }
@@ -498,7 +501,7 @@ html { scroll-padding-top: 9rem; }
 @media (pointer: coarse) { .kitchen-search .field input { height: var(--target-min); } } /* one row, one height */
 
 /* Shopping preview (ADR-011). */
-.shop-choice { margin-bottom: var(--space-5); }
+.shop-choice { margin-bottom: var(--space-5); row-gap: var(--space-4); }
 .shop-lines { list-style: none; padding: 0; margin: 0 0 var(--space-3); }
 .shop-lines li { padding: var(--space-2) 0; border-bottom: 1px solid var(--line); }
 .shop-lines label { display: flex; gap: var(--space-3); align-items: baseline; }

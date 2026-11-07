@@ -45,6 +45,7 @@ test('meal plan: plan two meals, shop for both days, take one off again', async 
   await page.getByRole('checkbox', { name: /Mi 18\.11\./ }).check();
   await page.getByRole('button', { name: 'Einkaufen' }).click();
   await expect(page.locator('.shop-meal')).toHaveCount(2);
+  await expect(page.getByRole('button', { name: 'Vorschau aktualisieren' })).toBeHidden();
   await expect(page.locator('.shop-meal').nth(1)).toContainText('250 g Linsen → 500 g Linsen');
   await page.getByRole('button', { name: 'Auf die Liste' }).click();
   await expect(page.getByRole('checkbox', { name: '500 g Linsen' })).toBeVisible();
