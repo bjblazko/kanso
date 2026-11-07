@@ -59,7 +59,7 @@ test('recipe from a web page: recipe data, then with the AI after an admin conne
   await expect(page.locator('main')).not.toContainText('sk-test-geheim');
 
   await page.goto('/recipes/import');
-  await expect(page.locator('main')).toContainText('geht ihr Text an die KI: 127.0.0.1');
+  await expect(page.locator('.ai-mark')).toHaveText('KI · im eigenen Netz: 127.0.0.1');
   await page.getByLabel('Adresse der Rezeptseite').fill(at(site, '/apfel'));
   await page.getByLabel('Wiki-Bereich').selectOption({ label: space });
   await page.getByRole('button', { name: 'Rezept holen' }).click();
