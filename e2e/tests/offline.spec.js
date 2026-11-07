@@ -103,7 +103,7 @@ test('offline: todo ticks wait and sync when the network is back', async ({ page
   await page.waitForFunction(async () => Boolean(await caches.match('/todos')));
   const name = unique('Offline-Liste');
   await page.getByLabel('Neue Liste').fill(name);
-  await page.getByRole('button', { name: 'Anlegen' }).click();
+  await page.getByRole('button', { name: 'Liste anlegen', exact: true }).click();
   await page.getByLabel('Neuer Punkt').fill('Holz holen');
   await Promise.all([page.waitForResponse('**/api/todos/sync'), page.getByLabel('Neuer Punkt').press('Enter')]);
   await expect(page.getByRole('status')).toHaveText('');

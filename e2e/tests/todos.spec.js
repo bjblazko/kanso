@@ -6,7 +6,7 @@ import { signIn, unique } from './helpers.js';
 export async function createList(page, name) {
   await page.goto('/todos');
   await page.getByLabel('Neue Liste').fill(name);
-  await page.getByRole('button', { name: 'Anlegen' }).click();
+  await page.getByRole('button', { name: 'Liste anlegen', exact: true }).click();
   await expect(page.getByRole('heading', { level: 1, name })).toBeVisible();
 }
 
