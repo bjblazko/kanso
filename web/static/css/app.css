@@ -512,5 +512,9 @@ html { scroll-padding-top: 9rem; }
 .shop-stepper .btn { min-width: var(--target-min); }
 .shop-edit { flex: 1; display: flex; flex-direction: column; gap: var(--space-2); }
 .todo-shop-link { display: inline-flex; gap: var(--space-2); align-items: center; }
-.shop-amount { font-variant-numeric: tabular-nums; }
-.shop-amount-form .todo-edit { width: 4rem; height: var(--control-h-sm); text-align: right; }
+/* One fixed width for the amount (four digits and a comma), so − amount + line up in every row. */
+.shop-amount, .shop-amount-form .todo-edit {
+  box-sizing: border-box; width: 4.5rem; min-width: 0;
+  padding: 0 var(--space-3); font-variant-numeric: tabular-nums; text-align: center;
+}
+.shop-amount-form .todo-edit { height: var(--control-h-sm); }
