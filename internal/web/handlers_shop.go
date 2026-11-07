@@ -61,7 +61,11 @@ func (s *Server) shopForm(w http.ResponseWriter, r *http.Request) (shopView, boo
 		s.notFound(w, r)
 		return shopView{}, false
 	}
-	sv.lang = s.newView(r, "", nil).Lang
+	v := s.newView(r, "", nil)
+	sv.lang = v.Lang
+	if sv.Name == "" {
+		sv.Name = v.T("shop.list_name", pc.Page.Meta.Title) // derived, not asked for
+	}
 	for _, ing := range recipes.Parse(pc.Page.Body).Ingredients() {
 		sv.ings = append(sv.ings, ing.Scale(float64(sv.Servings)/float64(base), sv.lang))
 	}
@@ -113,9 +117,6 @@ func (s *Server) shopRecipe(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) renderShop(w http.ResponseWriter, r *http.Request, sv shopView) {
 	v := s.newView(r, "", nil)
-	if sv.Name == "" {
-		sv.Name = v.T("shop.default_name")
-	}
 	v.Title, v.Data = v.T("shop.title", sv.Page.Meta.Title), sv
 	s.render(w, r, http.StatusOK, "recipe_shop", v)
 }

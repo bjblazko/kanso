@@ -251,10 +251,8 @@ func (s *Server) removeMeal(w http.ResponseWriter, r *http.Request) {
 // listExists tells whether a list exists at all, whoever may see it.
 func (s *Server) listExists(id string) bool { return s.Todos.Exists(id) }
 
-// Dates of a week page, for the template.
-func (wp weekPage) Range() string {
-	return wp.Start.Format("2.1.") + "–" + wp.End.Format("2.1.2006")
-}
+// Range is the week's dates, for the template.
+func (wp weekPage) Range() string { return weekRange(wp.Start) }
 
 // WeekNumber is the ISO week number of the page.
 func (wp weekPage) WeekNumber() string {
