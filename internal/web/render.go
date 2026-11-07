@@ -113,17 +113,27 @@ func (s *Server) serverError(w http.ResponseWriter, r *http.Request, err error) 
 
 // moduleOf names the part of Kanso a path belongs to.
 func moduleOf(path string) string {
-	switch {
-	case path == "/notes" || strings.HasPrefix(path, "/notes/"):
-		return "notes"
-	case path == "/todos" || strings.HasPrefix(path, "/todos/"):
-		return "todos"
-	case path == "/tasks" || strings.HasPrefix(path, "/tasks/"):
-		return "tasks"
-	case path == "/recipes" || strings.HasPrefix(path, "/recipes/"), path == "/mealplan" || strings.HasPrefix(path, "/mealplan/"):
-		return "kitchen"
-	case path == "/", strings.HasPrefix(path, "/s/"), strings.HasPrefix(path, "/p/"), strings.HasPrefix(path, "/admin/spaces/"):
+	if path == "/" {
 		return "wiki"
 	}
+	for _, m := range modules {
+		for _, prefix := range m.prefixes {
+			if path == strings.TrimSuffix(prefix, "/") || strings.HasPrefix(path, prefix) {
+				return m.name
+			}
+		}
+	}
 	return ""
+}
+
+// modules are the parts of Kanso with the path prefixes that belong to them.
+var modules = []struct {
+	name     string
+	prefixes []string
+}{
+	{"notes", []string{"/notes/"}},
+	{"todos", []string{"/todos/"}},
+	{"tasks", []string{"/tasks/"}},
+	{"kitchen", []string{"/recipes/", "/mealplan/"}},
+	{"wiki", []string{"/s/", "/p/", "/admin/spaces/"}},
 }

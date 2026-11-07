@@ -165,6 +165,9 @@ func setField(l *List, op Op) (bool, error) {
 // applyField sets the field op names if op is not older than its last
 // change; the first item cannot become a sub-item.
 func applyField(it *Item, first bool, op Op) bool {
+	if op.Kind == "note" {
+		return applyNote(it, op)
+	}
 	switch {
 	case op.Kind == "text" && op.At >= it.At.Text:
 		it.Text, it.At.Text = strings.TrimSpace(op.Text), op.At
@@ -172,11 +175,18 @@ func applyField(it *Item, first bool, op Op) bool {
 		it.Done, it.At.Done = op.Done, op.At
 	case op.Kind == "sub" && op.At >= it.At.Sub && (!first || !op.Sub):
 		it.Sub, it.At.Sub = op.Sub, op.At
-	case op.Kind == "note" && op.At >= it.At.Note:
-		it.Note, it.At.Note = strings.TrimSpace(op.Text), op.At
 	default:
 		return false
 	}
+	return true
+}
+
+// applyNote sets a shopping item's note if op is the later change.
+func applyNote(it *Item, op Op) bool {
+	if op.At < it.At.Note {
+		return false
+	}
+	it.Note, it.At.Note = strings.TrimSpace(op.Text), op.At
 	return true
 }
 

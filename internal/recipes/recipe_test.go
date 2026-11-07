@@ -2,7 +2,10 @@
 
 package recipes
 
-import "testing"
+import (
+	"slices"
+	"testing"
+)
 
 const curry = `Kurz und mild, die Kinder essen es.
 
@@ -120,5 +123,15 @@ func TestHeadingVariantsAndHashtags(t *testing.T) {
 	r := Parse("## Zutaten\n- 1 Ei\n#vegan #schnell\n- 200 g Mehl\n")
 	if len(r.Ingredients()) != 2 {
 		t.Errorf("hashtag ended the section: %+v", r.Ingredients())
+	}
+}
+
+func TestStepImages(t *testing.T) {
+	r := Parse("## Zubereitung\n\n1. Schneiden.\n\n   ![Schritt 1](attachments/s1.jpg)\n\n2. Braten.\n3. Servieren.\n   ![](attachments/s3.jpg)\n")
+	if !slices.Equal(r.Steps, []string{"Schneiden.", "Braten.", "Servieren."}) {
+		t.Fatalf("steps %q", r.Steps)
+	}
+	if !slices.Equal(r.StepImages, []string{"attachments/s1.jpg", "", "attachments/s3.jpg"}) {
+		t.Fatalf("images %q", r.StepImages)
 	}
 }

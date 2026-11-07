@@ -32,7 +32,8 @@ type PageMeta struct {
 	Servings int      `yaml:"servings,omitempty"`
 	Tags     []string `yaml:"tags,omitempty"`
 	Source   string   `yaml:"source,omitempty"`
-	Time     int      `yaml:"time,omitempty"` // minutes
+	Time     int      `yaml:"time,omitempty"`  // minutes
+	Image    string   `yaml:"image,omitempty"` // a photo among the page's attachments
 }
 
 // TypeRecipe marks a page as a recipe.

@@ -24,14 +24,16 @@ import (
 
 // Errors a person can understand.
 var (
-	ErrBlocked = errors.New("this address cannot be fetched")
-	ErrNotHTML = errors.New("the address is no web page")
-	ErrFetch   = errors.New("the page could not be fetched")
+	ErrBlocked  = errors.New("this address cannot be fetched")
+	ErrNotHTML  = errors.New("the address is no web page")
+	ErrNotImage = errors.New("the address is no photo")
+	ErrFetch    = errors.New("the page could not be fetched")
 )
 
 const (
 	fetchTimeout = 10 * time.Second
 	maxPage      = 3 << 20
+	maxImage     = 8 << 20
 	maxRedirects = 5
 	userAgent    = "Kanso (+https://github.com/bjblazko/kanso)"
 )
@@ -113,31 +115,68 @@ func (f *Fetcher) check(u *url.URL) error {
 
 // Fetch loads a web page of at most 3 MB.
 func (f *Fetcher) Fetch(ctx context.Context, raw string) (Page, error) {
-	u, err := url.Parse(raw)
-	if err != nil || f.check(u) != nil {
-		return Page{}, ErrBlocked
-	}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	resp, err := f.get(ctx, raw, "text/html,application/xhtml+xml")
 	if err != nil {
-		return Page{}, ErrBlocked
-	}
-	req.Header.Set("User-Agent", userAgent)
-	req.Header.Set("Accept", "text/html,application/xhtml+xml")
-	resp, err := f.client.Do(req)
-	if err != nil {
-		if errors.Is(err, ErrBlocked) {
-			return Page{}, ErrBlocked
-		}
-		return Page{}, fmt.Errorf("%w: %v", ErrFetch, err)
+		return Page{}, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 	return read(resp)
 }
 
-func read(resp *http.Response) (Page, error) {
-	if resp.StatusCode >= 400 {
-		return Page{}, fmt.Errorf("%w: HTTP %d", ErrFetch, resp.StatusCode)
+// get requests raw with the checks every fetch shares.
+func (f *Fetcher) get(ctx context.Context, raw, accept string) (*http.Response, error) {
+	u, err := url.Parse(raw)
+	if err != nil || f.check(u) != nil {
+		return nil, ErrBlocked
 	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, ErrBlocked
+	}
+	req.Header.Set("User-Agent", userAgent)
+	req.Header.Set("Accept", accept)
+	resp, err := f.client.Do(req)
+	switch {
+	case errors.Is(err, ErrBlocked):
+		return nil, ErrBlocked
+	case err != nil:
+		return nil, fmt.Errorf("%w: %v", ErrFetch, err)
+	case resp.StatusCode >= 400:
+		_ = resp.Body.Close()
+		return nil, fmt.Errorf("%w: HTTP %d", ErrFetch, resp.StatusCode)
+	}
+	return resp, nil
+}
+
+// Image is a fetched photo.
+type Image struct {
+	Data []byte
+	Type string // e.g. image/jpeg
+	Ext  string // e.g. .jpg
+}
+
+var imageTypes = map[string]string{"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif"}
+
+// FetchImage loads a photo of at most 8 MB: JPEG, PNG, WebP or GIF.
+func (f *Fetcher) FetchImage(ctx context.Context, raw string) (Image, error) {
+	resp, err := f.get(ctx, raw, "image/jpeg,image/png,image/webp,image/gif")
+	if err != nil {
+		return Image{}, err
+	}
+	defer func() { _ = resp.Body.Close() }()
+	mt, _, _ := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+	ext, ok := imageTypes[mt]
+	if !ok {
+		return Image{}, ErrNotImage
+	}
+	b, err := io.ReadAll(io.LimitReader(resp.Body, maxImage+1))
+	if err != nil || len(b) > maxImage {
+		return Image{}, ErrFetch
+	}
+	return Image{Data: b, Type: mt, Ext: ext}, nil
+}
+
+func read(resp *http.Response) (Page, error) {
 	mt, params, _ := mime.ParseMediaType(resp.Header.Get("Content-Type"))
 	if mt != "text/html" && mt != "application/xhtml+xml" {
 		return Page{}, ErrNotHTML

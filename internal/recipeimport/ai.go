@@ -47,33 +47,46 @@ func FromAI(ctx context.Context, c ai.Client, cfg ai.Config, page Page) (Draft, 
 // parseAnswer reads "# Titel", "Portionen:", "Zeit:", a description and the
 // recipe sections; anything else in front of the sections becomes the description.
 func parseAnswer(answer string) Draft {
-	answer = cleanAnswer(answer)
-	var d Draft
-	var body, desc []string
-	for _, line := range strings.Split(answer, "\n") {
-		t := strings.TrimSpace(line)
-		switch {
-		case d.Title == "" && strings.HasPrefix(t, "# "):
-			d.Title = strings.TrimSpace(t[2:])
-		case strings.HasPrefix(t, "Portionen:") || strings.HasPrefix(t, "Servings:"):
-			d.Servings = number(t)
-		case strings.HasPrefix(t, "Zeit:") || strings.HasPrefix(t, "Time:"):
-			d.Time = number(t)
-		case len(body) == 0 && !strings.HasPrefix(t, "## "):
-			if t != "" {
-				desc = append(desc, t)
-			}
-		default:
-			body = append(body, line)
-		}
+	var a answerParts
+	for _, line := range strings.Split(cleanAnswer(answer), "\n") {
+		a.line(line)
 	}
-	d.Description = strings.Join(desc, " ")
-	r := recipes.Parse(strings.Join(body, "\n"))
+	d := a.d
+	d.Description = strings.Join(a.desc, " ")
+	r := recipes.Parse(strings.Join(a.body, "\n"))
 	for _, ing := range r.Ingredients() {
 		d.Ingredients = append(d.Ingredients, ing.Line)
 	}
 	d.Steps = r.Steps
 	return d
+}
+
+// answerParts collects the head lines, the description and the recipe body.
+type answerParts struct {
+	d          Draft
+	body, desc []string
+}
+
+func (a *answerParts) line(line string) {
+	t := strings.TrimSpace(line)
+	switch {
+	case a.d.Title == "" && strings.HasPrefix(t, "# "):
+		a.d.Title = strings.TrimSpace(t[2:])
+	case hasAnyPrefix(t, "Portionen:", "Servings:"):
+		a.d.Servings = number(t)
+	case hasAnyPrefix(t, "Zeit:", "Time:"):
+		a.d.Time = number(t)
+	case len(a.body) == 0 && !strings.HasPrefix(t, "## "):
+		if t != "" {
+			a.desc = append(a.desc, t)
+		}
+	default:
+		a.body = append(a.body, line)
+	}
+}
+
+func hasAnyPrefix(s string, prefixes ...string) bool {
+	return slices.ContainsFunc(prefixes, func(p string) bool { return strings.HasPrefix(s, p) })
 }
 
 // cleanAnswer drops thinking (also an unpaired </think> or a cut-off

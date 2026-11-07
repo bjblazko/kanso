@@ -11,13 +11,8 @@ var toBase = map[string]float64{"g": 1, "kg": 1000, "ml": 1, "cl": 10, "l": 1000
 // kilograms, millilitres to litres, or the same counted unit. The result
 // is in grams or millilitres, from 1000 on in kilograms or litres.
 func sum(a, b recipes.Ingredient, lang string) (recipes.Ingredient, bool) {
-	if a.Qty == nil || b.Qty == nil || a.Family != b.Family {
-		return a, false
-	}
-	fa, fb := 1.0, 1.0
-	if a.Family == recipes.FamilyMass || a.Family == recipes.FamilyVolume {
-		fa, fb = toBase[a.Unit], toBase[b.Unit]
-	} else if a.Unit != b.Unit {
+	fa, fb, ok := factors(a, b)
+	if !ok {
 		return a, false
 	}
 	q := recipes.Quantity{Low: a.Qty.Low*fa + b.Qty.Low*fb, High: a.Qty.High*fa + b.Qty.High*fb}
@@ -30,6 +25,18 @@ func sum(a, b recipes.Ingredient, lang string) (recipes.Ingredient, bool) {
 		q.Text += "–" + recipes.FormatAmount(q.High, a.Family, a.Unit, lang)
 	}
 	return a, true
+}
+
+// factors convert a's and b's amounts into one unit: grams or millilitres,
+// or, for counted things, the same unit; ok is false when they do not compare.
+func factors(a, b recipes.Ingredient) (fa, fb float64, ok bool) {
+	switch {
+	case a.Qty == nil || b.Qty == nil || a.Family != b.Family:
+		return 0, 0, false
+	case a.Family == recipes.FamilyMass || a.Family == recipes.FamilyVolume:
+		return toBase[a.Unit], toBase[b.Unit], true
+	}
+	return 1, 1, a.Unit == b.Unit
 }
 
 // baseUnit picks g or kg (ml or l) for an amount in grams (millilitres) and scales it.

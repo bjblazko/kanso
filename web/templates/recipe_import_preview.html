@@ -15,6 +15,16 @@
   {{with $d.Ingredients}}<section class="recipe-parsed" aria-labelledby="parsed-h"><h2 id="parsed-h">{{$.T "recipe.parsed"}}</h2><ul class="list-plain">
   {{range .}}{{if .Qty}}<li>{{.Qty.Text}} · {{.Unit}} · {{.Name}}{{with .Note}} <span class="hint">({{.}})</span>{{end}}</li>{{else}}<li class="parsed-none">{{.Name}} <span class="hint">– {{$.T "recipe.parsed_no_qty"}}</span></li>{{end}}
   {{end}}</ul></section>{{end}}
+  {{if $d.Photos}}<fieldset class="field-set"><legend>{{.T "import.photos"}}</legend>
+  <ul class="import-photos">{{range $i, $p := $d.Photos}}<li>
+    <img src="{{$p.Data}}" alt="">
+    <input type="hidden" name="photo_url_{{$i}}" value="{{$p.URL}}">
+    <div class="field"><label for="place_{{$i}}">{{$.T "import.place"}}</label>
+      <select id="place_{{$i}}" name="place_{{$i}}">
+        <option value="skip"{{if eq $p.Place "skip"}} selected{{end}}>{{$.T "import.place_skip"}}</option>
+        {{range $d.Places}}<option value="{{.}}"{{if eq . $p.Place}} selected{{end}}>{{$.T (printf "import.place_%s" (placeKind .)) (placeStep .)}}</option>{{end}}
+      </select></div>
+  </li>{{end}}</ul></fieldset>{{end}}
   <div class="field"><label for="body">{{.T "import.text"}}</label><textarea id="body" name="body" rows="16">{{$d.Body}}</textarea></div>
   <div class="actions"><button class="btn btn-primary" type="submit">{{.T "recipe.create"}}</button>
   <a class="btn btn-quiet" href="/recipes/import">{{.T "action.cancel"}}</a></div>
