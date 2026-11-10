@@ -100,3 +100,20 @@ func TestCookViewOffersReset(t *testing.T) {
 		t.Fatal("no reset action")
 	}
 }
+
+func TestCookViewRendersInlineMarkdown(t *testing.T) {
+	ts, admin, _ := setupHaus(t)
+	body := "## Zutaten\n\n- 60 g Röstzwiebeln, *frisch*\n\n## Zubereitung\n\n1. __Hefe auflösen__: Wasser **2 Min. / 37 °C** erwärmen.\n2. <script>alert(1)</script> Kneten.\n"
+	id := ts.makeRecipe(t, admin, "haus", "Baguette", body, 1)
+	_, page := get(t, admin, ts.URL+"/recipes/"+id+"/cook")
+	steps := between(page, `<ol class="cook-steps">`, `</ol>`)
+	if !strings.Contains(steps, "<strong>Hefe auflösen</strong>") || !strings.Contains(steps, "<strong>2 Min. / 37 °C</strong>") || strings.Contains(steps, "__Hefe") {
+		t.Fatalf("steps:\n%s", steps)
+	}
+	if strings.Contains(steps, "<script>") || strings.Contains(steps, "<p>") {
+		t.Fatalf("unsafe or block markup:\n%s", steps)
+	}
+	if !strings.Contains(between(page, `<ul class="cook-list">`, `</ul>`), "<em>frisch</em>") {
+		t.Fatal("ingredient note not rendered")
+	}
+}

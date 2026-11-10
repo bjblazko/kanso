@@ -3,11 +3,13 @@
 package web
 
 import (
+	"html/template"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/bjblazko/kanso/internal/access"
+	"github.com/bjblazko/kanso/internal/markdown"
 	"github.com/bjblazko/kanso/internal/recipes"
 )
 
@@ -17,6 +19,9 @@ type cookItem struct {
 	Ing   recipes.Ingredient
 	Step  string
 	Photo string // address of the step's photo; "" = none
+	// Text and Note are Step or the ingredient's name and note with their
+	// inline Markdown (bold, italics, links) rendered and sanitised.
+	Text, Note template.HTML
 }
 
 type cookGroup struct {
@@ -60,8 +65,39 @@ func (s *Server) cookRecipe(w http.ResponseWriter, r *http.Request) {
 	cv.Servings = recipes.ClampServings(r.URL.Query().Get("servings"), base)
 	v := s.newView(r, pc.Page.Meta.Title, nil)
 	cv.fill(recipes.Parse(pc.Page.Body), float64(cv.Servings)/float64(base), v.Lang)
+	s.renderInline(&cv)
 	v.Data = cv
 	s.render(w, r, http.StatusOK, "recipe_cook", v)
+}
+
+// renderInline turns the Markdown inside steps and ingredients into HTML.
+func (s *Server) renderInline(cv *cookView) {
+	base := markdown.PageCtx{Base: "/p/" + cv.Page.Meta.ID}
+	for g := range cv.Groups {
+		for i := range cv.Groups[g].Items {
+			it := &cv.Groups[g].Items[i]
+			it.Text, it.Note = s.inline(it.Ing.Name, base), s.inline(it.Ing.Note, base)
+		}
+	}
+	for i := range cv.Steps {
+		cv.Steps[i].Text = s.inline(cv.Steps[i].Step, base)
+	}
+}
+
+// inline renders one line of Markdown without its paragraph; raw HTML stays text.
+func (s *Server) inline(md string, base markdown.PageCtx) template.HTML {
+	if md == "" {
+		return ""
+	}
+	out, _, err := s.MD.Render([]byte(md), base)
+	if err != nil {
+		return template.HTML(template.HTMLEscapeString(md)) // #nosec G203 -- escaped
+	}
+	h := strings.TrimSpace(string(out))
+	if strings.HasPrefix(h, "<p>") && strings.HasSuffix(h, "</p>") && strings.Count(h, "<p>") == 1 {
+		h = h[3 : len(h)-4]
+	}
+	return template.HTML(h) // #nosec G203 -- sanitised by the Markdown renderer
 }
 
 // fill scales the recipe by factor and numbers every tick.

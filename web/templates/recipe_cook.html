@@ -17,10 +17,10 @@
 {{if not (or $d.Groups $d.Steps)}}<p class="notice">{{.T "recipe.no_sections"}}{{if $d.CanWrite}} <a href="/p/{{$id}}/edit">{{.T "page.edit"}}</a>{{end}}</p>{{end}}
 {{if $d.Groups}}<section aria-labelledby="cook-ing"><h2 id="cook-ing">{{.T "recipe.ingredients"}}</h2>
 {{range $d.Groups}}{{with .Name}}<h3>{{.}}</h3>{{end}}<ul class="cook-list">
-{{range .Items}}<li><label><input type="checkbox" data-tick="{{.Tick}}"> <span>{{with .Ing.Qty}}{{.Text}} {{end}}{{if .Ing.Qty}}{{with .Ing.UnitText}}{{.}} {{end}}{{end}}{{.Ing.Name}}{{with .Ing.Note}}<span class="hint">, {{.}}</span>{{end}}</span></label></li>
+{{range .Items}}<li><label><input type="checkbox" data-tick="{{.Tick}}"> <span>{{with .Ing.Qty}}{{.Text}} {{end}}{{if .Ing.Qty}}{{with .Ing.UnitText}}{{.}} {{end}}{{end}}{{.Text}}{{with .Note}}<span class="hint">, {{.}}</span>{{end}}</span></label></li>
 {{end}}</ul>{{end}}</section>{{end}}
 {{if $d.Steps}}<section aria-labelledby="cook-steps"><h2 id="cook-steps">{{.T "recipe.steps"}}</h2><ol class="cook-steps">
-{{range $i, $s := $d.Steps}}<li><label><input type="checkbox" data-tick="{{$s.Tick}}"> <span>{{$s.Step}}</span></label>{{with $s.Photo}}<img class="cook-photo" src="{{.}}" alt="" loading="lazy">{{end}}</li>
+{{range $i, $s := $d.Steps}}<li><label><input type="checkbox" data-tick="{{$s.Tick}}"> <span>{{$s.Text}}</span></label>{{with $s.Photo}}<img class="cook-photo" src="{{.}}" alt="" loading="lazy">{{end}}</li>
 {{end}}</ol></section>{{end}}
 </article></div>{{end}}
 {{define "scripts"}}<script type="module" src="{{.Asset "js/cook.js"}}"></script>{{end}}

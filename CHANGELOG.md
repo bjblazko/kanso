@@ -12,6 +12,7 @@ All notable changes to this project are documented here. The format follows
 - The meal plan shows each meal's photo; a recipe page lists the days it is on the meal plans of one's groups ("Im Kochplan"), latest first, each a jump into that week.
 
 ### Fixed
+- The cook view renders bold, italics and links in steps and ingredients instead of showing the raw Markdown (`__…__`, `**…**`).
 - Shopping previews no longer show "Vorschau aktualisieren" when the page updates by itself (only without script), and choices wrap with room between rows.
 - Elements marked hidden stay hidden even when a component sets its own display (e.g. "Häkchen entfernen" without script).
 
