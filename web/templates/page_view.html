@@ -11,7 +11,7 @@
     <button class="btn btn-secondary btn-sm" type="submit">{{.T "lock.break"}}</button>
   </form>{{end}}
 </div>{{end}}
-{{if $d.Page.Meta.IsRecipe}}{{template "recipe-meta" .}}{{else}}{{with $d.Page.Meta.Tags}}<p class="recipe-meta">{{range .}}<a class="tag" href="/search?q={{urlquery .}}">{{.}}</a>{{end}}</p>{{end}}{{end}}
+{{if $d.Page.Meta.IsRecipe}}{{template "recipe-meta" .}}{{else}}{{with $d.Page.Meta.Tags}}<p class="recipe-meta">{{range .}}<a class="tag" href="/search?tag={{urlquery .}}">{{.}}</a>{{end}}</p>{{end}}{{end}}
 <p class="meta">{{.T "page.updated_by" $d.Page.Meta.Author}} <time datetime="{{$d.Page.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Page.Meta.Updated.Format "02.01.2006 15:04"}}</time></p>
 <div class="prose">{{if $d.Page.Body}}{{$d.HTML}}{{else}}<p class="empty">{{.T "page.empty"}}</p>{{end}}</div>
 

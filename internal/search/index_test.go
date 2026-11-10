@@ -3,6 +3,7 @@
 package search
 
 import (
+	"slices"
 	"strings"
 	"testing"
 )
@@ -100,5 +101,19 @@ func TestAllowedSeesDoc(t *testing.T) {
 	}
 	if hits := ix.Search("zettel", func(d Doc) bool { return d.Owner == "ben" }, 10); len(hits) != 0 {
 		t.Errorf("ben sees %+v", hits)
+	}
+}
+
+func TestBrowseAndTags(t *testing.T) {
+	ix := NewIndex()
+	ix.Put(Doc{ID: "b", Space: "haus", Title: "Brot", Body: "Mehl", Tags: []string{"backen"}, Kind: KindRecipe})
+	ix.Put(Doc{ID: "a", Space: "haus", Title: "Apfelkuchen", Body: "Äpfel", Tags: []string{"backen", "süß"}, Kind: KindRecipe})
+	ix.Put(Doc{ID: "c", Space: "haus", Title: "Heizung", Body: "Filter"})
+	hits := ix.Browse(func(d Doc) bool { return slices.Contains(d.Tags, "backen") }, 10)
+	if len(hits) != 2 || hits[0].Title != "Apfelkuchen" || hits[0].Kind != KindRecipe || !slices.Equal(hits[0].Tags, []string{"backen", "süß"}) {
+		t.Fatalf("%+v", hits)
+	}
+	if got := ix.Search("filter", func(Doc) bool { return true }, 10); len(got) != 1 || got[0].Kind != "" {
+		t.Fatalf("%+v", got)
 	}
 }

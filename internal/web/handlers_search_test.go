@@ -59,7 +59,7 @@ func TestSearchFindsOwnNotesOnly(t *testing.T) {
 	}
 	link := `href="/notes/` + n.Meta.ID + `"`
 	_, body := get(t, anna, ts.URL+"/search?q="+url.QueryEscape("zählerstand"))
-	if !strings.Contains(body, link) || !strings.Contains(body, "<h2>Notizen</h2>") {
+	if !strings.Contains(body, link) || !strings.Contains(body, ">Notizen</h2>") {
 		t.Error("own note not found")
 	}
 	ben := ts.client(t, "ben", "Ben", false)

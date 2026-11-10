@@ -8,6 +8,7 @@ All notable changes to this project are documented here. The format follows
 ## [Unreleased]
 
 ### Added
+- One search with filters: the search shows recipes in their own group with photos and a jump into the kitchen, then pages and own notes; "Nur Rezepte" and the tags of the hits filter by click, and a tag alone lists everything with it. Tags on wiki pages lead into this filtered search; the kitchen's search box uses the same search.
 - Tags for every wiki page, not only recipes: free words typed in the editor, created on save, shown on the page as links (recipes into the kitchen, other pages into the search). Unticking "Ist ein Rezept" keeps them.
 - "Heute gekocht" in the cook view notes the day in the recipe (once per day, in its history); the recipe page shows "Gekocht": how often and when last, the days from the meal plans and the days noted by hand together (planned days marked).
 - The meal plan shows each meal's photo; a recipe page lists the days it is on the meal plans of one's groups ("Im Kochplan"), latest first, each a jump into that week.

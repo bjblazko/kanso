@@ -551,3 +551,4 @@ html { scroll-padding-top: 9rem; }
 .week-meals .week-meal { flex: 1; }
 .tb-form { display: contents; }
 .tb-done { align-self: center; padding: 0 var(--space-2); }
+.row > span.recipe-thumb, .row > img.recipe-thumb { flex: none; min-width: 0; } /* not the stretching first span of a .row */

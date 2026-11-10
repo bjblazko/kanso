@@ -14,6 +14,7 @@ import (
 	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/recipes"
+	"github.com/bjblazko/kanso/internal/search"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/wiki"
 )
@@ -36,13 +37,12 @@ func recipePhoto(p wiki.Page) string {
 // newRecipeServings is what a new recipe starts with.
 const newRecipeServings = 4
 
-// recipeRow is one recipe in the kitchen, with the words it can be found by.
+// recipeRow is one recipe in the kitchen.
 type recipeRow struct {
 	ID, Title, Space string
 	Image            string // attachment name of its photo; "" = none
 	Tags             []string
 	Time             int
-	words            []string // title, tags and ingredient names, lower case
 }
 
 type tagLink struct {
@@ -79,36 +79,19 @@ func (s *Server) rowOf(p wiki.Page) recipeRow {
 	if sp, ok := s.Spaces.Get(p.Space); ok {
 		row.Space = sp.Name
 	}
-	row.words = append(strings.Fields(strings.ToLower(p.Meta.Title)), tags...)
-	for _, ing := range recipes.Parse(p.Body).Ingredients() {
-		row.words = append(row.words, strings.Fields(ing.Key)...)
-	}
 	return row
 }
 
-// matchRecipe tells whether row carries all tags and every word of q starts one of its words.
-func matchRecipe(row recipeRow, q string, tags []string) bool {
-	for _, t := range tags {
-		if !slices.Contains(row.Tags, t) {
-			return false
-		}
-	}
-	for _, term := range strings.Fields(strings.ToLower(q)) {
-		if !slices.ContainsFunc(row.words, func(w string) bool { return strings.HasPrefix(w, term) }) {
-			return false
-		}
-	}
-	return true
-}
-
+// kitchen lists the recipes; its search is the one search, limited to recipes.
 func (s *Server) kitchen(w http.ResponseWriter, r *http.Request) {
 	_, who := auth.UserFrom(r.Context())
 	all := s.visibleRecipes(who)
 	q := strings.TrimSpace(r.URL.Query().Get("q"))
 	selected := recipes.NormalizeTags(strings.Join(r.URL.Query()["tag"], ","))
 	kp := kitchenPage{Query: q, Selected: selected, Any: len(all) > 0, Tags: tagLinks(all, q, selected)}
+	found := s.recipeMatches(q)
 	for _, row := range all {
-		if matchRecipe(row, q, selected) {
+		if hasAll(row.Tags, selected) && (found == nil || found[row.ID]) {
 			kp.Rows = append(kp.Rows, row)
 		}
 	}
@@ -117,21 +100,36 @@ func (s *Server) kitchen(w http.ResponseWriter, r *http.Request) {
 	s.render(w, r, http.StatusOK, "recipes", v)
 }
 
+// recipeMatches are the recipes the search finds for q; nil means no words, all match.
+func (s *Server) recipeMatches(q string) map[string]bool {
+	if q == "" {
+		return nil
+	}
+	found := map[string]bool{}
+	for _, h := range s.Search.Search(q, func(d search.Doc) bool { return d.Kind == search.KindRecipe }, 1000) {
+		found[h.ID] = true
+	}
+	return found
+}
+
 // tagLinks offers every tag of the visible recipes as a link that switches it on or off.
 func tagLinks(rows []recipeRow, q string, selected []string) []tagLink {
 	var names []string
 	for _, row := range rows {
-		for _, t := range row.Tags {
-			if !slices.Contains(names, t) {
-				names = append(names, t)
-			}
-		}
+		names = append(names, row.Tags...)
 	}
-	sort.Strings(names)
+	return filterLinks(names, selected, func(t []string) string { return kitchenURL(q, t) })
+}
+
+// filterLinks makes one link per tag (each once, sorted) that switches it on
+// or off among selected; href builds the address for a set of tags.
+func filterLinks(names, selected []string, href func([]string) string) []tagLink {
+	slices.Sort(names)
+	names = slices.Compact(names)
 	links := make([]tagLink, 0, len(names))
 	for _, n := range names {
 		on := slices.Contains(selected, n)
-		links = append(links, tagLink{Name: n, Pressed: on, Href: kitchenURL(q, toggle(selected, n, on))})
+		links = append(links, tagLink{Name: n, Pressed: on, Href: href(toggle(selected, n, on))})
 	}
 	return links
 }

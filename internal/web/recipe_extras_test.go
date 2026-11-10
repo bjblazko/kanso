@@ -57,7 +57,7 @@ func TestTagsOnEveryPage(t *testing.T) {
 		t.Fatalf("%+v", p.Meta)
 	}
 	_, view := get(t, admin, ts.URL+"/p/"+id)
-	if !strings.Contains(view, `href="/search?q=wartung"`) {
+	if !strings.Contains(view, `href="/search?tag=wartung"`) {
 		t.Fatal("tags of a page do not lead to the search")
 	}
 	// unticking "Ist ein Rezept" keeps the tags

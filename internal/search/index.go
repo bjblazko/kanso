@@ -17,14 +17,21 @@ const (
 	snippetLen  = 160
 )
 
+// KindRecipe marks a page that is a recipe; "" is any other page or a note.
+const KindRecipe = "recipe"
+
 // Doc is one searchable page (Space set) or note (Owner set).
 type Doc struct {
 	ID, Space, Owner, Title, Body string
+	Tags                          []string // lower case; filters, also searched as words
+	Kind                          string   // "" or KindRecipe
 }
 
 // Hit is one search result.
 type Hit struct {
 	ID, Space, Owner, Title, Snippet string
+	Tags                             []string
+	Kind                             string
 	Score                            int
 }
 
@@ -72,12 +79,34 @@ func (ix *Index) Search(q string, allowed func(d Doc) bool, limit int) []Hit {
 	var hits []Hit
 	for _, e := range ix.docs {
 		if score := e.score(terms); score > 0 && allowed(e.doc) {
-			hits = append(hits, Hit{ID: e.doc.ID, Space: e.doc.Space, Owner: e.doc.Owner, Title: e.doc.Title,
-				Snippet: snippet(e.words, terms), Score: score})
+			h := hitOf(e.doc)
+			h.Snippet, h.Score = snippet(e.words, terms), score
+			hits = append(hits, h)
 		}
 	}
 	slices.SortFunc(hits, func(a, b Hit) int { return cmp.Or(b.Score-a.Score, strings.Compare(a.Title, b.Title)) })
 	return hits[:min(limit, len(hits))]
+}
+
+// Browse returns every document allowed reports true for, by title; for
+// filtering by tag without a search word.
+func (ix *Index) Browse(allowed func(d Doc) bool, limit int) []Hit {
+	ix.mu.RLock()
+	defer ix.mu.RUnlock()
+	var hits []Hit
+	for _, e := range ix.docs {
+		if allowed(e.doc) {
+			hits = append(hits, hitOf(e.doc))
+		}
+	}
+	slices.SortFunc(hits, func(a, b Hit) int {
+		return cmp.Or(strings.Compare(strings.ToLower(a.Title), strings.ToLower(b.Title)), strings.Compare(a.ID, b.ID))
+	})
+	return hits[:min(limit, len(hits))]
+}
+
+func hitOf(d Doc) Hit {
+	return Hit{ID: d.ID, Space: d.Space, Owner: d.Owner, Title: d.Title, Tags: d.Tags, Kind: d.Kind}
 }
 
 // score is 0 unless every term matches.
