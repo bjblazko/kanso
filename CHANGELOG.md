@@ -7,6 +7,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-10
+
 ### Added
 - One search with filters: the search shows recipes in their own group with photos and a jump into the kitchen, then pages and own notes; "Nur Rezepte" and the tags of the hits filter by click, and a tag alone lists everything with it. Tags on wiki pages lead into this filtered search; the kitchen's search box uses the same search.
 - Tags for every wiki page, not only recipes: free words typed in the editor, created on save, shown on the page as links (recipes into the kitchen, other pages into the search). Unticking "Ist ein Rezept" keeps them.
