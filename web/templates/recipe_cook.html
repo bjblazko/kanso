@@ -4,6 +4,9 @@
   <a class="btn btn-quiet btn-sm" href="/p/{{$id}}">{{template "icon" "book"}}<span class="tb-label">{{.T "recipe.back"}}</span></a>
   <a class="btn btn-quiet btn-sm" href="/recipes/{{$id}}/shop?servings={{$d.Servings}}">{{template "icon" "cart"}}<span class="tb-label">{{.T "shop.action"}}</span></a>
   <button class="btn btn-quiet btn-sm" type="button" data-reset hidden>{{template "icon" "history"}}<span class="tb-label">{{.T "recipe.reset"}}</span></button>
+  {{if $d.CanWrite}}{{if $d.CookedToday}}<span class="meta tb-done">{{.T "recipe.cooked_today_done"}}</span>{{else}}<form method="post" action="/recipes/{{$id}}/cooked" class="tb-form">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <button class="btn btn-quiet btn-sm" type="submit">{{template "icon" "check"}}<span class="tb-label">{{.T "recipe.cooked_today"}}</span></button></form>{{end}}{{end}}
   <span class="tb-grow"></span>
   <div class="servings" role="group" aria-label="{{.T "recipe.servings"}}">
     {{with $d.Fewer}}<a class="btn btn-quiet btn-sm" href="{{.}}" aria-label="{{$.T "recipe.fewer"}}">−</a>{{else}}<span class="btn btn-quiet btn-sm" aria-disabled="true">−</span>{{end}}

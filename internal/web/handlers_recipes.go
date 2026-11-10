@@ -3,6 +3,11 @@
 package web
 
 import (
+	"slices"
+	"time"
+
+	"github.com/bjblazko/kanso/internal/auth"
+	"github.com/bjblazko/kanso/internal/wiki"
 	"html/template"
 	"net/http"
 	"strconv"
@@ -35,6 +40,7 @@ type cookView struct {
 	Steps       []cookItem
 	Servings    int
 	HasServings bool
+	CookedToday bool
 }
 
 // Fewer and More are the links of the servings stepper; "" at the limits.
@@ -60,7 +66,8 @@ func (s *Server) cookRecipe(w http.ResponseWriter, r *http.Request) {
 		s.notFound(w, r)
 		return
 	}
-	cv := cookView{pageCtx: pc, HasServings: pc.Page.Meta.Servings > 0}
+	cv := cookView{pageCtx: pc, HasServings: pc.Page.Meta.Servings > 0,
+		CookedToday: slices.Contains(pc.Page.Meta.Cooked, time.Now().Format(dayLayout))}
 	base := max(pc.Page.Meta.Servings, 1)
 	cv.Servings = recipes.ClampServings(r.URL.Query().Get("servings"), base)
 	v := s.newView(r, pc.Page.Meta.Title, nil)
@@ -68,6 +75,31 @@ func (s *Server) cookRecipe(w http.ResponseWriter, r *http.Request) {
 	s.renderInline(&cv)
 	v.Data = cv
 	s.render(w, r, http.StatusOK, "recipe_cook", v)
+}
+
+// markCooked notes today as a day the recipe was cooked; once per day.
+func (s *Server) markCooked(w http.ResponseWriter, r *http.Request) {
+	pc, ok := s.pageFor(w, r, access.Write)
+	if !ok {
+		return
+	}
+	if !pc.Page.Meta.IsRecipe() {
+		s.notFound(w, r)
+		return
+	}
+	u, _ := auth.UserFrom(r.Context())
+	today := time.Now().Format(dayLayout)
+	err := s.Wiki.SaveWith(u.Author(), pc.Page.Meta.ID, pc.Page.Meta.Title, pc.Page.Body, func(m *wiki.PageMeta) {
+		if !slices.Contains(m.Cooked, today) {
+			m.Cooked = append(m.Cooked, today)
+			slices.Sort(m.Cooked)
+		}
+	})
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	http.Redirect(w, r, "/recipes/"+pc.Page.Meta.ID+"/cook", http.StatusSeeOther)
 }
 
 // renderInline turns the Markdown inside steps and ingredients into HTML.

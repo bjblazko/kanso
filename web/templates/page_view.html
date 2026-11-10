@@ -15,8 +15,11 @@
 <p class="meta">{{.T "page.updated_by" $d.Page.Meta.Author}} <time datetime="{{$d.Page.Meta.Updated.Format "2006-01-02T15:04:05Z07:00"}}">{{$d.Page.Meta.Updated.Format "02.01.2006 15:04"}}</time></p>
 <div class="prose">{{if $d.Page.Body}}{{$d.HTML}}{{else}}<p class="empty">{{.T "page.empty"}}</p>{{end}}</div>
 
-{{if $d.Cooked}}<section class="cooked" aria-labelledby="cooked-h"><h2 id="cooked-h">{{.T "recipe.cooked"}}</h2><ul class="list-plain">
-{{range $d.Cooked}}<li><a href="/mealplan/{{.Plan.ID}}?week={{.Week}}#day-{{.Day}}">{{$.T (printf "day.%d" .Weekday)}} {{.Date.Format "2.1.2006"}}</a> <span class="meta">· {{.Plan.Name}}{{if .Planned}} · {{$.T "recipe.planned"}}{{end}}</span></li>
+{{if $d.Cooked}}<section class="cooked" aria-labelledby="cooked-h"><h2 id="cooked-h">{{.T "recipe.cooked"}}</h2>
+<p class="meta">{{if $d.CookedCount}}{{.T "recipe.cooked_count" $d.CookedCount $d.LastCooked}}{{else}}{{.T "recipe.cooked_never"}}{{end}}</p>
+<ul class="list-plain">
+{{range $d.Cooked}}<li>{{if .Plan.ID}}<a href="/mealplan/{{.Plan.ID}}?week={{.Week}}#day-{{.Day}}">{{$.T (printf "day.%d" .Weekday)}} {{.Date.Format "2.1.2006"}}</a>{{else}}{{$.T (printf "day.%d" .Weekday)}} {{.Date.Format "2.1.2006"}}{{end}}
+  <span class="meta">{{with .Plan.Name}}· {{.}} {{end}}{{if .Manual}}· {{$.T "recipe.cooked_manual"}} {{end}}{{if .Planned}}· {{$.T "recipe.planned"}}{{end}}</span></li>
 {{end}}</ul></section>{{end}}
 
 {{if $d.Files}}<section class="files"><h2>{{.T "page.attachments"}}</h2><ul class="list-plain">

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"html/template"
 	"net/http"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -34,16 +35,20 @@ type pageCtx struct {
 	Who access.Principal
 	// SpaceReadable is false for someone who reads the page only through a share.
 	SpaceReadable bool
-	// Cooked are the days a recipe is on the meal plans of the person's groups, latest first.
-	Cooked []cookedDay
+	// Cooked are the days a recipe was cooked or is planned, latest first.
+	Cooked      []cookedDay
+	CookedCount int    // distinct days cooked up to today
+	LastCooked  string // "2.1.2006" or ""
 }
 
-// cookedDay is one day a recipe was or will be cooked.
+// cookedDay is one day a recipe was or will be cooked: on a meal plan
+// (Plan set), noted by hand ("Heute gekocht"), or both.
 type cookedDay struct {
 	mealplan.Cooked
 	Date    time.Time
 	Weekday int  // 0 = Monday
 	Planned bool // still ahead
+	Manual  bool // noted with "Heute gekocht"
 }
 
 // CanBreakLock tells templates whether to offer breaking an edit lock.
@@ -116,7 +121,7 @@ func (s *Server) fillPageView(pc *pageCtx) error {
 	}
 	pc.Children = childrenOf(s.visibleTree(pc.Who, pc.Space.Slug, s.groups()), pc.Page.Meta.ID)
 	if pc.Page.Meta.IsRecipe() {
-		pc.Cooked = s.cookedDays(pc.Who.Sub, pc.Page.Meta.ID)
+		s.fillCooked(pc)
 	}
 	return nil
 }
@@ -124,16 +129,44 @@ func (s *Server) fillPageView(pc *pageCtx) error {
 // maxCooked is how many cooked days a recipe page lists.
 const maxCooked = 12
 
-func (s *Server) cookedDays(sub, recipe string) []cookedDay {
+// fillCooked merges the days on the meal plans of the person's groups with
+// the days noted by hand, counts those up to today and lists the latest.
+func (s *Server) fillCooked(pc *pageCtx) {
 	today := time.Now().Format(dayLayout)
-	var out []cookedDay
-	for _, c := range s.MealPlans.CookedOn(s.groups(), sub, recipe, maxCooked) {
+	for _, c := range s.cookedByDay(pc) {
 		d, err := time.Parse(dayLayout, c.Day)
-		if err == nil {
-			out = append(out, cookedDay{Cooked: c, Date: d, Weekday: (int(d.Weekday()) + 6) % 7, Planned: c.Day > today})
+		if err != nil {
+			continue
+		}
+		c.Date, c.Weekday, c.Planned = d, (int(d.Weekday())+6)%7, c.Day > today
+		if !c.Planned {
+			pc.CookedCount++
+		}
+		pc.Cooked = append(pc.Cooked, *c)
+	}
+	slices.SortFunc(pc.Cooked, func(a, b cookedDay) int { return strings.Compare(b.Day, a.Day) })
+	if i := slices.IndexFunc(pc.Cooked, func(c cookedDay) bool { return !c.Planned }); i >= 0 {
+		pc.LastCooked = pc.Cooked[i].Date.Format("2.1.2006")
+	}
+	pc.Cooked = pc.Cooked[:min(maxCooked, len(pc.Cooked))]
+}
+
+// cookedByDay collects one entry per day: from the meal plans (with a link)
+// and from "Heute gekocht"; a day in both counts once.
+func (s *Server) cookedByDay(pc *pageCtx) map[string]*cookedDay {
+	days := map[string]*cookedDay{}
+	for _, c := range s.MealPlans.CookedOn(s.groups(), pc.Who.Sub, pc.Page.Meta.ID, 1000) {
+		if days[c.Day] == nil {
+			days[c.Day] = &cookedDay{Cooked: c}
 		}
 	}
-	return out
+	for _, day := range pc.Page.Meta.Cooked {
+		if days[day] == nil {
+			days[day] = &cookedDay{Cooked: mealplan.Cooked{Day: day}}
+		}
+		days[day].Manual = true
+	}
+	return days
 }
 
 func childrenOf(nodes []*wiki.Node, id string) []*wiki.Node {

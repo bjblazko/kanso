@@ -31,8 +31,12 @@ func TestRecipePageShowsCookedDays(t *testing.T) {
 	ts.planMeal(t, plan, "2026-11-12", curry, "Curry", 2)
 	_, body := get(t, anna, ts.URL+"/p/"+curry)
 	cooked := between(body, `<section class="cooked"`, `</section>`)
-	if !strings.Contains(cooked, "Im Kochplan") || !strings.Contains(cooked, `href="/mealplan/`+plan+`?week=2026-W46#day-2026-11-12"`) ||
-		!strings.Contains(cooked, `href="/mealplan/`+plan+`?week=2026-W45#day-2026-11-03"`) || strings.Index(cooked, "12.11.2026") > strings.Index(cooked, "3.11.2026") {
+	list := between(cooked, "<ul", "</ul>")
+	if strings.Index(list, "12.11.2026") > strings.Index(list, "3.11.2026") {
+		t.Fatalf("not latest first:\n%s", list)
+	}
+	if !strings.Contains(cooked, "1× gekocht, zuletzt am 3.11.2026") || !strings.Contains(cooked, `href="/mealplan/`+plan+`?week=2026-W46#day-2026-11-12"`) ||
+		!strings.Contains(cooked, `href="/mealplan/`+plan+`?week=2026-W45#day-2026-11-03"`) {
 		t.Fatalf("cooked:\n%s", cooked)
 	}
 	if _, body = get(t, admin, ts.URL+"/p/"+curry); strings.Contains(body, `<section class="cooked"`) {
