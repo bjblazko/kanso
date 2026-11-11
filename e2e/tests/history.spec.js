@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { test, expect } from '@playwright/test';
-import { signIn, unique, createSpace, createPage } from './helpers.js';
+import { signIn, unique, createSpace, createPage, pageAction } from './helpers.js';
 
 async function edit(page, text) {
   await page.getByRole('link', { name: 'Bearbeiten' }).click();
@@ -16,7 +16,7 @@ test('history: compare an older version and restore it', async ({ page }) => {
   await edit(page, 'Mehl 500 g\n');
   await edit(page, 'Mehl 750 g\n');
 
-  await page.getByRole('link', { name: 'Verlauf', exact: true }).click();
+  await pageAction(page, 'Verlauf');
   await expect(page.getByRole('heading', { level: 1, name: 'Verlauf' })).toBeVisible();
   await expect(page.locator('.history li')).toHaveCount(3);
   await page.locator('.history li').nth(1).getByRole('link').click();

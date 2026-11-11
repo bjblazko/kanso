@@ -41,6 +41,21 @@ Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 | Move confirmation | Decide whether a page may go where other people read it: "Bisher" and "Danach" readers side by side, "Verschieben" as the accent, "Abbrechen" beside it. |
 | App icon | Three note lines and one accent dot on the dark ink colour; mark inside the central 60 % (maskable safe zone). |
 
+## Phones (owner's devices: Motorola Edge 60 Neo, iPhone 16 Pro Max)
+
+- No `viewport-fit=cover` and no safe-area padding: Chrome on Android reports
+  a bottom inset that comes and goes with its toolbar, so the bottom bar jumped
+  while scrolling. The browser keeps the page above the system bar instead.
+- The top bar shows only the profile picture on phones; the search gets the room.
+- Toolbars stay one row: rare page actions (Verschieben, Verlauf, Löschen)
+  sit behind "⋯" on phones and in the row on wide screens.
+- Buttons that belong together share a row in equal parts (Kamera · Foto
+  wählen; Liste anlegen · Einkaufsliste anlegen); a lone primary action
+  takes the full width below them.
+- Shopping items are a grid: tick, text and − amount + in one row, note and
+  "für …" below across the width.
+- Ticks meant for a thumb are 1.25 rem.
+
 ## AI mark (ADR-013)
 
 Functions that send text to the AI are marked with a word, not a colour (no

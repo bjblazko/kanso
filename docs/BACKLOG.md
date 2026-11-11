@@ -17,7 +17,10 @@ decisions in [ADRs](adr/). Done items are removed here and noted in the CHANGELO
    settled state instead of timing. Seen 2026-11-07.
 2. **Introduce aim42** for architecture improvement: collect issues and
    improvements with cost and benefit, linked from arc42 chapter 11.
-3. CLAUDE.md names Go end-to-end tests in `internal/e2e`; they live in
+3. The web test setup ignores the error of `i18n.Load()`; a broken
+   translation file (e.g. a duplicate key) then shows up as panics in
+   unrelated tests. Fail the setup instead.
+4. CLAUDE.md names Go end-to-end tests in `internal/e2e`; they live in
    `internal/web` (`*_test.go` against the whole server). Align the text or
    move them.
 

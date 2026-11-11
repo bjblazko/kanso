@@ -29,3 +29,11 @@ export async function createPage(page, title, { child = false } = {}) {
   await page.getByLabel('Titel').fill(title);
   await page.getByRole('button', { name: 'Seite anlegen' }).click();
 }
+
+/** Clicks a rare page action (Verschieben, Verlauf, Löschen): in the toolbar
+ * on wide screens, behind "⋯" on phones. */
+export async function pageAction(page, name) {
+  const more = page.locator('.tb-more > summary');
+  if (await more.isVisible()) await more.click();
+  await page.getByRole('toolbar').getByRole('link', { name, exact: true }).click();
+}

@@ -260,3 +260,14 @@ func TestDevModeOffersPersonSwitch(t *testing.T) {
 		t.Error("no person switch in dev mode")
 	}
 }
+
+// viewport-fit=cover made Chrome on Android report a bottom safe area that
+// comes and goes with its toolbar, so the bottom bar jumped while scrolling.
+func TestViewportWithoutCover(t *testing.T) {
+	ts := newTestServer(t)
+	c := ts.client(t, "anna", "Anna", false)
+	_, body := get(t, c, ts.URL+"/notes/new")
+	if strings.Contains(body, "viewport-fit") || !strings.Contains(body, `content="width=device-width, initial-scale=1"`) {
+		t.Fatal(between(body, `<meta name="viewport"`, ">"))
+	}
+}

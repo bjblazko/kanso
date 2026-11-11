@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { test, expect } from '@playwright/test';
-import { signIn, unique, createSpace, createPage } from './helpers.js';
+import { signIn, unique, createSpace, createPage, pageAction } from './helpers.js';
 
 test('pages: create, nest, move and delete', async ({ page }) => {
   await signIn(page, { sub: 'pia', name: 'Pia', admin: true });
@@ -16,13 +16,13 @@ test('pages: create, nest, move and delete', async ({ page }) => {
   await expect(nav.locator('a[aria-current="page"]')).toHaveText('Größe & Gewicht');
 
   // Move the sub-page to the top level.
-  await page.getByRole('toolbar').getByRole('link', { name: 'Verschieben' }).click();
+  await pageAction(page, 'Verschieben');
   await page.getByLabel('Verschieben nach').selectOption({ label: unique('Wiki') });
   await page.getByRole('button', { name: 'Seite verschieben' }).click();
   await expect(page.getByRole('navigation', { name: 'Pfad' }).getByRole('link', { name: 'Über uns' })).toHaveCount(0);
 
   // Delete needs a second, explicit step that names the page.
-  await page.getByRole('toolbar').getByRole('link', { name: 'Löschen' }).click();
+  await pageAction(page, 'Löschen');
   await page.getByRole('button', { name: '„Größe & Gewicht“ löschen' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toContainText(unique('Wiki'));
   await expect(page.getByRole('main').getByRole('link', { name: 'Größe & Gewicht' })).toHaveCount(0);

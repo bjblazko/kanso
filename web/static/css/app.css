@@ -237,8 +237,10 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
   background: var(--bg); color: var(--fg); resize: vertical;
   font: 400 var(--text-md)/1.5 var(--font-sans);
 }
-.capture-actions { display: flex; flex-wrap: wrap; gap: var(--space-3); }
-.capture-actions .btn-primary { margin-left: auto; }
+/* Two photo buttons share a row in halves, Speichern takes the row below:
+   the same shape on every phone, the main action under the thumb. */
+.capture-actions { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.capture-actions .btn-primary { grid-column: 1 / -1; }
 .capture-status { min-height: 1.4em; margin: 0; }
 .previews { display: flex; flex-wrap: wrap; gap: var(--space-2); }
 .previews:empty { display: none; }
@@ -266,14 +268,17 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 
 @media (max-width: 59.99rem) {
   /* svh above: heights that follow Safari's toolbar (vh, dvh) change while
-     scrolling, the layout reflows and the fixed bar jumps with it. */
+     scrolling, the layout reflows and the fixed bar jumps with it. No
+     safe-area padding either: without viewport-fit=cover the browser keeps
+     the page above the home indicator and the system bar, and Chrome on
+     Android does not report an inset that comes and goes with its toolbar. */
   .rail {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
     transform: translateZ(0); /* own layer: Safari keeps it on the edge while the toolbar moves */
-    padding: var(--space-1) var(--space-2) calc(var(--space-1) + env(safe-area-inset-bottom));
+    padding: var(--space-1) var(--space-2);
     border-top: 1px solid var(--line);
   }
-  body { padding-bottom: calc(var(--rail-h, 3.5rem) + var(--space-2) + env(safe-area-inset-bottom)); }
+  body { padding-bottom: calc(var(--rail-h, 3.5rem) + var(--space-2) * 2); }
 }
 
 @media (min-width: 60rem) {
@@ -508,7 +513,7 @@ html { scroll-padding-top: 9rem; }
 
 /* Shopping list items: text, note and what for; − and + at the end. */
 .shop-item { align-items: flex-start; }
-.shop-body { flex: 1; min-width: 0; }
+
 .shop-meta { margin: 0; display: flex; flex-wrap: wrap; gap: 0 var(--space-3); }
 .shop-note { color: var(--fg); }
 .shop-stepper { display: flex; gap: var(--space-2); flex: none; }
@@ -552,3 +557,36 @@ html { scroll-padding-top: 9rem; }
 .tb-form { display: contents; }
 .tb-done { align-self: center; padding: 0 var(--space-2); }
 .row > span.recipe-thumb, .row > img.recipe-thumb { flex: none; min-width: 0; } /* not the stretching first span of a .row */
+
+/* ---- Phones (Motorola Edge 60 Neo, iPhone 16 Pro Max) ------------------ */
+
+/* Rare page actions: inline on wide screens, behind "⋯" on phones. */
+.tb-rare { display: contents; }
+.tb-more { display: none; position: relative; }
+.tb-more > summary { list-style: none; min-width: var(--target-min); }
+.tb-more > summary::-webkit-details-marker { display: none; }
+.tb-more-menu {
+  position: absolute; right: 0; top: calc(100% + var(--space-1)); z-index: 20;
+  display: flex; flex-direction: column; align-items: stretch; gap: var(--space-1); padding: var(--space-2);
+  min-width: 12rem; background: var(--bg-2); border: 1px solid var(--line-strong); border-radius: var(--radius-md); box-shadow: var(--shadow-float);
+}
+.tb-more-menu .btn { justify-content: flex-start; }
+
+/* The new-list form: the name on its own row, the two kinds of list in halves below. */
+.todo-new { display: grid; grid-template-columns: 1fr 1fr; align-items: end; max-width: 40rem; }
+.todo-new .field { grid-column: 1 / -1; min-width: 0; }
+
+/* Shopping items: tick, text and − amount + in one row; note and "für …" below across the width. */
+.shop-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; column-gap: var(--space-1); padding-bottom: var(--space-1); }
+.shop-item .shop-meta { grid-column: 2 / -1; }
+.shop-item .shop-edit { grid-column: 2 / -1; }
+
+/* Meal plan: day ticks big enough for a thumb. */
+.week-pick input[type="checkbox"] { width: 1.25rem; height: 1.25rem; flex: none; }
+
+@media (max-width: 39.99rem) {
+  .tb-rare { display: none; }
+  .tb-more { display: block; }
+  .usermenu-name { display: none; } /* the picture opens the menu; the search gets the room */
+  .topbar { gap: var(--space-3); }
+}

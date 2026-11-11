@@ -578,9 +578,9 @@ function shopRow(l, it) {
     onchange: (e) => change({ kind: 'done', list: l.id, item: it.id, done: e.target.checked }),
   }));
   if (editing) return h('li', { className: cls }, box, shopEdit(l, it));
-  const body = h('div', { className: 'shop-body' },
-    h('button', { type: 'button', className: 'todo-text', onclick: () => startEdit(l, it) }, it.text), shopMeta(it));
-  return h('li', { className: cls }, box, body, stepper(l, it));
+  // A grid: tick, text and − amount + in a row, the note and "für …" below across the width.
+  const text = h('button', { type: 'button', className: 'todo-text', onclick: () => startEdit(l, it) }, it.text);
+  return h('li', { className: cls }, box, text, stepper(l, it) || h('span'), shopMeta(it));
 }
 
 function shopMeta(it) {

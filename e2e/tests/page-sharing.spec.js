@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { test, expect } from '@playwright/test';
-import { signIn, unique, createSpace, createPage } from './helpers.js';
+import { signIn, unique, createSpace, createPage, pageAction } from './helpers.js';
 
 test('a page shared on its own: the other person finds it and nothing else of the space', async ({ page }) => {
   const christa = unique('Christa');
@@ -50,7 +50,7 @@ test('a page moves to another space, after saying who will see it then', async (
   await createPage(page, 'Wartung', { child: true });
   await page.getByRole('link', { name: 'Heizung' }).first().click();
 
-  await page.getByRole('toolbar').getByRole('link', { name: 'Verschieben' }).click();
+  await pageAction(page, 'Verschieben');
   await page.getByLabel('Verschieben nach').selectOption({ label: to });
   await page.getByRole('button', { name: 'Seite verschieben' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(`„Heizung“ nach „${to}“ verschieben?`);

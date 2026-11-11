@@ -7,6 +7,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-11
+
+### Fixed
+- Phones: the bottom bar no longer jumps or leaves an empty strip when scrolling (no `viewport-fit=cover`, no safe-area padding); the top bar shows only the profile picture so the search has room; page toolbars stay one row with Verschieben, Verlauf and Löschen behind "⋯"; Kamera and Foto wählen share a row with Speichern below in full width; the new-list buttons share a row; shopping items keep the note and "für …" below in the full width; the meal plan's day ticks are big enough for a thumb.
+
 ## [0.2.0] - 2026-11-10
 
 ### Added
