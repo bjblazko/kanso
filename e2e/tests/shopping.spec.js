@@ -69,3 +69,42 @@ test('shopping list: amounts with − and + in sensible steps, a note, filled fr
   await expect(item(page, '2 l Milch')).toContainText(`für ${recipe}`);
   await expect(item(page, '250 g Milchreis')).toContainText(`für ${recipe}`);
 });
+
+test('shopping list: an item not got moves to another list and adds up there', async ({ page }) => {
+  await signIn(page, { sub: 'sina', name: 'Sina', admin: true });
+  const newList = async (name) => {
+    await page.goto('/todos');
+    await page.getByLabel('Neue Liste').fill(name);
+    await page.getByRole('button', { name: 'Einkaufsliste anlegen' }).click();
+    await expect(page.getByRole('heading', { level: 1, name })).toBeVisible();
+  };
+  const add = async (text) => {
+    await page.getByLabel('Was fehlt?').fill(text);
+    await page.getByLabel('Was fehlt?').press('Enter');
+    await expect(page.getByRole('checkbox', { name: text })).toBeVisible();
+  };
+  const market = unique('Wochenmarkt');
+  await newList(market);
+  await add('300 g Mehl');
+  const week = unique('KW 46');
+  await newList(week);
+  await add('200 g Mehl');
+  await add('1 Brokkoli');
+
+  await page.getByRole('button', { name: '200 g Mehl', exact: true }).click();
+  await page.getByLabel('Auf andere Liste').selectOption({ label: market });
+  await page.getByRole('button', { name: 'Verschieben' }).click();
+  await expect(page.getByRole('checkbox', { name: '200 g Mehl' })).toHaveCount(0);
+
+  await page.getByRole('button', { name: '1 Brokkoli', exact: true }).click();
+  await page.getByLabel('Auf andere Liste').selectOption({ index: (await page.locator('#shop-move option').count()) - 1 }); // the new list
+  await page.getByRole('button', { name: 'Verschieben' }).click();
+  await expect(page.getByRole('checkbox', { name: '1 Brokkoli' })).toHaveCount(0);
+
+  await page.goto('/todos');
+  await page.getByRole('link', { name: market }).click();
+  await expect(page.getByRole('checkbox', { name: '500 g Mehl' })).toBeVisible(); // added up by the server
+  await page.goto('/todos');
+  await page.getByRole('link', { name: /^Einkauf \d/ }).first().click();
+  await expect(page.getByRole('checkbox', { name: '1 Brokkoli' })).toBeVisible();
+});

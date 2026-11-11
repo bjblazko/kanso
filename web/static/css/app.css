@@ -597,7 +597,11 @@ html { scroll-padding-top: 9rem; }
 /* Shopping items: tick, text and − amount + in one row; note and "für …" below across the width. */
 .shop-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; column-gap: var(--space-1); padding-bottom: var(--space-1); }
 .shop-item .shop-meta { grid-column: 2 / -1; }
-.shop-item .shop-edit { grid-column: 2 / -1; }
+.shop-item .shop-editing { grid-column: 2 / -1; display: flex; flex-direction: column; gap: var(--space-4); }
+.shop-move { padding-top: var(--space-3); border-top: 1px solid var(--line); }
+.shop-move-row { display: flex; gap: var(--space-2); align-items: center; }
+.shop-move-row select { flex: 1; min-width: 0; }
+.shop-item.editing > .todo-check { align-self: start; }
 
 /* Meal plan: day ticks big enough for a thumb. */
 .week-pick input[type="checkbox"] { width: 1.25rem; height: 1.25rem; flex: none; }

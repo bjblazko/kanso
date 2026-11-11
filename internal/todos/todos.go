@@ -97,6 +97,9 @@ type Store struct {
 	repo    *store.Repo
 	mu      sync.Mutex
 	now     func() time.Time
+	// Join adds a moved item to a like item on dst (amounts added up) and
+	// reports whether it did; nil or false: the item goes to the end.
+	Join func(dst *List, it Item, lang string) bool
 }
 
 // NewStore opens the lists below dataDir and keeps them out of Git.

@@ -1,7 +1,7 @@
 ---
 status: done
 created: 2026-11-07
-updated: 2026-11-07
+updated: 2026-11-11
 ---
 
 # Shopping lists
@@ -13,6 +13,10 @@ on a recipe shows a preview with every ingredient ticked for the chosen
 servings and adds them to a new or existing shopping list, adding up amounts of
 the same ingredient. Second of three parts: recipes, shopping list, cooking
 plan.
+
+Since 0.4.0 an item one did not get moves to another shopping list (or a new
+one named "Einkauf <date>"): tap it, pick the list under "Auf andere Liste",
+"Verschieben". Note and "für …" go along; a like item there adds up.
 
 ## Related
 

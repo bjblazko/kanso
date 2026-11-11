@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Created:** 2026-11-07
-**Updated:** 2026-11-07
+**Updated:** 2026-11-11
 
 ## Context
 
@@ -26,6 +26,11 @@ as their own list type with one file per item.
   with every ingredient ticked, then one change to the list. The pure package
   `internal/shopping` plans it and adds up amounts of the same ingredient in
   compatible units, never into an item already ticked.
+- An item not got moves to another shopping list with the operation `move`
+  (`list`, `item`, `to`, `lang`): one operation, so offline it neither doubles
+  nor disappears; the server takes the item (with note and `for`) off the one
+  list as a deletion and adds it unticked to the other, adding it up with a
+  like item there as filling does (2026-11-11). Only between shopping lists.
 
 ## Alternatives Considered
 

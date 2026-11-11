@@ -26,7 +26,7 @@ const (
 // field of an item the later change wins. Sending an op twice does no harm.
 type Op struct {
 	ID    string `json:"id"`
-	Kind  string `json:"kind"` // create, rename, add, text, done, sub, note, delete
+	Kind  string `json:"kind"` // create, rename, add, text, done, sub, note, delete, move
 	List  string `json:"list"`
 	Item  string `json:"item,omitempty"`
 	After string `json:"after,omitempty"` // add: insert below this item; "" = at the end
@@ -36,6 +36,10 @@ type Op struct {
 	At    int64  `json:"at"`
 	// ListKind is the kind of a list made by create: "" or KindShopping.
 	ListKind string `json:"listKind,omitempty"`
+	// To is the shopping list a move takes the item to; Lang is how its
+	// amounts are written when they add up with an item there.
+	To   string `json:"to,omitempty"`
+	Lang string `json:"lang,omitempty"`
 }
 
 var errRejected = errors.New("operation rejected")
@@ -50,19 +54,27 @@ func (s *Store) Apply(sub string, g access.Groups, ops []Op) []string {
 	changed := map[string]bool{}
 	var rejected []string
 	for _, op := range ops {
-		l, err := s.listFor(sub, g, op, lists)
-		if err == nil {
-			var c bool
-			if c, err = applyOp(l, sub, op, s.now()); c {
-				changed[l.ID] = true
-			}
-		}
-		if err != nil {
+		if err := s.apply1(sub, g, op, lists, changed); err != nil {
 			rejected = append(rejected, op.ID)
 		}
 	}
 	s.save(lists, changed)
 	return rejected
+}
+
+func (s *Store) apply1(sub string, g access.Groups, op Op, lists map[string]*List, changed map[string]bool) error {
+	l, err := s.listFor(sub, g, op, lists)
+	if err != nil {
+		return err
+	}
+	if op.Kind == "move" {
+		return s.move(sub, g, l, op, lists, changed)
+	}
+	c, err := applyOp(l, sub, op, s.now())
+	if c {
+		changed[l.ID] = true
+	}
+	return err
 }
 
 // listFor loads (or, for create, makes) the list an op works on.
@@ -196,17 +208,14 @@ func deleteItem(l *List, op Op, now time.Time) bool {
 	if i < 0 {
 		return false
 	}
-	end := i + 1
-	for !l.Items[i].Sub && end < len(l.Items) && l.Items[end].Sub {
-		end++
-	}
+	stop := end(l, i)
 	if l.Deleted == nil {
 		l.Deleted = map[string]int64{}
 	}
-	for _, it := range l.Items[i:end] {
+	for _, it := range l.Items[i:stop] {
 		l.Deleted[it.ID] = now.UnixMilli()
 	}
-	l.Items = slices.Delete(l.Items, i, end)
+	l.Items = slices.Delete(l.Items, i, stop)
 	return true
 }
 

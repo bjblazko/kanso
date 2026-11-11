@@ -7,6 +7,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-11
+
+### Added
+- Shopping lists: an item one did not get moves to another shopping list or to a new one ("Einkauf 12.11."): tap it, "Auf andere Liste", "Verschieben". Note and "für …" go along, it arrives unticked, and a like item there adds up ("200 g Mehl" onto "300 g Mehl" gives "500 g Mehl"). Works offline like ticking.
+
 ## [0.3.0] - 2026-11-11
 
 ### Added

@@ -12,6 +12,7 @@ import (
 	"io/fs"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/config"
@@ -21,6 +22,7 @@ import (
 	"github.com/bjblazko/kanso/internal/notes"
 	"github.com/bjblazko/kanso/internal/recipeimport"
 	"github.com/bjblazko/kanso/internal/search"
+	"github.com/bjblazko/kanso/internal/shopping"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/tasks"
@@ -68,6 +70,11 @@ func New(d Deps) (*Server, error) {
 		return nil, err
 	}
 	s := &Server{Deps: d, static: static}
+	if d.Todos != nil { // a moved shopping item adds up with a like one (ADR-011)
+		d.Todos.Join = func(dst *todos.List, it todos.Item, lang string) bool {
+			return shopping.Join(dst, it, lang, time.Now())
+		}
+	}
 	if s.version, err = hashFS(static); err != nil {
 		return nil, err
 	}

@@ -212,3 +212,23 @@ func TestNewListHasEmptyArrays(t *testing.T) {
 		t.Fatalf("body %s", body)
 	}
 }
+
+// A shopping item moves to another shopping list and adds up with a like item there.
+func TestSyncMovesAShoppingItem(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	syncTodos(t, ts, anna, `{"ops":[
+{"id":"op1","kind":"create","list":"`+gardenID+`","text":"KW 46","listKind":"shopping","at":1},
+{"id":"op2","kind":"create","list":"marktaaaaaaa","text":"Markt","listKind":"shopping","at":1},
+{"id":"op3","kind":"add","list":"`+gardenID+`","item":"itemaaaaaaaa","text":"200 g Mehl","at":1},
+{"id":"op4","kind":"add","list":"marktaaaaaaa","item":"itembbbbbbbb","text":"300 g Mehl","at":1},
+{"id":"op5","kind":"move","list":"`+gardenID+`","item":"itemaaaaaaaa","to":"marktaaaaaaa","lang":"de","at":2}]}`, true)
+	_, body := get(t, anna, ts.URL+"/api/todos")
+	if !strings.Contains(body, `"text":"500 g Mehl"`) || strings.Contains(body, `"text":"200 g Mehl"`) {
+		t.Fatalf("body %s", body)
+	}
+	_, page := get(t, anna, ts.URL+"/todos")
+	if !strings.Contains(page, `"move":"Auf andere Liste"`) {
+		t.Error("no move message for todos.js")
+	}
+}

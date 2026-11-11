@@ -26,7 +26,8 @@ var todoMessages = []string{"title", "new_list", "create", "empty", "offline_emp
 	"only_you", "you", "visible_to", "new_item", "add", "indent", "outdent", "add_sub", "delete_item", "rename", "share",
 	"delete_list", "all", "waiting_one", "waiting_many", "sync_login", "not_found", "name", "save", "cancel",
 	"item", "edit_item", "change_sharing", "toolbar", "path",
-	"create_shopping", "shop_new_item", "note", "note_hint", "for", "more", "less", "amount", "edit_amount"}
+	"create_shopping", "shop_new_item", "note", "note_hint", "for", "more", "less", "amount", "edit_amount",
+	"move", "move_do", "move_new", "move_name"}
 
 // todosPage serves the page for /todos and /todos/{id}; todos.js draws it
 // from the copy on the device, so it also opens offline.

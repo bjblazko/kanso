@@ -128,6 +128,7 @@ function applyOp(lists, op) {
   if (op.kind === 'rename') l.name = op.text;
   else if (op.kind === 'add') addItem(l, op);
   else if (op.kind === 'delete') deleteItem(l, op.item);
+  else if (op.kind === 'move') moveItem(l, lists.get(op.to), op.item);
   else setField(l, op);
   l.updated = new Date(op.at).toISOString();
 }
@@ -155,6 +156,16 @@ function deleteItem(l, id) {
   let end = i + 1;
   while (!l.items[i].sub && l.items[end]?.sub) end++;
   l.items.splice(i, end - i);
+}
+
+// moveItem takes an item to the end of another list, unticked; the server
+// adds it up with a like item there, the next sync shows that.
+function moveItem(from, to, id) {
+  const it = from.items.find((x) => x.id === id);
+  if (!it || !to || to.items.some((x) => x.id === id)) return;
+  deleteItem(from, id);
+  to.items.push({ ...it, done: false, sub: false });
+  to.updated = new Date().toISOString();
 }
 
 // lists returns the server state with the waiting operations applied, most
@@ -577,7 +588,7 @@ function shopRow(l, it) {
     type: 'checkbox', 'aria-label': it.text, checked: it.done,
     onchange: (e) => change({ kind: 'done', list: l.id, item: it.id, done: e.target.checked }),
   }));
-  if (editing) return h('li', { className: cls }, box, shopEdit(l, it));
+  if (editing) return h('li', { className: cls }, box, h('div', { className: 'shop-editing' }, shopEdit(l, it), moveForm(l, it)));
   // A grid: tick, text and − amount + in a row, the note and "für …" below across the width.
   const text = h('button', { type: 'button', className: 'todo-text', onclick: () => startEdit(l, it) }, it.text);
   return h('li', { className: cls }, box, text, stepper(l, it) || h('span'), shopMeta(it));
@@ -662,6 +673,30 @@ function shopEdit(l, it) {
       h('button', { type: 'submit', className: 'btn btn-secondary btn-sm' }, msg.save),
       button(msg.cancel, cancel, 'btn-quiet'),
       button(msg.delete_item, () => { state.editing = null; change({ kind: 'delete', list: l.id, item: it.id }); }, 'btn-destructive')));
+}
+
+// moveForm takes an item to another shopping list, or to a new one named by today.
+function moveForm(l, it) {
+  const others = lists().filter((x) => x.kind === SHOPPING && x.id !== l.id);
+  const name = fill(msg.move_name, { date: new Date().toLocaleDateString(document.documentElement.lang || 'de', { day: 'numeric', month: 'numeric' }) });
+  const move = async (event) => {
+    event.preventDefault();
+    let to = event.target.elements.to.value;
+    commitEdit(l);
+    state.editing = null;
+    if (to === 'new') {
+      to = newID();
+      await change({ kind: 'create', list: to, text: name, listKind: SHOPPING });
+    }
+    await change({ kind: 'move', list: l.id, item: it.id, to, lang: document.documentElement.lang || 'de' });
+  };
+  return h('form', { className: 'field shop-move', onsubmit: move },
+    h('label', { for: 'shop-move' }, msg.move),
+    h('div', { className: 'shop-move-row' },
+      h('select', { id: 'shop-move', name: 'to' },
+        ...others.map((x) => h('option', { value: x.id }, x.name)),
+        h('option', { value: 'new' }, fill(msg.move_new, { name }))),
+      h('button', { type: 'submit', className: 'btn btn-secondary' }, msg.move_do)));
 }
 
 // ---- Wiring ----------------------------------------------------------------
