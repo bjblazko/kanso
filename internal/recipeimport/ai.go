@@ -23,15 +23,19 @@ const maxText = 30000
 //go:embed prompt.md
 var prompt string
 
-// FromAI asks the AI to write the page's recipe in Kanso's format.
-func FromAI(ctx context.Context, c ai.Client, cfg ai.Config, page Page) (Draft, error) {
+// languageNames name the person's language for the AI, in German like the prompt.
+var languageNames = map[string]string{"de": "Deutsch", "en": "Englisch"}
+
+// FromAI asks the AI to write the page's recipe in Kanso's format; lang is
+// the person's language, used when the page's own is not clear.
+func FromAI(ctx context.Context, c ai.Client, cfg ai.Config, page Page, lang string) (Draft, error) {
 	text := Text(page.HTML)
 	if r := []rune(text); len(r) > maxText {
 		text = string(r[:maxText])
 	}
 	answer, err := c.Complete(ctx, cfg, []ai.Message{
 		{Role: "system", Content: prompt},
-		{Role: "user", Content: "Seite: " + page.URL + "\n\n" + text},
+		{Role: "user", Content: "Seite: " + page.URL + "\nSprache, wenn die Seite keine eindeutige hat: " + languageNames[langOr(lang)] + "\n\n" + text},
 	})
 	if err != nil {
 		return Draft{}, err

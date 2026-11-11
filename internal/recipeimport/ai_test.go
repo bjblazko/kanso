@@ -40,7 +40,7 @@ func TestFromAI(t *testing.T) {
 	var seen string
 	cfg := fakeAI(t, answer, &seen)
 	page := Page{URL: "https://blog.example/apfel", HTML: "<html><body><h1>Omas Apfelkuchen</h1><p>500 g Äpfel</p><script>x</script></body></html>"}
-	d, err := FromAI(context.Background(), ai.Client{}, cfg, page)
+	d, err := FromAI(context.Background(), ai.Client{}, cfg, page, "de")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,7 +55,7 @@ func TestFromAI(t *testing.T) {
 
 func TestFromAIWithoutRecipe(t *testing.T) {
 	cfg := fakeAI(t, "Auf dieser Seite steht kein Rezept.", nil)
-	if _, err := FromAI(context.Background(), ai.Client{}, cfg, Page{URL: "https://x.example", HTML: "<p>Hallo</p>"}); !errors.Is(err, ErrNoRecipe) {
+	if _, err := FromAI(context.Background(), ai.Client{}, cfg, Page{URL: "https://x.example", HTML: "<p>Hallo</p>"}, "de"); !errors.Is(err, ErrNoRecipe) {
 		t.Fatalf("%v", err)
 	}
 }
@@ -64,7 +64,7 @@ func TestFromAICutsLongPages(t *testing.T) {
 	var seen string
 	cfg := fakeAI(t, answer, &seen)
 	long := "<p>" + strings.Repeat("Wort ", 20000) + "</p>"
-	if _, err := FromAI(context.Background(), ai.Client{}, cfg, Page{URL: "https://x.example", HTML: long}); err != nil {
+	if _, err := FromAI(context.Background(), ai.Client{}, cfg, Page{URL: "https://x.example", HTML: long}, "de"); err != nil {
 		t.Fatal(err)
 	}
 	if len(seen) > maxText+8000 {
@@ -93,5 +93,16 @@ func TestTrailingTextIsNoStep(t *testing.T) {
 	d := parseAnswer("# Kuchen\n\n## Zutaten\n\n- 1 Ei\n\n## Zubereitung\n\n1. Backen.\n\nGuten Appetit!")
 	if !slices.Equal(d.Steps, []string{"Backen."}) {
 		t.Fatalf("%q", d.Steps)
+	}
+}
+
+func TestFromAIAsksForTheLanguage(t *testing.T) {
+	var seen string
+	cfg := fakeAI(t, answer, &seen)
+	if _, err := FromAI(context.Background(), ai.Client{}, cfg, Page{URL: "https://x.example", HTML: "<p>Rezept</p>"}, "de"); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(seen, "Deutsch") {
+		t.Fatalf("language not passed: %s", seen)
 	}
 }

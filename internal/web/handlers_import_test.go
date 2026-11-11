@@ -196,3 +196,16 @@ func TestAIMarkSaysWhereTextGoes(t *testing.T) {
 		t.Fatal("mark without AI")
 	}
 }
+
+func TestImportHeadingsFollowTheRecipesLanguage(t *testing.T) {
+	ts, _, anna := setupHaus(t)
+	for page, want := range map[string]string{
+		ldPage: "## Zubereitung", // no language on the page: the person's (German)
+		strings.Replace(ldPage, "<html>", `<html lang="en-GB">`, 1): "## Method",
+	} {
+		_, body := ts.postFormBody(t, anna, "/recipes/import", "/recipes/import", url.Values{"url": {recipeSite(t, page)}, "space": {"haus"}})
+		if got := htmlUnescape(between(body, `name="body" rows="16">`, `</textarea>`)); !strings.Contains(got, want) {
+			t.Errorf("want %q in\n%s", want, got)
+		}
+	}
+}

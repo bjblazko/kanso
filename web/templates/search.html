@@ -3,6 +3,7 @@
 {{if $d.Searched}}
   <nav class="tag-filter" aria-label="{{.T "search.filters"}}">
     <a class="tag" href="{{$d.RecipeFilter.Href}}" aria-pressed="{{if $d.RecipeFilter.Pressed}}true{{else}}false{{end}}">{{.T "search.only_recipes"}}</a>
+    {{template "star-filters" (starFilterArgs $d.StarFilters $)}}
     {{range $d.Filters}}<a class="tag" href="{{.Href}}" aria-pressed="{{if .Pressed}}true{{else}}false{{end}}">{{.Name}}</a>{{end}}
   </nav>
   {{if $d.Count}}<p class="meta">{{.T "search.found" $d.Count}}</p>
@@ -10,7 +11,7 @@
   <ol class="list-plain recipe-list">{{range $d.Recipes}}<li class="row">
     {{if .Photo}}<img class="recipe-thumb" src="{{.Photo}}" alt="" loading="lazy" width="56" height="56">{{else}}<span class="recipe-thumb" aria-hidden="true"></span>{{end}}
     <a href="/p/{{.ID}}">{{.Title}}</a>
-    <span class="recipe-row-meta">{{range .Tags}}<span class="tag-text">{{.}}</span>{{end}}<span>{{index $d.Spaces .Space}}</span></span>
+    <span class="recipe-row-meta">{{template "stars" (starsArgs .Rating $)}}{{range .Tags}}<span class="tag-text">{{.}}</span>{{end}}<span>{{index $d.Spaces .Space}}</span></span>
   </li>{{end}}</ol>
   <p><a href="{{$d.KitchenURL}}">{{.T "search.in_kitchen"}}</a></p></section>{{end}}
   {{if $d.Hits}}<section class="results-pages" aria-labelledby="res-pages"><h2 id="res-pages">{{.T "search.pages"}}</h2>

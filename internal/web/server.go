@@ -107,8 +107,36 @@ var templateFuncs = template.FuncMap{
 	"hasPrefix": strings.HasPrefix,
 	"aiMark":    func(t *aiTarget, v view) aiMarkArgs { return aiMarkArgs{T: t, V: v} },
 	// placeKind and placeStep split a photo place like "step-3" for its label.
-	"placeKind": func(p string) string { k, _, _ := strings.Cut(p, "-"); return k },
-	"placeStep": func(p string) string { _, n, _ := strings.Cut(p, "-"); return n },
+	"placeKind":      func(p string) string { k, _, _ := strings.Cut(p, "-"); return k },
+	"placeStep":      func(p string) string { _, n, _ := strings.Cut(p, "-"); return n },
+	"stars":          starRow,
+	"starsArgs":      func(n int, v view) starsArgs { return starsArgs{N: n, V: v} },
+	"starFilterArgs": func(l []starLink, v view) starFilterArgs { return starFilterArgs{Links: l, V: v} },
+}
+
+type starFilterArgs struct {
+	Links []starLink
+	V     view
+}
+
+type starsArgs struct {
+	N int
+	V view
+}
+
+// star is one of a rating's five stars; On when it is filled.
+type star struct {
+	N  int
+	On bool
+}
+
+// starRow is the five stars of a rating.
+func starRow(rating int) []star {
+	row := make([]star, maxStars)
+	for i := range row {
+		row[i] = star{N: i + 1, On: i < rating}
+	}
+	return row
 }
 
 // hashFS fingerprints the static files for cache-busting URLs.

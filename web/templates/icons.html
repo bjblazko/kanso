@@ -25,3 +25,7 @@
 {{- else if eq . "star"}}<path d="M12 3l2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z"/>
 {{- else}}<path d="M3 6a1 1 0 0 1 1-1h5l2 2h9a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
 {{- end}}</svg>{{end}}
+{{/* stars shows a rating read-only; nothing when not rated. */}}
+{{define "stars"}}{{if .N}}<span class="stars" role="img" aria-label="{{.V.T "recipe.stars_n" .N}}">{{range stars .N}}<span{{if .On}} class="on"{{end}}>{{template "icon" "star"}}</span>{{end}}</span>{{end}}{{end}}
+{{/* star-filters are the minimum ratings as filter chips. */}}
+{{define "star-filters"}}{{$v := .V}}{{range .Links}}<a class="tag" href="{{.Href}}" aria-pressed="{{if .Pressed}}true{{else}}false{{end}}">{{if eq .N 5}}{{$v.T "recipe.stars_five"}}{{else}}{{$v.T "recipe.stars_min" .N}}{{end}}</a>{{end}}{{end}}

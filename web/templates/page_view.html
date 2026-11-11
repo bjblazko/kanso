@@ -63,4 +63,10 @@
 {{- with $m.Time}}<span>{{$.T "recipe.minutes_n" .}}</span>{{end}}
 {{- with $.Data.SourceURL}}<span><a href="{{.}}" rel="noopener noreferrer">{{$m.Source}}</a></span>{{else}}{{with $m.Source}}<span>{{.}}</span>{{end}}{{end}}
 {{- range $m.Tags}}<a class="tag" href="/recipes?tag={{urlquery .}}">{{.}}</a>{{end}}
-</p>{{end}}
+</p>
+{{if .Data.CanWrite}}<form class="rate" method="post" action="/recipes/{{.Data.Page.Meta.ID}}/rating" role="group" aria-label="{{if $m.Rating}}{{$.T "recipe.stars_n" $m.Rating}}{{else}}{{$.T "recipe.unrated"}}{{end}}">
+<input type="hidden" name="csrf" value="{{$.CSRF}}">
+<span class="rate-group">
+{{- range stars $m.Rating}}<button class="rate-star{{if .On}} on{{end}}" type="submit" name="stars" value="{{.N}}" aria-label="{{$.T "recipe.rate_n" .N}}" aria-pressed="{{if eq .N $m.Rating}}true{{else}}false{{end}}">{{template "icon" "star"}}</button>{{end}}</span>
+<span class="meta" aria-hidden="true">{{if $m.Rating}}{{$.T "recipe.stars_n" $m.Rating}}{{else}}{{$.T "recipe.unrated"}}{{end}}</span></form>
+{{else if $m.Rating}}<p class="recipe-meta">{{template "stars" (starsArgs $m.Rating $)}}</p>{{end}}{{end}}

@@ -105,3 +105,19 @@ func TestPageImageFallback(t *testing.T) {
 		t.Errorf("javascript: %q", got)
 	}
 }
+
+func TestPageLang(t *testing.T) {
+	cases := map[string]string{
+		`<html lang="de-DE"><head></head></html>`:                                          "de",
+		`<html class="x" lang='en'>`:                                                       "en",
+		`<html><head><meta http-equiv="content-language" content="de"></head></html>`:      "de",
+		`<script type="application/ld+json">{"@type":"Recipe","inLanguage":"de"}</script>`: "de",
+		`<html lang="fr">`: "",
+		`<html>`:           "",
+	}
+	for page, want := range cases {
+		if got := PageLang(page); got != want {
+			t.Errorf("%s → %q, want %q", page, got, want)
+		}
+	}
+}

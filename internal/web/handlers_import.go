@@ -58,13 +58,17 @@ func (s *Server) importRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	v := s.newView(r, "", nil)
-	draft, fetched, withAI, err := s.draftFrom(r.Context(), page.URL)
+	draft, fetched, withAI, err := s.draftFrom(r.Context(), page.URL, v.Lang)
 	if err != nil {
 		page.Error = v.T(importErrorKey(err))
 		s.renderImportForm(w, r, http.StatusBadRequest, page)
 		return
 	}
-	body := draft.Markdown(v.Lang)
+	lang := recipeimport.PageLang(fetched.HTML) // the headings follow the recipe's language
+	if lang == "" {
+		lang = v.Lang
+	}
+	body := draft.Markdown(lang)
 	v.Title, v.Data = draft.Title, importPreview{Space: page.Space, Draft: draft, Body: body, WithAI: withAI,
 		Ingredients: recipes.Parse(body).Ingredients(), Photos: s.previewPhotos(r.Context(), draft, fetched), AI: s.aiTarget(r.Context()),
 		Places: places(len(draft.Steps))}
@@ -73,7 +77,8 @@ func (s *Server) importRecipe(w http.ResponseWriter, r *http.Request) {
 
 var errNoData = errors.New("no recipe data and no AI")
 
-func (s *Server) draftFrom(ctx context.Context, url string) (recipeimport.Draft, recipeimport.Page, bool, error) {
+// draftFrom fetches url and reads its recipe data, else asks the AI in lang.
+func (s *Server) draftFrom(ctx context.Context, url, lang string) (recipeimport.Draft, recipeimport.Page, bool, error) {
 	fctx, cancel := context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 	p, err := s.Fetch.Fetch(fctx, url)
@@ -89,7 +94,7 @@ func (s *Server) draftFrom(ctx context.Context, url string) (recipeimport.Draft,
 	}
 	actx, cancel2 := context.WithTimeout(ctx, ai.Timeout)
 	defer cancel2()
-	d, err := recipeimport.FromAI(actx, ai.Client{}, cfg, p)
+	d, err := recipeimport.FromAI(actx, ai.Client{}, cfg, p, lang)
 	return d, p, true, err
 }
 

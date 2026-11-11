@@ -10,14 +10,15 @@
 <div class="content">
 {{if $d.Any}}<form method="get" action="/recipes" class="kitchen-search" role="search">
   <div class="field"><label for="recipe-q">{{.T "recipe.search_hint"}}</label>
-  <input id="recipe-q" name="q" type="search" value="{{$d.Query}}"></div>
-  {{range $d.Selected}}<input type="hidden" name="tag" value="{{.}}">{{end}}
+  <input id="recipe-q" name="q" type="search" value="{{$d.Filters.Query}}"></div>
+  {{range $d.Filters.Tags}}<input type="hidden" name="tag" value="{{.}}">{{end}}
+  {{with $d.Filters.Stars}}<input type="hidden" name="stars" value="{{.}}">{{end}}
   <button class="btn btn-secondary" type="submit">{{.T "nav.search"}}</button>
 </form>
-{{if $d.Tags}}<nav class="tag-filter" aria-label="{{.T "recipe.tags"}}">{{range $d.Tags}}<a class="tag" href="{{.Href}}" aria-pressed="{{if .Pressed}}true{{else}}false{{end}}">{{.Name}}</a>{{end}}</nav>{{end}}
+{{if or $d.Tags $d.Stars}}<nav class="tag-filter" aria-label="{{.T "search.filters"}}">{{template "star-filters" (starFilterArgs $d.Stars $)}}{{range $d.Tags}}<a class="tag" href="{{.Href}}" aria-pressed="{{if .Pressed}}true{{else}}false{{end}}">{{.Name}}</a>{{end}}</nav>{{end}}
 {{if $d.Rows}}<ul class="recipe-list list-plain">
 {{range $d.Rows}}<li class="row">{{if .Image}}<img class="recipe-thumb" src="/p/{{.ID}}/attachments/{{.Image}}" alt="" loading="lazy" width="56" height="56">{{else}}<span class="recipe-thumb" aria-hidden="true"></span>{{end}}<a href="/p/{{.ID}}">{{.Title}}</a>
-  <span class="recipe-row-meta">{{range .Tags}}<span class="tag-text">{{.}}</span>{{end}}{{with .Time}}<span>{{$.T "recipe.minutes_n" .}}</span>{{end}}<span>{{.Space}}</span></span></li>
+  <span class="recipe-row-meta">{{template "stars" (starsArgs .Rating $)}}{{range .Tags}}<span class="tag-text">{{.}}</span>{{end}}{{with .Time}}<span>{{$.T "recipe.minutes_n" .}}</span>{{end}}<span>{{.Space}}</span></span></li>
 {{end}}</ul>{{else}}<p class="empty">{{.T "recipe.no_match"}}</p>{{end}}
 {{else}}<p class="empty">{{.T "recipe.empty"}}</p>{{end}}
 </div></div>{{end}}

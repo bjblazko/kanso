@@ -117,3 +117,11 @@ func TestBrowseAndTags(t *testing.T) {
 		t.Fatalf("%+v", got)
 	}
 }
+
+func TestHitsCarryTheRating(t *testing.T) {
+	ix := NewIndex()
+	ix.Put(Doc{ID: "b", Title: "Brot", Body: "Mehl", Kind: KindRecipe, Rating: 4})
+	if hits := ix.Search("brot", func(d Doc) bool { return d.Rating >= 4 }, 10); len(hits) != 1 || hits[0].Rating != 4 {
+		t.Fatalf("%+v", hits)
+	}
+}

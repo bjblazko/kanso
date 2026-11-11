@@ -4,7 +4,6 @@ package web
 
 import (
 	"net/http"
-	"net/url"
 	"slices"
 	"strings"
 
@@ -53,7 +52,7 @@ func docOf(p wiki.Page) search.Doc {
 	d := docText(p)
 	d.Tags = recipes.NormalizeTags(strings.Join(p.Meta.Tags, ","))
 	if p.Meta.IsRecipe() {
-		d.Kind = search.KindRecipe
+		d.Kind, d.Rating = search.KindRecipe, p.Meta.Rating
 	}
 	return d
 }
@@ -70,18 +69,17 @@ func docOfNote(n notes.Note) search.Doc {
 	return search.Doc{ID: n.Meta.ID, Owner: n.Owner, Title: notes.Title(n), Body: n.Body}
 }
 
-// searchPage is the one search: words, tags and "only recipes" as filters;
-// hits grouped into recipes (with photos), pages and own notes.
+// searchPage is the one search: words, tags, stars and "only recipes" as
+// filters; hits grouped into recipes (with photos), pages and own notes.
 type searchPage struct {
-	Query        string
-	Tags         []string // chosen tag filters
-	OnlyRecipes  bool
+	filters
 	Searched     bool // words or a filter were given
 	Recipes      []recipeHit
 	Hits         []search.Hit // other pages
 	Notes        []search.Hit // own notes
 	Count        int
 	Filters      []tagLink // the tags of the hits, to switch on and off
+	StarFilters  []starLink
 	RecipeFilter tagLink
 	KitchenURL   string
 	Spaces       map[string]string // slug → name
@@ -93,17 +91,15 @@ type recipeHit struct {
 }
 
 func (s *Server) search(w http.ResponseWriter, r *http.Request) {
-	q := strings.TrimSpace(r.URL.Query().Get("q"))
-	data := searchPage{Query: q, Spaces: map[string]string{}, OnlyRecipes: r.URL.Query().Get("type") == search.KindRecipe,
-		Tags: recipes.NormalizeTags(strings.Join(r.URL.Query()["tag"], ","))}
-	data.Searched = q != "" || len(data.Tags) > 0 || data.OnlyRecipes
+	data := searchPage{filters: filtersFrom(r), Spaces: map[string]string{}}
+	data.Searched = data.Query != "" || len(data.Tags) > 0 || data.OnlyRecipes || data.Stars > 0
 	if data.Searched {
 		s.fillSearch(&data, s.searchAllowed(r, data))
 	}
 	for _, sp := range s.Spaces.List() {
 		data.Spaces[sp.Slug] = sp.Name
 	}
-	v := s.newView(r, q, data)
+	v := s.newView(r, data.Query, data)
 	v.Title = v.T("search.title")
 	s.render(w, r, http.StatusOK, "search", v)
 }
@@ -113,7 +109,7 @@ func (s *Server) searchAllowed(r *http.Request, data searchPage) func(search.Doc
 	u, p := auth.UserFrom(r.Context())
 	g := s.groups()
 	return func(d search.Doc) bool {
-		if data.OnlyRecipes && d.Kind != search.KindRecipe || !hasAll(d.Tags, data.Tags) {
+		if data.OnlyRecipes && d.Kind != search.KindRecipe || !data.accepts(d.Tags, d.Rating) {
 			return false
 		}
 		if d.Owner != "" {
@@ -153,9 +149,15 @@ func (s *Server) fillSearch(data *searchPage, allowed func(search.Doc) bool) {
 		}
 	}
 	data.Count = len(hits)
-	data.Filters = filterLinks(append(tags, data.Tags...), data.Tags, func(t []string) string { return searchURL(data.Query, t, data.OnlyRecipes) })
-	data.RecipeFilter = tagLink{Pressed: data.OnlyRecipes, Href: searchURL(data.Query, data.Tags, !data.OnlyRecipes)}
-	data.KitchenURL = kitchenURL(data.Query, data.Tags)
+	f := data.filters
+	data.Filters = filterLinks(append(tags, f.Tags...), f.Tags, func(t []string) string { return f.withTags(t).searchURL() })
+	if len(data.Recipes) > 0 || f.Stars > 0 {
+		data.StarFilters = starLinks(f, filters.searchURL)
+	}
+	only := f
+	only.OnlyRecipes = !f.OnlyRecipes
+	data.RecipeFilter = tagLink{Pressed: f.OnlyRecipes, Href: only.searchURL()}
+	data.KitchenURL = f.kitchenURL()
 }
 
 // photoOf is the address of a recipe page's photo, or "".
@@ -166,18 +168,4 @@ func (s *Server) photoOf(id string) string {
 		}
 	}
 	return ""
-}
-
-func searchURL(q string, tags []string, onlyRecipes bool) string {
-	v := url.Values{}
-	if q != "" {
-		v.Set("q", q)
-	}
-	for _, t := range tags {
-		v.Add("tag", t)
-	}
-	if onlyRecipes {
-		v.Set("type", search.KindRecipe)
-	}
-	return "/search?" + v.Encode()
 }

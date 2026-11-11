@@ -35,6 +35,7 @@ type PageMeta struct {
 	Time     int      `yaml:"time,omitempty"`   // minutes
 	Image    string   `yaml:"image,omitempty"`  // a photo among the page's attachments
 	Cooked   []string `yaml:"cooked,omitempty"` // days noted with "Heute gekocht", "2006-01-02"
+	Rating   int      `yaml:"rating,omitempty"` // stars 1–5; 0 = not rated
 }
 
 // TypeRecipe marks a page as a recipe.

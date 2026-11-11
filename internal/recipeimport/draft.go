@@ -73,3 +73,31 @@ func Text(page string) string {
 	}
 	return strings.Join(lines, "\n")
 }
+
+// langOr is lang if Kanso speaks it, else German.
+func langOr(lang string) string {
+	if _, ok := words[lang]; ok {
+		return lang
+	}
+	return "de"
+}
+
+var (
+	htmlLang = regexp.MustCompile(`(?is)<html\b[^>]*\blang\s*=\s*["']?([a-z]{2})`)
+	metaLang = regexp.MustCompile(`(?is)<meta\b[^>]*http-equiv\s*=\s*["']?content-language["']?[^>]*content\s*=\s*["']?([a-z]{2})`)
+	ldLang   = regexp.MustCompile(`"inLanguage"\s*:\s*"([a-zA-Z]{2})`)
+)
+
+// PageLang is the language a page declares (html lang, content-language,
+// JSON-LD inLanguage) if Kanso writes recipes in it; "" otherwise.
+func PageLang(page string) string {
+	for _, re := range []*regexp.Regexp{htmlLang, metaLang, ldLang} {
+		if m := re.FindStringSubmatch(page); m != nil {
+			if l := strings.ToLower(m[1]); langOr(l) == l {
+				return l
+			}
+			return ""
+		}
+	}
+	return ""
+}

@@ -102,6 +102,38 @@ func (s *Server) markCooked(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/recipes/"+pc.Page.Meta.ID+"/cook", http.StatusSeeOther)
 }
 
+// maxStars is the best rating a recipe can get.
+const maxStars = 5
+
+// rateRecipe sets the recipe's stars; the stars it already has clear it.
+func (s *Server) rateRecipe(w http.ResponseWriter, r *http.Request) {
+	pc, ok := s.pageFor(w, r, access.Write)
+	if !ok {
+		return
+	}
+	if !pc.Page.Meta.IsRecipe() {
+		s.notFound(w, r)
+		return
+	}
+	stars, err := strconv.Atoi(r.PostFormValue("stars"))
+	if err != nil || stars < 1 || stars > maxStars {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	u, _ := auth.UserFrom(r.Context())
+	err = s.Wiki.SaveWith(u.Author(), pc.Page.Meta.ID, pc.Page.Meta.Title, pc.Page.Body, func(m *wiki.PageMeta) {
+		if m.Rating == stars {
+			stars = 0
+		}
+		m.Rating = stars
+	})
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	http.Redirect(w, r, "/p/"+pc.Page.Meta.ID, http.StatusSeeOther)
+}
+
 // renderInline turns the Markdown inside steps and ingredients into HTML.
 func (s *Server) renderInline(cv *cookView) {
 	base := markdown.PageCtx{Base: "/p/" + cv.Page.Meta.ID}

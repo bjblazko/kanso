@@ -548,6 +548,24 @@ html { scroll-padding-top: 9rem; }
 .import-photos { list-style: none; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); gap: var(--space-4); }
 .import-photos img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: var(--radius-sm); background: var(--bg-3); }
 
+/* Stars: filled in the text colour, empty as outline — a rating, not a signal.
+   On the recipe one framed group of five; pressing the given stars again clears them. */
+.stars { display: inline-flex; vertical-align: middle; color: var(--fg); }
+.stars .icon { width: 14px; height: 14px; }
+.stars .on .icon, .rate-star.on .icon { fill: currentColor; }
+.stars > span:not(.on) { color: var(--fg-2); }
+.rate { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin: var(--space-2) 0 var(--space-3); }
+.rate .meta { margin: 0; }
+.rate-group { display: inline-flex; }
+.rate-star { display: inline-grid; place-items: center; width: var(--control-h); height: var(--control-h); margin: 0 -1px 0 0; padding: 0;
+  border: 1px solid var(--line-strong); background: var(--bg); color: var(--fg); cursor: pointer; }
+.rate-star:first-of-type { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.rate-star:last-of-type { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; margin-right: 0; }
+.rate-star:hover { background: var(--bg-2); }
+.rate-star:focus-visible { outline: none; box-shadow: var(--focus-ring); position: relative; }
+.rate-star:not(.on) { color: var(--fg-2); }
+@media (pointer: coarse) { .rate-star { width: 44px; height: 44px; } }
+
 /* AI mark (ADR-013): a word and where the text goes — no colour, works in greyscale. */
 .ai-mark { display: inline-flex; align-items: center; gap: var(--space-1); padding: 0 var(--space-2); vertical-align: middle;
   background: var(--bg-3); border-radius: var(--radius-sm); color: var(--fg); font-size: var(--text-sm); white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }

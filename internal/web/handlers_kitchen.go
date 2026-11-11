@@ -5,7 +5,6 @@ package web
 import (
 	"errors"
 	"net/http"
-	"net/url"
 	"regexp"
 	"slices"
 	"sort"
@@ -43,6 +42,7 @@ type recipeRow struct {
 	Image            string // attachment name of its photo; "" = none
 	Tags             []string
 	Time             int
+	Rating           int
 }
 
 type tagLink struct {
@@ -51,11 +51,11 @@ type tagLink struct {
 }
 
 type kitchenPage struct {
-	Rows     []recipeRow
-	Tags     []tagLink
-	Query    string
-	Selected []string
-	Any      bool // the person can read at least one recipe
+	Rows    []recipeRow
+	Tags    []tagLink
+	Stars   []starLink // offered once any recipe has stars
+	Filters filters
+	Any     bool // the person can read at least one recipe
 }
 
 // visibleRecipes lists every recipe page the person may read, by title.
@@ -75,7 +75,7 @@ func (s *Server) visibleRecipes(who access.Principal) []recipeRow {
 
 func (s *Server) rowOf(p wiki.Page) recipeRow {
 	tags := recipes.NormalizeTags(strings.Join(p.Meta.Tags, ",")) // files edited outside Kanso may say "Deftig"
-	row := recipeRow{ID: p.Meta.ID, Title: p.Meta.Title, Tags: tags, Time: p.Meta.Time, Space: p.Space, Image: recipePhoto(p)}
+	row := recipeRow{ID: p.Meta.ID, Title: p.Meta.Title, Tags: tags, Time: p.Meta.Time, Space: p.Space, Image: recipePhoto(p), Rating: p.Meta.Rating}
 	if sp, ok := s.Spaces.Get(p.Space); ok {
 		row.Space = sp.Name
 	}
@@ -86,18 +86,25 @@ func (s *Server) rowOf(p wiki.Page) recipeRow {
 func (s *Server) kitchen(w http.ResponseWriter, r *http.Request) {
 	_, who := auth.UserFrom(r.Context())
 	all := s.visibleRecipes(who)
-	q := strings.TrimSpace(r.URL.Query().Get("q"))
-	selected := recipes.NormalizeTags(strings.Join(r.URL.Query()["tag"], ","))
-	kp := kitchenPage{Query: q, Selected: selected, Any: len(all) > 0, Tags: tagLinks(all, q, selected)}
-	found := s.recipeMatches(q)
+	f := filtersFrom(r)
+	f.OnlyRecipes = false // the kitchen holds recipes only anyway
+	kp := kitchenPage{Filters: f, Any: len(all) > 0, Tags: tagLinks(all, f)}
+	if anyRated(all) || f.Stars > 0 {
+		kp.Stars = starLinks(f, filters.kitchenURL)
+	}
+	found := s.recipeMatches(f.Query)
 	for _, row := range all {
-		if hasAll(row.Tags, selected) && (found == nil || found[row.ID]) {
+		if f.accepts(row.Tags, row.Rating) && (found == nil || found[row.ID]) {
 			kp.Rows = append(kp.Rows, row)
 		}
 	}
 	v := s.newView(r, "", kp)
 	v.Title = v.T("nav.kitchen")
 	s.render(w, r, http.StatusOK, "recipes", v)
+}
+
+func anyRated(rows []recipeRow) bool {
+	return slices.ContainsFunc(rows, func(r recipeRow) bool { return r.Rating > 0 })
 }
 
 // recipeMatches are the recipes the search finds for q; nil means no words, all match.
@@ -113,12 +120,12 @@ func (s *Server) recipeMatches(q string) map[string]bool {
 }
 
 // tagLinks offers every tag of the visible recipes as a link that switches it on or off.
-func tagLinks(rows []recipeRow, q string, selected []string) []tagLink {
+func tagLinks(rows []recipeRow, f filters) []tagLink {
 	var names []string
 	for _, row := range rows {
 		names = append(names, row.Tags...)
 	}
-	return filterLinks(names, selected, func(t []string) string { return kitchenURL(q, t) })
+	return filterLinks(names, f.Tags, func(t []string) string { return f.withTags(t).kitchenURL() })
 }
 
 // filterLinks makes one link per tag (each once, sorted) that switches it on
@@ -139,20 +146,6 @@ func toggle(tags []string, t string, on bool) []string {
 		return slices.DeleteFunc(slices.Clone(tags), func(x string) bool { return x == t })
 	}
 	return append(slices.Clone(tags), t)
-}
-
-func kitchenURL(q string, tags []string) string {
-	v := url.Values{}
-	if q != "" {
-		v.Set("q", q)
-	}
-	for _, t := range tags {
-		v.Add("tag", t)
-	}
-	if len(v) == 0 {
-		return "/recipes"
-	}
-	return "/recipes?" + v.Encode()
 }
 
 type newRecipeForm struct {

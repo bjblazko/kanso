@@ -25,6 +25,7 @@ type Doc struct {
 	ID, Space, Owner, Title, Body string
 	Tags                          []string // lower case; filters, also searched as words
 	Kind                          string   // "" or KindRecipe
+	Rating                        int      // a recipe's stars, 0 = not rated
 }
 
 // Hit is one search result.
@@ -32,6 +33,7 @@ type Hit struct {
 	ID, Space, Owner, Title, Snippet string
 	Tags                             []string
 	Kind                             string
+	Rating                           int
 	Score                            int
 }
 
@@ -106,7 +108,7 @@ func (ix *Index) Browse(allowed func(d Doc) bool, limit int) []Hit {
 }
 
 func hitOf(d Doc) Hit {
-	return Hit{ID: d.ID, Space: d.Space, Owner: d.Owner, Title: d.Title, Tags: d.Tags, Kind: d.Kind}
+	return Hit{ID: d.ID, Space: d.Space, Owner: d.Owner, Title: d.Title, Tags: d.Tags, Kind: d.Kind, Rating: d.Rating}
 }
 
 // score is 0 unless every term matches.

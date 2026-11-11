@@ -42,3 +42,30 @@ test('recipe: create, find by tag, cook with more servings, tick off', async ({ 
   await page.reload();
   await expect(page.locator('.cook-list input[type="checkbox"]').first()).not.toBeChecked();
 });
+
+test('recipe: give stars, filter the kitchen by them, clear them', async ({ page }) => {
+  await signIn(page, { sub: 'rita', name: 'Rita', admin: true });
+  const space = unique('Sterne');
+  await createSpace(page, space);
+  await page.goto('/recipes/new');
+  const title = unique('Linsensuppe');
+  await page.getByLabel('Titel').fill(title);
+  await page.getByLabel('Wiki-Bereich').selectOption({ label: space });
+  await page.getByRole('button', { name: 'Rezept anlegen' }).click();
+  await page.getByRole('button', { name: 'Speichern' }).click();
+  await expect(page).toHaveURL(/\/p\/[a-z2-7]{12}$/);
+
+  const stars = page.getByRole('group', { name: 'Noch nicht bewertet' });
+  await stars.getByRole('button', { name: 'Mit 5 bewerten' }).click();
+  await expect(page.getByRole('group', { name: '5 von 5 Sternen' })).toBeVisible();
+
+  await page.goto('/recipes');
+  await page.locator('.tag-filter').getByRole('link', { name: '5 Sterne' }).click();
+  await expect(page).toHaveURL(/stars=5/);
+  const row = page.locator('.recipe-list li', { hasText: title });
+  await expect(row.getByRole('img', { name: '5 von 5 Sternen' })).toBeVisible();
+
+  await row.getByRole('link', { name: title }).click();
+  await page.getByRole('button', { name: 'Mit 5 bewerten' }).click(); // the same stars again clear them
+  await expect(page.getByRole('group', { name: 'Noch nicht bewertet' })).toBeVisible();
+});

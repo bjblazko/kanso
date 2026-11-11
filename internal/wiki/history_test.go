@@ -104,3 +104,21 @@ func TestDiffIgnoresFrontmatter(t *testing.T) {
 		t.Errorf("diff of equal bodies = %+v, %v", lines, err)
 	}
 }
+
+func TestRestoreBringsBackTheRating(t *testing.T) {
+	w := newWiki(t)
+	p := mustCreate(t, w, "", "Curry")
+	if err := w.SaveWith(anna, p.Meta.ID, "Curry", "eins\n", func(m *PageMeta) { m.Type, m.Rating = TypeRecipe, 4 }); err != nil {
+		t.Fatal(err)
+	}
+	if err := w.SaveWith(anna, p.Meta.ID, "Curry", "zwei\n", func(m *PageMeta) { m.Rating = 0 }); err != nil {
+		t.Fatal(err)
+	}
+	revs, _ := w.History(p.Meta.ID, 50)
+	if err := w.Restore(anna, p.Meta.ID, revs[1].Hash); err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := w.ByID(p.Meta.ID); got.Meta.Rating != 4 {
+		t.Fatalf("rating %d", got.Meta.Rating)
+	}
+}

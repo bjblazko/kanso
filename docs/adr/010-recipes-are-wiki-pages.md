@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Created:** 2026-11-06
-**Updated:** 2026-11-06
+**Updated:** 2026-11-11
 
 ## Context
 
@@ -17,7 +17,8 @@ readable without Kanso.
 ## Decision
 
 A recipe is an ordinary wiki page with `type: recipe` in its frontmatter,
-plus optional `servings`, `tags`, `source` and `time`. Its text follows a
+plus optional `servings`, `tags`, `source` and `time` (later also `image`,
+`cooked` and `rating`, 1–5 stars shared by everyone who reads it). Its text follows a
 Markdown convention: a `## Zutaten` (or `Ingredients`) list of
 `[amount] [unit] name[, note]` lines, optional `###` groups, and a
 `## Zubereitung` (or `Schritte`, `Steps`, `Method`) list of steps. The pure

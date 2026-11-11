@@ -7,6 +7,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-11
+
+### Added
+- Stars for recipes: one to five, set on the recipe page by whoever may edit it (pressing the given stars again clears them), kept as `rating` in the page's frontmatter and its history. The kitchen and the search show them in the rows and filter by "ab 3 Sternen", "ab 4 Sternen" and "5 Sterne".
+
+### Fixed
+- Recipes imported from a web page get their headings ("Zutaten", "Zubereitung") in the page's language, else in the person's Kanso language; the AI is told that language too, instead of writing "Method" for a German household.
+
 ## [0.2.1] - 2026-11-11
 
 ### Fixed
