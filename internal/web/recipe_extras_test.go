@@ -7,7 +7,9 @@ import (
 	"slices"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/bjblazko/kanso/internal/mealplan"
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/wiki"
 )
@@ -28,14 +30,17 @@ func TestRecipePageShowsCookedDays(t *testing.T) {
 	plan := ts.familyPlan(t)
 	curry := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
 	ts.planMeal(t, plan, "2026-11-03", curry, "Curry", 4)
-	ts.planMeal(t, plan, "2026-11-12", curry, "Curry", 2)
+	next := time.Now().AddDate(0, 0, 7) // a planned day, always ahead
+	day := next.Format("2006-01-02")
+	start, _ := mealplan.ParseWeek("", next)
+	ts.planMeal(t, plan, day, curry, "Curry", 2)
 	_, body := get(t, anna, ts.URL+"/p/"+curry)
 	cooked := between(body, `<section class="cooked"`, `</section>`)
 	list := between(cooked, "<ul", "</ul>")
-	if strings.Index(list, "12.11.2026") > strings.Index(list, "3.11.2026") {
+	if strings.Index(list, next.Format("2.1.2006")) > strings.Index(list, "3.11.2026") {
 		t.Fatalf("not latest first:\n%s", list)
 	}
-	if !strings.Contains(cooked, "1× gekocht, zuletzt am 3.11.2026") || !strings.Contains(cooked, `href="/mealplan/`+plan+`?week=2026-W46#day-2026-11-12"`) ||
+	if !strings.Contains(cooked, "1× gekocht, zuletzt am 3.11.2026") || !strings.Contains(cooked, `href="/mealplan/`+plan+`?week=`+mealplan.WeekKey(start)+`#day-`+day+`"`) ||
 		!strings.Contains(cooked, `href="/mealplan/`+plan+`?week=2026-W45#day-2026-11-03"`) {
 		t.Fatalf("cooked:\n%s", cooked)
 	}
