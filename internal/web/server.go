@@ -87,7 +87,7 @@ func New(d Deps) (*Server, error) {
 	return s, nil
 }
 
-var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "space_delete", "admin_groups", "admin_spaces", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search",
+var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "space_delete", "admin_groups", "me_shared", "admin_spaces", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search",
 	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote", "todos", "todo_share", "todo_delete", "tasks_board", "task_view", "task_edit", "task_delete", "task_new", "admin_boards", "note_task", "page_share", "page_move_confirm", "page_move", "recipe_parsed", "recipe_cook", "recipes", "recipe_new", "recipe_shop", "mealplan", "mealplan_add", "mealplan_remove", "admin_mealplans", "mealplan_shop", "admin_ai", "recipe_import", "recipe_import_preview"}
 
 func parsePages() (map[string]*template.Template, error) {
@@ -112,7 +112,10 @@ var templateFuncs = template.FuncMap{
 	"treeArgs":  func(nodes []*wiki.Node, current string) treeArgs { return treeArgs{nodes, current} },
 	"cardArgs":  func(c card, v view) cardArgs { return cardArgs{c, v} },
 	"hasPrefix": strings.HasPrefix,
-	"aiMark":    func(t *aiTarget, v view) aiMarkArgs { return aiMarkArgs{T: t, V: v} },
+	"sharedArgs": func(items []sharedItem, heading string, v view) sharedArgs {
+		return sharedArgs{Items: items, Heading: heading, V: v}
+	},
+	"aiMark": func(t *aiTarget, v view) aiMarkArgs { return aiMarkArgs{T: t, V: v} },
 	// placeKind and placeStep split a photo place like "step-3" for its label.
 	"placeKind":      func(p string) string { k, _, _ := strings.Cut(p, "-"); return k },
 	"placeStep":      func(p string) string { _, n, _ := strings.Cut(p, "-"); return n },

@@ -41,14 +41,15 @@
           <button type="submit" name="lang" value="en" aria-pressed="{{eq .Lang "en"}}">English</button>
         </div>
       </form>
-      {{if or .Admin .Dev}}<ul class="navlist menu-links">
+      <ul class="navlist menu-links">
+        <li><a href="/me/shared">{{template "icon" "users"}}<span>{{.T "me.shared"}}</span></a></li>
         {{if .Admin}}<li><a href="/admin/spaces">{{template "icon" "folder"}}<span>{{.T "admin.spaces"}}</span></a></li>
         <li><a href="/admin/groups">{{template "icon" "users"}}<span>{{.T "user.groups"}}</span></a></li>
         <li><a href="/admin/boards">{{template "icon" "board"}}<span>{{.T "tasks.admin_boards"}}</span></a></li>
         <li><a href="/admin/mealplans">{{template "icon" "calendar"}}<span>{{.T "plan.admin"}}</span></a></li>
         <li><a href="/admin/ai">{{template "icon" "settings"}}<span>{{.T "ai.title"}}</span></a></li>{{end}}
         {{if .Dev}}<li><a href="/auth/dev?next={{.Path}}">{{template "icon" "switch"}}<span>{{.T "user.switch"}}</span></a></li>{{end}}
-      </ul>{{end}}
+      </ul>
       <form class="menu-end" method="post" action="/auth/logout">
         <input type="hidden" name="csrf" value="{{.CSRF}}">
         <button class="btn btn-secondary btn-sm" type="submit">{{template "icon" "logout"}}{{.T "user.logout"}}</button>
@@ -56,7 +57,7 @@
     </div>
   </details>
 </header>
-<div class="shell{{if eq .Module "wiki"}} shell-wiki{{end}}">
+<div class="shell{{if eq .Module "wiki"}} shell-wiki{{if .SideFolded}} shell-folded{{end}}{{end}}">
   {{/* The parts of Kanso (ADR-005): what the page is. Only parts that exist are listed. */}}
   <nav class="rail" aria-label="{{.T "app.short"}}">
     <ul>

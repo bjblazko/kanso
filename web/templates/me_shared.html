@@ -1,0 +1,14 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.T "me.shared"}}</h1>
+<p class="meta">{{.T "me.shared_intro"}}</p>
+{{if $d.Empty}}<p class="empty">{{.T "me.shared_none"}}</p>{{end}}
+{{template "shared-section" (sharedArgs $d.Spaces "me.shared_spaces" $)}}
+{{template "shared-section" (sharedArgs $d.Pages "me.shared_pages" $)}}
+{{template "shared-section" (sharedArgs $d.Lists "me.shared_lists" $)}}
+{{template "shared-section" (sharedArgs $d.Boards "me.shared_boards" $)}}
+{{template "shared-section" (sharedArgs $d.Plans "me.shared_plans" $)}}
+</div>{{end}}
+
+{{define "shared-section"}}{{with .Items}}<h2>{{$.V.T $.Heading}}</h2>
+<ul class="list-plain spaces">{{range .}}<li><a href="{{.Href}}">{{.Name}}</a>
+{{template "audience" .Audience}}</li>{{end}}</ul>{{end}}{{end}}

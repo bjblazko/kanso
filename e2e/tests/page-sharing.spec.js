@@ -36,14 +36,17 @@ test('a page shared on its own: the other person finds it and nothing else of th
   await expect(page.getByRole('link', { name: space })).toHaveCount(0);
 });
 
-test('a page moves to another space, after saying who will see it then', async ({ page }) => {
+test('a page moves to another space, after saying who will see it then', async ({ page, browser }) => {
+  const readerCtx = await browser.newContext();
+  await signIn(await readerCtx.newPage(), { sub: 'lu', name: 'Lu' }); // known to Kanso from now on
+  await readerCtx.close();
   await signIn(page, { sub: 'mo', name: 'Mo', admin: true });
   const from = unique('Haus alt');
   const to = unique('Keller neu');
   await createSpace(page, to);
   await createSpace(page, from);
-  await page.getByRole('link', { name: 'Einstellungen' }).click(); // someone reads "from", nobody "to"
-  await page.getByLabel('Wer').selectOption({ label: 'Mo' });
+  await page.getByRole('link', { name: 'Einstellungen' }).click(); // Lu reads "from" too, "to" is Mo's alone
+  await page.getByLabel('Wer').selectOption({ label: 'Lu' });
   await page.getByRole('button', { name: 'Hinzufügen' }).click();
   await page.getByRole('link', { name: 'Zum Bereich' }).click();
   await createPage(page, 'Heizung');

@@ -100,9 +100,13 @@ type sharedEntry struct {
 // sharedWith lists the pages shared with p in spaces p cannot read, with their subtrees.
 func (s *Server) sharedWith(p access.Principal) []sharedEntry {
 	g := s.groups()
+	withShares := map[string]bool{} // only these spaces can hold a page shared with p
+	for _, pg := range s.Wiki.Shared() {
+		withShares[pg.Space] = true
+	}
 	var out []sharedEntry
 	for _, sp := range s.Spaces.List() {
-		if access.Can(s.Spaces.RoleOf(p, sp.Slug, g), access.Read) {
+		if !withShares[sp.Slug] || access.Can(s.Spaces.RoleOf(p, sp.Slug, g), access.Read) {
 			continue
 		}
 		for _, n := range sharedNodes(p, s.Wiki.Tree(sp.Slug), g) {

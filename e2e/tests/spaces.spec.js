@@ -11,7 +11,7 @@ test('admin creates a space, shares it with a group, member sees it', async ({ b
   const admin = await adminCtx.newPage();
   const member = await memberCtx.newPage();
 
-  await signIn(member, { sub: 'mia', name: 'Mia' });
+  await signIn(member, { sub: 'mira', name: 'Mira' });
   await expect(member.getByText('Noch keine Bereiche.')).toBeVisible();
 
   await signIn(admin, { sub: 'root', name: 'Root', admin: true });
@@ -25,9 +25,9 @@ test('admin creates a space, shares it with a group, member sees it', async ({ b
   await admin.getByLabel('Name der Gruppe').fill(group);
   await admin.getByRole('button', { name: 'Gruppe anlegen' }).click();
   const section = admin.locator('section.group', { hasText: group });
-  await section.getByLabel('Person').selectOption(`mia-${project}`);
+  await section.getByLabel('Person').selectOption(`mira-${project}`);
   await section.getByRole('button', { name: 'Hinzufügen' }).click();
-  await expect(admin.locator('section.group', { hasText: group }).locator('li', { hasText: 'Mia' })).toBeVisible();
+  await expect(admin.locator('section.group', { hasText: group }).locator('li', { hasText: 'Mira' })).toBeVisible();
 
   await admin.goto('/');
   await admin.getByRole('link', { name: unique('Haus') }).first().click();
@@ -72,4 +72,22 @@ test('owner deletes a space with its pages', async ({ page }) => {
   await button.click();
   await expect(page.getByRole('status')).toHaveText(`Bereich „${name}“ gelöscht.`);
   await expect(page.locator('main').getByRole('link', { name, exact: true })).toHaveCount(0);
+});
+
+test('"Was andere sehen" lists a space someone else reads too', async ({ page, browser }) => {
+  const readerCtx = await browser.newContext();
+  await signIn(await readerCtx.newPage(), { sub: 'ute', name: 'Ute' });
+  await readerCtx.close();
+  const name = unique('Gemeinsam');
+  await signIn(page, { sub: 'olaf', name: 'Olaf', admin: true });
+  await createSpace(page, name);
+  await page.getByRole('link', { name: 'Einstellungen' }).click();
+  await page.getByLabel('Wer').selectOption({ label: 'Ute' });
+  await page.getByRole('button', { name: 'Hinzufügen' }).click();
+
+  await page.getByLabel('Menü von Olaf').click();
+  await page.getByRole('link', { name: 'Was andere sehen' }).click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Was andere sehen');
+  const row = page.locator('main li', { has: page.getByRole('link', { name, exact: true }) });
+  await expect(row).toContainText('Sichtbar für dich, Ute');
 });

@@ -5,9 +5,9 @@ package web
 import (
 	"net/http"
 	"slices"
-	"strings"
 	"time"
 
+	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/tasks"
 )
@@ -175,20 +175,7 @@ func (s *Server) boardAudience(v view, b tasks.Board) audience {
 	if b.Private() {
 		return onlyYou(v)
 	}
-	var you bool
-	var names []string
-	for _, sub := range s.groups()[b.Owner.Group] {
-		if sub == v.User.Sub {
-			you = true
-		} else {
-			names = append(names, s.userName(sub))
-		}
-	}
-	slices.Sort(names)
-	if you {
-		names = append([]string{v.T("visibility.you")}, names...)
-	}
-	a := audience{Text: v.T("visibility.board", strings.Join(names, ", "))}
+	a := s.membersAudience(v, []access.Member{{Group: b.Owner.Group, Role: access.Viewer}})
 	if v.Admin { // the group decides who sees the board
 		a = a.changeAt(v, "/admin/groups")
 	}

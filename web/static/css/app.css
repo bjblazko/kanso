@@ -83,7 +83,7 @@ p { margin: 0 0 var(--space-4); }
   .sidenav > details > summary::-webkit-details-marker { display: none; }
   .sidenav-label { color: var(--fg-3); font-size: var(--text-xs); font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
   .sidenav-toggle { display: inline-flex; align-items: center; justify-content: center; width: var(--control-h-sm); padding: 0; }
-  .shell-wiki:has(.sidenav-fold:not([open])) { grid-template-columns: 5.5rem 3.25rem 1fr; }
+  .shell-wiki.shell-folded { grid-template-columns: 5.5rem 3.25rem 1fr; } /* a class, not :has(): WebKit re-checks :has on the whole page at every change */
   .sidenav-fold:not([open]) > summary { padding: var(--space-3) 0; justify-content: center; }
   .sidenav-fold:not([open]) .sidenav-label {
     position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;

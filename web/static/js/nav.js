@@ -7,6 +7,7 @@ const wide = window.matchMedia('(min-width: 60rem)');
 if (nav && !wide.matches) nav.open = false;
 nav?.addEventListener('toggle', () => {
   if (!wide.matches) return;
+  nav.closest('.shell')?.classList.toggle('shell-folded', !nav.open);
   const value = nav.open ? 'open' : 'closed';
   document.cookie = `kanso_sidenav=${value}; Path=/; Max-Age=31536000; SameSite=Lax`;
 });

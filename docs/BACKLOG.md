@@ -26,6 +26,7 @@ decisions in [ADRs](adr/). Done items are removed here and noted in the CHANGELO
 
 ## Follow-ups from reviews
 
+
 - Shopping: sums round to the nearest step, not up (250 g + 12 g → 260 g);
   the unit word of the first amount is kept ("3 Dose Tomaten"); `Apply`
   ignores the item and text limits for recipe lines.
