@@ -7,6 +7,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-16
+
 ### Changed
 - Admins no longer read every space (ADR-014): one sees what oneself or one's groups are entered for, admins included. Whoever creates a space becomes its owner. "Sichtbar für …" names only those people ("Nur für dich sichtbar", "Sichtbar für dich, Anna"); "und Admins" is gone.
 - A board of a group with only you in it says "Nur für dich sichtbar", like everything else.
