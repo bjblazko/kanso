@@ -72,6 +72,12 @@ Mobile first: top bar (name, search, user menu), navigation below it as a
 collapsible block; from 60rem a fixed left navigation. Navigation entries are
 links with `aria-current`, actions are framed buttons.
 
+The wiki's spaces bar folds on wide screens too: its head is the disclosure
+itself — "WIKI-BEREICHE" and a small framed panel icon on the right; folded,
+only a 3.25 rem strip with that icon is left (the name stays for screen
+readers). The device remembers it in the cookie `kanso_sidenav`, so the next
+page is drawn folded without a jump. On phones the bar starts folded as before.
+
 ## Screen head (owner's rule, 2026-11-01)
 
 Every screen that shows content (wiki start, space, page, notes, note, to-do

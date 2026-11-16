@@ -47,6 +47,30 @@ test('navigation starts folded on phones and open on wide screens', async ({ pag
   }
 });
 
+test('the spaces bar folds on wide screens and stays folded', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'on phones the bar sits above the content and starts folded');
+  await signIn(page, { sub: 'hanna', name: 'Hanna' });
+  await page.goto('/'); // waits for load, so nav.js listens before the click
+  const nav = page.locator('.sidenav > details');
+  const toggle = page.locator('.sidenav summary');
+  const remembered = () => page.evaluate(() => document.cookie);
+  const wide = (await page.locator('.sidenav').boundingBox()).width;
+
+  await toggle.click();
+  await expect(nav).not.toHaveAttribute('open', '');
+  await expect.poll(async () => (await page.locator('.sidenav').boundingBox()).width).toBeLessThan(wide / 3);
+  await expect(toggle).toHaveAccessibleName('Wiki-Bereiche');
+  await expect.poll(remembered).toContain('kanso_sidenav=closed');
+  await page.reload();
+  await expect(nav).not.toHaveAttribute('open', '');
+
+  await toggle.click();
+  await expect(nav).toHaveAttribute('open', '');
+  await expect.poll(remembered).toContain('kanso_sidenav=open');
+  await page.reload();
+  await expect(nav).toHaveAttribute('open', '');
+});
+
 test('links styled as buttons are not underlined', async ({ page }) => {
   await signIn(page, { sub: 'gerd', name: 'Gerd', admin: true });
   const button = page.getByRole('link', { name: 'Bereich anlegen' });

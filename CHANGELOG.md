@@ -10,6 +10,8 @@ All notable changes to this project are documented here. The format follows
 ### Added
 - Delete a space: "Bereich löschen" at the end of its settings, for whoever may manage it. The confirmation counts pages, recipes, attachments, meal plan entries and shared pages; a space with pages asks for its name. One Git commit removes it, so the history keeps everything. Not while someone edits one of its pages.
 
+- The wiki's spaces bar folds on wide screens: the panel icon next to "Wiki-Bereiche" leaves a narrow strip, and the device remembers it.
+
 ### Fixed
 - A recipe test planned "the future" on 2026-11-12 and failed once that day had passed.
 

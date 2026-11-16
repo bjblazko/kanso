@@ -68,9 +68,8 @@
   </nav>
   {{if eq .Module "wiki"}}{{/* What is in the wiki: its spaces and the open space's pages. */}}
   <nav class="sidenav" aria-label="{{.T "nav.spaces"}}">
-    <details open>
-      <summary>{{.T "nav.spaces"}}</summary>
-      <p class="sidenav-title" aria-hidden="true">{{.T "nav.spaces"}}</p>
+    <details class="sidenav-fold"{{if not .SideFolded}} open{{end}}>
+      <summary><span class="sidenav-label">{{.T "nav.spaces"}}</span><span class="btn btn-quiet btn-sm sidenav-toggle" aria-hidden="true">{{template "icon" "sidebar"}}</span></summary>
       {{block "nav" .}}<ul class="navlist">
         {{range .Nav}}<li><a href="/s/{{.Slug}}"{{if and (eq $.Here .Slug) (not $.Page)}} aria-current="page"{{end}}>{{template "icon" .Icon}}<span>{{.Name}}</span></a>
           {{if and (eq $.Here .Slug) $.Tree}}{{template "tree" (treeArgs $.Tree $.Page)}}{{end}}</li>

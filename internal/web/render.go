@@ -43,6 +43,8 @@ type view struct {
 	// AppVersion is Kanso's release, shown in the footer.
 	AppVersion string
 	Path       string // request URI, to come back after switching
+	// SideFolded: the person folded the wiki's spaces bar on a wide screen (cookie, set by nav.js).
+	SideFolded bool
 
 	bundle  *i18n.Bundle
 	version string
@@ -66,8 +68,17 @@ func (s *Server) newView(r *http.Request, title string, data any) view {
 	}
 	if v.Module == "wiki" {
 		v.Shared = s.sharedWith(p)
+		v.SideFolded = sidenavFolded(r)
 	}
 	return v
+}
+
+// sidenavCookie remembers on this device that the spaces bar is folded; nav.js sets it.
+const sidenavCookie = "kanso_sidenav"
+
+func sidenavFolded(r *http.Request) bool {
+	c, err := r.Cookie(sidenavCookie)
+	return err == nil && c.Value == "closed"
 }
 
 // render executes a page into a buffer first, so errors never leave half a page.
