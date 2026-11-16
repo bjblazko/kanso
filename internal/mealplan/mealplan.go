@@ -271,3 +271,31 @@ func (s *Store) cookedIn(p Plan, key, recipe string) []Cooked {
 	}
 	return out
 }
+
+// Uses counts the entries on all plans that cook one of recipes.
+func (s *Store) Uses(recipes map[string]bool) int {
+	n := 0
+	for _, p := range s.All() {
+		files, _ := filepath.Glob(filepath.Join(s.dataDir, Dir, p.ID, "*-W*.yaml"))
+		for _, f := range files {
+			n += s.usesIn(p.ID, strings.TrimSuffix(filepath.Base(f), ".yaml"), recipes)
+		}
+	}
+	return n
+}
+
+func (s *Store) usesIn(planID, key string, recipes map[string]bool) int {
+	w, err := s.Week(planID, key)
+	if err != nil {
+		return 0
+	}
+	n := 0
+	for _, es := range w.Days {
+		for _, e := range es {
+			if recipes[e.Recipe] {
+				n++
+			}
+		}
+	}
+	return n
+}

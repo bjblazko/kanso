@@ -140,3 +140,22 @@ func TestCookedOn(t *testing.T) {
 		t.Error("limit")
 	}
 }
+
+func TestUsesCountsEntriesAcrossPlansAndWeeks(t *testing.T) {
+	s := newStore(t)
+	p, _ := s.Create(admin, "Küche", "familie")
+	other, _ := s.Create(admin, "Garten", "garten")
+	add := func(plan, week, day, recipe string) {
+		_ = s.Update(admin, plan, week, func(w *Week) error { w.Add(day, Entry{Recipe: recipe, Title: "X", Servings: 2}); return nil })
+	}
+	add(p.ID, "2026-W45", "2026-11-03", "a")
+	add(p.ID, "2026-W46", "2026-11-10", "b")
+	add(p.ID, "2026-W46", "2026-11-11", "c")
+	add(other.ID, "2026-W46", "2026-11-11", "a")
+	if n := s.Uses(map[string]bool{"a": true, "b": true}); n != 3 {
+		t.Errorf("uses = %d, want 3", n)
+	}
+	if n := s.Uses(map[string]bool{}); n != 0 {
+		t.Errorf("empty = %d", n)
+	}
+}
