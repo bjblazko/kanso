@@ -33,18 +33,21 @@ func newService(t *testing.T) *Service {
 
 func TestCreateUsesSlugAndCommits(t *testing.T) {
 	svc := newService(t)
-	sp, err := svc.Create(admin, "Gesundheit Timo", "Arzttermine")
+	sp, err := svc.Create(admin, "root", "Gesundheit Timo", "Arzttermine")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if sp.Slug != "gesundheit-timo" || sp.Name != "Gesundheit Timo" || sp.Icon != DefaultIcon {
 		t.Errorf("space = %+v", sp)
 	}
+	if len(sp.Members) != 1 || sp.Members[0] != (access.Member{User: "root", Role: access.Owner}) {
+		t.Errorf("creator is not the owner: %+v", sp.Members)
+	}
 	revs, _ := svc.repo.Log("spaces/gesundheit-timo/space.yaml", 5)
 	if len(revs) != 1 || revs[0].Author.Name != "Admin" {
 		t.Errorf("history = %+v", revs)
 	}
-	again, _ := svc.Create(admin, "Gesundheit Timo", "")
+	again, _ := svc.Create(admin, "root", "Gesundheit Timo", "")
 	if again.Slug != "gesundheit-timo-2" {
 		t.Errorf("duplicate slug = %q", again.Slug)
 	}
@@ -52,19 +55,19 @@ func TestCreateUsesSlugAndCommits(t *testing.T) {
 
 func TestCreateRejectsEmptyName(t *testing.T) {
 	svc := newService(t)
-	if _, err := svc.Create(admin, "   ", ""); err == nil {
+	if _, err := svc.Create(admin, "root", "   ", ""); err == nil {
 		t.Error("empty name accepted")
 	}
 }
 
 func TestReloadAndVisible(t *testing.T) {
 	svc := newService(t)
-	sp, _ := svc.Create(admin, "Haus", "")
+	sp, _ := svc.Create(admin, "root", "Haus", "")
 	sp.Members = []access.Member{{Group: "familie", Role: access.Editor}, {User: "oma", Role: access.Viewer}}
 	if err := svc.Update(admin, sp); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := svc.Create(admin, "Geheim", ""); err != nil {
+	if _, err := svc.Create(admin, "root", "Geheim", ""); err != nil {
 		t.Fatal(err)
 	}
 	again, err := NewService(svc.dataDir, svc.repo)
@@ -79,14 +82,14 @@ func TestReloadAndVisible(t *testing.T) {
 	if len(vis) != 1 || vis[0].Slug != "haus" {
 		t.Errorf("visible for oma = %+v", vis)
 	}
-	if len(again.Visible(access.Principal{Sub: "x", Admin: true}, g)) != 2 {
-		t.Error("admin should see all spaces")
+	if n := len(again.Visible(access.Principal{Sub: "x", Admin: true}, g)); n != 0 {
+		t.Errorf("an admin who is no member sees %d spaces", n)
 	}
 }
 
 func TestUpdateRejectsUnknownIconAndBadMember(t *testing.T) {
 	svc := newService(t)
-	sp, _ := svc.Create(admin, "Haus", "")
+	sp, _ := svc.Create(admin, "root", "Haus", "")
 	sp.Icon = "rocket"
 	if err := svc.Update(admin, sp); err == nil {
 		t.Error("unknown icon accepted")
@@ -107,7 +110,7 @@ func TestGetUnknown(t *testing.T) {
 
 func TestDeleteRemovesFolderAndCommits(t *testing.T) {
 	svc := newService(t)
-	sp, _ := svc.Create(admin, "Haus", "")
+	sp, _ := svc.Create(admin, "root", "Haus", "")
 	page := filepath.Join(svc.repo.Dir(), Dir, sp.Slug, "pages", "x", "index.md")
 	if err := os.MkdirAll(filepath.Dir(page), 0o750); err != nil {
 		t.Fatal(err)

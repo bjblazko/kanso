@@ -19,7 +19,7 @@ func TestPageToolbarForWriters(t *testing.T) {
 	for _, want := range []string{
 		`href="/p/` + w.list + `/edit"`, `href="/s/haus/new?parent=` + w.list + `"`, `href="/p/` + w.list + `/move"`,
 		`href="/p/` + w.list + `/history"`, `href="/p/` + w.list + `/delete"`, `href="/p/` + w.list + `/share"`,
-		"Sichtbar für Anna, Christina und Admins",
+		"Sichtbar für dich, Anna, Christina</span>",
 	} {
 		if !strings.Contains(bar, want) {
 			t.Errorf("toolbar lacks %s:\n%s", want, bar)

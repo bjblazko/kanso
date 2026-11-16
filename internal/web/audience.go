@@ -31,8 +31,8 @@ func ptr[T any](v T) *T { return &v }
 func onlyYou(v view) audience { return audience{Text: v.T("visibility.only_you"), Private: true} }
 
 // spaceAudience names who can read the space and its pages: the viewer first,
-// then the others by name, members of a group as people. Admins read every
-// space; Kanso learns who they are only at their sign-in, so they stay a role.
+// then the others by name, members of a group as people. Admins are not
+// readers by role (ADR-014), so only members count.
 func (s *Server) spaceAudience(v view, sp spaces.Space) audience {
 	return s.membersAudience(v, sp.Members)
 }
@@ -59,11 +59,13 @@ func (s *Server) membersAudience(v view, members []access.Member) audience {
 		}
 	}
 	slices.Sort(names)
-	if you {
+	switch {
+	case len(names) == 0 && you:
+		return onlyYou(v)
+	case len(names) == 0:
+		return audience{Text: v.T("visibility.nobody"), Private: true}
+	case you:
 		names = append([]string{v.T("visibility.you")}, names...)
-	}
-	if len(names) == 0 {
-		return audience{Text: v.T("visibility.admins_only")}
 	}
 	return audience{Text: v.T("visibility.space", strings.Join(names, ", "))}
 }

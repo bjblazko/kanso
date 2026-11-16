@@ -65,7 +65,7 @@ func TestPageShareHintAndInherited(t *testing.T) {
 func TestPageAudienceNamesSharedPeople(t *testing.T) {
 	w := setupWishlist(t, access.Viewer)
 	for _, id := range []string{w.list, w.books} {
-		if _, body := get(t, w.anna, w.ts.URL+"/p/"+id); !strings.Contains(body, "Sichtbar für dich, Christina und Admins") {
+		if _, body := get(t, w.anna, w.ts.URL+"/p/"+id); !strings.Contains(body, "Sichtbar für dich, Admin, Christina</span>") {
 			t.Errorf("%s: audience lacks Christina", id)
 		}
 	}

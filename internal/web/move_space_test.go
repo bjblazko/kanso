@@ -47,7 +47,7 @@ func TestMovePageToOtherSpaceAsksWhenAudienceChanges(t *testing.T) {
 		t.Fatal("moved without confirmation")
 	}
 	_, page := ts.postFormBody(t, admin, "/p/"+id, "/p/"+id+"/move", url.Values{"parent": {"keller/"}, "order": {"0"}})
-	if !strings.Contains(page, "Bisher") || !strings.Contains(page, "Danach") || !strings.Contains(page, "Sichtbar nur für Admins") {
+	if !strings.Contains(page, "Bisher") || !strings.Contains(page, "Danach") || !strings.Contains(page, "<dd>Nur für dich sichtbar</dd>") {
 		t.Fatalf("confirmation lacks the audiences:\n%s", page)
 	}
 	resp = movePost(t, ts, admin, id, url.Values{"parent": {"keller/"}, "order": {"0"}, "confirm": {"1"}})

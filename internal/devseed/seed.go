@@ -132,7 +132,7 @@ func seedPeople(us *users.Store) (store.Author, error) {
 }
 
 func seedSpace(a store.Author, sp *spaces.Service, wk *wiki.Wiki, s spaceSeed) error {
-	space, err := sp.Create(a, s.name, s.desc)
+	space, err := sp.Create(a, "", s.name, s.desc) // members follow below
 	if err != nil {
 		return err
 	}

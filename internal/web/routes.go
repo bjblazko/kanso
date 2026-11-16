@@ -94,6 +94,8 @@ func (s *Server) taskRoutes(mux *http.ServeMux) {
 func (s *Server) adminRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /admin/spaces/new", s.newSpaceForm)
 	mux.HandleFunc("POST /admin/spaces/new", s.createSpace)
+	mux.HandleFunc("GET /admin/spaces", s.adminSpaces)
+	mux.HandleFunc("POST /admin/spaces", s.claimSpace)
 	mux.HandleFunc("GET /admin/groups", s.groupsPage)
 	mux.HandleFunc("POST /admin/groups", s.updateGroups)
 	mux.HandleFunc("GET /admin/boards", s.boardsPage)

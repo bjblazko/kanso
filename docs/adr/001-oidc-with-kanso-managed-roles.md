@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Created:** 2026-10-26
-**Updated:** 2026-10-26
+**Updated:** 2026-11-16
 
 ## Context
 
@@ -30,3 +30,5 @@ does not see it.
 
 - Removing a role takes effect on the next request.
 - Removing admin rights in the IdP takes effect at the next login.
+- Admins are no longer owners of every space; see
+  [ADR-014](014-admins-manage-but-do-not-read.md).

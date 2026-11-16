@@ -25,7 +25,8 @@ func TestResolve(t *testing.T) {
 		{"no entry", Principal{Sub: "dora"}, None},
 		{"highest of user and group", Principal{Sub: "anna"}, Editor},
 		{"user only", Principal{Sub: "carl"}, Viewer},
-		{"admin without entry", Principal{Sub: "erik", Admin: true}, Owner},
+		{"admin without entry reads nothing", Principal{Sub: "erik", Admin: true}, None},
+		{"admin with entry has that role", Principal{Sub: "carl", Admin: true}, Viewer},
 		{"group member unknown elsewhere", Principal{Sub: "ghost"}, Viewer},
 	}
 	for _, c := range cases {

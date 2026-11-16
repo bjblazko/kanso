@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/wiki"
@@ -24,16 +23,6 @@ type spaceDelete struct {
 // NeedsName tells whether the name must be typed: only when something is lost.
 func (d spaceDelete) NeedsName() bool { return d.Stats.Pages > 0 }
 
-// managedSpace resolves the space for someone who may manage it; it answers itself otherwise.
-func (s *Server) managedSpace(w http.ResponseWriter, r *http.Request) (spaces.Space, bool) {
-	sp, role, ok := s.spaceFor(w, r)
-	if ok && !access.Can(role, access.ManageSpace) {
-		s.forbidden(w, r)
-		return spaces.Space{}, false
-	}
-	return sp, ok
-}
-
 func (s *Server) spaceDeleteData(sp spaces.Space) spaceDelete {
 	st := s.Wiki.SpaceStats(sp.Slug)
 	ids := make(map[string]bool, len(st.IDs))
@@ -48,13 +37,13 @@ func (s *Server) renderSpaceDelete(w http.ResponseWriter, r *http.Request, statu
 }
 
 func (s *Server) deleteSpaceForm(w http.ResponseWriter, r *http.Request) {
-	if sp, ok := s.managedSpace(w, r); ok {
+	if sp, ok := s.spaceToManage(w, r); ok {
 		s.renderSpaceDelete(w, r, http.StatusOK, s.spaceDeleteData(sp))
 	}
 }
 
 func (s *Server) deleteSpace(w http.ResponseWriter, r *http.Request) {
-	sp, ok := s.managedSpace(w, r)
+	sp, ok := s.spaceToManage(w, r)
 	if !ok {
 		return
 	}

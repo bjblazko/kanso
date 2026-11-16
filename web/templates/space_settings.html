@@ -38,7 +38,7 @@
     {{range $d.Icons}}<label class="icon-choice"><input type="radio" name="icon" value="{{.}}"{{if eq . $d.Space.Icon}} checked{{end}}>{{template "icon" .}}<span class="visually-hidden">{{$.T (printf "icon.%s" .)}}</span></label>{{end}}
   </fieldset>
   <div class="actions"><button class="btn btn-primary" type="submit">{{.T "settings.save"}}</button>
-  <a class="btn btn-quiet" href="/s/{{$d.Space.Slug}}">{{.T "settings.back"}}</a></div>
+  <a class="btn btn-quiet" href="{{$d.Back}}">{{.T "settings.back"}}</a></div>
 </form>
 
 <h2>{{.T "space.delete_section"}}</h2>

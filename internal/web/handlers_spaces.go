@@ -93,23 +93,38 @@ type settingsPage struct {
 	Groups []string
 	Roles  []access.Role
 	Error  string
+	Back   string // the space, or the admins' list for an admin who cannot read it
+}
+
+// spaceToManage resolves the {space} for whoever may manage it: its owners, and
+// admins even without reading it (ADR-014). Readers get 403, everyone else 404.
+func (s *Server) spaceToManage(w http.ResponseWriter, r *http.Request) (spaces.Space, bool) {
+	_, p := auth.UserFrom(r.Context())
+	sp, ok := s.Spaces.Get(r.PathValue("space"))
+	role := s.Spaces.RoleOf(p, sp.Slug, s.groups())
+	switch {
+	case ok && (access.Can(role, access.ManageSpace) || p.Admin):
+		return sp, true
+	case ok && access.Can(role, access.Read):
+		s.forbidden(w, r)
+	default:
+		s.notFound(w, r)
+	}
+	return spaces.Space{}, false
 }
 
 func (s *Server) spaceSettings(w http.ResponseWriter, r *http.Request) {
-	sp, role, ok := s.spaceFor(w, r)
-	if !ok {
-		return
+	if sp, ok := s.spaceToManage(w, r); ok {
+		s.renderSettings(w, r, http.StatusOK, sp, "")
 	}
-	if !access.Can(role, access.ManageSpace) {
-		s.forbidden(w, r)
-		return
-	}
-	s.renderSettings(w, r, http.StatusOK, sp, "")
 }
 
 func (s *Server) renderSettings(w http.ResponseWriter, r *http.Request, status int, sp spaces.Space, errKey string) {
 	data := settingsPage{Space: sp, Icons: spaces.Icons, Users: map[string]string{},
-		Roles: []access.Role{access.Viewer, access.Editor, access.Owner}}
+		Roles: []access.Role{access.Viewer, access.Editor, access.Owner}, Back: "/s/" + sp.Slug}
+	if _, p := auth.UserFrom(r.Context()); !access.Can(s.Spaces.RoleOf(p, sp.Slug, s.groups()), access.Read) {
+		data.Back = "/admin/spaces"
+	}
 	for _, u := range s.Users.List() {
 		data.Users[u.Sub] = u.Name
 	}
@@ -126,12 +141,8 @@ func (s *Server) renderSettings(w http.ResponseWriter, r *http.Request, status i
 }
 
 func (s *Server) updateSpaceSettings(w http.ResponseWriter, r *http.Request) {
-	sp, role, ok := s.spaceFor(w, r)
+	sp, ok := s.spaceToManage(w, r)
 	if !ok {
-		return
-	}
-	if !access.Can(role, access.ManageSpace) {
-		s.forbidden(w, r)
 		return
 	}
 	changed, errKey := s.applySettings(sp, r)

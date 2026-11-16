@@ -34,7 +34,7 @@ func (s *Server) createSpace(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	u, _ := auth.UserFrom(r.Context())
-	sp, err := s.Spaces.Create(u.Author(), r.PostFormValue("name"), r.PostFormValue("description"))
+	sp, err := s.Spaces.Create(u.Author(), u.Sub, r.PostFormValue("name"), r.PostFormValue("description"))
 	if err != nil {
 		v := s.newView(r, "", nil)
 		v.Data = v.T("space.name_required")

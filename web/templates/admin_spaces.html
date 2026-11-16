@@ -1,0 +1,12 @@
+{{define "content"}}<div class="content">
+<h1>{{.T "admin.spaces"}}</h1>
+<p class="meta">{{.T "admin.spaces_intro"}}</p>
+{{if .Data}}<ul class="list-plain spaces">
+{{range .Data}}<li><a href="/s/{{.Space.Slug}}/settings">{{template "icon" .Space.Icon}} {{.Space.Name}}</a> <span class="meta">· {{$.T "admin.spaces_pages" .Pages}}</span>
+{{template "audience" .Audience}}
+{{if .Orphan}}<form method="post" action="/admin/spaces">
+  <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="claim"><input type="hidden" name="space" value="{{.Space.Slug}}">
+  <button class="btn btn-secondary btn-sm" type="submit">{{$.T "admin.spaces_claim"}}</button>
+</form>{{end}}</li>
+{{end}}</ul>{{else}}<p class="empty">{{.T "home.empty_admin"}}</p>{{end}}
+</div>{{end}}

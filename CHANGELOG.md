@@ -7,6 +7,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+- Admins no longer read every space (ADR-014): one sees what oneself or one's groups are entered for, admins included. Whoever creates a space becomes its owner. "Sichtbar für …" names only those people ("Nur für dich sichtbar", "Sichtbar für dich, Anna"); "und Admins" is gone.
+- **Upgrade:** a space without members disappears from the wiki until an admin takes it over under "Alle Bereiche" → "Mich als Besitzer eintragen".
+
+### Added
+- "Alle Bereiche" for admins (`/admin/spaces`): every space with its members and page count, never its content; its settings and deletion are open to admins who are no members.
+
 ## [0.5.0] - 2026-11-16
 
 ### Added

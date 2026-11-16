@@ -103,8 +103,8 @@ func (svc *Service) Visible(p access.Principal, g access.Groups) []Space {
 	return vis
 }
 
-// Create adds a space named name.
-func (svc *Service) Create(a store.Author, name, desc string) (Space, error) {
+// Create adds a space named name with owner (a user's sub) as its owner.
+func (svc *Service) Create(a store.Author, owner, name, desc string) (Space, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return Space{}, errors.New("a space needs a name")
@@ -113,6 +113,9 @@ func (svc *Service) Create(a store.Author, name, desc string) (Space, error) {
 	defer svc.mu.Unlock()
 	slug := store.UniqueSlug(filepath.Join(svc.dataDir, Dir), store.Slugify(name))
 	sp := Space{Slug: slug, Name: name, Description: strings.TrimSpace(desc), Icon: DefaultIcon}
+	if owner != "" {
+		sp.Members = []access.Member{{User: owner, Role: access.Owner}}
+	}
 	return sp, svc.save(a, sp, "Bereich angelegt: "+name)
 }
 

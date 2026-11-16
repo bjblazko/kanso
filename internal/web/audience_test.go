@@ -3,6 +3,7 @@
 package web
 
 import (
+	"net/http"
 	"net/url"
 	"strings"
 	"testing"
@@ -17,23 +18,28 @@ func TestSpaceSaysWhoSeesIt(t *testing.T) {
 	ts.postForm(t, admin, "/s/haus/settings", "/s/haus/settings",
 		url.Values{"action": {"add"}, "kind": {"user"}, "who": {"oma"}, "role": {"viewer"}})
 	id := ts.createPage(t, anna, "haus", "", "Garten")
-	want := "Sichtbar für dich, Oma und Admins"
+	want := "Sichtbar für dich, Admin, Oma</span>"
 	for _, path := range []string{"/", "/s/haus", "/p/" + id} {
 		if _, body := get(t, anna, ts.URL+path); !strings.Contains(body, want) {
 			t.Errorf("%s lacks %q", path, want)
 		}
 	}
-	if _, body := get(t, admin, ts.URL+"/s/haus"); !strings.Contains(body, "Sichtbar für Anna, Oma und Admins") {
+	if _, body := get(t, admin, ts.URL+"/s/haus"); !strings.Contains(body, "Sichtbar für dich, Anna, Oma</span>") {
 		t.Error("admin view lacks the members")
 	}
 }
 
-func TestSpaceWithoutMembersIsAdminsOnly(t *testing.T) {
+func TestNewSpaceIsOnlyForItsCreator(t *testing.T) {
 	ts := newTestServer(t)
 	admin := ts.client(t, "admin", "Admin", true)
 	ts.postForm(t, admin, "/", "/admin/spaces/new", url.Values{"name": {"Leer"}})
-	if _, body := get(t, admin, ts.URL+"/s/leer"); !strings.Contains(body, "Sichtbar nur für Admins") {
-		t.Error("empty space does not say admins only")
+	_, body := get(t, admin, ts.URL+"/s/leer")
+	if !strings.Contains(body, "Nur für dich sichtbar") || strings.Contains(body, "Admins") {
+		t.Error("a new space does not say only you")
+	}
+	other := ts.client(t, "boss", "Boss", true)
+	if code := status(t, other, ts.URL+"/s/leer"); code != http.StatusNotFound {
+		t.Errorf("another admin reads it: %d", code)
 	}
 }
 

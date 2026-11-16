@@ -42,7 +42,8 @@
         </div>
       </form>
       {{if or .Admin .Dev}}<ul class="navlist menu-links">
-        {{if .Admin}}<li><a href="/admin/groups">{{template "icon" "users"}}<span>{{.T "user.groups"}}</span></a></li>
+        {{if .Admin}}<li><a href="/admin/spaces">{{template "icon" "folder"}}<span>{{.T "admin.spaces"}}</span></a></li>
+        <li><a href="/admin/groups">{{template "icon" "users"}}<span>{{.T "user.groups"}}</span></a></li>
         <li><a href="/admin/boards">{{template "icon" "board"}}<span>{{.T "tasks.admin_boards"}}</span></a></li>
         <li><a href="/admin/mealplans">{{template "icon" "calendar"}}<span>{{.T "plan.admin"}}</span></a></li>
         <li><a href="/admin/ai">{{template "icon" "settings"}}<span>{{.T "ai.title"}}</span></a></li>{{end}}

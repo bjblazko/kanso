@@ -59,11 +59,9 @@ type Member struct {
 // Groups maps a group name to the subjects of its members.
 type Groups map[string][]string
 
-// Resolve returns p's highest role from members; admins are owners everywhere.
+// Resolve returns p's highest role from members. Being admin adds nothing
+// here: admins read only what they or their groups are entered for (ADR-014).
 func Resolve(p Principal, members []Member, g Groups) Role {
-	if p.Admin {
-		return Owner
-	}
 	best := None
 	for _, m := range members {
 		if m.Role > best && m.applies(p.Sub, g) {

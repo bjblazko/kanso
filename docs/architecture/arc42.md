@@ -48,7 +48,7 @@ leaves the host.
 ## 4. Solution Strategy
 
 - **Files + Git as the database** ([ADR-000](../adr/000-filesystem-and-git-storage.md)).
-- **OIDC for identity, roles in Kanso** ([ADR-001](../adr/001-oidc-with-kanso-managed-roles.md)).
+- **OIDC for identity, roles in Kanso** ([ADR-001](../adr/001-oidc-with-kanso-managed-roles.md)); admins manage spaces but read only where they are members ([ADR-014](../adr/014-admins-manage-but-do-not-read.md)).
 - **Edit locks instead of live collaboration** ([ADR-003](../adr/003-edit-locks.md)).
 - **Private notes outside Git, captured offline** ([ADR-004](../adr/004-notes-outside-git-offline-capture.md)).
 - **To-do lists outside Git, synced as operations** ([ADR-006](../adr/006-todo-lists-outside-git-synced-operations.md)).
@@ -187,6 +187,7 @@ Kopia jobs.
 | [011](../adr/011-shopping-lists-are-lists.md) | Shopping lists are a kind of list |
 | [012](../adr/012-meal-plans-belong-to-groups.md) | Meal plans belong to groups and live in Git |
 | [013](../adr/013-ai-openai-compatible-through-kanso-services.md) | AI through an OpenAI-compatible API, content only through Kanso's services |
+| [014](../adr/014-admins-manage-but-do-not-read.md) | Admins manage spaces but do not read them |
 
 ## 10. Quality Requirements
 
