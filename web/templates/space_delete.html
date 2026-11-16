@@ -1,0 +1,14 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.T "space.delete_confirm" $d.Space.Name}}</h1>
+{{if $d.Error}}<p class="notice notice-warning" role="alert">{{$d.Error}}</p>{{end}}
+<p>{{.T "space.delete_counts" $d.Stats.Pages $d.Stats.Recipes $d.Stats.Attachments}}</p>
+{{if or $d.Planned $d.Stats.Shared}}<p class="meta">{{if $d.Planned}}{{.T "space.delete_planned" $d.Planned}}{{end}}{{if and $d.Planned $d.Stats.Shared}} · {{end}}{{if $d.Stats.Shared}}{{.T "space.delete_shared" $d.Stats.Shared}}{{end}}</p>{{end}}
+<p class="meta">{{.T "space.delete_git"}}</p>
+<form method="post" action="/s/{{$d.Space.Slug}}/delete" class="form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  {{if $d.NeedsName}}<div class="field"><label for="name">{{.T "space.delete_type_name"}}</label>
+    <input id="name" name="name" required autocomplete="off" spellcheck="false"></div>{{end}}
+  <div class="actions"><button class="btn btn-destructive" type="submit">{{.T "space.delete_named" $d.Space.Name}}</button>
+  <a class="btn btn-secondary" href="/s/{{$d.Space.Slug}}/settings">{{.T "action.cancel"}}</a></div>
+</form>
+</div>{{end}}

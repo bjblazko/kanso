@@ -36,15 +36,33 @@ func (s *Server) spaceFor(w http.ResponseWriter, r *http.Request) (spaces.Space,
 	return sp, role, true
 }
 
+type homePage struct {
+	Audiences map[string]audience // by space slug
+	Deleted   string              // name of the space just deleted
+}
+
 // home lists the visible spaces, each with who else sees it.
 func (s *Server) home(w http.ResponseWriter, r *http.Request) {
 	v := s.newView(r, "", nil)
-	seen := map[string]audience{}
+	data := homePage{Audiences: map[string]audience{}}
 	for _, sp := range v.Nav {
-		seen[sp.Slug] = s.spaceAudience(v, sp)
+		data.Audiences[sp.Slug] = s.spaceAudience(v, sp)
 	}
-	v.Data = seen
+	if name := r.URL.Query().Get("deleted"); name != "" && !s.spaceNamed(name) {
+		data.Deleted = name
+	}
+	v.Data = data
 	s.render(w, r, http.StatusOK, "home", v)
+}
+
+// spaceNamed tells whether a space is called name.
+func (s *Server) spaceNamed(name string) bool {
+	for _, sp := range s.Spaces.List() {
+		if sp.Name == name {
+			return true
+		}
+	}
+	return false
 }
 
 type spacePage struct {

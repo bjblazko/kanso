@@ -19,6 +19,8 @@ func (s *Server) wikiRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /s/{space}", s.showSpace)
 	mux.HandleFunc("GET /s/{space}/settings", s.spaceSettings)
 	mux.HandleFunc("POST /s/{space}/settings", s.updateSpaceSettings)
+	mux.HandleFunc("GET /s/{space}/delete", s.deleteSpaceForm)
+	mux.HandleFunc("POST /s/{space}/delete", s.deleteSpace)
 	mux.HandleFunc("GET /s/{space}/new", s.newPageForm)
 	mux.HandleFunc("POST /s/{space}/new", s.createPage)
 	mux.HandleFunc("GET /p/{id}", s.showPage)

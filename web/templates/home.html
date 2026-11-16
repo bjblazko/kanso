@@ -4,9 +4,10 @@
 </div>{{end}}
 <h1>{{.T "nav.spaces"}}</h1></header>
 <div class="content">
+{{with .Data.Deleted}}<p class="notice" role="status">{{$.T "space.deleted" .}}</p>{{end}}
 {{if .Nav}}<ul class="list-plain spaces">
 {{range .Nav}}<li><a href="/s/{{.Slug}}">{{template "icon" .Icon}} {{.Name}}</a>{{if .Description}}<br><span class="meta">{{.Description}}</span>{{end}}
-{{template "audience" (index $.Data .Slug)}}</li>
+{{template "audience" (index $.Data.Audiences .Slug)}}</li>
 {{end}}</ul>
 {{else if not .Shared}}<p class="empty">{{if .Admin}}{{.T "home.empty_admin"}}{{else}}{{.T "home.empty"}}{{end}}</p>{{end}}
 {{with .Shared}}<h2>{{$.T "nav.shared"}}</h2>

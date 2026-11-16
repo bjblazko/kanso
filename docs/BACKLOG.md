@@ -42,6 +42,8 @@ decisions in [ADRs](adr/). Done items are removed here and noted in the CHANGELO
 - Import: windows-1252 bytes 0x80–0x9F are read as Latin-1 (€, quotes); no
   tests yet for the 3 MB page limit, the redirect cap and model errors with
   HTTP 400.
+- Shopping: "für <Rezept>" links even a deleted recipe (the list is drawn in
+  the browser and does not know); the link then shows "nicht gefunden".
 
 ## Ideas
 

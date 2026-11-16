@@ -40,4 +40,8 @@
   <div class="actions"><button class="btn btn-primary" type="submit">{{.T "settings.save"}}</button>
   <a class="btn btn-quiet" href="/s/{{$d.Space.Slug}}">{{.T "settings.back"}}</a></div>
 </form>
+
+<h2>{{.T "space.delete_section"}}</h2>
+<p class="meta">{{.T "space.delete_hint"}}</p>
+<p><a class="btn btn-quiet tb-danger" href="/s/{{$d.Space.Slug}}/delete">{{template "icon" "trash"}}<span>{{.T "space.delete_section"}}</span></a></p>
 </div>{{end}}
