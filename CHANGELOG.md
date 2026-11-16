@@ -7,6 +7,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-16
+
 ### Added
 - Delete a space: "Bereich löschen" at the end of its settings, for whoever may manage it. The confirmation counts pages, recipes, attachments, meal plan entries and shared pages; a space with pages asks for its name. One Git commit removes it, so the history keeps everything. Not while someone edits one of its pages.
 
