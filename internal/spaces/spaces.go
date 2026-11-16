@@ -6,6 +6,7 @@ package spaces
 import (
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -17,6 +18,9 @@ import (
 
 // Dir holds all spaces, relative to the data directory.
 const Dir = "spaces"
+
+// ErrUnknown means there is no space with that slug.
+var ErrUnknown = errors.New("unknown space")
 
 // Icons a space may use; drawn in web/templates/icons.html.
 var Icons = []string{"folder", "home", "heart", "book", "users", "star"}
@@ -120,9 +124,32 @@ func (svc *Service) Update(a store.Author, sp Space) error {
 	svc.mu.Lock()
 	defer svc.mu.Unlock()
 	if _, ok := svc.spaces[sp.Slug]; !ok {
-		return errors.New("unknown space")
+		return ErrUnknown
 	}
 	return svc.save(a, sp, "Bereich geändert: "+sp.Name)
+}
+
+// Delete removes the space with everything in it and commits that.
+// also runs while the repository is locked, after the folder is gone, so
+// callers can drop what they index about the space before anyone writes again.
+func (svc *Service) Delete(a store.Author, slug string, also func()) error {
+	svc.mu.Lock()
+	defer svc.mu.Unlock()
+	sp, ok := svc.spaces[slug]
+	if !ok {
+		return ErrUnknown
+	}
+	rel := filepath.Join(Dir, slug)
+	return svc.repo.Locked(func() error {
+		if err := os.RemoveAll(filepath.Join(svc.dataDir, rel)); err != nil {
+			return err
+		}
+		delete(svc.spaces, slug)
+		if also != nil {
+			also()
+		}
+		return svc.repo.Commit(a, "Bereich gelöscht: "+sp.Name, rel)
+	})
 }
 
 func validate(sp Space) error {

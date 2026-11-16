@@ -3,7 +3,10 @@
 package spaces
 
 import (
+	"errors"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/bjblazko/kanso/internal/access"
@@ -99,5 +102,45 @@ func TestGetUnknown(t *testing.T) {
 	svc := newService(t)
 	if _, ok := svc.Get("../etc"); ok {
 		t.Error("found ../etc")
+	}
+}
+
+func TestDeleteRemovesFolderAndCommits(t *testing.T) {
+	svc := newService(t)
+	sp, _ := svc.Create(admin, "Haus", "")
+	page := filepath.Join(svc.repo.Dir(), Dir, sp.Slug, "pages", "x", "index.md")
+	if err := os.MkdirAll(filepath.Dir(page), 0o750); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(page, []byte("x"), 0o640); err != nil {
+		t.Fatal(err)
+	}
+	calls := 0
+	if err := svc.Delete(admin, sp.Slug, func() { calls++ }); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(svc.repo.Dir(), Dir, sp.Slug)); !os.IsNotExist(err) {
+		t.Errorf("folder still there: %v", err)
+	}
+	if _, ok := svc.Get(sp.Slug); ok || len(svc.List()) != 0 {
+		t.Error("space still listed")
+	}
+	if calls != 1 {
+		t.Errorf("also called %d times", calls)
+	}
+	revs, _ := svc.repo.Log("spaces/"+sp.Slug, 1)
+	if len(revs) != 1 || revs[0].Message != "Bereich gelöscht: Haus" {
+		t.Errorf("history = %+v", revs)
+	}
+}
+
+func TestDeleteUnknownSpace(t *testing.T) {
+	svc := newService(t)
+	called := false
+	if err := svc.Delete(admin, "nope", func() { called = true }); !errors.Is(err, ErrUnknown) {
+		t.Errorf("err = %v", err)
+	}
+	if called {
+		t.Error("also called for an unknown space")
 	}
 }
