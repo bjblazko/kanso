@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { test, expect } from '@playwright/test';
-import { signIn } from './helpers.js';
+import { signIn, createSpace, createPage } from './helpers.js';
 
 const unique = (name) => `${name} ${test.info().project.name}`;
 
@@ -52,4 +52,24 @@ test('non-admins cannot reach group management', async ({ page }) => {
   const response = await page.goto('/admin/groups');
   expect(response.status()).toBe(403);
   await expect(page.getByRole('heading', { name: 'Dafür fehlt dir die Berechtigung.' })).toBeVisible();
+});
+
+test('owner deletes a space with its pages', async ({ page }) => {
+  const name = unique('Alt');
+  await signIn(page, { sub: 'root', name: 'Root', admin: true });
+  await createSpace(page, name);
+  await createPage(page, 'Notiz');
+  await page.getByRole('link', { name, exact: true }).first().click();
+  await page.getByRole('link', { name: 'Einstellungen' }).click();
+  await page.getByRole('link', { name: 'Bereich löschen' }).click();
+  await expect(page.getByText('1 Seiten, davon 0 Rezepte, 0 Anhänge')).toBeVisible();
+
+  const button = page.getByRole('button', { name: `„${name}“ löschen` });
+  await button.click();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(`„${name}“ löschen?`);
+
+  await page.getByLabel('Zum Bestätigen den Namen eintippen').fill(name);
+  await button.click();
+  await expect(page.getByRole('status')).toHaveText(`Bereich „${name}“ gelöscht.`);
+  await expect(page.locator('main').getByRole('link', { name, exact: true })).toHaveCount(0);
 });
