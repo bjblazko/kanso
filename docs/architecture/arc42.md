@@ -1,7 +1,7 @@
 # Hüpattl! Kanso — Architecture (arc42)
 
 **Created:** 2026-10-26
-**Updated:** 2026-11-07
+**Updated:** 2026-11-16
 
 ## 1. Introduction and Goals
 
@@ -136,6 +136,12 @@ stays where it is.
 and the members of the page and its ancestors (from the in-memory index).
 Someone without a space role gets the space's tree cut down to the subtrees
 shared with them, listed under "Für dich freigegeben".
+
+**Deleting a space:** under the repository lock the space's folder is
+removed, the wiki index forgets its pages (the search index hears each as
+deleted), then one commit "Bereich gelöscht: <Name>". Refused while someone
+holds an edit lock on one of its pages. Meal plan entries keep the recipe's
+title and lose the link.
 
 **Moving a page to another space:** `git mv` of its folder into the other
 space's pages, one commit; the index and the search index learn the new space
