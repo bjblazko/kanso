@@ -28,6 +28,7 @@ import (
 	"github.com/bjblazko/kanso/internal/tasks"
 	"github.com/bjblazko/kanso/internal/todos"
 	"github.com/bjblazko/kanso/internal/users"
+	"github.com/bjblazko/kanso/internal/visits"
 	"github.com/bjblazko/kanso/internal/web"
 	"github.com/bjblazko/kanso/internal/wiki"
 )
@@ -122,7 +123,7 @@ func buildDeps(cfg config.Config) (web.Deps, error) {
 		return web.Deps{}, err
 	}
 	bundle, err := i18n.Load()
-	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, Notes: ns, Todos: td, Tasks: tasks.NewStore(cfg.DataDir, repo), MealPlans: mealplan.NewStore(cfg.DataDir, repo), AI: ai.NewStore(cfg.StateDir), Fetch: fetcherFor(cfg),
+	return web.Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, Notes: ns, Todos: td, Tasks: tasks.NewStore(cfg.DataDir, repo), MealPlans: mealplan.NewStore(cfg.DataDir, repo), AI: ai.NewStore(cfg.StateDir), Visits: visits.NewStore(cfg.StateDir), Fetch: fetcherFor(cfg),
 		MD: markdown.New(), Locks: wiki.NewLocks(5*time.Minute, time.Now), Search: web.BuildIndex(wk, ns)}, err
 }
 
