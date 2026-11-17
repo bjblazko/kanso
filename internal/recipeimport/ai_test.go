@@ -90,7 +90,7 @@ func TestCleanAnswer(t *testing.T) {
 }
 
 func TestTrailingTextIsNoStep(t *testing.T) {
-	d := parseAnswer("# Kuchen\n\n## Zutaten\n\n- 1 Ei\n\n## Zubereitung\n\n1. Backen.\n\nGuten Appetit!")
+	d := ParseAnswer("# Kuchen\n\n## Zutaten\n\n- 1 Ei\n\n## Zubereitung\n\n1. Backen.\n\nGuten Appetit!")
 	if !slices.Equal(d.Steps, []string{"Backen."}) {
 		t.Fatalf("%q", d.Steps)
 	}

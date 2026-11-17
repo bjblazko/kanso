@@ -40,7 +40,7 @@ func FromAI(ctx context.Context, c ai.Client, cfg ai.Config, page Page, lang str
 	if err != nil {
 		return Draft{}, err
 	}
-	d := parseAnswer(answer)
+	d := ParseAnswer(answer)
 	d.Source = page.URL
 	if d.Title == "" || len(d.Ingredients) == 0 {
 		return Draft{}, ErrNoRecipe
@@ -48,9 +48,9 @@ func FromAI(ctx context.Context, c ai.Client, cfg ai.Config, page Page, lang str
 	return d, nil
 }
 
-// parseAnswer reads "# Titel", "Portionen:", "Zeit:", a description and the
+// ParseAnswer reads "# Titel", "Portionen:", "Zeit:", a description and the
 // recipe sections; anything else in front of the sections becomes the description.
-func parseAnswer(answer string) Draft {
+func ParseAnswer(answer string) Draft {
 	var a answerParts
 	for _, line := range strings.Split(cleanAnswer(answer), "\n") {
 		a.line(line)
