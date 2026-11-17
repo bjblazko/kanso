@@ -146,3 +146,15 @@ func TestKitchenTabs(t *testing.T) {
 		t.Error("kitchen tabs")
 	}
 }
+
+func TestAdminMealPlansLinkOnlyForMembers(t *testing.T) {
+	ts, admin, _ := setupHaus(t)
+	plan := ts.familyPlan(t) // admin is not in familie
+	if _, body := get(t, admin, ts.URL+"/admin/mealplans"); strings.Contains(body, `href="/mealplan/`+plan+`"`) {
+		t.Fatal("link for a non-member")
+	}
+	ts.postForm(t, admin, "/admin/groups", "/admin/groups", url.Values{"action": {"add"}, "group": {"familie"}, "sub": {"admin"}})
+	if _, body := get(t, admin, ts.URL+"/admin/mealplans"); !strings.Contains(body, `href="/mealplan/`+plan+`"`) {
+		t.Fatal("no link for a member")
+	}
+}

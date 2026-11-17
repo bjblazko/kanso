@@ -18,7 +18,7 @@
   <button class="btn btn-primary" type="submit">{{.T "plan.create"}}</button>
 </form>{{else}}<p class="empty">{{.T "tasks.admin_no_groups"}} <a href="/admin/groups">{{.T "nav.groups"}}</a></p>{{end}}
 {{range $d.Plans}}<section class="group">
-  <h2>{{template "icon" "calendar"}} {{.Name}} <span class="meta">{{$.T "plan.of_group" .Group}}</span></h2>
+  <h2>{{template "icon" "calendar"}} {{if .Open}}<a href="/mealplan/{{.ID}}">{{.Name}}</a>{{else}}{{.Name}}{{end}} <span class="meta">{{$.T "plan.of_group" .Group}}</span></h2>
   <form method="post" action="/admin/mealplans" class="actions">
     <input type="hidden" name="csrf" value="{{$.CSRF}}"><input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{.ID}}">
     <button class="btn btn-destructive btn-sm" type="submit">{{$.T "plan.delete_named" .Name}}</button>

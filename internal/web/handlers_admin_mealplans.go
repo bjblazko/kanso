@@ -10,8 +10,14 @@ import (
 	"github.com/bjblazko/kanso/internal/mealplan"
 )
 
+// adminPlan is a plan on the admin page; Open when the admin is in its group and can enter it.
+type adminPlan struct {
+	mealplan.Plan
+	Open bool
+}
+
 type adminPlansPage struct {
-	Plans   []mealplan.Plan
+	Plans   []adminPlan
 	Groups  []string
 	Confirm *mealplan.Plan // plan whose deletion waits for confirmation
 	Error   string
@@ -25,7 +31,12 @@ func (s *Server) mealplansAdmin(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) renderAdminPlans(w http.ResponseWriter, r *http.Request, status int, data adminPlansPage) {
 	v := s.newView(r, "", nil)
-	data.Plans = s.MealPlans.All()
+	u, _ := auth.UserFrom(r.Context())
+	mine := s.MealPlans.For(s.groups(), u.Sub)
+	for _, p := range s.MealPlans.All() {
+		open := slices.ContainsFunc(mine, func(m mealplan.Plan) bool { return m.ID == p.ID })
+		data.Plans = append(data.Plans, adminPlan{Plan: p, Open: open})
+	}
 	for name := range s.groups() {
 		data.Groups = append(data.Groups, name)
 	}
