@@ -14,6 +14,7 @@ All notable changes to this project are documented here. The format follows
 - Berichte → Aktivität: a calendar of changes per day over the last year and a weekday × hour map of when people write.
 - Berichte → Wiki: how old the pages are, the ten untouched the longest, and the wiki as a sunburst of spaces, pages and subpages.
 - Berichte → Aufgaben: new against done per week, and per Eisenhower field the open and overdue tasks and how long they take to get done.
+- Berichte → Küche: the meals cooked most, what is bought most, recipes by tag and by preparation time.
 
 ## [0.7.0] - 2026-11-17
 

@@ -47,6 +47,9 @@
     return months.filter((_, i) => i % step === 0);
   };
 
+  // countAxis is an axis for counts: whole numbers only.
+  const countAxis = (axis, max, fmt = d3.format('d')) => axis.ticks(Math.max(1, Math.min(4, max))).tickFormat(fmt);
+
   const draw = {};
 
   // bars: one horizontal bar per kind (the single row of a chartSeries).
@@ -82,7 +85,7 @@
         .attr('width', (p) => Math.max(0, x(p[1]) - x(p[0]) - 2)).attr('fill', colors[i % colors.length]),
       (p) => `${esc(p.data.label)} · ${esc(d.keys[i])}: <b>${p.data[d.keys[i]]}</b>`);
     });
-    s.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - m.b})`).call(d3.axisBottom(x).ticks(5).tickSizeOuter(0));
+    s.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - m.b})`).call(countAxis(d3.axisBottom(x), x.domain()[1]).tickSizeOuter(0));
     s.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).tickSize(0)).select('.domain').remove();
     legend(el, d.keys);
   };
@@ -99,7 +102,7 @@
     const x = d3.scaleUtc(d3.extent(rows, (r) => r.t), [m.l, W - m.r]);
     const y = d3.scaleLinear([0, d3.max(stack.at(-1) || [], (p) => p[1]) || 1], [h - m.b, m.t]).nice();
     s.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`)
-      .call(d3.axisLeft(y).ticks(4).tickSize(-(W - m.l - m.r))).call((g) => g.selectAll('line').attr('stroke-opacity', 0.5))
+      .call(countAxis(d3.axisLeft(y), y.domain()[1]).tickSize(-(W - m.l - m.r))).call((g) => g.selectAll('line').attr('stroke-opacity', 0.5))
       .select('.domain').remove();
     stack.forEach((layer, i) => s.append('path').datum(layer).attr('fill', colors[i % colors.length]).attr('fill-opacity', 0.85)
       .attr('stroke', css('--bg')).attr('stroke-width', 1)
@@ -248,7 +251,7 @@
     const rows = d.rows.map((r, i) => ({ label: r.label, n: r.values[0], stale: i >= d.stale }));
     const x = d3.scaleBand(rows.map((r) => r.label), [m.l, W - m.r]).padding(0.2);
     const y = d3.scaleLinear([0, d3.max(rows, (r) => r.n) || 1], [h - m.b, m.t]).nice();
-    s.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4)).select('.domain').remove();
+    s.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(countAxis(d3.axisLeft(y), d3.max(rows, (r) => r.n))).select('.domain').remove();
     hover(s.selectAll('rect').data(rows).join('rect').attr('x', (r) => x(r.label)).attr('width', x.bandwidth())
       .attr('y', (r) => y(r.n)).attr('height', (r) => y(0) - y(r.n)).attr('rx', 2)
       .attr('fill', (r) => (r.stale ? css('--fg-3') : colors[0])), (r) => `${esc(r.label)}: <b>${r.n}</b> ${esc(d.unit)}`);
@@ -290,7 +293,7 @@
         .attr('x', (w) => x(w.label)).attr('width', x.bandwidth()).attr('y', yy).attr('height', hh).attr('rx', 2).attr('fill', c),
       (w) => `${esc(w.label)}: <b>${w[k]}</b> ${esc(d.labels[k])}`));
     s.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', css('--line'));
-    s.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat(Math.abs))
+    s.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(countAxis(d3.axisLeft(y), top, (n) => Math.abs(n)))
       .select('.domain').remove();
     const every = Math.ceil(d.weeks.length / Math.max(1, Math.floor(W / 60)));
     s.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - m.b})`)
@@ -319,6 +322,23 @@
       const median = f.median ? f.median.toLocaleString(lang, { maximumFractionDigits: 1 }) : '–';
       g.append('text').attr('class', 'lbl').attr('x', 56).attr('y', 50).text(`${f.overdue} ${d.labels.overdue}`);
       g.append('text').attr('class', 'lbl').attr('x', 56).attr('y', 66).text(`${median} ${d.labels.median}`);
+    });
+  };
+
+  // ranking: horizontal bars, most first, the number at the end of each bar.
+  draw.ranking = (el, d) => {
+    const W = width(el);
+    const row = 26;
+    const left = Math.min(180, W * 0.4);
+    const s = svg(el, d.rows.length * row + 8);
+    const x = d3.scaleLinear([0, d3.max(d.rows, (r) => r.n) || 1], [left, W - 40]);
+    d.rows.forEach((r, i) => {
+      const y = 4 + i * row;
+      const label = r.label.length > 28 ? `${r.label.slice(0, 27)}…` : r.label;
+      s.append('text').attr('class', 'lbl').attr('x', left - 8).attr('y', y + 14).attr('text-anchor', 'end').text(label);
+      hover(s.append('rect').datum(r).attr('x', left).attr('y', y + 3).attr('height', 15).attr('rx', 2)
+        .attr('width', Math.max(1, x(r.n) - left)).attr('fill', colors[0]), (v) => `${esc(v.label)}: <b>${v.n}</b> ${esc(d.unit)}`);
+      s.append('text').attr('class', 'lbl').attr('x', x(r.n) + 6).attr('y', y + 15).text(r.n);
     });
   };
 

@@ -248,3 +248,22 @@ func TestReportsTasksTab(t *testing.T) {
 		t.Errorf("flow lacks this week's two new tasks:\n%s", flow)
 	}
 }
+
+func TestReportsKitchenTab(t *testing.T) {
+	ts, _, anna := setupHaus(t)
+	curry := ts.makeRecipe(t, anna, "haus", "Curry", curryBody, 4, "vegetarisch")
+	ts.planMeal(t, ts.familyPlan(t), time.Now().Format("2006-01-02"), curry, "Curry", 4)
+	_, body := get(t, anna, ts.URL+"/reports/kitchen?scope=seen")
+	if cooked := between(body, `id="card-cooked"`, "</section>"); !strings.Contains(cooked, ">Curry</a>") {
+		t.Errorf("cooked:\n%s", cooked)
+	}
+	if tags := between(body, `id="card-tags"`, "</section>"); !strings.Contains(tags, "vegetarisch") {
+		t.Errorf("tags:\n%s", tags)
+	}
+	boss := otherAdmin(t, ts)
+	_, body = get(t, boss, ts.URL+"/reports/kitchen?scope=all")
+	main := htmlUnescape(between(body, "<main", "</main>"))
+	if strings.Contains(main, "Curry") || !strings.Contains(main, "– (kein Zugriff)") {
+		t.Errorf("admin sees a recipe they cannot read:\n%s", between(main, `id="card-cooked"`, "</section>"))
+	}
+}
