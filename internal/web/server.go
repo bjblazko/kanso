@@ -64,6 +64,7 @@ type Server struct {
 	// scanRepo reads the Git history for reports; reports keeps the result per HEAD.
 	scanRepo func() (store.Scan, error)
 	reports  reportCache
+	started  time.Time // for the server tile of the reports
 }
 
 // New parses templates and prepares static files.
@@ -72,7 +73,7 @@ func New(d Deps) (*Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	s := &Server{Deps: d, static: static}
+	s := &Server{Deps: d, static: static, started: time.Now()}
 	if d.Repo != nil {
 		s.scanRepo = d.Repo.Scan
 	}

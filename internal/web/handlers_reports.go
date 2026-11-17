@@ -26,6 +26,7 @@ type reportTab struct {
 // reportTabs are the tabs in order.
 var reportTabs = []reportTab{
 	{"overview", (*Server).overviewTab},
+	{"storage", (*Server).storageTab},
 }
 
 // reportPage is what the reports template shows.
@@ -113,7 +114,7 @@ func (s *Server) newReport(v view, rc reportCtx) *reportBuild {
 		slog.Warn("reports: reading the history", "err", err)
 		page.HistoryError, rc.scan = true, store.Scan{Live: map[string]int64{}}
 	}
-	rc.added = s.addedBy(rc.scan)
+	rc.added, rc.bodies = s.addedBy(rc.scan), map[string]string{}
 	return &reportBuild{rc: rc, docs: s.reportDocs(rc), page: page, data: map[string]any{}}
 }
 
@@ -179,3 +180,13 @@ func formatBytes(v view, n int64) string {
 
 func num(n int) reportCell     { return reportCell{Text: fmt.Sprint(n), Num: true} }
 func text(s string) reportCell { return reportCell{Text: s} }
+
+func bytesCell(v view, n int64) reportCell { return reportCell{Text: formatBytes(v, n), Num: true} }
+
+// docCell is a document's name, linked when the viewer may read it.
+func docCell(v view, title, href string) reportCell {
+	if title == "" {
+		return text(v.T("reports.no_access"))
+	}
+	return reportCell{Text: title, Href: href}
+}

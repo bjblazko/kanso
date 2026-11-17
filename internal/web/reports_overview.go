@@ -25,6 +25,9 @@ func (s *Server) overviewTab(rb *reportBuild) {
 		rb.page.Tiles = append(rb.page.Tiles, reportTile{v.T("reports.tile_deleted"), formatBytes(v, sc.Deleted),
 			v.T("reports.tile_deleted_n", sc.DeletedN, formatBytes(v, sc.PackBytes))})
 	}
+	if rb.page.ForAdmin {
+		rb.page.Tiles = append(rb.page.Tiles, s.serverTile(v, rb.rc.scan.PackBytes))
+	}
 	s.inventoryCard(rb)
 	growthCard(rb)
 }

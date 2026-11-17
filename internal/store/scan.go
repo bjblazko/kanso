@@ -29,6 +29,7 @@ type Scan struct {
 	Head      string           // "" for a repository without commits
 	Changes   []FileChange     // oldest first; a move is one change with From set
 	Live      map[string]int64 // path → size at HEAD
+	LiveBlobs map[string]bool  // the blobs at HEAD
 	Deleted   int64            // bytes of blobs in the history but not at HEAD
 	DeletedN  int              // number of those blobs
 	PackBytes int64            // what the objects take on disk
@@ -62,6 +63,7 @@ func (r *Repo) Scan() (Scan, error) {
 	if err != nil {
 		return sc, err
 	}
+	sc.LiveBlobs = live
 	sizes, err := r.blobSizes(sc.Changes)
 	if err != nil {
 		return sc, err

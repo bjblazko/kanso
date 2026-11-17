@@ -15,16 +15,17 @@
 <section class="report-card" aria-labelledby="card-{{.ID}}">
   <h2 id="card-{{.ID}}">{{.Title}}</h2>
   <p class="meta">{{.Why}}</p>
-  {{if .Empty}}<p class="empty">{{$.T "reports.empty"}}</p>{{else}}
+  {{if .Empty}}<p class="empty">{{$.T "reports.empty"}}</p>{{else if .Chart}}
   <div class="report-chart" data-chart="{{.Chart}}" data-id="{{.ID}}" aria-hidden="true"></div>
-  <details class="report-table"><summary>{{$.T "reports.as_table"}}</summary>
-    <div class="table-scroll"><table><thead><tr>{{range .Head}}<th>{{.}}</th>{{end}}</tr></thead>
-    <tbody>{{range .Rows}}<tr>{{range .}}<td{{if .Num}} class="n"{{end}}>{{if .Href}}<a href="{{.Href}}">{{.Text}}</a>{{else}}{{.Text}}{{end}}</td>{{end}}</tr>{{end}}</tbody></table></div>
-  </details>{{end}}
+  <details class="report-table"><summary>{{$.T "reports.as_table"}}</summary>{{template "report-table" .}}</details>
+  {{else}}<div class="report-table">{{template "report-table" .}}</div>{{end}}
 </section>{{end}}
 </div>
 <script type="application/json" id="report-data">{{$d.JSON}}</script>
 </div>{{end}}
+
+{{define "report-table"}}<div class="table-scroll"><table><thead><tr>{{range .Head}}<th>{{.}}</th>{{end}}</tr></thead>
+<tbody>{{range .Rows}}<tr>{{range .}}<td{{if .Num}} class="n"{{end}}>{{if .Href}}<a href="{{.Href}}">{{.Text}}</a>{{else}}{{.Text}}{{end}}</td>{{end}}</tr>{{end}}</tbody></table></div>{{end}}
 
 {{define "scripts"}}<script src="{{.Asset "vendor/d3/d3.min.js"}}" defer></script>
 <script src="{{.Asset "js/reports.js"}}" defer></script>{{end}}

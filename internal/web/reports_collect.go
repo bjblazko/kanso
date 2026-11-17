@@ -38,6 +38,8 @@ type reportCtx struct {
 	scope reportScope
 	scan  store.Scan
 	added map[string]added // path → who added it and when
+	// bodies are the Markdown of pages and notes by id, for finding orphaned attachments.
+	bodies map[string]string
 }
 
 // candidate is a document before the scope decides on it.
@@ -135,6 +137,7 @@ func (s *Server) pageCandidates(rc reportCtx) []candidate {
 		d := reports.Doc{Kind: kind, ID: id, Title: pg.Meta.Title, Href: "/p/" + id, Person: rc.added[path].sub,
 			Space: pg.Space, Path: path, Created: pg.Meta.Created, Updated: pg.Meta.Updated, Bytes: s.size(rc, path)}
 		out = append(out, candidate{d, readable})
+		rc.bodies[id] = pg.Body
 		out = append(out, s.attachmentCandidates(rc, pg, readable)...)
 	}
 	return out
@@ -166,6 +169,7 @@ func (s *Server) noteCandidates(rc reportCtx) []candidate {
 			Person: n.Owner, Space: "notes", Path: filepath.Join(rel, "index.md"), Created: n.Meta.Created,
 			Updated: n.Meta.Updated, Bytes: int64(len(n.Body))}
 		out = append(out, candidate{d, readable})
+		rc.bodies[n.Meta.ID] = n.Body
 		for _, name := range n.Attachments {
 			path := filepath.Join(rel, "attachments", name)
 			a := reports.Doc{Kind: reports.Attachment, ID: n.Meta.ID + "/" + name, Title: name,

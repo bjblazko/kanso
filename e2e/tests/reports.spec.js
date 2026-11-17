@@ -20,4 +20,9 @@ test('Berichte: the overview counts, draws and switches scope', async ({ page })
   const own = page.locator('section', { has: page.getByRole('heading', { name: 'Bestand nach Typ' }) });
   await own.getByText('Als Tabelle').click();
   await expect(own.getByRole('row', { name: /Seiten/ })).toBeVisible();
+
+  await page.getByRole('link', { name: 'Speicher', exact: true }).click();
+  const areas = page.locator('section', { has: page.getByRole('heading', { name: 'Wo der Platz steckt' }) });
+  await expect(areas.locator('svg')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Eigene', exact: true })).toHaveAttribute('aria-current', 'page');
 });

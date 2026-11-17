@@ -128,3 +128,62 @@ func TestReportsGitErrorStillRenders(t *testing.T) {
 		t.Errorf("git error: %d", resp.StatusCode)
 	}
 }
+
+// attachments gives page id the files a.png (linked from its text) and lost.png (not linked).
+func (ts *testServer) attachments(t *testing.T, id string) {
+	t.Helper()
+	a := store.Author{Name: "Anna", Email: "anna@users.kanso"}
+	for _, name := range []string{"a.png", "lost.png"} {
+		if _, err := ts.deps.Wiki.AddAttachment(a, id, name, strings.NewReader("png-bytes"), 1<<20); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := ts.deps.Wiki.Save(a, id, "Keller", "![](attachments/a.png)"); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestReportsStorageTab(t *testing.T) {
+	ts, _, anna := setupHaus(t)
+	id := ts.createPage(t, anna, "haus", "", "Keller")
+	ts.attachments(t, id)
+	resp, body := get(t, anna, ts.URL+"/reports/storage")
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("%d", resp.StatusCode)
+	}
+	orphans := between(body, `id="card-orphans"`, "</section>")
+	if !strings.Contains(orphans, `href="/p/`+id+`/attachments/lost.png"`) || strings.Contains(orphans, "a.png") {
+		t.Errorf("orphans:\n%s", orphans)
+	}
+	if tree := between(body, `id="card-areas"`, "</section>"); !strings.Contains(tree, "<td>Haus</td>") {
+		t.Errorf("areas:\n%s", tree)
+	}
+	if strings.Contains(body, `id="card-history"`) {
+		t.Error("a non-admin gets the repository over time")
+	}
+}
+
+func TestReportsStorageAdminSeesNoForeignNames(t *testing.T) {
+	ts, _, anna := setupHaus(t)
+	id := ts.createPage(t, anna, "haus", "", "Keller")
+	ts.attachments(t, id)
+	boss := otherAdmin(t, ts)
+	_, body := get(t, boss, ts.URL+"/reports/storage?scope=all")
+	main := htmlUnescape(between(body, "<main", "</main>"))
+	if strings.Contains(main, "lost.png") || strings.Contains(main, "Keller") || !strings.Contains(main, "– (kein Zugriff)") {
+		t.Errorf("admin sees names of things they cannot read:\n%s", between(main, `id="card-orphans"`, "</section>"))
+	}
+	if !strings.Contains(main, `id="card-history"`) {
+		t.Error("admin lacks the repository over time")
+	}
+}
+
+func TestReportsOverviewServerTileAdminOnly(t *testing.T) {
+	ts, admin, anna := setupHaus(t)
+	if _, body := get(t, admin, ts.URL+"/reports/overview"); !strings.Contains(body, "Arbeitsspeicher") {
+		t.Error("admin lacks the server tile")
+	}
+	if _, body := get(t, anna, ts.URL+"/reports/overview"); strings.Contains(body, "Arbeitsspeicher") {
+		t.Error("anna gets the server tile")
+	}
+}

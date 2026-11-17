@@ -118,6 +118,84 @@
   };
 
 
+  // fmtBytes writes bytes like the server does ("3,8 GB" in German).
+  const lang = document.documentElement.lang || 'de';
+  const fmtBytes = (n) => {
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    let f = n;
+    let u = 0;
+    while (f >= 1000 && u < units.length - 1) { f /= 1000; u += 1; }
+    return `${f.toLocaleString(lang, { maximumFractionDigits: u > 0 && f < 100 ? 1 : 0 })} ${units[u]}`;
+  };
+
+  // hatch is the fill for what Git keeps but is no longer current.
+  const hatch = (s) => {
+    const id = `hatch-${Math.random().toString(36).slice(2)}`;
+    const p = s.append('defs').append('pattern').attr('id', id).attr('width', 6).attr('height', 6)
+      .attr('patternUnits', 'userSpaceOnUse').attr('patternTransform', 'rotate(45)');
+    p.append('rect').attr('width', 6).attr('height', 6).attr('fill', css('--bg-3'));
+    p.append('line').attr('y2', 6).attr('stroke', css('--fg-3')).attr('stroke-width', 1.5);
+    return `url(#${id})`;
+  };
+
+  // treemap: area → text, attachments, no longer current (hatched).
+  draw.treemap = (el, d) => {
+    const W = width(el);
+    const h = 280;
+    const s = svg(el, h);
+    const deleted = hatch(s);
+    const parts = [['attachments', colors[0]], ['text', colors[1]], ['deleted', deleted]];
+    const tree = { children: d.areas.map((a) => ({ name: a.name, children: parts.map(([k]) => ({ name: d.labels[k], kind: k, area: a.name, v: a[k] })) })) };
+    const root = d3.hierarchy(tree).sum((n) => n.v || 0).sort((a, b) => b.value - a.value);
+    d3.treemap().size([W, h]).paddingInner(2).paddingTop(18).round(true)(root);
+    (root.children || []).forEach((a) => {
+      if (a.x1 - a.x0 > 60) {
+        s.append('text').attr('class', 'lbl').attr('x', a.x0 + 2).attr('y', a.y0 + 13)
+          .text(`${a.data.name} · ${fmtBytes(a.value)}`);
+      }
+    });
+    hover(s.selectAll('rect.leaf').data(root.leaves().filter((l) => l.value > 0)).join('rect').attr('class', 'leaf')
+      .attr('x', (l) => l.x0).attr('y', (l) => l.y0).attr('width', (l) => l.x1 - l.x0).attr('height', (l) => l.y1 - l.y0).attr('rx', 2)
+      .attr('fill', (l) => parts.find(([k]) => k === l.data.kind)[1]),
+    (l) => `${esc(l.data.area)} · ${esc(l.data.name)}: <b>${fmtBytes(l.value)}</b>`);
+    const box = document.createElement('div');
+    box.className = 'report-legend';
+    box.innerHTML = `<span><i style="background:${colors[0]}"></i>${esc(d.labels.attachments)}</span>`
+      + `<span><i style="background:${colors[1]}"></i>${esc(d.labels.text)}</span>`
+      + `<span><i style="background:repeating-linear-gradient(45deg,${css('--fg-3')} 0 1.5px,${css('--bg-3')} 1.5px 4px)"></i>${esc(d.labels.deleted)}</span>`;
+    el.append(box);
+  };
+
+  // size-lines: the repository against the current files, the gap shaded, labels at the line ends.
+  draw['size-lines'] = (el, d) => {
+    const W = width(el);
+    const h = 220;
+    const m = { l: 56, r: 96, t: 8, b: 24 };
+    const s = svg(el, h);
+    const parse = d3.utcParse('%Y-%m');
+    const pts = d.points.map((p) => ({ ...p, t: parse(p.t) }));
+    const x = d3.scaleUtc(d3.extent(pts, (p) => p.t), [m.l, W - m.r]);
+    const y = d3.scaleLinear([0, d3.max(pts, (p) => p.repo) || 1], [h - m.b, m.t]).nice();
+    s.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`)
+      .call(d3.axisLeft(y).ticks(4).tickFormat(fmtBytes).tickSize(-(W - m.l - m.r)))
+      .call((g) => g.selectAll('line').attr('stroke-opacity', 0.5)).select('.domain').remove();
+    s.append('path').datum(pts).attr('fill', colors[0]).attr('fill-opacity', 0.12)
+      .attr('d', d3.area().x((p) => x(p.t)).y0((p) => y(p.tree)).y1((p) => y(p.repo)));
+    [['repo', colors[0]], ['tree', colors[1]]].forEach(([k, c]) => {
+      s.append('path').datum(pts).attr('fill', 'none').attr('stroke', c).attr('stroke-width', 2)
+        .attr('d', d3.line().x((p) => x(p.t)).y((p) => y(p[k])));
+      s.append('text').attr('class', 'lbl').attr('x', W - m.r + 6).attr('y', y(pts.at(-1)[k]) + 4).text(d.labels[k]);
+    });
+    s.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - m.b})`)
+      .call(d3.axisBottom(x).tickValues(monthTicks(pts.map((p) => p.t), W)).tickFormat(d3.utcFormat('%m/%y')).tickSizeOuter(0));
+    s.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', h - m.t - m.b).attr('fill', 'transparent')
+      .on('mousemove', (e) => {
+        const p = pts[d3.bisector((v) => v.t).center(pts, x.invert(d3.pointer(e)[0]))];
+        show(e, `${d3.utcFormat('%m/%Y')(p.t)}<br>${esc(d.labels.repo)}: <b>${fmtBytes(p.repo)}</b><br>${esc(d.labels.tree)}: <b>${fmtBytes(p.tree)}</b>`);
+      })
+      .on('mouseleave', hide);
+  };
+
   document.querySelectorAll('.report-chart[data-chart]').forEach((el) => {
     const fn = draw[el.dataset.chart];
     if (fn && data[el.dataset.id]) fn(el, data[el.dataset.id]);

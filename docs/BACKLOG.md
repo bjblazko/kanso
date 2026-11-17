@@ -1,7 +1,7 @@
 # Backlog
 
 **Created:** 2026-11-07
-**Updated:** 2026-11-07
+**Updated:** 2026-11-17
 
 Known work that is not planned yet: technical debt, follow-ups from reviews,
 ideas. Risks that stay are in [arc42 chapter 11](architecture/arc42.md#11-risks-and-technical-debt);
@@ -52,3 +52,6 @@ decisions in [ADRs](adr/). Done items are removed here and noted in the CHANGELO
 - Import recipes from Instagram (caption pasted or a screenshot).
 - AI help in the wiki (tidy, summarise, find) as read-only tools (ADR-013).
 - Rename meal plans; a confirmation before sending text to an external AI.
+- Free space the reports show (Berichte → Speicher): delete orphaned media,
+  and for what Git keeps of deleted files and old versions, a guarded history
+  rewrite (with a backup first) — risky, needs its own design.
