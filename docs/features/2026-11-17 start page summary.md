@@ -6,7 +6,7 @@ updated: 2026-11-17
 
 # Start page: what happened
 
-The start page opens with what changed since one's last visit (at least the
+Kanso's start page ("Start", first in the rail, at `/`) shows what changed since one's last visit (at least the
 last 24 hours): one sentence ("Seit gestern, 18:40: 4 Seiten geändert, 2 neue
 Rezepte, 7 Listeneinträge abgehakt."), a number with a spark line per kind,
 the changes over time stacked by kind, who was active, and the changed
@@ -14,7 +14,8 @@ documents grouped by space, newest first.
 
 A select switches to 24 hours, 7 or 30 days; "Eigene einblenden" adds one's own
 changes, which are hidden at first. Below, "Heute" lists today's meals of one's
-cooking plans and the tasks due today or overdue. The spaces follow as before.
+cooking plans and the tasks due today or overdue. The wiki's spaces are under
+"Wiki" (`/wiki`).
 
 Only documents one may read count, for admins too. Who ticked a list item is
 not recorded, so those count under "ohne Namen".

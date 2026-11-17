@@ -28,9 +28,11 @@ test('a page shared on its own: the other person finds it and nothing else of th
   await signIn(page, { sub: 'christa', name: christa });
   await page.goto('/');
   const main = page.locator('main');
+  await expect(main.getByRole('link', { name: 'Wunschliste' })).toBeVisible(); // the start page lists the shared page
+  await expect(main.getByRole('link', { name: 'Geheim' })).toHaveCount(0); // and nothing else of the space
+  await page.goto('/wiki');
   await expect(main.getByRole('heading', { name: 'Für dich freigegeben' })).toBeVisible();
-  await expect(main.getByRole('link', { name: 'Geheim' })).toHaveCount(0); // not in the start page summary either
-  await main.locator('ul.spaces').getByRole('link', { name: 'Wunschliste' }).click(); // the summary lists it too
+  await main.getByRole('link', { name: 'Wunschliste' }).click();
   await expect(page.getByRole('heading', { level: 1, name: 'Wunschliste' })).toBeVisible();
   await expect(main.getByRole('link', { name: 'Bücher' })).toBeVisible();
   await expect(page.getByText('Geheim')).toHaveCount(0);

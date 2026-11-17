@@ -4,7 +4,7 @@ import { signIn, unique } from './helpers.js';
 
 test('sign in shows the start page in German', async ({ page }) => {
   await signIn(page);
-  await expect(page.getByRole('heading', { level: 1, name: 'Wiki-Bereiche' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Was passiert ist' })).toBeVisible();
   await expect(page.locator('html')).toHaveAttribute('lang', 'de');
 });
 
@@ -12,7 +12,7 @@ test('language can be switched to English', async ({ page }) => {
   await signIn(page, { sub: 'ben', name: 'Ben' });
   await page.getByLabel('Menü von Ben').click();
   await page.getByRole('button', { name: 'English' }).click();
-  await expect(page.getByRole('heading', { level: 1, name: 'Wiki spaces' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'What happened' })).toBeVisible();
 });
 
 test('licenses page lists shipped third-party work', async ({ page }) => {
@@ -37,6 +37,7 @@ test('layout has no horizontal scroll', async ({ page }) => {
 
 test('navigation starts folded on phones and open on wide screens', async ({ page, isMobile }) => {
   await signIn(page, { sub: 'fritz', name: 'Fritz' });
+  await page.goto('/wiki');
   const nav = page.locator('.sidenav > details');
   if (isMobile) {
     await expect(nav).not.toHaveAttribute('open', '');
@@ -50,7 +51,7 @@ test('navigation starts folded on phones and open on wide screens', async ({ pag
 test('the spaces bar folds on wide screens and stays folded', async ({ page, isMobile }) => {
   test.skip(isMobile, 'on phones the bar sits above the content and starts folded');
   await signIn(page, { sub: 'hanna', name: 'Hanna' });
-  await page.goto('/'); // waits for load, so nav.js listens before the click
+  await page.goto('/wiki'); // waits for load, so nav.js listens before the click
   const nav = page.locator('.sidenav > details');
   const toggle = page.locator('.sidenav summary');
   const remembered = () => page.evaluate(() => document.cookie);
@@ -73,6 +74,7 @@ test('the spaces bar folds on wide screens and stays folded', async ({ page, isM
 
 test('links styled as buttons are not underlined', async ({ page }) => {
   await signIn(page, { sub: 'gerd', name: 'Gerd', admin: true });
+  await page.goto('/wiki');
   const button = page.getByRole('link', { name: 'Bereich anlegen' });
   await expect(button).toHaveCSS('text-decoration-line', 'none');
 });
@@ -86,13 +88,13 @@ test('dev login switches between made-up people', async ({ page }) => {
   await page.getByRole('link', { name: 'Person wechseln' }).click();
   await page.getByRole('button', { name: 'Oma Gerda', exact: true }).click();
   await expect(menu).toHaveText('Oma Gerda');
-  await expect(page.getByRole('heading', { level: 1, name: 'Wiki-Bereiche' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Was passiert ist' })).toBeVisible();
 });
 
 test('a short page keeps the closed menu compact on phones', async ({ page, isMobile }) => {
   test.skip(!isMobile, 'the menu sits above the content only on phones');
   await signIn(page, { sub: 'kurt', name: 'Kurt' });
-  await page.goto('/');
+  await page.goto('/wiki');
   const nav = await page.locator('.sidenav').boundingBox();
   expect(nav.height).toBeLessThan(120);
 });

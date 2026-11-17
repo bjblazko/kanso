@@ -10,8 +10,12 @@ test('the module bar names each part of Kanso and marks the current one', async 
   await expect(modules(page).getByRole('link', { name: 'Notizen' })).toHaveAttribute('aria-current', 'true');
   await expect(modules(page).getByRole('link', { name: 'Wiki' })).not.toHaveAttribute('aria-current', 'true');
   await modules(page).getByRole('link', { name: 'Wiki' }).click();
-  await expect(page).toHaveURL(/\/$/);
+  await expect(page).toHaveURL(/\/wiki$/);
   await expect(modules(page).getByRole('link', { name: 'Wiki' })).toHaveAttribute('aria-current', 'true');
+  await modules(page).getByRole('link', { name: 'Start' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(modules(page).getByRole('link', { name: 'Start' })).toHaveAttribute('aria-current', 'true');
+  await expect(modules(page).getByRole('link', { name: 'Wiki' })).not.toHaveAttribute('aria-current', 'true');
 });
 
 test('wiki spaces appear only in the wiki, under their own heading', async ({ page }) => {

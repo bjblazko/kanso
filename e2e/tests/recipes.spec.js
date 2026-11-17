@@ -25,7 +25,7 @@ test('recipe: create, find by tag, cook with more servings, tick off', async ({ 
   // A recipe lives in the kitchen: no spaces bar, back to the recipes, not in the space's tree.
   await expect(page.locator('nav.rail').getByRole('link', { name: 'Küche' })).toHaveAttribute('aria-current', 'true');
   await expect(page.locator('.breadcrumb').getByRole('link', { name: 'Rezepte' })).toBeVisible();
-  await page.goto('/');
+  await page.goto('/wiki');
   await expect(page.locator('main').getByRole('link', { name: space, exact: true })).toHaveCount(0); // the cookbook is not in the wiki
 
   await page.goto('/recipes');

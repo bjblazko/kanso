@@ -1,12 +1,12 @@
 {{define "content"}}{{with .Data.Summary}}<header class="screen-head">
-<div class="page-toolbar home-toolbar" role="toolbar" aria-label="{{$.T "home.range"}}">
+<div class="page-toolbar home-toolbar" role="toolbar" aria-label="{{$.T "home.title"}}">
   <form class="home-range" method="get" action="/">
     <div class="field"><label class="visually-hidden" for="home-range">{{$.T "home.range"}}</label>
     <select id="home-range" name="range">{{range .Ranges}}<option value="{{.Value}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>{{end}}</select></div>
     {{if .Own}}<input type="hidden" name="own" value="1">{{end}}
-    <button class="btn btn-secondary" type="submit">{{$.T "home.show"}}</button>
+    <button class="btn btn-secondary btn-sm" type="submit">{{$.T "home.show"}}</button>
   </form>
-  <a class="btn btn-secondary" href="{{.OwnHref}}">{{if .Own}}{{$.T "home.own_hide"}}{{else}}{{$.T "home.own_show"}}{{end}}</a>
+  <a class="btn btn-secondary btn-sm" href="{{.OwnHref}}">{{if .Own}}{{$.T "home.own_hide"}}{{else}}{{$.T "home.own_show"}}{{end}}</a>
 </div>
 <h1>{{$.T "home.title"}}</h1></header>
 <div class="content">

@@ -650,6 +650,7 @@ html { scroll-padding-top: 9rem; }
 .report-card > .meta { margin: 0 0 var(--space-3); }
 .report-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
 .home-range { display: flex; gap: var(--space-2); align-items: center; }
+.home-toolbar .field select { height: var(--control-h-sm); font-size: var(--text-sm); }
 .home-sentence { font-size: 1.125rem; margin: var(--space-4) 0; }
 .home-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: var(--space-3); }
 .home-spark { margin-top: var(--space-2); height: 28px; }
