@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: Apache-2.0
 import { test, expect } from '@playwright/test';
-import { signIn, unique, createSpace } from './helpers.js';
+import { signIn, unique, createSpace, useAsCookbook } from './helpers.js';
 
 test('recipe: create, find by tag, cook with more servings, tick off', async ({ page }) => {
   await signIn(page, { sub: 'rita', name: 'Rita', admin: true });
   const space = unique('Rezepte');
   await createSpace(page, space);
+  await useAsCookbook(page, space);
 
   await page.goto('/recipes');
   await page.getByRole('link', { name: 'Neues Rezept' }).click();
   const title = unique('Kartoffelcurry');
   await page.getByLabel('Titel').fill(title);
-  await page.getByLabel('Wiki-Bereich').selectOption({ label: space });
   await page.getByRole('button', { name: 'Rezept anlegen' }).click();
 
   await expect(page.getByLabel('Ist ein Rezept')).toBeChecked();
@@ -26,8 +26,7 @@ test('recipe: create, find by tag, cook with more servings, tick off', async ({ 
   await expect(page.locator('nav.rail').getByRole('link', { name: 'Küche' })).toHaveAttribute('aria-current', 'true');
   await expect(page.locator('.breadcrumb').getByRole('link', { name: 'Rezepte' })).toBeVisible();
   await page.goto('/');
-  await page.locator('main').getByRole('link', { name: space, exact: true }).click();
-  await expect(page.locator('nav.sidenav').getByRole('link', { name: title })).toHaveCount(0);
+  await expect(page.locator('main').getByRole('link', { name: space, exact: true })).toHaveCount(0); // the cookbook is not in the wiki
 
   await page.goto('/recipes');
   await page.locator('.tag-filter').getByRole('link', { name: 'deftig' }).click();
@@ -54,10 +53,10 @@ test('recipe: give stars, filter the kitchen by them, clear them', async ({ page
   await signIn(page, { sub: 'rita', name: 'Rita', admin: true });
   const space = unique('Sterne');
   await createSpace(page, space);
+  await useAsCookbook(page, space);
   await page.goto('/recipes/new');
   const title = unique('Linsensuppe');
   await page.getByLabel('Titel').fill(title);
-  await page.getByLabel('Wiki-Bereich').selectOption({ label: space });
   await page.getByRole('button', { name: 'Rezept anlegen' }).click();
   await page.getByRole('button', { name: 'Speichern' }).click();
   await expect(page).toHaveURL(/\/p\/[a-z2-7]{12}$/);

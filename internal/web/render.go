@@ -61,7 +61,7 @@ func (s *Server) newView(r *http.Request, title string, data any) view {
 	v := view{
 		Title: title, Lang: i18n.Negotiate(r.Header.Get("Accept-Language"), u.Lang),
 		User: u, CSRF: auth.CSRFToken(r.Context()), Query: r.URL.Query().Get("q"), Data: data,
-		Admin: p.Admin, Nav: s.Spaces.Visible(p, s.groups()),
+		Admin: p.Admin, Nav: s.wikiSpaces(p),
 		Module: moduleOf(r.URL.Path), Dev: s.Cfg.DevLogin, Path: r.URL.RequestURI(),
 		AvatarVersion: s.Users.AvatarVersion(u.Sub), AppVersion: buildinfo.Version,
 		bundle: s.I18n, version: s.version,

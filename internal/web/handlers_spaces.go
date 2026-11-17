@@ -81,6 +81,10 @@ func (s *Server) showSpace(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
+	if sp.Cookbook { // its recipes live in the kitchen (ADR-016)
+		http.Redirect(w, r, "/recipes", http.StatusSeeOther)
+		return
+	}
 	v := s.inSpace(s.newView(r, sp.Name, spacePage{Space: sp, Role: role}), sp.Slug, "")
 	v.Audience = ptr(s.spaceAudienceFor(v, sp, role))
 	s.render(w, r, http.StatusOK, "space", v)

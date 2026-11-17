@@ -27,9 +27,10 @@ func recipeSite(t *testing.T, html string) string {
 
 func TestImportFromJSONLDThenCreate(t *testing.T) {
 	ts, _, anna := setupHaus(t)
+	ts.cookbook(t, "haus")
 	site := recipeSite(t, ldPage)
 	_, form := get(t, anna, ts.URL+"/recipes/import")
-	if !strings.Contains(form, `value="haus"`) || !strings.Contains(form, "nur Seiten mit Rezeptdaten") {
+	if strings.Contains(form, `<select id="space"`) || !strings.Contains(form, "nur Seiten mit Rezeptdaten") {
 		t.Fatal("import form")
 	}
 	resp, body := ts.postFormBody(t, anna, "/recipes/import", "/recipes/import", url.Values{"url": {site}, "space": {"haus"}})
@@ -51,6 +52,7 @@ func TestImportFromJSONLDThenCreate(t *testing.T) {
 
 func TestImportWithoutDataAndWithoutAI(t *testing.T) {
 	ts, _, anna := setupHaus(t)
+	ts.cookbook(t, "haus")
 	site := recipeSite(t, "<html><body><p>500 g Mehl</p></body></html>")
 	resp, body := ts.postFormBody(t, anna, "/recipes/import", "/recipes/import", url.Values{"url": {site}, "space": {"haus"}})
 	if resp.StatusCode != http.StatusBadRequest || !strings.Contains(body, "keine Rezeptdaten") {
@@ -64,6 +66,7 @@ func TestImportWithoutDataAndWithoutAI(t *testing.T) {
 
 func TestImportWithAI(t *testing.T) {
 	ts, _, anna := setupHaus(t)
+	ts.cookbook(t, "haus")
 	base := fakeAI(t, "# Omas Apfelkuchen\nPortionen: 12\n\n## Zutaten\n\n- 500 g Äpfel\n\n## Zubereitung\n\n1. Backen.")
 	_ = ts.deps.AI.Save(ai.Config{Enabled: true, BaseURL: base, Model: "m"})
 	_, form := get(t, anna, ts.URL+"/recipes/import")
@@ -80,6 +83,7 @@ func TestImportWithAI(t *testing.T) {
 func TestImportCreateNeedsWrite(t *testing.T) {
 	ts, admin, anna := setupHaus(t)
 	ts.postForm(t, admin, "/", "/admin/spaces/new", url.Values{"name": {"Geheim"}})
+	ts.cookbook(t, "geheim") // anna may not write there
 	resp := ts.postForm(t, anna, "/recipes/import", "/recipes/import/create",
 		url.Values{"space": {"geheim"}, "title": {"X"}, "body": {"## Zutaten\n- 1 Ei\n"}})
 	if resp.StatusCode != http.StatusForbidden {
@@ -90,6 +94,7 @@ func TestImportCreateNeedsWrite(t *testing.T) {
 func TestImportNeedsAWritableSpace(t *testing.T) {
 	ts, admin, anna := setupHaus(t)
 	ts.postForm(t, admin, "/", "/admin/spaces/new", url.Values{"name": {"Geheim"}})
+	ts.cookbook(t, "geheim") // anna may not write there
 	site := recipeSite(t, ldPage)
 	if resp, _ := ts.postFormBody(t, anna, "/recipes/import", "/recipes/import", url.Values{"url": {site}, "space": {"geheim"}}); resp.StatusCode != http.StatusForbidden {
 		t.Fatalf("%d", resp.StatusCode)
@@ -116,6 +121,7 @@ func photoSite(t *testing.T) string {
 
 func TestImportTakesThePhoto(t *testing.T) {
 	ts, _, anna := setupHaus(t)
+	ts.cookbook(t, "haus")
 	site := photoSite(t)
 	_, body := ts.postFormBody(t, anna, "/recipes/import", "/recipes/import", url.Values{"url": {site}, "space": {"haus"}})
 	if !strings.Contains(body, `src="data:image/jpeg;base64,`) || !strings.Contains(body, `name="place_0"`) || !strings.Contains(body, `<option value="top" selected>`) {
@@ -145,6 +151,7 @@ func TestImportTakesThePhoto(t *testing.T) {
 
 func TestImportWithoutPhotoWhenSkipped(t *testing.T) {
 	ts, _, anna := setupHaus(t)
+	ts.cookbook(t, "haus")
 	site := photoSite(t)
 	form := url.Values{"space": {"haus"}, "title": {"Curry"}, "source": {site}, "place_0": {"skip"},
 		"photo_url_0": {strings.Replace(site, "/rezept", "/bild.jpeg", 1)}, "body": {"## Zutaten\n- 1 Ei\n"}}
@@ -166,6 +173,7 @@ func TestKitchenThumbnailFromBody(t *testing.T) {
 
 func TestImportPhotoOnTopIsTheKitchenPhoto(t *testing.T) {
 	ts, _, anna := setupHaus(t)
+	ts.cookbook(t, "haus")
 	site := photoSite(t)
 	img := strings.Replace(site, "/rezept", "/bild.jpeg", 1)
 	form := url.Values{"space": {"haus"}, "title": {"Curry"}, "source": {site}, "body": {"## Zutaten\n- 1 Ei\n\n## Zubereitung\n\n1. Kochen.\n"},
@@ -180,6 +188,7 @@ func TestImportPhotoOnTopIsTheKitchenPhoto(t *testing.T) {
 
 func TestAIMarkSaysWhereTextGoes(t *testing.T) {
 	ts, _, anna := setupHaus(t)
+	ts.cookbook(t, "haus")
 	_ = ts.deps.AI.Save(ai.Config{Enabled: true, BaseURL: "http://127.0.0.1:1/v1", Model: "m"})
 	_, form := get(t, anna, ts.URL+"/recipes/import")
 	mark := between(form, `<span class="ai-mark"`, `</span>`)
@@ -199,6 +208,7 @@ func TestAIMarkSaysWhereTextGoes(t *testing.T) {
 
 func TestImportHeadingsFollowTheRecipesLanguage(t *testing.T) {
 	ts, _, anna := setupHaus(t)
+	ts.cookbook(t, "haus")
 	for page, want := range map[string]string{
 		ldPage: "## Zubereitung", // no language on the page: the person's (German)
 		strings.Replace(ldPage, "<html>", `<html lang="en-GB">`, 1): "## Method",

@@ -43,6 +43,7 @@ only units of one family are added up.
   recipe moves up in its place), and a recipe page — view, editor, history,
   sharing — belongs to Küche in the rail, its path leads back to "Rezepte".
   The file stays a page in its space; search still finds it.
+- One space is the cookbook that holds the recipes ([ADR-016](016-one-cookbook-space.md)).
 - Recognition can fail on unusual lines; the editor preview shows how Kanso
   read each ingredient so the author can fix it.
 - An optional AI (OpenAI-compatible endpoint) may later turn pasted text

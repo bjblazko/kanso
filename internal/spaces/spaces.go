@@ -6,6 +6,7 @@ package spaces
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"slices"
@@ -35,6 +36,8 @@ type Space struct {
 	Description string          `yaml:"description,omitempty"`
 	Icon        string          `yaml:"icon"`
 	Members     []access.Member `yaml:"members"`
+	// Cookbook marks the one space that holds the recipes (ADR-016).
+	Cookbook bool `yaml:"cookbook,omitempty"`
 }
 
 // Service keeps all spaces in memory; this process is the only writer.
@@ -130,6 +133,50 @@ func (svc *Service) Update(a store.Author, sp Space) error {
 		return ErrUnknown
 	}
 	return svc.save(a, sp, "Bereich geändert: "+sp.Name)
+}
+
+// Cookbook returns the space that holds the recipes, if one is marked.
+func (svc *Service) Cookbook() (Space, bool) {
+	for _, sp := range svc.List() {
+		if sp.Cookbook {
+			return sp, true
+		}
+	}
+	return Space{}, false
+}
+
+// SetCookbook makes slug the cookbook and unmarks any other, in one commit.
+func (svc *Service) SetCookbook(a store.Author, slug string) error {
+	svc.mu.Lock()
+	defer svc.mu.Unlock()
+	target, ok := svc.spaces[slug]
+	if !ok {
+		return ErrUnknown
+	}
+	changed := map[string]Space{}
+	for _, sp := range svc.spaces {
+		if sp.Cookbook && sp.Slug != slug {
+			sp.Cookbook = false
+			changed[sp.Slug] = sp
+		}
+	}
+	target.Cookbook = true
+	changed[slug] = target
+	var paths []string
+	err := svc.repo.Locked(func() error {
+		for _, sp := range changed {
+			rel := filepath.Join(Dir, sp.Slug, "space.yaml")
+			if err := store.WriteYAML(filepath.Join(svc.dataDir, rel), sp); err != nil {
+				return err
+			}
+			paths = append(paths, rel)
+		}
+		return svc.repo.Commit(a, "Kochbuch: "+target.Name, paths...)
+	})
+	if err == nil {
+		maps.Copy(svc.spaces, changed)
+	}
+	return err
 }
 
 // Delete removes the space with everything in it and commits that.

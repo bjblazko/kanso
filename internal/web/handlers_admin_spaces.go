@@ -40,6 +40,10 @@ func (s *Server) claimSpace(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sp, ok := s.Spaces.Get(r.PostFormValue("space"))
+	if r.PostFormValue("action") == "cookbook" && ok {
+		s.moveCookbook(w, r, sp)
+		return
+	}
 	if r.PostFormValue("action") != "claim" || !ok || len(sp.Members) > 0 {
 		s.fail(w, r, http.StatusBadRequest, "settings.invalid")
 		return
@@ -51,4 +55,14 @@ func (s *Server) claimSpace(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/s/"+sp.Slug, http.StatusSeeOther)
+}
+
+// moveCookbook makes sp the cookbook (ADR-016).
+func (s *Server) moveCookbook(w http.ResponseWriter, r *http.Request, sp spaces.Space) {
+	u, _ := auth.UserFrom(r.Context())
+	if err := s.Spaces.SetCookbook(u.Author(), sp.Slug); err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	http.Redirect(w, r, "/admin/spaces", http.StatusSeeOther)
 }

@@ -9,21 +9,19 @@ import (
 	"strings"
 	"time"
 
-	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/ai"
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/recipeimport"
 	"github.com/bjblazko/kanso/internal/recipes"
-	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/wiki"
 )
 
 type importPage struct {
-	Spaces []spaces.Space
-	Space  string
-	URL    string
-	AI     *aiTarget // where page text goes when there is no recipe data; nil = no AI
-	Error  string
+	Problem string // i18n key of why no recipe can be created (no cookbook, no access)
+	Space   string
+	URL     string
+	AI      *aiTarget // where page text goes when there is no recipe data; nil = no AI
+	Error   string
 }
 
 type importPreview struct {
@@ -43,7 +41,8 @@ func (s *Server) importForm(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) renderImportForm(w http.ResponseWriter, r *http.Request, status int, page importPage) {
 	_, who := auth.UserFrom(r.Context())
-	page.Spaces = s.writableSpaces(who)
+	cb, problem := s.cookbookFor(who)
+	page.Space, page.Problem = cb.Slug, problem
 	page.AI = s.aiTarget(r.Context())
 	v := s.newView(r, "", page)
 	v.Title = v.T("import.title")
@@ -52,11 +51,13 @@ func (s *Server) renderImportForm(w http.ResponseWriter, r *http.Request, status
 
 // importRecipe fetches the page and shows a draft: from its recipe data, else from the AI.
 func (s *Server) importRecipe(w http.ResponseWriter, r *http.Request) {
-	page := importPage{URL: strings.TrimSpace(r.PostFormValue("url")), Space: r.PostFormValue("space")}
-	if _, who := auth.UserFrom(r.Context()); !access.Can(s.Spaces.RoleOf(who, page.Space, s.groups()), access.Write) {
+	_, who := auth.UserFrom(r.Context())
+	cb, problem := s.cookbookFor(who)
+	if problem != "" {
 		s.forbidden(w, r) // fetching and asking the AI only for a recipe one may create
 		return
 	}
+	page := importPage{URL: strings.TrimSpace(r.PostFormValue("url")), Space: cb.Slug}
 	v := s.newView(r, "", nil)
 	draft, fetched, withAI, err := s.draftFrom(r.Context(), page.URL, v.Lang)
 	if err != nil {
@@ -117,11 +118,12 @@ func importErrorKey(err error) string {
 // createImported makes the recipe page the person confirmed and opens its editor.
 func (s *Server) createImported(w http.ResponseWriter, r *http.Request) {
 	u, who := auth.UserFrom(r.Context())
-	space := r.PostFormValue("space")
-	if _, ok := s.Spaces.Get(space); !ok || !access.Can(s.Spaces.RoleOf(who, space, s.groups()), access.Write) {
+	cb, problem := s.cookbookFor(who)
+	if problem != "" {
 		s.forbidden(w, r)
 		return
 	}
+	space := cb.Slug
 	p, err := s.Wiki.Create(u.Author(), space, "", r.PostFormValue("title"))
 	if err == nil {
 		body := strings.ReplaceAll(r.PostFormValue("body"), "\r\n", "\n")

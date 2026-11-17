@@ -147,3 +147,31 @@ func TestDeleteUnknownSpace(t *testing.T) {
 		t.Error("also called for an unknown space")
 	}
 }
+
+func TestCookbookIsOnlyOne(t *testing.T) {
+	svc := newService(t)
+	a, _ := svc.Create(admin, "root", "Rezepte", "")
+	b, _ := svc.Create(admin, "root", "Backen", "")
+	if _, ok := svc.Cookbook(); ok {
+		t.Fatal("a cookbook without anyone choosing one")
+	}
+	if err := svc.SetCookbook(admin, a.Slug); err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.SetCookbook(admin, b.Slug); err != nil {
+		t.Fatal(err)
+	}
+	again, err := NewService(svc.dataDir, svc.repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cb, ok := again.Cookbook(); !ok || cb.Slug != b.Slug {
+		t.Errorf("cookbook = %+v, %v", cb, ok)
+	}
+	if sp, _ := again.Get(a.Slug); sp.Cookbook {
+		t.Error("two cookbooks")
+	}
+	if err := svc.SetCookbook(admin, "nope"); !errors.Is(err, ErrUnknown) {
+		t.Errorf("unknown: %v", err)
+	}
+}

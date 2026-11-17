@@ -204,6 +204,7 @@ Kopia jobs.
 | [013](../adr/013-ai-openai-compatible-through-kanso-services.md) | AI through an OpenAI-compatible API, content only through Kanso's services |
 | [014](../adr/014-admins-manage-but-do-not-read.md) | Admins manage spaces but do not read them |
 | [015](../adr/015-reports-on-request-cached-per-head.md) | Reports are computed on request, cached per Git HEAD |
+| [016](../adr/016-one-cookbook-space.md) | One cookbook space holds the recipes |
 
 ## 10. Quality Requirements
 

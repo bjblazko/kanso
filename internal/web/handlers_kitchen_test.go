@@ -89,11 +89,8 @@ func TestRecipesEmpty(t *testing.T) {
 func TestNewRecipe(t *testing.T) {
 	ts, admin, anna := setupHaus(t)
 	ts.postForm(t, admin, "/", "/admin/spaces/new", url.Values{"name": {"Geheim"}})
-	_, body := get(t, anna, ts.URL+"/recipes/new")
-	if !strings.Contains(body, `value="haus"`) || strings.Contains(body, `value="geheim"`) {
-		t.Fatalf("spaces:\n%s", body)
-	}
-	resp := ts.postForm(t, anna, "/recipes/new", "/recipes/new", url.Values{"space": {"haus"}, "title": {"Curry"}})
+	ts.cookbook(t, "haus")
+	resp := ts.postForm(t, anna, "/recipes/new", "/recipes/new", url.Values{"title": {"Curry"}})
 	loc := resp.Header.Get("Location")
 	if resp.StatusCode != http.StatusSeeOther || !strings.HasSuffix(loc, "/edit") {
 		t.Fatalf("%d %q", resp.StatusCode, loc)
@@ -102,11 +99,12 @@ func TestNewRecipe(t *testing.T) {
 	if !p.Meta.IsRecipe() || p.Meta.Servings != 4 || !strings.Contains(p.Body, "## Zutaten") || !strings.Contains(p.Body, "## Zubereitung") {
 		t.Fatalf("%+v\n%s", p.Meta, p.Body)
 	}
-	if resp = ts.postForm(t, anna, "/recipes/new", "/recipes/new", url.Values{"space": {"geheim"}, "title": {"X"}}); resp.StatusCode != http.StatusForbidden {
-		t.Errorf("no write right: %d", resp.StatusCode)
-	}
-	if resp = ts.postForm(t, anna, "/recipes/new", "/recipes/new", url.Values{"space": {"haus"}, "title": {" "}}); resp.StatusCode != http.StatusBadRequest {
+	if resp = ts.postForm(t, anna, "/recipes/new", "/recipes/new", url.Values{"title": {" "}}); resp.StatusCode != http.StatusBadRequest {
 		t.Errorf("empty title: %d", resp.StatusCode)
+	}
+	ts.cookbook(t, "geheim")
+	if resp = ts.postForm(t, anna, "/", "/recipes/new", url.Values{"title": {"X"}}); resp.StatusCode != http.StatusForbidden {
+		t.Errorf("no write right: %d", resp.StatusCode)
 	}
 }
 
@@ -116,5 +114,13 @@ func TestKitchenTagsFromFilesAreNormalised(t *testing.T) {
 	_, body := get(t, admin, ts.URL+"/recipes?tag=Deftig")
 	if !strings.Contains(listOf(body), id) || !strings.Contains(between(body, `<nav class="tag-filter"`, `</nav>`), `aria-pressed="true">deftig`) {
 		t.Fatalf("hand-written tag:\n%s", body)
+	}
+}
+
+// cookbook makes slug the cookbook (ADR-016).
+func (ts *testServer) cookbook(t *testing.T, slug string) {
+	t.Helper()
+	if err := ts.deps.Spaces.SetCookbook(planAuthor, slug); err != nil {
+		t.Fatal(err)
 	}
 }

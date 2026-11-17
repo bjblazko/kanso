@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 /**
  * Signs in through the dev login form. The user id is made unique per
@@ -36,4 +36,12 @@ export async function pageAction(page, name) {
   const more = page.locator('.tb-more > summary');
   if (await more.isVisible()) await more.click();
   await page.getByRole('toolbar').getByRole('link', { name, exact: true }).click();
+}
+
+/** Makes the space named name the cookbook (ADR-016) as the signed-in admin. */
+export async function useAsCookbook(page, name) {
+  await page.goto('/admin/spaces');
+  const row = page.locator('main li', { has: page.getByRole('link', { name, exact: true }) });
+  await row.getByRole('button', { name: 'Als Kochbuch' }).click();
+  await expect(row.getByText('Kochbuch', { exact: true })).toBeVisible();
 }

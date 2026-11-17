@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 import { test, expect } from '@playwright/test';
 import http from 'node:http';
-import { signIn, unique, createSpace } from './helpers.js';
+import { signIn, unique, createSpace, useAsCookbook } from './helpers.js';
 
 const LD_PAGE = `<html><head><script type="application/ld+json">{"@type":"Recipe","name":"Linsendal","recipeYield":"4",
 "recipeIngredient":["250 g rote Linsen","1 Dose Kokosmilch"],"recipeInstructions":[{"@type":"HowToStep","text":"Kochen."}]}</script></head><body></body></html>`;
@@ -38,11 +38,11 @@ test('recipe from a web page: recipe data, then with the AI after an admin conne
   await signIn(page, { sub: 'ines', name: 'Ines', admin: true });
   const space = unique('Importe');
   await createSpace(page, space);
+  await useAsCookbook(page, space);
 
   await page.goto('/recipes');
   await page.getByRole('link', { name: 'Von Webseite' }).click();
   await page.getByLabel('Adresse der Rezeptseite').fill(at(site, '/curry'));
-  await page.getByLabel('Wiki-Bereich').selectOption({ label: space });
   await page.getByRole('button', { name: 'Rezept holen' }).click();
   await expect(page.getByLabel('Titel')).toHaveValue('Linsendal');
   await expect(page.locator('.recipe-parsed')).toContainText('250 · g · rote Linsen');
@@ -61,7 +61,6 @@ test('recipe from a web page: recipe data, then with the AI after an admin conne
   await page.goto('/recipes/import');
   await expect(page.locator('.ai-mark')).toHaveText('KI · im eigenen Netz: 127.0.0.1');
   await page.getByLabel('Adresse der Rezeptseite').fill(at(site, '/apfel'));
-  await page.getByLabel('Wiki-Bereich').selectOption({ label: space });
   await page.getByRole('button', { name: 'Rezept holen' }).click();
   await expect(page.getByLabel('Titel')).toHaveValue('Apfelkuchen');
   await expect(page.locator('main')).toContainText('mit KI aus dem Text der Seite');

@@ -14,7 +14,6 @@ import (
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/recipes"
 	"github.com/bjblazko/kanso/internal/search"
-	"github.com/bjblazko/kanso/internal/spaces"
 	"github.com/bjblazko/kanso/internal/wiki"
 )
 
@@ -100,6 +99,13 @@ func (s *Server) kitchen(w http.ResponseWriter, r *http.Request) {
 	}
 	v := s.newView(r, "", kp)
 	v.Title = v.T("nav.kitchen")
+	if cb, ok := s.Spaces.Cookbook(); ok { // who sees the recipes, and for managers where to change it
+		a := s.spaceAudience(v, cb)
+		if v.Admin || access.Can(s.Spaces.RoleOf(who, cb.Slug, s.groups()), access.ManageSpace) {
+			a = a.changeAt(v, "/s/"+cb.Slug+"/settings")
+		}
+		v.Audience = &a
+	}
 	s.render(w, r, http.StatusOK, "recipes", v)
 }
 
@@ -149,26 +155,22 @@ func toggle(tags []string, t string, on bool) []string {
 }
 
 type newRecipeForm struct {
-	Spaces []spaces.Space
-	Space  string
-	Title  string
-	Error  string
+	Space   string // the cookbook's slug
+	Problem string // i18n key of why no recipe can be created here
+	Admin   bool   // may create the cookbook when there is none
+	Title   string
+	Error   string
 }
 
-// writableSpaces are the spaces the person may create pages in.
-func (s *Server) writableSpaces(who access.Principal) []spaces.Space {
-	var out []spaces.Space
-	for _, sp := range s.Spaces.List() {
-		if access.Can(s.Spaces.RoleOf(who, sp.Slug, s.groups()), access.Write) {
-			out = append(out, sp)
-		}
-	}
-	return out
+// recipeForm is the form for who, with the cookbook or why it cannot be used.
+func (s *Server) recipeForm(who access.Principal) newRecipeForm {
+	cb, problem := s.cookbookFor(who)
+	return newRecipeForm{Space: cb.Slug, Problem: problem, Admin: who.Admin && problem == "recipe.no_cookbook"}
 }
 
 func (s *Server) newRecipeForm(w http.ResponseWriter, r *http.Request) {
 	_, who := auth.UserFrom(r.Context())
-	v := s.newView(r, "", newRecipeForm{Spaces: s.writableSpaces(who)})
+	v := s.newView(r, "", s.recipeForm(who))
 	v.Title = v.T("recipe.new")
 	s.render(w, r, http.StatusOK, "recipe_new", v)
 }
@@ -176,13 +178,13 @@ func (s *Server) newRecipeForm(w http.ResponseWriter, r *http.Request) {
 // createRecipe makes a recipe page from the skeleton and opens its editor.
 func (s *Server) createRecipe(w http.ResponseWriter, r *http.Request) {
 	u, who := auth.UserFrom(r.Context())
-	space := r.PostFormValue("space")
-	if _, ok := s.Spaces.Get(space); !ok || !access.Can(s.Spaces.RoleOf(who, space, s.groups()), access.Write) {
+	cb, problem := s.cookbookFor(who) // recipes go to the cookbook, whatever was posted
+	if problem != "" {
 		s.forbidden(w, r)
 		return
 	}
 	v := s.newView(r, "", nil)
-	p, err := s.Wiki.Create(u.Author(), space, "", r.PostFormValue("title"))
+	p, err := s.Wiki.Create(u.Author(), cb.Slug, "", r.PostFormValue("title"))
 	if err == nil {
 		err = s.Wiki.SaveWith(u.Author(), p.Meta.ID, p.Meta.Title, v.T("recipe.skeleton")+"\n", func(m *wiki.PageMeta) {
 			m.Type, m.Servings = wiki.TypeRecipe, newRecipeServings
@@ -190,7 +192,9 @@ func (s *Server) createRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 	switch {
 	case errors.Is(err, wiki.ErrNoTitle):
-		v.Title, v.Data = v.T("recipe.new"), newRecipeForm{Spaces: s.writableSpaces(who), Space: space, Error: v.T(pageErrorKey(err))}
+		form := s.recipeForm(who)
+		form.Error = v.T(pageErrorKey(err))
+		v.Title, v.Data = v.T("recipe.new"), form
 		s.render(w, r, http.StatusBadRequest, "recipe_new", v)
 	case err != nil:
 		s.serverError(w, r, err)

@@ -77,6 +77,9 @@ func New(d Deps) (*Server, error) {
 	if d.Repo != nil {
 		s.scanRepo = d.Repo.Scan
 	}
+	if d.Spaces != nil && d.Wiki != nil {
+		s.adoptCookbook()
+	}
 	if d.Todos != nil { // a moved shopping item adds up with a like one (ADR-011)
 		d.Todos.Join = func(dst *todos.List, it todos.Item, lang string) bool {
 			return shopping.Join(dst, it, lang, time.Now())

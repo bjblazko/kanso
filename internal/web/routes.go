@@ -117,6 +117,7 @@ func (s *Server) kitchenRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /recipes/import", s.importRecipe)
 	mux.HandleFunc("POST /recipes/import/create", s.createImported)
 	mux.HandleFunc("POST /recipes/new", s.createRecipe)
+	mux.HandleFunc("POST /recipes/cookbook", s.createCookbook)
 	mux.HandleFunc("GET /recipes/{id}/cook", s.cookRecipe)
 	mux.HandleFunc("POST /recipes/{id}/cooked", s.markCooked)
 	mux.HandleFunc("POST /recipes/{id}/rating", s.rateRecipe)

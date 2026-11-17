@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { test, expect } from '@playwright/test';
-import { signIn, unique, createSpace } from './helpers.js';
+import { signIn, unique, createSpace, useAsCookbook } from './helpers.js';
 
 const item = (page, text) => page.locator('.todo-item', { has: page.getByRole('checkbox', { name: text }) });
 
@@ -52,7 +52,9 @@ test('shopping list: amounts with − and + in sensible steps, a note, filled fr
   await page.reload();
   await expect(item(page, '1 l Milch')).toContainText('laktosefrei, sonst Hafermilch');
 
-  await createSpace(page, unique('Rezepte'));
+  const cookbook = unique('Rezepte Einkauf');
+  await createSpace(page, cookbook);
+  await useAsCookbook(page, cookbook);
   await page.goto('/recipes/new');
   const recipe = unique('Milchreis');
   await page.getByLabel('Titel').fill(recipe);

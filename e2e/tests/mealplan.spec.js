@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import { test, expect } from '@playwright/test';
-import { signIn, unique, createSpace } from './helpers.js';
+import { signIn, unique, createSpace, useAsCookbook } from './helpers.js';
 
 test('meal plan: plan two meals, shop for both days, take one off again', async ({ page }) => {
   const me = unique('Mia');
@@ -19,7 +19,9 @@ test('meal plan: plan two meals, shop for both days, take one off again', async 
   await page.getByLabel('Gruppe').selectOption(group);
   await page.getByRole('button', { name: 'Kochplan anlegen' }).click();
 
-  await createSpace(page, unique('Rezepte'));
+  const cookbook = unique('Rezepte Kochplan');
+  await createSpace(page, cookbook);
+  await useAsCookbook(page, cookbook);
   await page.goto('/recipes/new');
   const recipe = unique('Linsensuppe');
   await page.getByLabel('Titel').fill(recipe);
