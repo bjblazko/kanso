@@ -7,6 +7,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-11-17
+
+### Changed
+
+- One space is the cookbook (ADR-016): new recipes and imports go there without asking for a space, the cookbook no longer shows in the wiki, and the kitchen says who sees the recipes, with a link to change it for owners and admins. A space holding only recipes becomes the cookbook by itself; without one, admins create it from the kitchen, and they can move it under "Alle Bereiche".
+
 ## [0.8.0] - 2026-11-17
 
 ### Added
