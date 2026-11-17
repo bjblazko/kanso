@@ -17,7 +17,7 @@ func TestSidenavRemembersFolded(t *testing.T) {
 	}
 	u, _ := url.Parse(ts.URL)
 	admin.Jar.SetCookies(u, []*http.Cookie{{Name: sidenavCookie, Value: "closed", Path: "/"}})
-	for _, path := range []string{"/", "/s/haus"} {
+	for _, path := range []string{"/wiki", "/s/haus"} {
 		if _, body = get(t, admin, ts.URL+path); !strings.Contains(body, `<details class="sidenav-fold">`) || !strings.Contains(body, "shell-folded") {
 			t.Errorf("%s: folded spaces bar renders open", path)
 		}

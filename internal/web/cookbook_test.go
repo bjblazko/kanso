@@ -47,7 +47,7 @@ func TestCookbookHiddenFromWiki(t *testing.T) {
 	ts, admin, anna := setupHaus(t)
 	cookbookSpace(t, ts, admin, anna)
 	ts.srv.adoptCookbook()
-	if _, body := get(t, anna, ts.URL+"/"); strings.Contains(body, `href="/s/rezepte"`) {
+	if _, body := get(t, anna, ts.URL+"/wiki"); strings.Contains(body, `href="/s/rezepte"`) {
 		t.Error("the wiki lists the cookbook")
 	}
 	if resp, _ := get(t, anna, ts.URL+"/s/rezepte"); resp.StatusCode != http.StatusSeeOther || resp.Header.Get("Location") != "/recipes" {

@@ -37,7 +37,7 @@ func TestScreenHeadWiki(t *testing.T) {
 	expectHead(t, body, "Haus", `href="/s/haus/new"`, `href="/s/haus/settings"`, "Sichtbar für")
 	_, body = get(t, w.admin, w.ts.URL+"/p/"+w.list)
 	expectHead(t, body, "Wunschliste", `href="/p/`+w.list+`/edit"`, `class="breadcrumb"`)
-	_, body = get(t, w.admin, w.ts.URL+"/")
+	_, body = get(t, w.admin, w.ts.URL+"/wiki")
 	expectHead(t, body, "Wiki-Bereiche", `href="/admin/spaces/new"`)
 }
 

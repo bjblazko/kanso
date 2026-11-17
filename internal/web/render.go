@@ -34,7 +34,7 @@ type view struct {
 	Audience *audience
 	// AvatarVersion names the signed-in person's picture; "" means a placeholder.
 	AvatarVersion string
-	// Module is the part of Kanso the page belongs to ("notes", "todos", "tasks", "wiki"), "" for
+	// Module is the part of Kanso the page belongs to ("start", "notes", "todos", "tasks", "wiki"), "" for
 	// pages outside all parts (search, administration, licenses).
 	Module string
 	// Shared are the pages shared with the person in spaces they cannot read (wiki only).
@@ -133,7 +133,7 @@ func (s *Server) serverError(w http.ResponseWriter, r *http.Request, err error) 
 // moduleOf names the part of Kanso a path belongs to.
 func moduleOf(path string) string {
 	if path == "/" {
-		return "wiki"
+		return "start"
 	}
 	for _, m := range modules {
 		for _, prefix := range m.prefixes {
@@ -154,5 +154,5 @@ var modules = []struct {
 	{"todos", []string{"/todos/"}},
 	{"tasks", []string{"/tasks/"}},
 	{"kitchen", []string{"/recipes/", "/mealplan/"}},
-	{"wiki", []string{"/s/", "/p/", "/admin/spaces/"}},
+	{"wiki", []string{"/wiki/", "/s/", "/p/", "/admin/spaces/"}},
 }

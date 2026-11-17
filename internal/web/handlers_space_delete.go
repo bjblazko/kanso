@@ -64,7 +64,7 @@ func (s *Server) deleteSpace(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
-	http.Redirect(w, r, "/?deleted="+url.QueryEscape(sp.Name), http.StatusSeeOther)
+	http.Redirect(w, r, "/wiki?deleted="+url.QueryEscape(sp.Name), http.StatusSeeOther)
 }
 
 // firstLock names someone editing one of the pages ids.

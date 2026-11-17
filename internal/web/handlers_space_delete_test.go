@@ -89,7 +89,7 @@ func TestDeleteSpace(t *testing.T) {
 	plan := ts.familyPlan(t)
 	ts.planMeal(t, plan, "2026-11-10", curry, "Curry", 4)
 	resp, _ := postDelete(t, ts, admin, "haus", " Haus ")
-	if resp.StatusCode != http.StatusSeeOther || resp.Header.Get("Location") != "/?deleted=Haus" {
+	if resp.StatusCode != http.StatusSeeOther || resp.Header.Get("Location") != "/wiki?deleted=Haus" {
 		t.Fatalf("delete: %d %q", resp.StatusCode, resp.Header.Get("Location"))
 	}
 	for _, u := range []string{"/s/haus", "/p/" + id} {
@@ -104,7 +104,7 @@ func TestDeleteSpace(t *testing.T) {
 	if !strings.Contains(week, "Curry") || strings.Contains(week, `href="/p/`+curry+`"`) {
 		t.Error("meal plan: title missing or still linked")
 	}
-	_, home := get(t, admin, ts.URL+"/?deleted=Haus")
+	_, home := get(t, admin, ts.URL+"/wiki?deleted=Haus")
 	if !strings.Contains(htmlUnescape(home), "Bereich „Haus“ gelöscht.") || strings.Contains(home, `href="/s/haus"`) {
 		t.Error("home: no notice or space still listed")
 	}
