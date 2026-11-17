@@ -7,6 +7,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-17
+
 ### Added
 
 - "Berichte" in the user menu: what Kanso holds and what it takes. The overview shows documents, storage and, for admins, what Git still keeps of old versions and deleted files; charts of what there is and how it grew, each with its numbers as a table. Everyone sees their own documents, what is shared with them, or both; admins see everyone by person — numbers only, never titles of things they cannot read.
