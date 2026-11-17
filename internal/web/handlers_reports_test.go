@@ -13,6 +13,7 @@ import (
 
 	"github.com/bjblazko/kanso/internal/store"
 	"github.com/bjblazko/kanso/internal/tasks"
+	"github.com/bjblazko/kanso/internal/todos"
 )
 
 func (ts *testServer) note(t *testing.T, owner, body string) string {
@@ -265,5 +266,26 @@ func TestReportsKitchenTab(t *testing.T) {
 	main := htmlUnescape(between(body, "<main", "</main>"))
 	if strings.Contains(main, "Curry") || !strings.Contains(main, "– (kein Zugriff)") {
 		t.Errorf("admin sees a recipe they cannot read:\n%s", between(main, `id="card-cooked"`, "</section>"))
+	}
+}
+
+func TestReportsSharingTab(t *testing.T) {
+	ts, _, anna := setupHaus(t) // Haus: admin owns it, familie (anna) writes
+	list, _ := ts.deps.Todos.Create("anna", "Baumarkt", "")
+	if err := ts.deps.Todos.SetShares("anna", list.ID, []todos.Share{{User: "admin"}}); err != nil {
+		t.Fatal(err)
+	}
+	_, body := get(t, anna, ts.URL+"/reports/sharing")
+	if links := htmlUnescape(between(body, `id="card-network"`, "</section>")); !strings.Contains(links, `<td>Admin ↔ Anna</td><td class="n">2</td>`) {
+		t.Errorf("network:\n%s", links)
+	}
+	counts := htmlUnescape(between(body, `id="card-shares"`, "</section>"))
+	if !strings.Contains(counts, `<td>Listen</td><td class="n">1</td><td class="n">0</td>`) ||
+		!strings.Contains(counts, `<td>Wiki-Bereiche</td><td class="n">0</td><td class="n">1</td>`) {
+		t.Errorf("shares:\n%s", counts)
+	}
+	ben := ts.client(t, "ben", "Ben", false)
+	if _, body := get(t, ben, ts.URL+"/reports/sharing"); strings.Contains(body, "Anna") {
+		t.Error("ben sees a link between people he shares nothing with")
 	}
 }

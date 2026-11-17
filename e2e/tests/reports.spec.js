@@ -39,4 +39,7 @@ test('Berichte: the overview counts, draws and switches scope', async ({ page })
 
   await page.locator('main').getByRole('link', { name: 'Küche', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Meistgekocht' })).toBeVisible();
+
+  await page.locator('main').getByRole('link', { name: 'Freigaben', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Wer teilt mit wem' })).toBeVisible();
 });

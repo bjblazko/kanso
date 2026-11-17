@@ -10,7 +10,6 @@
   const root = getComputedStyle(document.documentElement);
   const css = (name) => root.getPropertyValue(name).trim();
   const colors = [1, 2, 3, 4, 5, 6].map((i) => css(`--chart-${i}`));
-  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const tip = document.createElement('div');
   tip.className = 'report-tip';
@@ -340,6 +339,34 @@
         .attr('width', Math.max(1, x(r.n) - left)).attr('fill', colors[0]), (v) => `${esc(v.label)}: <b>${v.n}</b> ${esc(d.unit)}`);
       s.append('text').attr('class', 'lbl').attr('x', x(r.n) + 6).attr('y', y + 15).text(r.n);
     });
+  };
+
+  // network: people as dots, lines as thick as what two people see together.
+  // The layout settles before it is drawn; dragging moves a dot, nothing moves by itself.
+  draw.network = (el, d) => {
+    const W = width(el);
+    const h = 300;
+    const s = svg(el, h);
+    const nodes = d.nodes.map((n) => ({ ...n }));
+    const links = d.links.map((l) => ({ source: l.a, target: l.b, n: l.n }));
+    const clamp = (n) => { n.x = Math.max(16, Math.min(W - 90, n.x)); n.y = Math.max(16, Math.min(h - 16, n.y)); };
+    const sim = d3.forceSimulation(nodes).force('link', d3.forceLink(links).id((n) => n.id).distance(110))
+      .force('charge', d3.forceManyBody().strength(-320)).force('center', d3.forceCenter(W / 2 - 30, h / 2))
+      .force('collide', d3.forceCollide(34)).stop();
+    for (let i = 0; i < 300; i += 1) { sim.tick(); nodes.forEach(clamp); }
+    const top = d3.max(links, (l) => l.n) || 1;
+    const line = hover(s.append('g').selectAll('line').data(links).join('line').attr('stroke', css('--fg-3'))
+      .attr('stroke-opacity', 0.6).attr('stroke-width', (l) => 1 + (5 * l.n) / top),
+    (l) => `${esc(l.source.name)} ↔ ${esc(l.target.name)}: <b>${l.n}</b> ${esc(d.unit)}`);
+    const dot = s.append('g').selectAll('g').data(nodes).join('g').style('cursor', 'grab');
+    dot.append('circle').attr('r', 10).attr('fill', colors[0]).attr('stroke', css('--bg')).attr('stroke-width', 2);
+    dot.append('text').attr('class', 'lbl').attr('x', 14).attr('y', 4).text((n) => n.name);
+    const place = () => {
+      line.attr('x1', (l) => l.source.x).attr('y1', (l) => l.source.y).attr('x2', (l) => l.target.x).attr('y2', (l) => l.target.y);
+      dot.attr('transform', (n) => `translate(${n.x},${n.y})`);
+    };
+    place();
+    dot.call(d3.drag().on('drag', (e, n) => { n.x = e.x; n.y = e.y; clamp(n); place(); }));
   };
 
   document.querySelectorAll('.report-chart[data-chart]').forEach((el) => {

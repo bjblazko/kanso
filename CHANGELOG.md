@@ -15,6 +15,7 @@ All notable changes to this project are documented here. The format follows
 - Berichte → Wiki: how old the pages are, the ten untouched the longest, and the wiki as a sunburst of spaces, pages and subpages.
 - Berichte → Aufgaben: new against done per week, and per Eisenhower field the open and overdue tasks and how long they take to get done.
 - Berichte → Küche: the meals cooked most, what is bought most, recipes by tag and by preparation time.
+- Berichte → Freigaben: who shares with whom as a network, and what you share and what is shared with you.
 
 ## [0.7.0] - 2026-11-17
 
