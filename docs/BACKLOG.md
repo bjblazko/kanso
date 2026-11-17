@@ -51,6 +51,8 @@ decisions in [ADRs](adr/). Done items are removed here and noted in the CHANGELO
 
 ## Ideas
 
+- Start page "Neu für dich" and names for list ticks: record when something
+  was shared and who ticked a list item (ADR-018 leaves both out).
 - Find recipes by ingredients: every chosen ingredient must be in the recipe
   (AND), from the parsed ingredient lists.
 - Tag filter in the wiki search (tags exist on every page since 0.1.0).
