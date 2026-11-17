@@ -272,6 +272,26 @@ func (s *Store) cookedIn(p Plan, key, recipe string) []Cooked {
 	return out
 }
 
+// Entries are the meals of plans on days from since (YYYY-MM-DD) on, for reports.
+func (s *Store) Entries(plans []Plan, since string) []Entry {
+	var out []Entry
+	for _, p := range plans {
+		files, _ := filepath.Glob(filepath.Join(s.dataDir, Dir, p.ID, "*-W*.yaml"))
+		for _, f := range files {
+			w, err := s.Week(p.ID, strings.TrimSuffix(filepath.Base(f), ".yaml"))
+			if err != nil {
+				continue
+			}
+			for day, es := range w.Days {
+				if day >= since {
+					out = append(out, es...)
+				}
+			}
+		}
+	}
+	return out
+}
+
 // Uses counts the entries on all plans that cook one of recipes.
 func (s *Store) Uses(recipes map[string]bool) int {
 	n := 0
