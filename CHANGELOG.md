@@ -7,6 +7,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.10.1] - 2026-11-17
+
 ### Changed
 
 - The summary of what happened is now Kanso's own start page: "Start" is the first entry in the rail and where signing in lands; the wiki's spaces moved to "Wiki" (`/wiki`) and no longer carry the summary.
