@@ -276,6 +276,52 @@
     legend(el, spaces.map((n) => n.data.name));
   };
 
+  // flow: new tasks above the line, done ones below, one pair per week.
+  draw.flow = (el, d) => {
+    const W = width(el);
+    const h = 220;
+    const m = { l: 32, r: 8, t: 8, b: 24 };
+    const s = svg(el, h);
+    const top = d3.max(d.weeks, (w) => Math.max(w.new, w.done)) || 1;
+    const x = d3.scaleBand(d.weeks.map((w) => w.label), [m.l, W - m.r]).padding(0.25);
+    const y = d3.scaleLinear([-top, top], [h - m.b, m.t]).nice();
+    [['new', colors[0], (w) => y(w.new), (w) => y(0) - y(w.new)], ['done', colors[1], () => y(0), (w) => y(-w.done) - y(0)]]
+      .forEach(([k, c, yy, hh]) => hover(s.append('g').selectAll('rect').data(d.weeks).join('rect')
+        .attr('x', (w) => x(w.label)).attr('width', x.bandwidth()).attr('y', yy).attr('height', hh).attr('rx', 2).attr('fill', c),
+      (w) => `${esc(w.label)}: <b>${w[k]}</b> ${esc(d.labels[k])}`));
+    s.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', css('--line'));
+    s.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat(Math.abs))
+      .select('.domain').remove();
+    const every = Math.ceil(d.weeks.length / Math.max(1, Math.floor(W / 60)));
+    s.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - m.b})`)
+      .call(d3.axisBottom(x).tickSize(0).tickValues(d.weeks.filter((_, i) => i % every === 0).map((w) => w.label)))
+      .select('.domain').remove();
+    legend(el, [d.labels.new, d.labels.done]);
+  };
+
+  // quadrants: the Eisenhower fields as a 2 × 2 grid of open counts with a bar each.
+  draw.quadrants = (el, d) => {
+    const W = width(el);
+    const gap = 8;
+    const cw = (W - gap) / 2;
+    const ch = 96;
+    const s = svg(el, ch * 2 + gap);
+    const top = d3.max(d.fields, (f) => f.open) || 1;
+    d.fields.forEach((f, i) => {
+      const gx = (i % 2) * (cw + gap);
+      const gy = Math.floor(i / 2) * (ch + gap);
+      const g = s.append('g').attr('transform', `translate(${gx},${gy})`);
+      hover(g.append('rect').datum(f).attr('width', cw).attr('height', ch).attr('rx', 4).attr('fill', css('--bg-2')),
+        (x) => `${esc(x.name)}: <b>${x.open}</b> ${esc(d.labels.open)} · ${x.overdue} ${esc(d.labels.overdue)} · ${x.median.toLocaleString(lang, { maximumFractionDigits: 1 })} ${esc(d.labels.median)}`);
+      g.append('rect').attr('y', ch - 6).attr('width', Math.max(2, (cw * f.open) / top)).attr('height', 6).attr('rx', 2).attr('fill', colors[0]);
+      g.append('text').attr('class', 'lbl').attr('x', 10).attr('y', 20).text(f.name);
+      g.append('text').attr('x', 10).attr('y', 58).attr('fill', css('--fg')).style('font', `600 28px ${css('--font-mono')}`).text(f.open);
+      const median = f.median ? f.median.toLocaleString(lang, { maximumFractionDigits: 1 }) : '–';
+      g.append('text').attr('class', 'lbl').attr('x', 56).attr('y', 50).text(`${f.overdue} ${d.labels.overdue}`);
+      g.append('text').attr('class', 'lbl').attr('x', 56).attr('y', 66).text(`${median} ${d.labels.median}`);
+    });
+  };
+
   document.querySelectorAll('.report-chart[data-chart]').forEach((el) => {
     const fn = draw[el.dataset.chart];
     if (fn && data[el.dataset.id]) fn(el, data[el.dataset.id]);

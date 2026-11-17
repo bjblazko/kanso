@@ -13,6 +13,7 @@ All notable changes to this project are documented here. The format follows
 - Berichte → Speicher: where the space goes per area (with what Git keeps of old versions, for admins), the repository against the current files over time, orphaned media (attachments nothing links to, attachments of deleted pages) and the largest files. Admins also see Kanso's memory, uptime and data size.
 - Berichte → Aktivität: a calendar of changes per day over the last year and a weekday × hour map of when people write.
 - Berichte → Wiki: how old the pages are, the ten untouched the longest, and the wiki as a sunburst of spaces, pages and subpages.
+- Berichte → Aufgaben: new against done per week, and per Eisenhower field the open and overdue tasks and how long they take to get done.
 
 ## [0.7.0] - 2026-11-17
 

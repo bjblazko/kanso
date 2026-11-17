@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/bjblazko/kanso/internal/store"
+	"github.com/bjblazko/kanso/internal/tasks"
 )
 
 func (ts *testServer) note(t *testing.T, owner, body string) string {
@@ -222,5 +223,28 @@ func TestReportsWikiTab(t *testing.T) {
 	_, body = get(t, boss, ts.URL+"/reports/wiki?scope=all")
 	if strings.Contains(body, "Tagebuch") || strings.Contains(body, "Montag") {
 		t.Error("admin sees titles in the wiki tab")
+	}
+}
+
+func TestReportsTasksTab(t *testing.T) {
+	ts, _, anna := setupHaus(t)
+	who := func(sub string) tasks.Actor {
+		return tasks.Actor{Sub: sub, Author: store.Author{Name: sub, Email: sub + "@example.org"}}
+	}
+	for _, n := range []tasks.New{{Title: "Dach", Urgent: true, Important: true}, {Title: "Keller"}} {
+		if _, _, err := ts.deps.Tasks.Create(who("anna"), n); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, _, err := ts.deps.Tasks.Create(who("admin"), tasks.New{Title: "Admin", Urgent: true, Important: true}); err != nil {
+		t.Fatal(err)
+	}
+	_, body := get(t, anna, ts.URL+"/reports/tasks")
+	eisen := htmlUnescape(between(body, `id="card-quadrants"`, "</section>"))
+	if !strings.Contains(eisen, `<td>Dringend & wichtig</td><td class="n">1</td>`) || !strings.Contains(eisen, `<td>Weder noch</td><td class="n">1</td>`) {
+		t.Errorf("quadrants:\n%s", eisen)
+	}
+	if flow := between(body, `id="card-flow"`, "</section>"); !strings.Contains(flow, `<td class="n">2</td>`) {
+		t.Errorf("flow lacks this week's two new tasks:\n%s", flow)
 	}
 }

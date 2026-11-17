@@ -29,6 +29,7 @@ var reportTabs = []reportTab{
 	{"storage", (*Server).storageTab},
 	{"activity", (*Server).activityTab},
 	{"wiki", (*Server).wikiTab},
+	{"tasks", (*Server).tasksTab},
 }
 
 // reportPage is what the reports template shows.
