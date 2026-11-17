@@ -1,6 +1,6 @@
 # Start page of its own — design
 
-**Status:** draft 2026-11-17 (short design)
+**Status:** approved 2026-11-17 (short design)
 
 ## Why
 
