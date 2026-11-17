@@ -98,7 +98,7 @@ func New(d Deps) (*Server, error) {
 }
 
 var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "space_delete", "admin_groups", "me_shared", "reports", "admin_spaces", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search",
-	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote", "todos", "todo_share", "todo_delete", "tasks_board", "task_view", "task_edit", "task_delete", "task_new", "admin_boards", "note_task", "page_share", "page_move_confirm", "page_move", "recipe_parsed", "recipe_cook", "recipes", "recipe_new", "recipe_shop", "mealplan", "mealplan_add", "mealplan_remove", "admin_mealplans", "mealplan_shop", "admin_ai", "recipe_import", "recipe_import_preview"}
+	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote", "todos", "todo_share", "todo_delete", "tasks_board", "task_view", "task_edit", "task_delete", "task_new", "admin_boards", "note_task", "page_share", "page_move_confirm", "page_move", "recipe_parsed", "recipe_cook", "recipes", "recipe_new", "recipe_shop", "mealplan", "mealplan_add", "mealplan_remove", "admin_mealplans", "mealplan_shop", "admin_ai", "recipe_import", "recipe_import_preview", "recipe_generate", "recipe_generate_preview"}
 
 func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}
@@ -123,6 +123,9 @@ var templateFuncs = template.FuncMap{
 	"cardArgs":  func(c card, v view) cardArgs { return cardArgs{c, v} },
 	"hasPrefix": strings.HasPrefix,
 	"aiMark":    func(t *aiTarget, v view) aiMarkArgs { return aiMarkArgs{T: t, V: v} },
+	"genRadios": func(name, legend string, c []genChoice, v view) genRadiosArgs {
+		return genRadiosArgs{Name: name, Legend: legend, Choices: c, V: v}
+	},
 	// placeKind and placeStep split a photo place like "step-3" for its label.
 	"placeKind":      func(p string) string { k, _, _ := strings.Cut(p, "-"); return k },
 	"placeStep":      func(p string) string { _, n, _ := strings.Cut(p, "-"); return n },

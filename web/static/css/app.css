@@ -397,6 +397,8 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 /* Task form: "worauf" only while Wartet is chosen; hidden, its value is still sent. */
 .task-form .form-row { display: flex; }
 .task-form .form-row .field { min-width: 12rem; }
+.generate-form .form-row { display: flex; }
+.generate-form .form-row .field { flex: 1; min-width: 8rem; }
 .field-set { border: 0; padding: 0; margin: 0; }
 .field-set legend { font: 500 var(--text-sm)/1.4 var(--font-sans); color: var(--fg-2); margin-bottom: var(--space-1); padding: 0; }
 .choices { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); }

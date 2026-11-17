@@ -1,0 +1,30 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{.T "gen.title"}}</h1>
+{{if $d.Error}}<p class="notice notice-warning" role="alert">{{$d.Error}}</p>{{end}}
+{{if not $d.Problem}}<form method="post" action="/recipes/generate" class="form generate-form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <div class="field"><label for="ingredients">{{.T "gen.ingredients"}}</label>
+    <textarea id="ingredients" name="ingredients" rows="3" required maxlength="700" aria-describedby="ingredients-hint">{{$d.Ingredients}}</textarea>
+    <p class="hint" id="ingredients-hint">{{.T "gen.ingredients_hint"}}</p></div>
+  <div class="choices"><label class="choice"><input type="checkbox" name="extend" value="1"{{if $d.Extend}} checked{{end}}> {{.T "gen.extend"}}</label></div>
+  {{template "gen-radios" (genRadios "temp" (.T "gen.temp") $d.Temps $)}}
+  {{template "gen-radios" (genRadios "heat" (.T "gen.heat") $d.Heats $)}}
+  {{template "gen-radios" (genRadios "time" (.T "gen.time") $d.Times $)}}
+  <div class="form-row">
+    <div class="field"><label for="style">{{.T "gen.style"}}</label><select id="style" name="style">
+      {{range $d.Styles}}<option value="{{.Value}}"{{if .On}} selected{{end}}>{{$.T .Key}}</option>{{end}}</select></div>
+    <div class="field"><label for="servings">{{.T "recipe.servings"}}</label><input id="servings" name="servings" type="number" min="1" max="99" value="{{$d.Servings}}"></div>
+  </div>
+  <fieldset class="field-set"><legend>{{.T "gen.without"}}</legend><div class="choices">
+    {{range $d.Without}}<label class="choice"><input type="checkbox" name="without" value="{{.Value}}"{{if .On}} checked{{end}}> {{$.T .Key}}</label>{{end}}
+  </div></fieldset>
+  <div class="field"><label for="extra">{{.T "gen.extra"}}</label><input id="extra" name="extra" maxlength="200" value="{{$d.Extra}}" autocomplete="off"></div>
+  <p class="hint">{{.T "gen.goes_to"}} {{template "ai-mark" (aiMark $d.AI $)}}</p>
+  <div class="actions"><button class="btn btn-primary" type="submit" data-wait="{{.T "gen.wait"}}">{{.T "gen.submit"}}</button>
+  <a class="btn btn-quiet" href="/recipes">{{.T "action.cancel"}}</a></div>
+</form>{{else}}<p class="empty">{{.T $d.Problem}}</p>{{end}}
+</div>{{end}}
+{{define "gen-radios"}}<fieldset class="field-set"><legend>{{.Legend}}</legend><div class="seg seg-choice">
+  {{range .Choices}}<label><input type="radio" name="{{$.Name}}" value="{{.Value}}"{{if .On}} checked{{end}}><span>{{$.V.T .Key}}</span></label>{{end}}
+</div></fieldset>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/wait.js"}}"></script>{{end}}

@@ -132,6 +132,9 @@ func (s *Server) createImported(w http.ResponseWriter, r *http.Request) {
 		err = s.Wiki.SaveWith(u.Author(), p.Meta.ID, p.Meta.Title, body, func(m *wiki.PageMeta) {
 			m.Type, m.Servings, m.Time = wiki.TypeRecipe, min(positive(r.PostFormValue("servings")), recipes.MaxServings), positive(r.PostFormValue("time"))
 			m.Source, m.Image = strings.TrimSpace(r.PostFormValue("source")), image
+			if r.PostFormValue("generated") == "1" {
+				m.Tags = []string{generatedTag}
+			}
 		})
 	}
 	if err != nil {

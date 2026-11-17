@@ -55,6 +55,7 @@ type kitchenPage struct {
 	Stars   []starLink // offered once any recipe has stars
 	Filters filters
 	Any     bool // the person can read at least one recipe
+	AI      bool // an AI connection is on: recipes can be generated
 }
 
 // visibleRecipes lists every recipe page the person may read, by title.
@@ -87,7 +88,7 @@ func (s *Server) kitchen(w http.ResponseWriter, r *http.Request) {
 	all := s.visibleRecipes(who)
 	f := filtersFrom(r)
 	f.OnlyRecipes = false // the kitchen holds recipes only anyway
-	kp := kitchenPage{Filters: f, Any: len(all) > 0, Tags: tagLinks(all, f)}
+	kp := kitchenPage{Filters: f, Any: len(all) > 0, Tags: tagLinks(all, f), AI: s.AI.Load().Ready()}
 	if anyRated(all) || f.Stars > 0 {
 		kp.Stars = starLinks(f, filters.kitchenURL)
 	}

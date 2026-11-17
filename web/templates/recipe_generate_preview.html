@@ -1,0 +1,29 @@
+{{define "content"}}{{$d := .Data}}<div class="content">
+<h1>{{$d.Draft.Title}}</h1>
+<p class="recipe-meta">{{with $d.Draft.Servings}}<span>{{$.T "recipe.servings_n" .}}</span>{{end}}{{with $d.Draft.Time}}<span>{{$.T "recipe.minutes_n" .}}</span>{{end}}
+  {{with $d.AI}}{{template "ai-mark" (aiMark . $)}}{{end}}</p>
+<p class="hint">{{.T "gen.check"}}</p>
+<form method="post" action="/recipes/import/create" class="form generate-form">
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <input type="hidden" name="generated" value="1">
+  <div class="field"><label for="title">{{.T "page.title"}}</label><input id="title" name="title" value="{{$d.Draft.Title}}" required maxlength="200"></div>
+  <div class="form-row">
+    <div class="field"><label for="servings">{{.T "recipe.servings"}}</label><input id="servings" name="servings" value="{{with $d.Draft.Servings}}{{.}}{{end}}" type="number" min="1" max="99"></div>
+    <div class="field"><label for="time">{{.T "recipe.time"}}</label><input id="time" name="time" value="{{with $d.Draft.Time}}{{.}}{{end}}" type="number" min="0"></div>
+  </div>
+  {{with $d.Ingredients}}<section class="recipe-parsed" aria-labelledby="parsed-h"><h2 id="parsed-h">{{$.T "recipe.parsed"}}</h2><ul class="list-plain">
+  {{range .}}{{if .Qty}}<li>{{.Qty.Text}} · {{.Unit}} · {{.Name}}{{with .Note}} <span class="hint">({{.}})</span>{{end}}</li>{{else}}<li class="parsed-none">{{.Name}} <span class="hint">– {{$.T "recipe.parsed_no_qty"}}</span></li>{{end}}
+  {{end}}</ul></section>{{end}}
+  <div class="field"><label for="body">{{.T "import.text"}}</label><textarea id="body" name="body" rows="16">{{$d.Body}}</textarea></div>
+  <div class="actions"><button class="btn btn-primary" type="submit">{{.T "gen.accept"}}</button>
+  <button class="btn btn-secondary" type="submit" form="reroll" data-wait="{{.T "gen.wait"}}">{{template "icon" "dice"}}{{.T "gen.reroll"}}</button>
+  <a class="btn btn-quiet" href="{{$d.Again}}">{{.T "gen.change"}}</a></div>
+</form>
+<form id="reroll" method="post" action="/recipes/generate" hidden>
+  <input type="hidden" name="csrf" value="{{.CSRF}}">
+  <input type="hidden" name="action" value="reroll">
+  <input type="hidden" name="rejected_now" value="{{$d.Draft.Title}}">
+  {{range $d.Wishes}}<input type="hidden" name="{{.Name}}" value="{{.Value}}">{{end}}
+</form>
+</div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/wait.js"}}"></script>{{end}}
