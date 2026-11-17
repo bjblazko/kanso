@@ -24,3 +24,17 @@ func TestAllTasksAcrossBoards(t *testing.T) {
 		t.Errorf("TaskPath: %v", err)
 	}
 }
+
+func TestAllBoardsAndSeesWithoutWriting(t *testing.T) {
+	s := newStore(t)
+	if _, err := s.CreateGroupBoard(admin(), "Putzplan", "familie"); err != nil {
+		t.Fatal(err)
+	}
+	bs := s.AllBoards()
+	if len(bs) != 1 {
+		t.Fatalf("AllBoards = %+v", bs)
+	}
+	if !actor("anna").Sees(bs[0]) || (Actor{Sub: "fremd"}).Sees(bs[0]) {
+		t.Error("Sees disagrees with group membership")
+	}
+}

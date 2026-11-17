@@ -35,6 +35,9 @@ func (s *Store) readBoard(id string) (Board, error) {
 }
 
 // allBoards reads every board; unreadable ones are skipped.
+// AllBoards are every board without creating anyone's own, for reports.
+func (s *Store) AllBoards() []Board { return s.allBoards() }
+
 func (s *Store) allBoards() []Board {
 	files, _ := filepath.Glob(filepath.Join(s.dataDir, Dir, "*", boardFile))
 	var out []Board

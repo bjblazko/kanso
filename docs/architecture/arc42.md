@@ -1,7 +1,7 @@
 # Hüpattl! Kanso — Architecture (arc42)
 
 **Created:** 2026-10-26
-**Updated:** 2026-11-16
+**Updated:** 2026-11-17
 
 ## 1. Introduction and Goals
 
@@ -80,10 +80,11 @@ leaves the host.
 | `internal/ai` | One OpenAI-compatible language model: configuration in the state directory, chat completions ([ADR-013](../adr/013-ai-openai-compatible-through-kanso-services.md)) |
 | `internal/recipeimport` | Fetches a recipe page safely (no internal addresses) and makes a recipe draft from its JSON-LD or with the AI |
 | `internal/photo` | Removes GPS data from JPEG uploads |
+| `internal/reports` | Numbers for the "Berichte" pages from plain inputs: inventory, growth, storage, activity; pure, no files ([ADR-015](../adr/015-reports-on-request-cached-per-head.md)) |
 | `internal/search` | In-memory search over pages and notes (scans all per query) |
 | `internal/devseed` | Made-up people, groups, spaces, pages, notes and tasks for development (`kanso seed`, dev login only) |
 | `internal/web` | HTTP routes, templates, static files |
-| `web/` | Templates, CSS, JS (editor, capture, task capture, board, to-dos, service worker), fonts, icons, vendored Mermaid |
+| `web/` | Templates, CSS, JS (editor, capture, task capture, board, to-dos, service worker), fonts, icons, vendored Mermaid and d3 (report pages only) |
 
 Later phases add `lists`, `calendar`, `push`.
 
@@ -152,6 +153,20 @@ any of them; asks first when the readers change.
 chosen page, gets a fresh page id and frontmatter, and is committed as a
 whole (text and photos).
 
+### Opening a report
+
+1. `GET /reports/<tab>?scope=…` checks the scope (everyone: own, shared, seen;
+   admins also all) and asks Git for HEAD.
+2. If the cached history scan belongs to another HEAD, one request scans
+   (`git log -M --raw`, `cat-file --batch-check`, `ls-tree -l`,
+   `count-objects`); others wait for it.
+3. Web collects pages, attachments, notes, lists and tasks with their person,
+   size and dates, keeps what the scope covers and clears titles the viewer may
+   not read.
+4. `internal/reports` computes the tab's numbers; the template writes tiles,
+   a table per chart and the same data as JSON, from which `reports.js` draws
+   with d3.
+
 ## 7. Deployment View
 
 One systemd service on the NAS (NixOS module in the homelab repository, app
@@ -188,6 +203,7 @@ Kopia jobs.
 | [012](../adr/012-meal-plans-belong-to-groups.md) | Meal plans belong to groups and live in Git |
 | [013](../adr/013-ai-openai-compatible-through-kanso-services.md) | AI through an OpenAI-compatible API, content only through Kanso's services |
 | [014](../adr/014-admins-manage-but-do-not-read.md) | Admins manage spaces but do not read them |
+| [015](../adr/015-reports-on-request-cached-per-head.md) | Reports are computed on request, cached per Git HEAD |
 
 ## 10. Quality Requirements
 

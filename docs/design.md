@@ -29,6 +29,7 @@ Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 | Cook view | Cook from the phone at the stove. Toolbar: "Zur Seite", "Heute gekocht" (for those who may change the recipe; afterwards "Heute gekocht ✓" as text), "Häkchen entfernen" (shown only with script) and the servings stepper (− number + as links, so it works without script); no accent. Below only ingredients (by group) and steps, large, each to tick off, a step's photo right below it; ticks are kept on the device, the screen stays on (Wake Lock) while visible. |
 | Page editor | Change a page and save it. Tags (free, comma-separated, created on save) for every page, then a box "Ist ein Rezept"; while ticked, Portionen, Zeit and Quelle appear (CSS `:has`, values kept) and the preview ends with "So versteht Kanso die Zutaten" (amount · unit · name; lines without an amount muted). |
 | What others see | See at a glance what is not only one's own: sections Wiki-Bereiche, Einzeln freigegebene Seiten, Listen, Boards, Kochpläne (only those with entries), each row the name as a link and the usual "Sichtbar für …" line below; nothing shared says "Nichts von dir ist für andere sichtbar." Tabs "Nach Art · Nach Dokument · Nach Person · Nach Recht" (`?by=`, links, the default by kind) and below, quiet, the filter "Alle Rechte · Lesen · Schreiben · Verwalten" (`?role=`, exact right; each row of links keeps the other's choice). Each row says who may do what ("Verwalten: Ben · Schreiben: Lena, Oma") instead of the usual "Sichtbar für …" line, since this page is about others. By document one list by name with the kind beside; by person one heading per other person, each row kind and right; by right headings from Verwalten down, each row the names. Shared lists, group boards and meal plans count as Schreiben: nobody there only reads. A filter nobody matches says "Niemand außer dir hat dieses Recht." Reached from the user menu, for everyone. |
+| Berichte | See what Kanso holds and what it takes: tabs as links (Übersicht first), below them the quiet scope row "Eigene · Mit mir geteilt · Alles, was ich sehe · Alle" (Alle for admins only, their default; everyone else starts at Eigene). Headline tiles (surface step, number in Plex Mono), then chart cards in a grid (two columns from 64rem): title, one line on what it answers, the chart, "Als Tabelle" with the same numbers. Non-admins read "Admins sehen von dir nur diese Zahlen, keine Titel oder Inhalte." Not a content screen, so no screen head. Reached from the user menu. |
 | All spaces (admins) | Manage spaces one may not read: each space with its icon, name (a link to its settings), page count and who sees it; a space without members says "Niemand hat Zugriff" and offers "Mich als Besitzer eintragen" (secondary). Never a link into the space itself. |
 | Space settings | Decide who may read and write. Last section "Bereich löschen": one sentence and a quiet link in red text (`tb-danger`) to the confirmation. |
 | Delete space | Decide whether a space and all it holds may go: "„Name“ löschen?", what is lost in numbers (pages, recipes, attachments; meal plan entries and shared pages when there are any), "Der Inhalt bleibt in der Git-Historie.", the name to type (only when the space has pages), "„Name“ löschen" as the destructive button and "Abbrechen". |
@@ -118,6 +119,15 @@ boards have nothing to share.
 | `--fg-3` on `--bg` (dark) | 6.64:1 |
 
 ## Deviations from huepattl-rams-design
+
+- **Chart colours (Berichte only):** inside a chart, colour means identity
+  (which kind, which person), not signal. Six categorical colours, never
+  orange (the primary action): light `#2a78d6 #1baf7a #eda100 #e87ba4
+  #008300 #6250d6`, dark `#3987e5 #199e70 #c98500 #d55181 #0ca30c #9085e9`
+  (`--chart-1…6`). Checked with the dataviz validator: light on `#F4F4F0`
+  worst adjacent CVD ΔE 9.1, normal-vision ΔE 19.6, aqua/yellow/magenta below
+  3:1 contrast, relieved by the legend and the table; dark on `#161718` all
+  checks pass (CVD ΔE 8.4). One series is `--chart-1` without a legend.
 
 - **To-do items:** an item's text is a frameless button that opens the item
   for editing (as in reminder apps). It is the item itself, not a separate

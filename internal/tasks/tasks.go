@@ -113,6 +113,9 @@ type Actor struct {
 	Groups access.Groups
 }
 
+// Sees tells whether a may see board b.
+func (a Actor) Sees(b Board) bool { return a.sees(b) }
+
 func (a Actor) sees(b Board) bool {
 	if b.Private() {
 		return b.Owner.User == a.Sub

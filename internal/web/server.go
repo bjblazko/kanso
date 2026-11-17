@@ -61,6 +61,9 @@ type Server struct {
 	static   fs.FS
 	version  string
 	licenses []license
+	// scanRepo reads the Git history for reports; reports keeps the result per HEAD.
+	scanRepo func() (store.Scan, error)
+	reports  reportCache
 }
 
 // New parses templates and prepares static files.
@@ -70,6 +73,9 @@ func New(d Deps) (*Server, error) {
 		return nil, err
 	}
 	s := &Server{Deps: d, static: static}
+	if d.Repo != nil {
+		s.scanRepo = d.Repo.Scan
+	}
 	if d.Todos != nil { // a moved shopping item adds up with a like one (ADR-011)
 		d.Todos.Join = func(dst *todos.List, it todos.Item, lang string) bool {
 			return shopping.Join(dst, it, lang, time.Now())
@@ -87,7 +93,7 @@ func New(d Deps) (*Server, error) {
 	return s, nil
 }
 
-var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "space_delete", "admin_groups", "me_shared", "admin_spaces", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search",
+var pageNames = []string{"home", "error", "licenses", "space", "space_new", "space_settings", "space_delete", "admin_groups", "me_shared", "reports", "admin_spaces", "page_view", "page_new", "page_delete", "page_edit", "page_history", "page_revision", "search",
 	"notes", "note_new", "note_view", "note_delete", "note_edit", "note_promote", "todos", "todo_share", "todo_delete", "tasks_board", "task_view", "task_edit", "task_delete", "task_new", "admin_boards", "note_task", "page_share", "page_move_confirm", "page_move", "recipe_parsed", "recipe_cook", "recipes", "recipe_new", "recipe_shop", "mealplan", "mealplan_add", "mealplan_remove", "admin_mealplans", "mealplan_shop", "admin_ai", "recipe_import", "recipe_import_preview"}
 
 func parsePages() (map[string]*template.Template, error) {
