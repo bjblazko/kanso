@@ -26,7 +26,7 @@ func TestSharedSectionInNav(t *testing.T) {
 
 func TestSharedOnHome(t *testing.T) {
 	w := setupWishlist(t, access.Viewer)
-	_, body := get(t, w.christina, w.ts.URL+"/")
+	_, body := get(t, w.christina, w.ts.URL+"/wiki")
 	main := between(body, `<main`, `</main>`)
 	if !strings.Contains(main, "Für dich freigegeben") || !strings.Contains(main, `href="/p/`+w.list+`"`) || !strings.Contains(main, "Haus") {
 		t.Fatalf("home:\n%s", main)
@@ -39,7 +39,7 @@ func TestSharedOnHome(t *testing.T) {
 func TestSharedSectionHiddenWhenEmpty(t *testing.T) {
 	w := setupWishlist(t, access.Viewer)
 	// anna reads the whole space: the page is not "shared with her"
-	if _, body := get(t, w.anna, w.ts.URL+"/"); strings.Contains(body, "Für dich freigegeben") {
+	if _, body := get(t, w.anna, w.ts.URL+"/wiki"); strings.Contains(body, "Für dich freigegeben") {
 		t.Fatal("member of the space gets the section")
 	}
 }
@@ -57,7 +57,7 @@ func TestRemovedShareDisappears(t *testing.T) {
 	w := setupWishlist(t, access.Viewer)
 	page := "/p/" + w.list + "/share"
 	w.ts.postForm(t, w.admin, page, page, url.Values{"action": {"remove"}, "index": {"0"}})
-	if _, body := get(t, w.christina, w.ts.URL+"/"); strings.Contains(body, "Für dich freigegeben") {
+	if _, body := get(t, w.christina, w.ts.URL+"/wiki"); strings.Contains(body, "Für dich freigegeben") {
 		t.Fatal("section still there")
 	}
 	if code := status(t, w.christina, w.ts.URL+"/p/"+w.list); code != http.StatusNotFound {

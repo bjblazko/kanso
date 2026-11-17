@@ -39,7 +39,6 @@ func (s *Server) spaceFor(w http.ResponseWriter, r *http.Request) (spaces.Space,
 type homePage struct {
 	Audiences map[string]audience // by space slug
 	Deleted   string              // name of the space just deleted
-	Summary   *homeSummary        // what changed recently
 }
 
 // spaceNamed tells whether a space is called name.

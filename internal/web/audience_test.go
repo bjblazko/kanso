@@ -19,7 +19,7 @@ func TestSpaceSaysWhoSeesIt(t *testing.T) {
 		url.Values{"action": {"add"}, "kind": {"user"}, "who": {"oma"}, "role": {"viewer"}})
 	id := ts.createPage(t, anna, "haus", "", "Garten")
 	want := "Sichtbar für dich, Admin, Oma</span>"
-	for _, path := range []string{"/", "/s/haus", "/p/" + id} {
+	for _, path := range []string{"/wiki", "/s/haus", "/p/" + id} {
 		if _, body := get(t, anna, ts.URL+path); !strings.Contains(body, want) {
 			t.Errorf("%s lacks %q", path, want)
 		}

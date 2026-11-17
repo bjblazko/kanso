@@ -21,6 +21,9 @@ read check, and keep the history scan per Git head.
 
 ## Decision
 
+- **Place:** `/` is Kanso's start page, its own entry "Start" first in the
+  rail, not part of the wiki; the wiki's spaces list lives at `/wiki`
+  (changed in 0.10.1 — 0.10.0 had put the summary above the spaces).
 - **Window:** since the previous visit to `/`, at least 24 hours. A select
   offers 24 hours, 7 and 30 days instead (`?range=`), and `?own=1` adds one's
   own changes, which are hidden by default.

@@ -51,7 +51,7 @@ func TestMemberSeesSpaceOutsiderDoesNot(t *testing.T) {
 	if resp.StatusCode != http.StatusOK || !strings.Contains(body, "Alles ums Haus") {
 		t.Errorf("member: %d", resp.StatusCode)
 	}
-	_, home := get(t, anna, ts.URL+"/")
+	_, home := get(t, anna, ts.URL+"/wiki")
 	if !strings.Contains(home, `href="/s/haus"`) {
 		t.Error("home does not list the space")
 	}
@@ -59,7 +59,7 @@ func TestMemberSeesSpaceOutsiderDoesNot(t *testing.T) {
 	if resp, _ := get(t, outsider, ts.URL+"/s/haus"); resp.StatusCode != http.StatusNotFound {
 		t.Errorf("outsider: %d", resp.StatusCode)
 	}
-	if _, home := get(t, outsider, ts.URL+"/"); strings.Contains(home, `href="/s/haus"`) {
+	if _, home := get(t, outsider, ts.URL+"/wiki"); strings.Contains(home, `href="/s/haus"`) {
 		t.Error("outsider sees the space")
 	}
 }
@@ -115,7 +115,7 @@ func TestSettingsEscapesNames(t *testing.T) {
 	ts := newTestServer(t)
 	admin := ts.client(t, "admin", "Admin", true)
 	ts.postForm(t, admin, "/", "/admin/spaces/new", url.Values{"name": {"<script>x</script>"}})
-	_, body := get(t, admin, ts.URL+"/")
+	_, body := get(t, admin, ts.URL+"/wiki")
 	if strings.Contains(body, "<script>x</script>") {
 		t.Error("space name not escaped")
 	}

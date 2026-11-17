@@ -180,7 +180,8 @@ whole (text and photos).
    their files (author → person) and list items written or ticked.
 3. `internal/reports.Summarize` counts by kind, hour or day and person, newest
    documents first; own changes drop out unless `?own=1`.
-4. The template writes the sentence, tiles, two chart cards with tables, the
+4. The start page (its own rail entry; the wiki's spaces are at `/wiki`)
+   writes the sentence, tiles, two chart cards with tables, the
    list of changed documents and "Heute" (today's meals, due tasks); `reports.js`
    draws the charts with d3.
 

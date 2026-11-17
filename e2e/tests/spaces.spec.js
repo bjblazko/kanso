@@ -12,9 +12,11 @@ test('admin creates a space, shares it with a group, member sees it', async ({ b
   const member = await memberCtx.newPage();
 
   await signIn(member, { sub: 'mira', name: 'Mira' });
+  await member.goto('/wiki');
   await expect(member.getByText('Noch keine Bereiche.')).toBeVisible();
 
   await signIn(admin, { sub: 'root', name: 'Root', admin: true });
+  await admin.goto('/wiki');
   await admin.getByRole('link', { name: 'Bereich anlegen' }).click();
   await admin.getByLabel('Name', { exact: true }).fill(unique('Haus'));
   await admin.getByRole('button', { name: 'Bereich anlegen' }).click();
@@ -29,7 +31,7 @@ test('admin creates a space, shares it with a group, member sees it', async ({ b
   await section.getByRole('button', { name: 'Hinzufügen' }).click();
   await expect(admin.locator('section.group', { hasText: group }).locator('li', { hasText: 'Mira' })).toBeVisible();
 
-  await admin.goto('/');
+  await admin.goto('/wiki');
   await admin.getByRole('link', { name: unique('Haus') }).first().click();
   await admin.getByRole('link', { name: 'Einstellungen' }).click();
   await admin.getByLabel('Art', { exact: true }).selectOption('group');

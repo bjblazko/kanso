@@ -19,7 +19,7 @@ import (
 func summary(t *testing.T, c *http.Client, u string) (int, string) {
 	t.Helper()
 	resp, body := get(t, c, u)
-	return resp.StatusCode, htmlUnescape(between(body, `<section class="home-summary"`, `<h2 id="spaces"`))
+	return resp.StatusCode, htmlUnescape(between(body, `<header class="screen-head"`, "</main>"))
 }
 
 func TestHomeShowsOthersChanges(t *testing.T) {
@@ -139,5 +139,35 @@ func TestHomeTodayHidesOtherBoards(t *testing.T) {
 	}
 	if _, body := get(t, anna, ts.URL+"/"); strings.Contains(body, "Geheimsache") || strings.Contains(body, `class="home-today"`) {
 		t.Error("anna sees admin's private task or an empty today section")
+	}
+}
+
+func TestStartPageIsOverall(t *testing.T) {
+	ts, _, anna := setupHaus(t)
+	_, body := get(t, anna, ts.URL+"/")
+	expectHead(t, body, "Was passiert ist", `name="range"`, "Eigene einblenden")
+	rail := between(body, `<nav class="rail"`, "</nav>")
+	if !strings.Contains(rail, `<a href="/" aria-current="true">`) || !strings.Contains(rail, "<span>Start</span>") {
+		t.Errorf("rail: %s", rail)
+	}
+	if main := between(body, "<main", "</main>"); strings.Contains(main, `href="/s/haus"`) || strings.Contains(body, `class="sidenav"`) {
+		t.Error("the start page shows the wiki")
+	}
+}
+
+func TestWikiListsSpacesOnly(t *testing.T) {
+	ts, _, anna := setupHaus(t)
+	_, body := get(t, anna, ts.URL+"/wiki")
+	if !strings.Contains(body, "<h1>Wiki-Bereiche</h1>") {
+		t.Error("/wiki has another title")
+	}
+	if !strings.Contains(body, `href="/s/haus"`) || strings.Contains(body, "home-summary") || strings.Contains(body, "d3.min.js") {
+		t.Error("/wiki is not just the spaces")
+	}
+	if b, _ := os.ReadFile(filepath.Join(ts.deps.Cfg.StateDir, "visits.json")); strings.Contains(string(b), `"anna"`) {
+		t.Errorf("/wiki recorded a visit: %s", b)
+	}
+	if rail := between(body, `<nav class="rail"`, "</nav>"); !strings.Contains(rail, `<a href="/wiki" aria-current="true">`) {
+		t.Errorf("rail: %s", rail)
 	}
 }

@@ -7,6 +7,7 @@ import "net/http"
 // shellRoutes registers the start page, search, licenses and the person's own settings.
 func (s *Server) shellRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /{$}", s.home)
+	mux.HandleFunc("GET /wiki", s.wikiHome)
 	mux.HandleFunc("GET /about", s.showAbout)
 	mux.HandleFunc("GET /about/licenses", s.showAbout) // older links: the licenses are part of "Über Kanso"
 	mux.HandleFunc("POST /me/lang", s.setLang)

@@ -2,16 +2,19 @@
 import { test, expect } from '@playwright/test';
 import { signIn, unique, createSpace, createPage } from './helpers.js';
 
-test('start page: what happened, with charts, window and own changes', async ({ page }) => {
+test('start page: what happened across Kanso, with charts, window and own changes', async ({ page }) => {
   await signIn(page, { sub: 'hanna', name: 'Hanna', admin: true });
   const space = unique('Neuigkeiten');
   await createSpace(page, space);
   const title = unique('Kellerplan');
   await createPage(page, title);
 
-  await page.goto('/');
-  const summary = page.locator('.home-summary');
-  await expect(summary.getByRole('heading', { name: 'Was passiert ist' })).toBeVisible();
+  await page.goto('/wiki');
+  await page.getByRole('navigation', { name: 'Kanso' }).getByRole('link', { name: 'Start' }).click();
+  await expect(page).toHaveURL(/\/$/);
+  const summary = page.locator('main');
+  await expect(summary.getByRole('heading', { level: 1, name: 'Was passiert ist' })).toBeVisible();
+  await expect(summary.getByRole('link', { name: space })).toHaveCount(0); // the wiki's spaces live at /wiki
   await expect(summary.getByRole('link', { name: title })).toHaveCount(0); // own changes hidden at first
 
   await summary.getByRole('link', { name: 'Eigene einblenden' }).click();

@@ -63,8 +63,19 @@ type homeGroup struct {
 // homeItem is one line of the start page: a document or a meal or a task.
 type homeItem struct{ Title, Href, Person, When string }
 
-// home shows what changed recently, then the visible spaces with who else sees them.
+// startPage is Kanso's start page: what happened, and what is on today.
+type startPage struct{ Summary *homeSummary }
+
+// home is the start page: what changed recently and what is on today.
 func (s *Server) home(w http.ResponseWriter, r *http.Request) {
+	v := s.newView(r, "", nil)
+	v.Title = v.T("home.title")
+	v.Data = startPage{Summary: s.homeSummary(r, v)}
+	s.render(w, r, http.StatusOK, "start", v)
+}
+
+// wikiHome lists the visible spaces, each with who else sees it.
+func (s *Server) wikiHome(w http.ResponseWriter, r *http.Request) {
 	v := s.newView(r, "", nil)
 	data := homePage{Audiences: map[string]audience{}}
 	for _, sp := range v.Nav {
@@ -73,9 +84,8 @@ func (s *Server) home(w http.ResponseWriter, r *http.Request) {
 	if name := r.URL.Query().Get("deleted"); name != "" && !s.spaceNamed(name) {
 		data.Deleted = name
 	}
-	data.Summary = s.homeSummary(r, v)
 	v.Data = data
-	s.render(w, r, http.StatusOK, "home", v)
+	s.render(w, r, http.StatusOK, "wiki", v)
 }
 
 // homeSummary sums up the window the request asks for.
