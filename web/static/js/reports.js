@@ -40,9 +40,9 @@
     el.append(box);
   };
 
-  // monthTicks picks at most one month label per 70 px.
-  const monthTicks = (months, W) => {
-    const step = Math.max(1, Math.ceil(months.length / Math.max(1, Math.floor(W / 70))));
+  // monthTicks picks at most one label per every px (70 by default).
+  const monthTicks = (months, W, every = 70) => {
+    const step = Math.max(1, Math.ceil(months.length / Math.max(1, Math.floor(W / every))));
     return months.filter((_, i) => i % step === 0);
   };
 
@@ -89,13 +89,23 @@
     legend(el, d.keys);
   };
 
-  // stacked-area: rows are months ("2026-01"), summed per key, with a hover rule.
+  // timeUnits: how rows of the stacked area are labelled, read and shown.
+  // Months come from the reports (UTC); hours and days from the start page (local time).
+  const timeUnits = {
+    month: { parse: d3.utcParse('%Y-%m'), tick: d3.utcFormat('%m/%y'), tip: d3.utcFormat('%m/%Y'), every: 70 },
+    day: { parse: d3.timeParse('%Y-%m-%d'), tick: d3.timeFormat('%d.%m.'), tip: d3.timeFormat('%d.%m.%Y'), every: 56 },
+    hour: { parse: d3.timeParse('%Y-%m-%dT%H:%M'), tick: d3.timeFormat('%H:%M'), tip: d3.timeFormat('%d.%m., %H:%M'), every: 56 },
+  };
+
+  // stacked-area: rows are months ("2026-01"), or hours and days with d.unit,
+  // summed per key, with a hover rule.
   draw['stacked-area'] = (el, d) => {
     const W = width(el);
     const h = 220;
     const m = { l: 40, r: 12, t: 8, b: 24 };
     const s = svg(el, h);
-    const parse = d3.utcParse('%Y-%m');
+    const unit = timeUnits[d.unit] || timeUnits.month;
+    const parse = unit.parse;
     const rows = d.rows.map((r) => Object.fromEntries([['t', parse(r.label)], ...d.keys.map((k, i) => [k, r.values[i]])]));
     const stack = d3.stack().keys(d.keys)(rows);
     const x = d3.scaleUtc(d3.extent(rows, (r) => r.t), [m.l, W - m.r]);
@@ -107,13 +117,13 @@
       .attr('stroke', css('--bg')).attr('stroke-width', 1)
       .attr('d', d3.area().x((p) => x(p.data.t)).y0((p) => y(p[0])).y1((p) => y(p[1])).curve(d3.curveMonotoneX)));
     s.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - m.b})`)
-      .call(d3.axisBottom(x).tickValues(monthTicks(rows.map((r) => r.t), W)).tickFormat(d3.utcFormat('%m/%y')).tickSizeOuter(0));
+      .call(d3.axisBottom(x).tickValues(monthTicks(rows.map((r) => r.t), W, unit.every)).tickFormat(unit.tick).tickSizeOuter(0));
     const rule = s.append('line').attr('stroke', css('--fg-3')).attr('y1', m.t).attr('y2', h - m.b).style('opacity', 0);
     s.append('rect').attr('x', m.l).attr('y', m.t).attr('width', W - m.l - m.r).attr('height', h - m.t - m.b).attr('fill', 'transparent')
       .on('mousemove', (e) => {
         const r = rows[d3.bisector((v) => v.t).center(rows, x.invert(d3.pointer(e)[0]))];
         rule.attr('x1', x(r.t)).attr('x2', x(r.t)).style('opacity', 1);
-        show(e, `${d3.utcFormat('%m/%Y')(r.t)}<br>${d.keys.map((k) => `${esc(k)}: <b>${r[k]}</b>`).join('<br>')}`);
+        show(e, `${unit.tip(r.t)}<br>${d.keys.map((k) => `${esc(k)}: <b>${r[k]}</b>`).join('<br>')}`);
       })
       .on('mouseleave', () => { hide(); rule.style('opacity', 0); });
     legend(el, d.keys);
@@ -367,6 +377,18 @@
     };
     place();
     dot.call(d3.drag().on('drag', (e, n) => { n.x = e.x; n.y = e.y; clamp(n); place(); }));
+  };
+
+  // spark: the changes over the window as one thin line, no axes (the tile says the number).
+  draw.spark = (el, d) => {
+    const W = width(el);
+    const h = 28;
+    const s = svg(el, h).attr('preserveAspectRatio', 'none');
+    const x = d3.scaleLinear([0, Math.max(1, d.values.length - 1)], [1, W - 1]);
+    const y = d3.scaleLinear([0, d3.max(d.values) || 1], [h - 2, 2]);
+    s.append('path').datum(d.values).attr('fill', 'none').attr('stroke', colors[0]).attr('stroke-width', 2)
+      .attr('stroke-linejoin', 'round').attr('stroke-linecap', 'round').attr('vector-effect', 'non-scaling-stroke')
+      .attr('d', d3.line().x((_, i) => x(i)).y((v) => y(v)).curve(d3.curveMonotoneX));
   };
 
   document.querySelectorAll('.report-chart[data-chart]').forEach((el) => {

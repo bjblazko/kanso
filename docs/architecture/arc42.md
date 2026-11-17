@@ -81,11 +81,12 @@ leaves the host.
 | `internal/recipeimport` | Fetches a recipe page safely (no internal addresses) and makes a recipe draft from its JSON-LD or with the AI |
 | `internal/recipegen` | Checks the wishes for a generated recipe against fixed lists, cleans the free text, builds the recipes-only prompt with data blocks and lets only a recipe through ([ADR-017](../adr/017-generated-recipes-guard-the-prompt.md)) |
 | `internal/photo` | Removes GPS data from JPEG uploads |
-| `internal/reports` | Numbers for the "Berichte" pages from plain inputs: inventory, growth, storage, activity; pure, no files ([ADR-015](../adr/015-reports-on-request-cached-per-head.md)) |
+| `internal/reports` | Numbers for the "Berichte" pages and the start page summary from plain inputs: inventory, growth, storage, activity, recent changes; pure, no files ([ADR-015](../adr/015-reports-on-request-cached-per-head.md)) |
+| `internal/visits` | When each person last opened the start page, in the state directory, never in Git ([ADR-018](../adr/018-start-page-summary-from-visits-and-reports.md)) |
 | `internal/search` | In-memory search over pages and notes (scans all per query) |
 | `internal/devseed` | Made-up people, groups, spaces, pages, notes and tasks for development (`kanso seed`, dev login only) |
 | `internal/web` | HTTP routes, templates, static files |
-| `web/` | Templates, CSS, JS (editor, capture, task capture, board, to-dos, service worker), fonts, icons, vendored Mermaid and d3 (report pages only) |
+| `web/` | Templates, CSS, JS (editor, capture, task capture, board, to-dos, service worker), fonts, icons, vendored Mermaid and d3 (report pages and the start page) |
 
 Later phases add `lists`, `calendar`, `push`.
 
@@ -168,6 +169,21 @@ whole (text and photos).
    a table per chart and the same data as JSON, from which `reports.js` draws
    with d3.
 
+### Opening the start page
+
+1. `GET /` reads the window: by default `internal/visits` records the visit
+   (moving previous/last only after an hour) and the window starts at the
+   previous visit, at least 24 hours back; `?range=24h|7d|30d` sets it
+   without touching the visit.
+2. Web collects the documents as for a report (scope "seen", history scan
+   cached per HEAD) and keeps the readable ones; changes are the commits on
+   their files (author → person) and list items written or ticked.
+3. `internal/reports.Summarize` counts by kind, hour or day and person, newest
+   documents first; own changes drop out unless `?own=1`.
+4. The template writes the sentence, tiles, two chart cards with tables, the
+   list of changed documents and "Heute" (today's meals, due tasks); `reports.js`
+   draws the charts with d3.
+
 ### Generating a recipe
 
 1. `POST /recipes/generate` checks that the person may write to the cookbook
@@ -222,6 +238,7 @@ Kopia jobs.
 | [015](../adr/015-reports-on-request-cached-per-head.md) | Reports are computed on request, cached per Git HEAD |
 | [016](../adr/016-one-cookbook-space.md) | One cookbook space holds the recipes |
 | [017](../adr/017-generated-recipes-guard-the-prompt.md) | Generated recipes: fixed choices, data blocks, parser gate |
+| [018](../adr/018-start-page-summary-from-visits-and-reports.md) | Start page summary: window from visits in the state directory, built on the reports |
 
 ## 10. Quality Requirements
 

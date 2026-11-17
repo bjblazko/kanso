@@ -7,6 +7,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- The start page says what happened since your last visit (at least the last 24 hours): a sentence, a number and spark line per kind, the changes over time, who was active and the changed documents by space. A select switches to 24 hours, 7 or 30 days; your own changes can be shown too. "Heute" lists today's meals and the tasks due today or overdue. Only what you may read counts, for admins too (ADR-018).
+
 ## [0.9.0] - 2026-11-17
 
 ### Added

@@ -1,0 +1,3 @@
+{{/* SPDX-License-Identifier: Apache-2.0 */}}
+{{define "report-table"}}<div class="table-scroll"><table><thead><tr>{{range .Head}}<th>{{.}}</th>{{end}}</tr></thead>
+<tbody>{{range .Rows}}<tr>{{range .}}<td{{if .Num}} class="n"{{end}}>{{if .Href}}<a href="{{.Href}}">{{.Text}}</a>{{else}}{{.Text}}{{end}}</td>{{end}}</tr>{{end}}</tbody></table></div>{{end}}

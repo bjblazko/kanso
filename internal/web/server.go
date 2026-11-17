@@ -28,6 +28,7 @@ import (
 	"github.com/bjblazko/kanso/internal/tasks"
 	"github.com/bjblazko/kanso/internal/todos"
 	"github.com/bjblazko/kanso/internal/users"
+	"github.com/bjblazko/kanso/internal/visits"
 	"github.com/bjblazko/kanso/internal/wiki"
 	assets "github.com/bjblazko/kanso/web"
 )
@@ -47,8 +48,10 @@ type Deps struct {
 	// MealPlans are the groups' cooking plans (ADR-012).
 	MealPlans *mealplan.Store
 	// AI is the registered language model (ADR-013); Fetch loads recipe pages.
-	AI     *ai.Store
-	Fetch  *recipeimport.Fetcher
+	AI    *ai.Store
+	Fetch *recipeimport.Fetcher
+	// Visits are when each person last opened the start page (ADR-018).
+	Visits *visits.Store
 	MD     *markdown.Renderer
 	Locks  *wiki.Locks
 	Search *search.Index
@@ -104,7 +107,7 @@ func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}
 	for _, name := range pageNames {
 		t, err := template.New(name).Funcs(templateFuncs).ParseFS(assets.Files,
-			"templates/layout.html", "templates/icons.html", "templates/tree.html", "templates/"+name+".html")
+			"templates/layout.html", "templates/icons.html", "templates/tree.html", "templates/charts.html", "templates/"+name+".html")
 		if err != nil {
 			return nil, fmt.Errorf("template %s: %w", name, err)
 		}
