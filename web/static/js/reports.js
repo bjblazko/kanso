@@ -239,6 +239,43 @@
     [0, 6, 12, 18].forEach((hr) => s.append('text').attr('class', 'lbl').attr('x', left + hr * cw).attr('y', h - 4).text(`${hr} ${d.hour}`));
   };
 
+  // age: vertical bars; bins from d.stale on are grey (old pages).
+  draw.age = (el, d) => {
+    const W = width(el);
+    const h = 200;
+    const m = { l: 32, r: 8, t: 8, b: 36 };
+    const s = svg(el, h);
+    const rows = d.rows.map((r, i) => ({ label: r.label, n: r.values[0], stale: i >= d.stale }));
+    const x = d3.scaleBand(rows.map((r) => r.label), [m.l, W - m.r]).padding(0.2);
+    const y = d3.scaleLinear([0, d3.max(rows, (r) => r.n) || 1], [h - m.b, m.t]).nice();
+    s.append('g').attr('class', 'axis').attr('transform', `translate(${m.l},0)`).call(d3.axisLeft(y).ticks(4)).select('.domain').remove();
+    hover(s.selectAll('rect').data(rows).join('rect').attr('x', (r) => x(r.label)).attr('width', x.bandwidth())
+      .attr('y', (r) => y(r.n)).attr('height', (r) => y(0) - y(r.n)).attr('rx', 2)
+      .attr('fill', (r) => (r.stale ? css('--fg-3') : colors[0])), (r) => `${esc(r.label)}: <b>${r.n}</b> ${esc(d.unit)}`);
+    const axis = s.append('g').attr('class', 'axis').attr('transform', `translate(0,${h - m.b})`).call(d3.axisBottom(x).tickSize(0));
+    axis.select('.domain').remove();
+    if (x.bandwidth() < 64) axis.selectAll('text').attr('transform', 'rotate(-25)').attr('text-anchor', 'end');
+  };
+
+  // sunburst: space → page → subpage, each space in its colour, deeper rings lighter.
+  draw.sunburst = (el, d) => {
+    const W = width(el);
+    const h = Math.min(320, W);
+    const r = h / 2;
+    const s = svg(el, h).append('g').attr('transform', `translate(${W / 2},${r})`);
+    const root = d3.partition().size([2 * Math.PI, r])(d3.hierarchy(d).sum((n) => n.bytes || 0)
+      .sort((a, b) => b.value - a.value));
+    const arc = d3.arc().startAngle((n) => n.x0).endAngle((n) => n.x1).innerRadius((n) => n.y0)
+      .outerRadius((n) => n.y1 - 2).padAngle(0.006);
+    const spaceOf = (n) => { let a = n; while (a.depth > 1) a = a.parent; return a; };
+    const spaces = root.children || [];
+    hover(s.selectAll('path').data(root.descendants().filter((n) => n.depth && n.x1 - n.x0 > 0.002)).join('path').attr('d', arc)
+      .attr('fill', (n) => colors[spaces.indexOf(spaceOf(n)) % colors.length])
+      .attr('fill-opacity', (n) => Math.max(0.35, 1 - (n.depth - 1) * 0.25)),
+    (n) => `${n.ancestors().reverse().slice(1).map((a) => esc(a.data.name)).join(' / ')}: <b>${fmtBytes(n.value)}</b>`);
+    legend(el, spaces.map((n) => n.data.name));
+  };
+
   document.querySelectorAll('.report-chart[data-chart]').forEach((el) => {
     const fn = draw[el.dataset.chart];
     if (fn && data[el.dataset.id]) fn(el, data[el.dataset.id]);

@@ -29,4 +29,8 @@ test('Berichte: the overview counts, draws and switches scope', async ({ page })
   await page.getByRole('link', { name: 'Aktivität', exact: true }).click();
   const cal = page.locator('section', { has: page.getByRole('heading', { name: 'Aktivitätskalender' }) });
   await expect(cal.locator('svg')).toBeVisible();
+
+  await page.locator('main').getByRole('link', { name: 'Wiki', exact: true }).click();
+  const age = page.locator('section', { has: page.getByRole('heading', { name: 'Wie alt ist das Wiki?' }) });
+  await expect(age.locator('svg')).toBeVisible();
 });

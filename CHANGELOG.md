@@ -12,6 +12,7 @@ All notable changes to this project are documented here. The format follows
 - "Berichte" in the user menu: what Kanso holds and what it takes. The overview shows documents, storage and, for admins, what Git still keeps of old versions and deleted files; charts of what there is and how it grew, each with its numbers as a table. Everyone sees their own documents, what is shared with them, or both; admins see everyone by person — numbers only, never titles of things they cannot read.
 - Berichte → Speicher: where the space goes per area (with what Git keeps of old versions, for admins), the repository against the current files over time, orphaned media (attachments nothing links to, attachments of deleted pages) and the largest files. Admins also see Kanso's memory, uptime and data size.
 - Berichte → Aktivität: a calendar of changes per day over the last year and a weekday × hour map of when people write.
+- Berichte → Wiki: how old the pages are, the ten untouched the longest, and the wiki as a sunburst of spaces, pages and subpages.
 
 ## [0.7.0] - 2026-11-17
 

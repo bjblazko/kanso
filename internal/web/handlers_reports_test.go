@@ -205,3 +205,22 @@ func TestReportsActivityTab(t *testing.T) {
 		t.Error("no weekday × hour card")
 	}
 }
+
+func TestReportsWikiTab(t *testing.T) {
+	ts, _, anna := setupHaus(t)
+	parent := ts.createPage(t, anna, "haus", "", "Tagebuch")
+	ts.createPage(t, anna, "haus", parent, "Montag")
+	_, body := get(t, anna, ts.URL+"/reports/wiki")
+	if age := between(body, `id="card-age"`, "</section>"); !strings.Contains(age, `<td>&lt; 1 Monat</td><td class="n">2</td>`) {
+		t.Errorf("age:\n%s", age)
+	}
+	data := between(body, `id="report-data">`, "</script>")
+	if !strings.Contains(data, `"Montag"`) || !strings.Contains(data, `"Haus"`) {
+		t.Errorf("tree lacks the pages: %s", data)
+	}
+	boss := otherAdmin(t, ts)
+	_, body = get(t, boss, ts.URL+"/reports/wiki?scope=all")
+	if strings.Contains(body, "Tagebuch") || strings.Contains(body, "Montag") {
+		t.Error("admin sees titles in the wiki tab")
+	}
+}
