@@ -42,6 +42,7 @@ type homeSummary struct {
 	More         int
 	HistoryError bool
 	JSON         template.JS // chart data by id
+	Today        homeToday
 }
 
 // homeOption is one entry of the window select.
@@ -88,6 +89,7 @@ func (s *Server) homeSummary(r *http.Request, v view) *homeSummary {
 	h := &homeSummary{Range: rng, Own: own, HistoryError: rb.page.HistoryError, Empty: sum.Total == 0}
 	h.Ranges, h.OwnHref = homeLinks(v, rng, own)
 	h.Sentence = homeSentence(v, sum, from, now)
+	h.Today = s.today(v, p.Sub, rb.rc.g, now)
 	data := map[string]any{}
 	if !h.Empty {
 		h.Tiles = homeTiles(v, sum, data)

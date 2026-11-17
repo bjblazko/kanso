@@ -5,6 +5,7 @@ package web
 import (
 	"errors"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -94,5 +95,49 @@ func TestHomeGitErrorStillRenders(t *testing.T) {
 	code, sum := summary(t, anna, ts.URL+"/")
 	if code != http.StatusOK || !strings.Contains(sum, "Historie gerade nicht lesbar") {
 		t.Errorf("git error: %d", code)
+	}
+}
+
+// today is the start page's "Heute" section, unescaped.
+func today(t *testing.T, c *http.Client, u string) string {
+	t.Helper()
+	_, body := get(t, c, u)
+	return htmlUnescape(between(body, `<section class="home-today"`, "</section>"))
+}
+
+func TestHomeTodayShowsMealAndDueTask(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	fam := familyBoardID(t, ts)
+	plan := ts.familyPlan(t)
+	ts.planMeal(t, plan, day(0), "", "Linsensuppe", 4)
+	ts.planMeal(t, plan, day(1), "", "Morgensuppe", 4)
+	createTask(t, ts, anna, url.Values{"title": {"Hof fegen"}, "board": {fam}, "due": {day(0)}})
+	createTask(t, ts, anna, url.Values{"title": {"Steuer"}, "board": {fam}, "due": {day(-2)}})
+	createTask(t, ts, anna, url.Values{"title": {"Später"}, "board": {fam}, "due": {day(3)}})
+	sec := today(t, anna, ts.URL+"/")
+	for _, want := range []string{"Linsensuppe", `href="/mealplan/` + plan, "Hof fegen", "Steuer", "überfällig"} {
+		if !strings.Contains(sec, want) {
+			t.Errorf("today lacks %q", want)
+		}
+	}
+	if strings.Contains(sec, "Morgensuppe") || strings.Contains(sec, "Später") {
+		t.Error("today shows tomorrow's meal or a later task")
+	}
+	if strings.Index(sec, "Steuer") > strings.Index(sec, "Hof fegen") {
+		t.Error("overdue task not first")
+	}
+}
+
+func TestHomeTodayHidesOtherBoards(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	admin := ts.client(t, "admin", "Admin", true)
+	_, a := createTask(t, ts, admin, url.Values{"title": {"Geheimsache"}, "due": {day(0)}})
+	if a.ID == "" {
+		t.Fatalf("admin task not created: %+v", a)
+	}
+	if _, body := get(t, anna, ts.URL+"/"); strings.Contains(body, "Geheimsache") || strings.Contains(body, `class="home-today"`) {
+		t.Error("anna sees admin's private task or an empty today section")
 	}
 }

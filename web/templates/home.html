@@ -9,12 +9,12 @@
 <div class="home-summary-head">
   <h2 id="home-summary-title">{{$.T "home.title"}}</h2>
   <form class="home-range" method="get" action="/">
-    <label class="visually-hidden" for="home-range">{{$.T "home.range"}}</label>
-    <select id="home-range" name="range">{{range .Ranges}}<option value="{{.Value}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>{{end}}</select>
+    <div class="field"><label class="visually-hidden" for="home-range">{{$.T "home.range"}}</label>
+    <select id="home-range" name="range">{{range .Ranges}}<option value="{{.Value}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>{{end}}</select></div>
     {{if .Own}}<input type="hidden" name="own" value="1">{{end}}
-    <button class="btn btn-sm" type="submit">{{$.T "home.show"}}</button>
+    <button class="btn btn-secondary" type="submit">{{$.T "home.show"}}</button>
   </form>
-  <a class="btn btn-sm" href="{{.OwnHref}}">{{if .Own}}{{$.T "home.own_hide"}}{{else}}{{$.T "home.own_show"}}{{end}}</a>
+  <a class="btn btn-secondary" href="{{.OwnHref}}">{{if .Own}}{{$.T "home.own_hide"}}{{else}}{{$.T "home.own_show"}}{{end}}</a>
 </div>
 {{if .HistoryError}}<p class="notice notice-warning" role="status">{{$.T "reports.history_error"}}</p>{{end}}
 <p class="home-sentence">{{.Sentence}}</p>
@@ -30,12 +30,19 @@
   <details class="report-table"><summary>{{$.T "reports.as_table"}}</summary>{{template "report-table" .}}</details>
 </section>{{end}}
 </div>
-<h3>{{$.T "home.recent"}}</h3>
+<h3 class="home-recent">{{$.T "home.recent"}}</h3>
 {{range .Groups}}<h4 class="home-group">{{.Name}}</h4>
 <ul class="list-plain home-items">{{range .Items}}<li><a href="{{.Href}}">{{.Title}}</a> <span class="meta">{{.Person}} · {{.When}}</span></li>{{end}}</ul>
 {{end}}{{with .More}}<p class="meta">{{$.T "home.more" .}}</p>{{end}}
 <script type="application/json" id="report-data">{{.JSON}}</script>
-{{end}}</section>{{end}}
+{{end}}</section>
+{{with .Today}}{{if or .Meals .Due}}<section class="home-today" aria-labelledby="home-today-title">
+<h2 id="home-today-title">{{$.T "home.today"}}</h2>
+{{with .Meals}}<h3 class="home-group">{{$.T "home.meals"}}</h3>
+<ul class="list-plain home-items">{{range .}}<li><a href="{{.Href}}">{{.Title}}</a> <span class="meta">{{.Person}}</span></li>{{end}}</ul>{{end}}
+{{with .Due}}<h3 class="home-group">{{$.T "home.due"}}</h3>
+<ul class="list-plain home-items">{{range .}}<li><a href="{{.Href}}">{{.Title}}</a> <span class="meta">{{.Person}} · {{.When}}</span></li>{{end}}</ul>{{end}}
+</section>{{end}}{{end}}{{end}}
 <h2 id="spaces">{{.T "home.spaces"}}</h2>
 {{if .Nav}}<ul class="list-plain spaces">
 {{range .Nav}}<li><a href="/s/{{.Slug}}">{{template "icon" .Icon}} {{.Name}}</a>{{if .Description}}<br><span class="meta">{{.Description}}</span>{{end}}
