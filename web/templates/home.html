@@ -5,6 +5,38 @@
 <h1>{{.T "nav.spaces"}}</h1></header>
 <div class="content">
 {{with .Data.Deleted}}<p class="notice" role="status">{{$.T "space.deleted" .}}</p>{{end}}
+{{with .Data.Summary}}<section class="home-summary" aria-labelledby="home-summary-title">
+<div class="home-summary-head">
+  <h2 id="home-summary-title">{{$.T "home.title"}}</h2>
+  <form class="home-range" method="get" action="/">
+    <label class="visually-hidden" for="home-range">{{$.T "home.range"}}</label>
+    <select id="home-range" name="range">{{range .Ranges}}<option value="{{.Value}}"{{if .Selected}} selected{{end}}>{{.Label}}</option>{{end}}</select>
+    {{if .Own}}<input type="hidden" name="own" value="1">{{end}}
+    <button class="btn btn-sm" type="submit">{{$.T "home.show"}}</button>
+  </form>
+  <a class="btn btn-sm" href="{{.OwnHref}}">{{if .Own}}{{$.T "home.own_hide"}}{{else}}{{$.T "home.own_show"}}{{end}}</a>
+</div>
+{{if .HistoryError}}<p class="notice notice-warning" role="status">{{$.T "reports.history_error"}}</p>{{end}}
+<p class="home-sentence">{{.Sentence}}</p>
+{{if not .Empty}}
+<div class="home-tiles">{{range .Tiles}}<div class="report-tile"><div class="meta">{{.Label}}</div>
+  <div class="report-value">{{.Value}}</div>
+  <div class="report-chart home-spark" data-chart="spark" data-id="{{.Spark}}" aria-hidden="true"></div></div>{{end}}</div>
+<div class="report-grid">{{range .Cards}}
+<section class="report-card" aria-labelledby="card-{{.ID}}">
+  <h3 id="card-{{.ID}}">{{.Title}}</h3>
+  <p class="meta">{{.Why}}</p>
+  <div class="report-chart" data-chart="{{.Chart}}" data-id="{{.ID}}" aria-hidden="true"></div>
+  <details class="report-table"><summary>{{$.T "reports.as_table"}}</summary>{{template "report-table" .}}</details>
+</section>{{end}}
+</div>
+<h3>{{$.T "home.recent"}}</h3>
+{{range .Groups}}<h4 class="home-group">{{.Name}}</h4>
+<ul class="list-plain home-items">{{range .Items}}<li><a href="{{.Href}}">{{.Title}}</a> <span class="meta">{{.Person}} · {{.When}}</span></li>{{end}}</ul>
+{{end}}{{with .More}}<p class="meta">{{$.T "home.more" .}}</p>{{end}}
+<script type="application/json" id="report-data">{{.JSON}}</script>
+{{end}}</section>{{end}}
+<h2 id="spaces">{{.T "home.spaces"}}</h2>
 {{if .Nav}}<ul class="list-plain spaces">
 {{range .Nav}}<li><a href="/s/{{.Slug}}">{{template "icon" .Icon}} {{.Name}}</a>{{if .Description}}<br><span class="meta">{{.Description}}</span>{{end}}
 {{template "audience" (index $.Data.Audiences .Slug)}}</li>
@@ -14,3 +46,6 @@
 <ul class="list-plain spaces">{{range .}}<li><a href="/p/{{.Node.Meta.ID}}">{{.Node.Meta.Title}}</a><br>
 <span class="meta">{{.SpaceName}}{{with .From}} · {{$.T "shared.from" .}}{{end}}</span></li>{{end}}</ul>{{end}}
 </div>{{end}}
+
+{{define "scripts"}}{{with .Data.Summary}}{{if not .Empty}}<script src="{{$.Asset "vendor/d3/d3.min.js"}}" defer></script>
+<script src="{{$.Asset "js/reports.js"}}" defer></script>{{end}}{{end}}{{end}}

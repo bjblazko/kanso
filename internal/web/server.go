@@ -107,7 +107,7 @@ func parsePages() (map[string]*template.Template, error) {
 	pages := map[string]*template.Template{}
 	for _, name := range pageNames {
 		t, err := template.New(name).Funcs(templateFuncs).ParseFS(assets.Files,
-			"templates/layout.html", "templates/icons.html", "templates/tree.html", "templates/"+name+".html")
+			"templates/layout.html", "templates/icons.html", "templates/tree.html", "templates/charts.html", "templates/"+name+".html")
 		if err != nil {
 			return nil, fmt.Errorf("template %s: %w", name, err)
 		}
