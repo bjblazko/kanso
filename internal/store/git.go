@@ -3,7 +3,6 @@
 package store
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -212,19 +211,7 @@ func (r *Repo) Show(hash, path string) ([]byte, error) {
 	return r.run("show", hash+":"+filepath.ToSlash(path))
 }
 
-func (r *Repo) run(args ...string) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), gitTimeout)
-	defer cancel()
-	cmd := exec.CommandContext(ctx, "git", append([]string{"-C", r.dir}, args...)...)
-	cmd.Env = append(os.Environ(), "GIT_TERMINAL_PROMPT=0", "LC_ALL=C")
-	var stderr bytes.Buffer
-	cmd.Stderr = &stderr
-	out, err := cmd.Output()
-	if err != nil {
-		return out, fmt.Errorf("git %s: %w: %s", args[0], err, strings.TrimSpace(stderr.String()))
-	}
-	return out, nil
-}
+func (r *Repo) run(args ...string) ([]byte, error) { return r.runInput(nil, args...) }
 
 // DiffText returns the unified diff of two texts ("" when they are equal).
 func DiffText(old, new string) (string, error) {
