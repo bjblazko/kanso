@@ -99,7 +99,12 @@ func (s *Server) page(w http.ResponseWriter, r *http.Request, page, title string
 }
 
 // inSpace marks the navigation position: the space, its tree, the page.
+// A recipe belongs to the kitchen: no spaces bar, the kitchen marked in the rail.
 func (s *Server) inSpace(v view, space, pageID string) view {
+	if pg, ok := s.Wiki.ByID(pageID); ok && pageID != "" && pg.Meta.IsRecipe() {
+		v.Module, v.Shared, v.SideFolded = "kitchen", nil, false
+		return v
+	}
 	who := access.Principal{Sub: v.User.Sub, Admin: v.Admin}
 	v.Here, v.Page, v.Tree = space, pageID, s.visibleTree(who, space, s.groups())
 	return v

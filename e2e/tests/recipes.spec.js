@@ -22,6 +22,13 @@ test('recipe: create, find by tag, cook with more servings, tick off', async ({ 
   await page.getByRole('button', { name: 'Speichern' }).click();
   await expect(page).toHaveURL(/\/p\/[a-z2-7]{12}$/);
 
+  // A recipe lives in the kitchen: no spaces bar, back to the recipes, not in the space's tree.
+  await expect(page.locator('nav.rail').getByRole('link', { name: 'Küche' })).toHaveAttribute('aria-current', 'true');
+  await expect(page.locator('.breadcrumb').getByRole('link', { name: 'Rezepte' })).toBeVisible();
+  await page.goto('/');
+  await page.locator('main').getByRole('link', { name: space, exact: true }).click();
+  await expect(page.locator('nav.sidenav').getByRole('link', { name: title })).toHaveCount(0);
+
   await page.goto('/recipes');
   await page.locator('.tag-filter').getByRole('link', { name: 'deftig' }).click();
   await expect(page).toHaveURL(/tag=deftig/);

@@ -17,6 +17,10 @@ All notable changes to this project are documented here. The format follows
 - Berichte → Küche: the meals cooked most, what is bought most, recipes by tag and by preparation time.
 - Berichte → Freigaben: who shares with whom as a network, and what you share and what is shared with you.
 
+### Changed
+
+- Recipes appear only in the kitchen: the wiki's spaces bar and subpage lists no longer show them (a page below a recipe moves up), and an opened recipe belongs to Küche, its path leading back to "Rezepte". Search still finds them.
+
 ## [0.7.0] - 2026-11-17
 
 ### Added

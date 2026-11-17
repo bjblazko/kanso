@@ -1,6 +1,6 @@
 {{define "content"}}{{$d := .Data}}<header class="screen-head">{{template "page-toolbar" .}}
 <nav class="breadcrumb" aria-label="{{.T "page.path"}}">
-  {{if $d.SpaceReadable}}<a href="/s/{{$d.Space.Slug}}">{{$d.Space.Name}}</a>{{end}}{{range $i, $a := $d.Ancestors}}{{if or $i $d.SpaceReadable}} <span aria-hidden="true">/</span> {{end}}<a href="/p/{{$a.ID}}">{{$a.Title}}</a>{{end}}
+  {{if $d.Page.Meta.IsRecipe}}<a href="/recipes">{{.T "plan.tab_recipes"}}</a>{{else}}{{if $d.SpaceReadable}}<a href="/s/{{$d.Space.Slug}}">{{$d.Space.Name}}</a>{{end}}{{range $i, $a := $d.Ancestors}}{{if or $i $d.SpaceReadable}} <span aria-hidden="true">/</span> {{end}}<a href="/p/{{$a.ID}}">{{$a.Title}}</a>{{end}}{{end}}
 </nav>
 <h1>{{$d.Page.Meta.Title}}</h1></header>
 <article class="content page">

@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Created:** 2026-11-06
-**Updated:** 2026-11-11
+**Updated:** 2026-11-17
 
 ## Context
 
@@ -38,6 +38,11 @@ only units of one family are added up.
 
 - Recipes get everything pages have: history, sharing, attachments, search,
   moving.
+- Recipes are shown where they are used, not twice (2026-11-17): the wiki's
+  spaces bar and the subpage lists leave them out (a plain page below a
+  recipe moves up in its place), and a recipe page — view, editor, history,
+  sharing — belongs to Küche in the rail, its path leads back to "Rezepte".
+  The file stays a page in its space; search still finds it.
 - Recognition can fail on unusual lines; the editor preview shows how Kanso
   read each ingredient so the author can fix it.
 - An optional AI (OpenAI-compatible endpoint) may later turn pasted text

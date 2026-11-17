@@ -34,12 +34,28 @@ func (s *Server) targetRole(p access.Principal, space, parent string, g access.G
 
 // visibleTree is the space's page tree as p may see it: all of it with a
 // space role, otherwise only the subtrees shared with p.
+// Recipes live in the kitchen, not in the tree.
 func (s *Server) visibleTree(p access.Principal, space string, g access.Groups) []*wiki.Node {
 	tree := s.Wiki.Tree(space)
 	if access.Can(s.Spaces.RoleOf(p, space, g), access.Read) {
-		return tree
+		return withoutRecipes(tree)
 	}
-	return sharedNodes(p, tree, g)
+	return withoutRecipes(sharedNodes(p, tree, g)) // shares first: a recipe's share reaches its subpages
+}
+
+// withoutRecipes drops the recipes of a tree; pages below a recipe move up in its place.
+func withoutRecipes(nodes []*wiki.Node) []*wiki.Node {
+	var out []*wiki.Node
+	for _, n := range nodes {
+		children := withoutRecipes(n.Children)
+		if n.Meta.IsRecipe() {
+			out = append(out, children...)
+			continue
+		}
+		n.Children = children
+		out = append(out, n)
+	}
+	return out
 }
 
 // sharedNodes keeps the nodes whose own members let p read them, with their
@@ -109,7 +125,7 @@ func (s *Server) sharedWith(p access.Principal) []sharedEntry {
 		if !withShares[sp.Slug] || access.Can(s.Spaces.RoleOf(p, sp.Slug, g), access.Read) {
 			continue
 		}
-		for _, n := range sharedNodes(p, s.Wiki.Tree(sp.Slug), g) {
+		for _, n := range withoutRecipes(sharedNodes(p, s.Wiki.Tree(sp.Slug), g)) {
 			out = append(out, sharedEntry{Node: n, SpaceName: sp.Name, From: s.ownerName(sp)})
 		}
 	}
