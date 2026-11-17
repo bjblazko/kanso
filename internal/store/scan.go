@@ -19,6 +19,7 @@ type FileChange struct {
 	When        time.Time
 	Name, Email string // commit author
 	Path, Blob  string // Blob is "" when deleted
+	From        string // the path before, when the commit moved the file here
 	Size        int64  // bytes of Blob, 0 when deleted
 	Deleted     bool
 }
@@ -26,7 +27,7 @@ type FileChange struct {
 // Scan is the whole history of the repository, for reports.
 type Scan struct {
 	Head      string           // "" for a repository without commits
-	Changes   []FileChange     // oldest first; a move is a delete plus an add
+	Changes   []FileChange     // oldest first; a move is one change with From set
 	Live      map[string]int64 // path → size at HEAD
 	Deleted   int64            // bytes of blobs in the history but not at HEAD
 	DeletedN  int              // number of those blobs
@@ -88,7 +89,7 @@ func (sc *Scan) addSizes(sizes map[string]int64, live map[string]bool) {
 
 // changes lists every file change from the first commit to head.
 func (r *Repo) changes(head string) ([]FileChange, error) {
-	out, err := r.run("-c", "core.quotePath=false", "log", "--reverse", "--no-renames", "--raw", "--no-abbrev",
+	out, err := r.run("-c", "core.quotePath=false", "log", "--reverse", "-M", "--raw", "--no-abbrev",
 		"--format=%x00%ct%x09%ae%x09%an", head)
 	if err != nil {
 		return nil, err
@@ -122,7 +123,7 @@ func parseCommit(s string) FileChange {
 	return c
 }
 
-// parseRaw reads ":mode mode old new STATUS<TAB>path" for the commit who.
+// parseRaw reads ":mode mode old new STATUS<TAB>path" (a move: "<TAB>from<TAB>to") for the commit who.
 func parseRaw(line string, who FileChange) (FileChange, bool) {
 	meta, path, ok := strings.Cut(line, "\t")
 	f := strings.Fields(meta)
@@ -131,6 +132,9 @@ func parseRaw(line string, who FileChange) (FileChange, bool) {
 	}
 	c := who
 	c.Path = unquote(path)
+	if from, to, moved := strings.Cut(path, "\t"); moved && strings.HasPrefix(f[4], "R") {
+		c.From, c.Path = unquote(from), unquote(to)
+	}
 	if strings.HasPrefix(f[4], "D") {
 		c.Deleted = true
 	} else {

@@ -98,3 +98,23 @@ func commit(t *testing.T, r *Repo, a Author, msg string) {
 		t.Fatal(err)
 	}
 }
+
+func TestScanFollowsRenames(t *testing.T) {
+	r := newRepo(t)
+	write(t, r, "x/a.txt", "a fairly long text so Git sees a rename")
+	commit(t, r, anna, "add")
+	if err := r.Move(ben, "x", "y", "move"); err != nil {
+		t.Fatal(err)
+	}
+	sc, err := r.Scan()
+	if err != nil {
+		t.Fatal(err)
+	}
+	last := sc.Changes[len(sc.Changes)-1]
+	if last.Path != "y/a.txt" || last.From != "x/a.txt" || last.Email != ben.Email {
+		t.Errorf("rename = %+v", last)
+	}
+	if sc.DeletedN != 0 {
+		t.Errorf("a moved file counts as deleted: %d", sc.DeletedN)
+	}
+}
