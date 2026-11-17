@@ -13,8 +13,25 @@ import (
 	"github.com/bjblazko/kanso/internal/store"
 )
 
-func (s *Store) taskRel(boardID, taskID string) string {
+func (s *Store) taskRel(boardID, taskID string) string { return TaskPath(boardID, taskID) }
+
+// TaskPath is where a task lives, relative to the data directory.
+func TaskPath(boardID, taskID string) string {
 	return filepath.Join(Dir, boardID, tasksDir, taskID+".md")
+}
+
+// AllTasks are the tasks of every board, for reports; callers check who may see them.
+func (s *Store) AllTasks() []Task {
+	var out []Task
+	for _, b := range s.allBoards() {
+		files, _ := filepath.Glob(filepath.Join(s.dataDir, Dir, b.ID, tasksDir, "*.md"))
+		for _, f := range files {
+			if t, err := s.readTask(b.ID, strings.TrimSuffix(filepath.Base(f), ".md")); err == nil {
+				out = append(out, t)
+			}
+		}
+	}
+	return out
 }
 
 func (s *Store) readTask(boardID, taskID string) (Task, error) {

@@ -78,6 +78,12 @@ type Wiki struct {
 const pageFile = "index.md"
 
 // pagePath is the repository-relative path of a page's index.md.
+// PagePath is the page's file, relative to the data directory.
+func PagePath(p Page) string { return pagePath(p.Space, p.Dir) }
+
+// AttachmentPath is an attachment's file of page p, relative to the data directory.
+func AttachmentPath(p Page, name string) string { return path.Join(attachmentDir(p), name) }
+
 func pagePath(space, dir string) string {
 	return path.Join("spaces", space, "pages", dir, pageFile)
 }

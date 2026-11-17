@@ -73,3 +73,14 @@ func TestForgetSpace(t *testing.T) {
 		t.Errorf("notified %v, want %v", gone, want)
 	}
 }
+
+func TestPagePathAndAttachmentPath(t *testing.T) {
+	w := newWiki(t)
+	p := mustCreate(t, w, "", "Keller")
+	if got := PagePath(p); got != "spaces/haus/pages/"+p.Dir+"/index.md" {
+		t.Errorf("PagePath = %q", got)
+	}
+	if got := AttachmentPath(p, "a.png"); got != "spaces/haus/pages/"+p.Dir+"/attachments/a.png" {
+		t.Errorf("AttachmentPath = %q", got)
+	}
+}

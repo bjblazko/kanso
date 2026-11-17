@@ -161,6 +161,18 @@ func (s *Store) Get(sub, id string, g access.Groups) (List, error) {
 	return l, nil
 }
 
+// All are the lists of everyone, for reports; callers check who may see them.
+func (s *Store) All() []List {
+	files, _ := filepath.Glob(filepath.Join(s.dataDir, Dir, "*.json"))
+	var out []List
+	for _, f := range files {
+		if l, err := s.read(strings.TrimSuffix(filepath.Base(f), ".json")); err == nil {
+			out = append(out, l)
+		}
+	}
+	return out
+}
+
 // Visible returns the lists sub may see, most recently changed first.
 func (s *Store) Visible(sub string, g access.Groups) []List {
 	files, _ := filepath.Glob(filepath.Join(s.dataDir, Dir, "*.json"))
