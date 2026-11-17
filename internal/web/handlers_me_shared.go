@@ -3,41 +3,56 @@
 package web
 
 import (
-	"cmp"
 	"net/http"
-	"slices"
-	"strings"
 
 	"github.com/bjblazko/kanso/internal/access"
 	"github.com/bjblazko/kanso/internal/auth"
 	"github.com/bjblazko/kanso/internal/todos"
 )
 
-// sharedItem is one thing someone else sees too, with who that is.
+// sharedItem is one thing someone else sees too, with who that is and how far they may go.
 type sharedItem struct {
 	Name, Href string
-	Kind       string // its kind, singular, translated
-	Audience   audience
-	People     []string // subs of everyone besides the viewer who sees it
-	kind       string   // i18n key of Kind
+	kind       string                 // i18n key of its kind, singular
+	Access     map[string]access.Role // everyone besides the viewer, by sub
+	Change     string                 // where the viewer may change who sees it, if they may
 }
 
-// sharedGroup is one heading of the overview, translated; "" is a list without one.
+// sharedRow is one line of the overview, every text translated.
+type sharedRow struct {
+	Name, Href string
+	Kind       string // shown beside the name; "" where the heading says it
+	Who        string // the line below or beside: names, roles or both
+	Change     string
+}
+
+// sharedGroup is one heading of the overview; "" is a list without one.
 type sharedGroup struct {
 	Heading string
-	Items   []sharedItem
+	Rows    []sharedRow
 }
 
 // sharedOverview is "Was andere sehen"; notes are always private and never appear.
 type sharedOverview struct {
-	By     string // "" (by kind), "doc" or "person"
-	Groups []sharedGroup
+	By, Role string // grouping ("" = by kind) and filter ("" = every role)
+	Groups   []sharedGroup
+	Nothing  bool // nothing at all is shared, before filtering
 }
 
-// sharedViews are the groupings the overview offers, the default first.
-var sharedViews = []struct{ By, Label string }{
-	{"", "me.shared_by_kind"}, {"doc", "me.shared_by_doc"}, {"person", "me.shared_by_person"},
+// sharedTab is one link above the overview.
+type sharedTab struct {
+	Label, Href string
+	Current     bool
 }
+
+// sharedViews are the groupings, the default first; sharedRoles the filters.
+var (
+	sharedViews = []struct{ By, Label string }{
+		{"", "me.shared_by_kind"}, {"doc", "me.shared_by_doc"},
+		{"person", "me.shared_by_person"}, {"role", "me.shared_by_role"},
+	}
+	sharedRoles = []access.Role{access.Viewer, access.Editor, access.Owner}
+)
 
 // kindHeadings are the i18n keys of the kind headings, by the key of the kind.
 var kindHeadings = map[string]string{
@@ -47,33 +62,59 @@ var kindHeadings = map[string]string{
 
 // add keeps an item only when someone besides the viewer sees it.
 func (s *Server) add(v view, items []sharedItem, kind, name, href string, a audience, members []access.Member) []sharedItem {
-	if a.Private {
+	acc := s.readers(members)
+	delete(acc, v.User.Sub)
+	if a.Private || len(acc) == 0 {
 		return items
 	}
-	var people []string
-	for sub := range s.readers(members) {
-		if sub != v.User.Sub {
-			people = append(people, sub)
-		}
-	}
-	return append(items, sharedItem{Name: name, Href: href, Kind: v.T(kind), Audience: a, People: people, kind: kind})
+	return append(items, sharedItem{Name: name, Href: href, kind: kind, Access: acc, Change: a.Change})
 }
 
 func (s *Server) sharedPage(w http.ResponseWriter, r *http.Request) {
 	v := s.newView(r, "", nil)
 	v.Title = v.T("me.shared")
-	items := s.sharedItems(v, r)
-	o := sharedOverview{By: r.URL.Query().Get("by")}
+	q := r.URL.Query()
+	o := sharedOverview{By: q.Get("by"), Role: q.Get("role")}
+	role, err := access.ParseRole(o.Role)
+	if err != nil {
+		o.Role = ""
+	}
+	all := s.sharedItems(v, r)
+	o.Nothing = len(all) == 0
+	items := onlyRole(all, o.Role, role)
 	switch o.By {
 	case "doc":
-		o.Groups = byDocument(items)
+		o.Groups = s.byDocument(v, items)
 	case "person":
-		o.Groups = s.byPerson(items)
+		o.Groups = s.byPerson(v, items)
+	case "role":
+		o.Groups = s.byRole(v, items)
 	default:
-		o.By, o.Groups = "", byKind(v, items)
+		o.By, o.Groups = "", s.byKind(v, items)
 	}
 	v.Data = o
 	s.render(w, r, http.StatusOK, "me_shared", v)
+}
+
+// onlyRole keeps of each item the people with exactly role, and the items left with anyone.
+func onlyRole(items []sharedItem, key string, role access.Role) []sharedItem {
+	if key == "" {
+		return items
+	}
+	var out []sharedItem
+	for _, it := range items {
+		acc := map[string]access.Role{}
+		for sub, r := range it.Access {
+			if r == role {
+				acc[sub] = r
+			}
+		}
+		if len(acc) > 0 {
+			it.Access = acc
+			out = append(out, it)
+		}
+	}
+	return out
 }
 
 // sharedItems is everything the viewer sees that someone else sees too, by kind.
@@ -90,13 +131,13 @@ func (s *Server) sharedItems(v view, r *http.Request) []sharedItem {
 		out = s.add(v, out, "me.kind_list", l.Name, "/todos/"+l.ID, s.membersAudience(v, m), m)
 	}
 	if boards, err := s.Tasks.Boards(s.actor(r)); err == nil {
-		for _, b := range boards {
-			m := []access.Member{{Group: b.Owner.Group, Role: access.Viewer}}
+		for _, b := range boards { // everyone in the group works on the board
+			m := []access.Member{{Group: b.Owner.Group, Role: access.Editor}}
 			out = s.add(v, out, "me.kind_board", b.Name, "/tasks/b/"+b.ID, s.boardAudience(v, b), m)
 		}
 	}
-	for _, pl := range s.MealPlans.For(g, p.Sub) {
-		m := []access.Member{{Group: pl.Group, Role: access.Viewer}}
+	for _, pl := range s.MealPlans.For(g, p.Sub) { // everyone in the group plans
+		m := []access.Member{{Group: pl.Group, Role: access.Editor}}
 		out = s.add(v, out, "me.kind_plan", pl.Name, "/mealplan/"+pl.ID, s.membersAudience(v, m), m)
 	}
 	return out
@@ -117,11 +158,11 @@ func (s *Server) sharedPages(v view, p access.Principal, g access.Groups) []shar
 	return out
 }
 
-// listMembers are a to-do list's owner and everyone it is shared with.
+// listMembers are a to-do list's owner and everyone it is shared with, who tick and add items.
 func listMembers(l todos.List) []access.Member {
 	members := []access.Member{{User: l.Owner, Role: access.Owner}}
 	for _, sh := range l.Shared {
-		members = append(members, access.Member{User: sh.User, Group: sh.Group, Role: access.Viewer})
+		members = append(members, access.Member{User: sh.User, Group: sh.Group, Role: access.Editor})
 	}
 	return members
 }
@@ -130,45 +171,3 @@ func listMembers(l todos.List) []access.Member {
 func (s *Server) listAudience(v view, l todos.List) audience {
 	return s.membersAudience(v, listMembers(l))
 }
-
-// byKind groups items under their kind, in the order sharedItems found them.
-func byKind(v view, items []sharedItem) []sharedGroup {
-	var out []sharedGroup
-	for _, it := range items {
-		heading := v.T(kindHeadings[it.kind])
-		if n := len(out); n > 0 && out[n-1].Heading == heading {
-			out[n-1].Items = append(out[n-1].Items, it)
-			continue
-		}
-		out = append(out, sharedGroup{Heading: heading, Items: []sharedItem{it}})
-	}
-	return out
-}
-
-// byDocument is one list of all items, by name.
-func byDocument(items []sharedItem) []sharedGroup {
-	if len(items) == 0 {
-		return nil
-	}
-	slices.SortStableFunc(items, func(a, b sharedItem) int { return byName(a.Name, b.Name) })
-	return []sharedGroup{{Items: items}}
-}
-
-// byPerson lists, for each other person, what they see, people by name.
-func (s *Server) byPerson(items []sharedItem) []sharedGroup {
-	seen := map[string][]sharedItem{}
-	for _, it := range items {
-		for _, sub := range it.People {
-			seen[sub] = append(seen[sub], it)
-		}
-	}
-	var out []sharedGroup
-	for sub, its := range seen {
-		out = append(out, sharedGroup{Heading: s.userName(sub), Items: its})
-	}
-	slices.SortFunc(out, func(a, b sharedGroup) int { return byName(a.Heading, b.Heading) })
-	return out
-}
-
-// byName orders names alphabetically, ignoring case.
-func byName(a, b string) int { return cmp.Compare(strings.ToLower(a), strings.ToLower(b)) }

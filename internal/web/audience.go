@@ -60,16 +60,18 @@ func (s *Server) membersAudience(v view, members []access.Member) audience {
 	return audience{Text: v.T("visibility.space", strings.Join(names, ", "))}
 }
 
-// readers is everyone members give access, members of a group as people.
-func (s *Server) readers(members []access.Member) map[string]bool {
+// readers is everyone members give access, members of a group as people,
+// each with the highest role any entry gives them.
+func (s *Server) readers(members []access.Member) map[string]access.Role {
 	g := s.groups()
-	seen := map[string]bool{}
+	seen := map[string]access.Role{}
+	grant := func(sub string, r access.Role) { seen[sub] = max(seen[sub], r) }
 	for _, m := range members {
 		if m.User != "" {
-			seen[m.User] = true
+			grant(m.User, m.Role)
 		}
 		for _, sub := range g[m.Group] {
-			seen[sub] = true
+			grant(sub, m.Role)
 		}
 	}
 	return seen

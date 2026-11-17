@@ -1,13 +1,16 @@
 {{define "content"}}{{$d := .Data}}<div class="content">
 <h1>{{.T "me.shared"}}</h1>
 <p class="meta">{{.T "me.shared_intro"}}</p>
-{{if not $d.Groups}}<p class="empty">{{.T "me.shared_none"}}</p>{{else}}
-<nav aria-label="{{.T "me.shared_group"}}"><ul class="tabs">{{range sharedViews}}
-  <li><a href="/me/shared{{with .By}}?by={{.}}{{end}}"{{if eq .By $d.By}} aria-current="page"{{end}}>{{$.T .Label}}</a></li>{{end}}
+{{if $d.Nothing}}<p class="empty">{{.T "me.shared_none"}}</p>{{else}}
+<nav aria-label="{{.T "me.shared_group"}}"><ul class="tabs">{{range $d.ViewTabs $}}
+  <li><a href="{{.Href}}"{{if .Current}} aria-current="page"{{end}}>{{.Label}}</a></li>{{end}}
 </ul></nav>
+<nav class="shared-filter" aria-label="{{.T "me.shared_filter"}}"><span class="meta" aria-hidden="true">{{.T "me.shared_filter"}}</span><ul class="tabs">{{range $d.RoleTabs $}}
+  <li><a href="{{.Href}}"{{if .Current}} aria-current="page"{{end}}>{{.Label}}</a></li>{{end}}
+</ul></nav>
+{{if not $d.Groups}}<p class="empty">{{.T "me.shared_none_role"}}</p>{{end}}
 {{range $d.Groups}}<section class="shared-group">{{with .Heading}}<h2>{{.}}</h2>{{end}}
-<ul class="list-plain spaces">{{range .Items}}<li><a href="{{.Href}}">{{.Name}}</a>
-{{if $d.By}}<span class="meta">· {{.Kind}}</span>{{end}}
-{{if ne $d.By "person"}}{{template "audience" .Audience}}{{end}}</li>{{end}}</ul>
+<ul class="list-plain spaces">{{range $row := .Rows}}<li><a href="{{.Href}}">{{.Name}}</a>{{with .Kind}} <span class="meta">· {{.}}</span>{{end}}
+{{with .Who}}<p class="meta audience">{{template "icon" "users"}}<span>{{.}}</span>{{with $row.Change}} · <a href="{{.}}">{{$.T "visibility.change"}}</a>{{end}}</p>{{end}}</li>{{end}}</ul>
 </section>{{end}}{{end}}
 </div>{{end}}

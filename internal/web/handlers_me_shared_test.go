@@ -28,9 +28,9 @@ func TestSharedOverviewListsWhatOthersSee(t *testing.T) {
 	_, body := get(t, anna, ts.URL+"/me/shared")
 	main := between(body, "<main", "</main>")
 	for _, want := range []string{
-		`href="/s/haus"`, "Sichtbar für dich, Admin",
+		`href="/s/haus"`, "Verwalten: Admin · Schreiben: Oma",
 		`href="/todos/` + shared.ID + `"`, "Baumarkt",
-		"Putzplan", `href="/mealplan/` + plan + `"`, "Familienküche", "Sichtbar für dich, Oma</span>",
+		"Putzplan", `href="/mealplan/` + plan + `"`, "Familienküche", "Schreiben: Oma</span>",
 	} {
 		if !strings.Contains(main, want) {
 			t.Errorf("overview lacks %q", want)
@@ -79,6 +79,9 @@ func sharedFixture(t *testing.T) (*testServer, *http.Client) {
 		t.Fatal(err)
 	}
 	ts.familyPlan(t)
+	ts.client(t, "ute", "Ute", false)
+	ts.postForm(t, admin, "/s/haus/settings", "/s/haus/settings",
+		url.Values{"action": {"add"}, "kind": {"user"}, "who": {"ute"}, "role": {"viewer"}})
 	return ts, anna
 }
 
@@ -122,7 +125,7 @@ func TestSharedOverviewByDocument(t *testing.T) {
 		}
 		last = i
 	}
-	if strings.Contains(main, "<h2>") || !strings.Contains(main, "Kochplan") || !strings.Contains(main, "Sichtbar für dich, Admin") {
+	if strings.Contains(main, "<h2>") || !strings.Contains(main, "Kochplan") || !strings.Contains(main, "Schreiben: Admin") {
 		t.Error("document view should be one list with kind and audience")
 	}
 }
@@ -132,5 +135,57 @@ func TestSharedOverviewDefaultsToKind(t *testing.T) {
 	_, body := get(t, anna, ts.URL+"/me/shared?by=nonsense")
 	if !strings.Contains(body, `href="/me/shared" aria-current="page"`) || !strings.Contains(body, "<h2>Listen</h2>") {
 		t.Error("unknown grouping does not fall back to kind")
+	}
+}
+
+func TestSharedOverviewByRole(t *testing.T) {
+	ts, anna := sharedFixture(t)
+	_, body := get(t, anna, ts.URL+"/me/shared?by=role")
+	main := between(body, "<main", "</main>")
+	manage := between(main, "<h2>Verwalten</h2>", "</section>")
+	write := between(main, "<h2>Schreiben</h2>", "</section>")
+	read := between(main, "<h2>Lesen</h2>", "</section>")
+	if !strings.Contains(manage, "Haus") || !strings.Contains(manage, "Admin") || strings.Contains(manage, "Baumarkt") {
+		t.Errorf("Verwalten: %s", manage)
+	}
+	for _, want := range []string{"Baumarkt", "Putzplan", "Familienküche", "Haus", "Oma"} {
+		if !strings.Contains(write, want) {
+			t.Errorf("Schreiben lacks %q", want)
+		}
+	}
+	if !strings.Contains(read, "Haus") || !strings.Contains(read, "Ute") || strings.Contains(read, "Putzplan") {
+		t.Errorf("Lesen: %s", read)
+	}
+	if strings.Index(main, "<h2>Verwalten</h2>") > strings.Index(main, "<h2>Lesen</h2>") {
+		t.Error("roles not ordered from most to least")
+	}
+}
+
+func TestSharedOverviewPersonShowsRole(t *testing.T) {
+	ts, anna := sharedFixture(t)
+	_, body := get(t, anna, ts.URL+"/me/shared?by=person")
+	ute := between(body, "<h2>Ute</h2>", "</section>")
+	if !strings.Contains(ute, "Haus") || !strings.Contains(ute, "Lesen") {
+		t.Errorf("Ute: %s", ute)
+	}
+}
+
+func TestSharedOverviewFilterByRole(t *testing.T) {
+	ts, anna := sharedFixture(t)
+	_, body := get(t, anna, ts.URL+"/me/shared?by=person&role=viewer")
+	main := between(body, "<main", "</main>")
+	if !strings.Contains(main, `href="/me/shared?by=person&amp;role=viewer" aria-current="page"`) {
+		t.Error("filter not marked current, or grouping lost")
+	}
+	if !strings.Contains(main, "<h2>Ute</h2>") || strings.Contains(main, "<h2>Oma</h2>") || strings.Contains(main, "Baumarkt") {
+		t.Errorf("filter keeps the wrong people or things:\n%s", main)
+	}
+	_, body = get(t, anna, ts.URL+"/me/shared?role=editor")
+	main = between(body, "<main", "</main>")
+	if !strings.Contains(main, "Schreiben: Oma") || strings.Contains(main, "Verwalten: Admin") || strings.Contains(main, "Lesen: Ute") {
+		t.Errorf("kind view does not narrow the lines to the role:\n%s", main)
+	}
+	if !strings.Contains(main, `href="/me/shared?by=person&amp;role=editor"`) {
+		t.Error("grouping tabs drop the filter")
 	}
 }

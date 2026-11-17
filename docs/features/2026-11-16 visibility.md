@@ -16,8 +16,9 @@ für dich, Anna", "Niemand hat Zugriff".
 "Was andere sehen" (user menu) lists everything someone besides oneself
 sees: wiki spaces, pages shared one by one, to-do and shopping lists, group
 boards and meal plans, each with who that is. Notes are always private and
-never listed. It groups by kind, by document (one list by name) or by person
-(for each other person what they see, so "what does Adele see" is one look).
+never listed. It groups by kind, by document (one list by name), by person (for each
+other person what they see, so "what does Adele see" is one look) or by right,
+and filters by right: Lesen, Schreiben, Verwalten.
 
 ## Related
 

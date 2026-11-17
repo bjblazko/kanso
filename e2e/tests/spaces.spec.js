@@ -89,11 +89,16 @@ test('"Was andere sehen" lists a space someone else reads too', async ({ page, b
   await page.getByRole('link', { name: 'Was andere sehen' }).click();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Was andere sehen');
   const row = page.locator('main li', { has: page.getByRole('link', { name, exact: true }) });
-  await expect(row).toContainText('Sichtbar für dich, Ute');
+  await expect(row).toContainText('Lesen: Ute');
 
   await page.getByRole('link', { name: 'Nach Person' }).click();
   await expect(page.getByRole('link', { name: 'Nach Person' })).toHaveAttribute('aria-current', 'page');
   const ute = page.locator('main section', { has: page.getByRole('heading', { name: 'Ute', exact: true }) });
   await expect(ute.getByRole('link', { name, exact: true })).toBeVisible();
   await expect(ute).toContainText('Wiki-Bereich');
+  await expect(ute).toContainText('Lesen');
+
+  await page.getByRole('link', { name: 'Schreiben', exact: true }).click();
+  await expect(page.getByRole('link', { name: 'Nach Person' })).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('main').getByRole('heading', { name: 'Ute', exact: true })).toHaveCount(0);
 });
