@@ -30,3 +30,9 @@
   license: MIT (bundled packages MIT, ISC, BSD, Apache-2.0, Unlicense)
   url: https://mermaid.js.org
   file: mermaid.txt
+- name: D3
+  module: d3
+  version: 7.9.2
+  license: ISC
+  url: https://d3js.org
+  file: d3.txt

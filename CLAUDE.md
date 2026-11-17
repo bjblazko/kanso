@@ -8,7 +8,7 @@ in a Git repository. Design: `docs/superpowers/specs/2026-10-26-kanso-design.md`
 - **License:** Apache-2.0. Every source file starts with
   `SPDX-License-Identifier: Apache-2.0`.
 - **Dependencies:** as few as possible. Approved: `github.com/yuin/goldmark/v2`,
-  `go.yaml.in/yaml/v3`, mermaid (ESM build without ELK, vendored), IBM Plex
+  `go.yaml.in/yaml/v3`, mermaid (ESM build without ELK, vendored), d3 (`d3.min.js`, vendored, report pages only), IBM Plex
   (vendored); dev-only: `@playwright/test` for e2e. Anything else: run the `huepattl-code-quality` dependency check
   and get the owner's approval first. Its license text goes to
   `web/static/licenses/`.
