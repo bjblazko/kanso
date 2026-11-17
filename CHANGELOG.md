@@ -7,9 +7,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-17
+
 ### Added
 
-- "Was andere sehen" groups by kind, by document or by person: "Nach Person" shows for each person at a glance what they see.
+- "Was andere sehen" groups by kind, by document, by person or by right, and filters by right (Lesen, Schreiben, Verwalten): "Nach Person" shows for each person at a glance what they see and may do. Each row now says who may do what instead of only who sees it.
 
 ## [0.6.0] - 2026-11-16
 
