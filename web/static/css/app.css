@@ -657,7 +657,7 @@ html { scroll-padding-top: 9rem; }
 .report-table table { width: 100%; border-collapse: collapse; margin-top: var(--space-2); }
 .report-table th, .report-table td { text-align: left; padding: var(--space-1) var(--space-2); border-bottom: 1px solid var(--line); }
 .report-table th { color: var(--fg-3); font-weight: 500; }
-.report-table td.n { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.report-table td.n { white-space: nowrap; text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
 .report-tip { position: fixed; pointer-events: none; z-index: 20; background: var(--fg); color: var(--bg); font-size: var(--text-xs);
   padding: var(--space-1) var(--space-2); border-radius: var(--radius-md); opacity: 0; transition: opacity 120ms ease-out; }
 @media (prefers-reduced-motion: reduce) { .report-tip { transition: none; } }
