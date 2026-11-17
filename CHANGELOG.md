@@ -7,6 +7,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- "Rezept generieren" in the kitchen: ingredients one fancies or has in the fridge, plus wishes (warm or cold, mild or spicy, a direction such as home-style, what must not go in, time, servings, a short note), and the AI makes up one recipe. "Neu würfeln" throws it away and makes another from the same wishes, "Wünsche ändern" goes back to the filled form, "Übernehmen" puts it in the cookbook tagged "ki-generiert". The AI writes only recipes: choices come from fixed lists, free text is cleaned and sent as marked data, and an answer that is not a recipe never shows (ADR-017).
+
+### Fixed
+
+- "Kochpläne" in the user menu: a plan whose group the admin belongs to links to it, so it can be opened from there.
+
 ## [0.8.1] - 2026-11-17
 
 ### Changed

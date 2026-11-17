@@ -23,6 +23,9 @@ decisions in [ADRs](adr/). Done items are removed here and noted in the CHANGELO
 4. CLAUDE.md names Go end-to-end tests in `internal/e2e`; they live in
    `internal/web` (`*_test.go` against the whole server). Align the text or
    move them.
+5. `.form-row` has no `display: flex` of its own, so its fields stack
+   everywhere except where a page adds it (task form, generated recipe).
+   Decide per page whether the row is wanted and set it once in the base rule.
 
 ## Follow-ups from reviews
 
@@ -48,6 +51,8 @@ decisions in [ADRs](adr/). Done items are removed here and noted in the CHANGELO
 
 ## Ideas
 
+- Find recipes by ingredients: every chosen ingredient must be in the recipe
+  (AND), from the parsed ingredient lists.
 - Tag filter in the wiki search (tags exist on every page since 0.1.0).
 - Import recipes from Instagram (caption pasted or a screenshot).
 - AI help in the wiki (tidy, summarise, find) as read-only tools (ADR-013).

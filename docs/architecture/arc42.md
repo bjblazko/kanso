@@ -79,6 +79,7 @@ leaves the host.
 | `internal/mealplan` | Group cooking plans: a file per ISO week in Git with meals per day ([ADR-012](../adr/012-meal-plans-belong-to-groups.md)) |
 | `internal/ai` | One OpenAI-compatible language model: configuration in the state directory, chat completions ([ADR-013](../adr/013-ai-openai-compatible-through-kanso-services.md)) |
 | `internal/recipeimport` | Fetches a recipe page safely (no internal addresses) and makes a recipe draft from its JSON-LD or with the AI |
+| `internal/recipegen` | Checks the wishes for a generated recipe against fixed lists, cleans the free text, builds the recipes-only prompt with data blocks and lets only a recipe through ([ADR-017](../adr/017-generated-recipes-guard-the-prompt.md)) |
 | `internal/photo` | Removes GPS data from JPEG uploads |
 | `internal/reports` | Numbers for the "Berichte" pages from plain inputs: inventory, growth, storage, activity; pure, no files ([ADR-015](../adr/015-reports-on-request-cached-per-head.md)) |
 | `internal/search` | In-memory search over pages and notes (scans all per query) |
@@ -167,6 +168,21 @@ whole (text and photos).
    a table per chart and the same data as JSON, from which `reports.js` draws
    with d3.
 
+### Generating a recipe
+
+1. `POST /recipes/generate` checks that the person may write to the cookbook
+   and that an AI connection is on, then reads the wishes: unknown choices are
+   refused, free text is cleaned and capped.
+2. `internal/recipegen` sends the system prompt (recipes only) and one user
+   message with the wishes, the free text inside `<zutaten>`, `<sonst>` and
+   `<schon_verworfen>`.
+3. The answer goes through the recipe parser; without a title and ingredients
+   the form comes back with an error. Otherwise the preview shows the draft,
+   with the wishes in hidden fields.
+4. "Neu würfeln" posts the wishes again, plus the shown title as rejected;
+   "Übernehmen" creates the page in the cookbook through the import's create
+   path, tagged `ki-generiert`.
+
 ## 7. Deployment View
 
 One systemd service on the NAS (NixOS module in the homelab repository, app
@@ -205,6 +221,7 @@ Kopia jobs.
 | [014](../adr/014-admins-manage-but-do-not-read.md) | Admins manage spaces but do not read them |
 | [015](../adr/015-reports-on-request-cached-per-head.md) | Reports are computed on request, cached per Git HEAD |
 | [016](../adr/016-one-cookbook-space.md) | One cookbook space holds the recipes |
+| [017](../adr/017-generated-recipes-guard-the-prompt.md) | Generated recipes: fixed choices, data blocks, parser gate |
 
 ## 10. Quality Requirements
 
@@ -228,6 +245,9 @@ Verified by unit tests (`go test ./...`) and browser end-to-end tests
   (intended for a local Ollama). Hosted AI services process what is sent.
 - AI answers are untrusted: they only ever become a draft a person checks;
   thinking and fences are stripped, the result goes through the recipe parser.
+- Prompt injection through "Rezept generieren" cannot be ruled out in the
+  model itself; fixed choices, cleaned data blocks and the parser gate limit
+  the outcome to an odd recipe draft (ADR-017).
 - Notes waiting offline live in browser storage, which a browser may evict;
   Kanso asks for persistent storage and shows what is waiting.
 - To-do conflicts are decided by device clocks; a badly wrong clock can lose
