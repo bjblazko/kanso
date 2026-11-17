@@ -620,3 +620,7 @@ html { scroll-padding-top: 9rem; }
   .usermenu-name { display: none; } /* the picture opens the menu; the search gets the room */
   .topbar { gap: var(--space-3); }
 }
+
+/* Was andere sehen: one heading per kind or person */
+.shared-group { margin-top: var(--space-6); }
+.shared-group h2 { margin-top: 0; }

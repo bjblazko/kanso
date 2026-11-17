@@ -90,4 +90,10 @@ test('"Was andere sehen" lists a space someone else reads too', async ({ page, b
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Was andere sehen');
   const row = page.locator('main li', { has: page.getByRole('link', { name, exact: true }) });
   await expect(row).toContainText('Sichtbar für dich, Ute');
+
+  await page.getByRole('link', { name: 'Nach Person' }).click();
+  await expect(page.getByRole('link', { name: 'Nach Person' })).toHaveAttribute('aria-current', 'page');
+  const ute = page.locator('main section', { has: page.getByRole('heading', { name: 'Ute', exact: true }) });
+  await expect(ute.getByRole('link', { name, exact: true })).toBeVisible();
+  await expect(ute).toContainText('Wiki-Bereich');
 });

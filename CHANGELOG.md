@@ -7,6 +7,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- "Was andere sehen" groups by kind, by document or by person: "Nach Person" shows for each person at a glance what they see.
+
 ## [0.6.0] - 2026-11-16
 
 ### Changed

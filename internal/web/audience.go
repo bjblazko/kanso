@@ -39,19 +39,9 @@ func (s *Server) spaceAudience(v view, sp spaces.Space) audience {
 
 // membersAudience names everyone members give access, as spaceAudience does.
 func (s *Server) membersAudience(v view, members []access.Member) audience {
-	g := s.groups()
-	seen := map[string]bool{}
-	for _, m := range members {
-		if m.User != "" {
-			seen[m.User] = true
-		}
-		for _, sub := range g[m.Group] {
-			seen[sub] = true
-		}
-	}
 	var you bool
 	var names []string
-	for sub := range seen {
+	for sub := range s.readers(members) {
 		if sub == v.User.Sub {
 			you = true
 		} else {
@@ -70,6 +60,30 @@ func (s *Server) membersAudience(v view, members []access.Member) audience {
 	return audience{Text: v.T("visibility.space", strings.Join(names, ", "))}
 }
 
+// readers is everyone members give access, members of a group as people.
+func (s *Server) readers(members []access.Member) map[string]bool {
+	g := s.groups()
+	seen := map[string]bool{}
+	for _, m := range members {
+		if m.User != "" {
+			seen[m.User] = true
+		}
+		for _, sub := range g[m.Group] {
+			seen[sub] = true
+		}
+	}
+	return seen
+}
+
+// pageMembers are the space's members plus everyone the page or a page above it is shared with.
+func (s *Server) pageMembers(pc pageCtx) []access.Member {
+	members := slices.Clone(pc.Space.Members)
+	for _, m := range s.Wiki.Chain(pc.Page.Meta.ID) {
+		members = append(members, m.Members...)
+	}
+	return members
+}
+
 // spaceAudienceFor is spaceAudience with a link to the settings for whoever may change them.
 func (s *Server) spaceAudienceFor(v view, sp spaces.Space, role access.Role) audience {
 	a := s.spaceAudience(v, sp)
@@ -82,11 +96,7 @@ func (s *Server) spaceAudienceFor(v view, sp spaces.Space, role access.Role) aud
 // pageAudience names who reads a page: the space's members plus everyone the
 // page or a page above it is shared with; managers get a link to the page's sharing.
 func (s *Server) pageAudience(v view, pc pageCtx) audience {
-	members := slices.Clone(pc.Space.Members)
-	for _, m := range s.Wiki.Chain(pc.Page.Meta.ID) {
-		members = append(members, m.Members...)
-	}
-	a := s.membersAudience(v, members)
+	a := s.membersAudience(v, s.pageMembers(pc))
 	if access.Can(pc.Role, access.ManageSpace) {
 		a = a.changeAt(v, "/p/"+pc.Page.Meta.ID+"/share")
 	}

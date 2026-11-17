@@ -3,6 +3,7 @@
 package web
 
 import (
+	"net/http"
 	"net/url"
 	"strings"
 	"testing"
@@ -60,5 +61,76 @@ func TestBoardOfAGroupOfOneIsOnlyYours(t *testing.T) {
 	}
 	if _, body := get(t, anna, ts.URL+"/tasks/b/"+b.ID); !strings.Contains(body, "Nur für dich sichtbar") {
 		t.Error("a board only anna sees does not say so")
+	}
+}
+
+// sharedFixture: anna's Haus (admin, familie = anna+oma), list Baumarkt shared
+// with admin, board Putzplan and the family plan for familie.
+func sharedFixture(t *testing.T) (*testServer, *http.Client) {
+	t.Helper()
+	ts, admin, anna := setupHaus(t)
+	ts.client(t, "oma", "Oma", false)
+	ts.postForm(t, admin, "/admin/groups", "/admin/groups", url.Values{"action": {"add"}, "group": {"familie"}, "sub": {"oma"}})
+	shared, _ := ts.deps.Todos.Create("anna", "Baumarkt", "")
+	if err := ts.deps.Todos.SetShares("anna", shared.ID, []todos.Share{{User: "admin"}}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ts.deps.Tasks.CreateGroupBoard(store.Author{Name: "A", Email: "a@example.org"}, "Putzplan", "familie"); err != nil {
+		t.Fatal(err)
+	}
+	ts.familyPlan(t)
+	return ts, anna
+}
+
+func TestSharedOverviewByPerson(t *testing.T) {
+	ts, anna := sharedFixture(t)
+	_, body := get(t, anna, ts.URL+"/me/shared?by=person")
+	main := between(body, "<main", "</main>")
+	if !strings.Contains(main, `href="/me/shared?by=person" aria-current="page"`) {
+		t.Error("person view not marked current")
+	}
+	admin := between(main, "<h2>Admin</h2>", "</section>")
+	oma := between(main, "<h2>Oma</h2>", "</section>")
+	for _, want := range []string{"Haus", "Baumarkt", "Liste"} {
+		if !strings.Contains(admin, want) {
+			t.Errorf("Admin lacks %q", want)
+		}
+	}
+	if strings.Contains(admin, "Putzplan") || strings.Contains(admin, "Familienküche") {
+		t.Error("Admin lists what only the family sees")
+	}
+	for _, want := range []string{"Haus", "Putzplan", "Familienküche"} {
+		if !strings.Contains(oma, want) {
+			t.Errorf("Oma lacks %q", want)
+		}
+	}
+	if strings.Contains(main, "<h2>Anna</h2>") {
+		t.Error("the viewer is listed as a person")
+	}
+}
+
+func TestSharedOverviewByDocument(t *testing.T) {
+	ts, anna := sharedFixture(t)
+	_, body := get(t, anna, ts.URL+"/me/shared?by=doc")
+	main := between(body, "<main", "</main>")
+	order := []string{"Baumarkt", "Familienküche", "Haus", "Putzplan"}
+	last := -1
+	for _, name := range order {
+		i := strings.Index(main, ">"+name+"</a>")
+		if i < last {
+			t.Errorf("%q out of order", name)
+		}
+		last = i
+	}
+	if strings.Contains(main, "<h2>") || !strings.Contains(main, "Kochplan") || !strings.Contains(main, "Sichtbar für dich, Admin") {
+		t.Error("document view should be one list with kind and audience")
+	}
+}
+
+func TestSharedOverviewDefaultsToKind(t *testing.T) {
+	ts, anna := sharedFixture(t)
+	_, body := get(t, anna, ts.URL+"/me/shared?by=nonsense")
+	if !strings.Contains(body, `href="/me/shared" aria-current="page"`) || !strings.Contains(body, "<h2>Listen</h2>") {
+		t.Error("unknown grouping does not fall back to kind")
 	}
 }
