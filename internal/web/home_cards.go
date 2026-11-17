@@ -27,7 +27,11 @@ func homeTiles(v view, sum reports.Summary, data map[string]any) []homeTile {
 	for _, k := range sum.Kinds {
 		id := "spark-" + string(k.Kind)
 		data[id] = map[string][]int{"values": k.Spark}
-		out = append(out, homeTile{Kind: string(k.Kind), Label: kindLabel(v, k.Kind), Value: fmt.Sprint(sparkSum(k.Spark)), Spark: id})
+		n := k.New + k.Changed // documents, as the sentence counts them
+		if k.Kind == reports.List {
+			n = sparkSum(k.Spark) // lists count their items
+		}
+		out = append(out, homeTile{Kind: string(k.Kind), Label: kindLabel(v, k.Kind), Value: fmt.Sprint(n), Spark: id})
 	}
 	return out
 }
