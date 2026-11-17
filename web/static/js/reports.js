@@ -196,6 +196,49 @@
       .on('mouseleave', hide);
   };
 
+  // seq is the sequential scale for counts: from the surface step to the first chart colour.
+  const seq = (max) => d3.scaleSequential([0, Math.max(1, max)], d3.interpolateRgb(css('--bg-2'), colors[0]));
+
+  // calendar: a year of days, weeks as columns, Monday on top.
+  draw.calendar = (el, d) => {
+    const W = width(el);
+    const parse = d3.timeParse('%Y-%m-%d');
+    const days = d.days.map((x) => ({ date: parse(x.d), n: x.n }));
+    const start = d3.timeMonday.floor(days[0].date);
+    const weeks = d3.timeMonday.count(start, days.at(-1).date) + 1;
+    const left = 24;
+    const cell = Math.max(4, Math.floor((W - left) / weeks));
+    const h = 7 * cell + 20;
+    const s = svg(el, h);
+    const c = seq(d3.max(days, (x) => x.n));
+    hover(s.selectAll('rect').data(days).join('rect').attr('width', cell - 1).attr('height', cell - 1).attr('rx', 1.5)
+      .attr('x', (x) => left + d3.timeMonday.count(start, x.date) * cell).attr('y', (x) => 16 + ((x.date.getDay() + 6) % 7) * cell)
+      .attr('fill', (x) => c(x.n)), (x) => `${x.date.toLocaleDateString(lang)}: <b>${x.n}</b> ${esc(d.label)}`);
+    d3.timeMonths(days[0].date, days.at(-1).date).forEach((m, i) => {
+      if (i % (cell < 8 ? 2 : 1) === 0) {
+        s.append('text').attr('class', 'lbl').attr('x', left + d3.timeMonday.count(start, m) * cell).attr('y', 10)
+          .text(m.toLocaleDateString(lang, { month: 'short' }));
+      }
+    });
+  };
+
+  // weekhours: weekdays as rows, hours as columns.
+  draw.weekhours = (el, d) => {
+    const W = width(el);
+    const left = 32;
+    const cw = (W - left) / 24;
+    const ch = Math.min(24, cw * 1.2);
+    const h = 7 * ch + 20;
+    const s = svg(el, h);
+    const cells = d.counts.flatMap((hours, day) => hours.map((n, hour) => ({ day, hour, n })));
+    const c = seq(d3.max(cells, (x) => x.n));
+    hover(s.selectAll('rect').data(cells).join('rect').attr('x', (x) => left + x.hour * cw).attr('y', (x) => x.day * ch)
+      .attr('width', cw - 2).attr('height', ch - 2).attr('rx', 2).attr('fill', (x) => c(x.n)),
+    (x) => `${esc(d.days[x.day])}, ${x.hour}–${x.hour + 1} ${esc(d.hour)}: <b>${x.n}</b>`);
+    d.days.forEach((name, i) => s.append('text').attr('class', 'lbl').attr('x', 0).attr('y', i * ch + ch / 2 + 4).text(name));
+    [0, 6, 12, 18].forEach((hr) => s.append('text').attr('class', 'lbl').attr('x', left + hr * cw).attr('y', h - 4).text(`${hr} ${d.hour}`));
+  };
+
   document.querySelectorAll('.report-chart[data-chart]').forEach((el) => {
     const fn = draw[el.dataset.chart];
     if (fn && data[el.dataset.id]) fn(el, data[el.dataset.id]);

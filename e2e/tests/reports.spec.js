@@ -25,4 +25,8 @@ test('Berichte: the overview counts, draws and switches scope', async ({ page })
   const areas = page.locator('section', { has: page.getByRole('heading', { name: 'Wo der Platz steckt' }) });
   await expect(areas.locator('svg')).toBeVisible();
   await expect(page.getByRole('link', { name: 'Eigene', exact: true })).toHaveAttribute('aria-current', 'page');
+
+  await page.getByRole('link', { name: 'Aktivität', exact: true }).click();
+  const cal = page.locator('section', { has: page.getByRole('heading', { name: 'Aktivitätskalender' }) });
+  await expect(cal.locator('svg')).toBeVisible();
 });

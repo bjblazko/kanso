@@ -27,6 +27,7 @@ type reportTab struct {
 var reportTabs = []reportTab{
 	{"overview", (*Server).overviewTab},
 	{"storage", (*Server).storageTab},
+	{"activity", (*Server).activityTab},
 }
 
 // reportPage is what the reports template shows.

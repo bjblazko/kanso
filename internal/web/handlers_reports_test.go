@@ -187,3 +187,21 @@ func TestReportsOverviewServerTileAdminOnly(t *testing.T) {
 		t.Error("anna gets the server tile")
 	}
 }
+
+func TestReportsActivityTab(t *testing.T) {
+	ts, admin, anna := setupHaus(t)
+	ts.createPage(t, admin, "haus", "", "Vom Admin")
+	_, body := get(t, anna, ts.URL+"/reports/activity")
+	if cal := between(body, `id="card-calendar"`, "</section>"); !strings.Contains(cal, "Noch nichts da.") {
+		t.Errorf("anna's own activity counts the admin's page:\n%s", cal)
+	}
+	ts.note(t, "anna", "Heute")
+	_, body = get(t, anna, ts.URL+"/reports/activity")
+	today := time.Now().Format("02.01.2006")
+	if cal := between(body, `id="card-calendar"`, "</section>"); !strings.Contains(cal, "<td>"+today+"</td>") {
+		t.Errorf("today's note missing:\n%s", cal)
+	}
+	if !strings.Contains(body, `id="card-weekhours"`) {
+		t.Error("no weekday × hour card")
+	}
+}
