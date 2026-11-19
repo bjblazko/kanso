@@ -47,6 +47,20 @@ test('recipe: create, find by tag, cook with more servings, tick off', async ({ 
   await page.getByRole('button', { name: 'Häkchen entfernen' }).click();
   await page.reload();
   await expect(page.locator('.cook-list input[type="checkbox"]').first()).not.toBeChecked();
+
+  const bar = page.getByRole('progressbar', { name: 'Fortschritt' });
+  const percent = page.locator('.cook-body .todo-percent');
+  await expect(bar).toHaveAttribute('aria-valuenow', '0');
+  await page.getByRole('checkbox', { name: 'Schälen.' }).check();
+  await expect(bar).toHaveAttribute('aria-valuenow', '50');
+  await expect(percent).toHaveText('50 %');
+  await page.reload();
+  await expect(percent).toHaveText('50 %');
+  await page.getByRole('checkbox', { name: 'Kochen.' }).check();
+  await expect(bar).toHaveAttribute('aria-valuenow', '100');
+  await expect(bar).toHaveAttribute('data-state', 'full');
+  await page.getByRole('button', { name: 'Häkchen entfernen' }).click();
+  await expect(percent).toHaveText('0 %');
 });
 
 test('recipe: give stars, filter the kitchen by them, clear them', async ({ page }) => {

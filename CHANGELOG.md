@@ -7,6 +7,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-11-19
+
+### Added
+
+- The cook view shows a progress bar over the steps, like a to-do list.
+- Every shopping item gets − and +: an item without an amount counts as 1, and "3x" or "3 x" is read as a factor. The amount sits at − and +, the item shows without it; "7Up" or "2 - 3 Eier" stay as written.
+
 ## [0.10.1] - 2026-11-17
 
 ### Changed

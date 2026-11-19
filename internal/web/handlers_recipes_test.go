@@ -117,3 +117,18 @@ func TestCookViewRendersInlineMarkdown(t *testing.T) {
 		t.Fatal("ingredient note not rendered")
 	}
 }
+
+func TestCookViewStepProgress(t *testing.T) {
+	ts, admin, _ := setupHaus(t)
+	id := ts.makeRecipe(t, admin, "haus", "Curry", curryBody, 4)
+	_, body := get(t, admin, ts.URL+"/recipes/"+id+"/cook")
+	for _, want := range []string{`role="progressbar"`, `aria-label="Fortschritt"`, `class="todo-meter-fill"`, `data-percent="{n} %"`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("cook view lacks %q", want)
+		}
+	}
+	plain := ts.makeRecipe(t, admin, "haus", "Ohne", "## Zutaten\n\n- Salz\n", 2)
+	if _, body := get(t, admin, ts.URL+"/recipes/"+plain+"/cook"); strings.Contains(body, `role="progressbar"`) {
+		t.Error("progress without steps")
+	}
+}

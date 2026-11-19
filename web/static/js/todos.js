@@ -17,8 +17,8 @@ const ME = root.dataset.sub;
 const ICONS = [...document.getElementById('todo-icons').content.children];
 const ICON_NAMES = ['lock', 'users', 'edit', 'trash', 'cart']; // the order of #todo-icons
 const SHOPPING = 'shopping';
-// An item's leading amount: "2 Eier", "250 g Butter", "1,5 kg Mehl" – not "2 - 3 Eier".
-const LEADING_AMOUNT = /^(\d+(?:[.,]\d+)?)(\s*)(?:(g|ml|kg|l)(?=\s))?(\s+(?![-–]).*)$/i;
+// An item's leading amount: "2 Eier", "250 g Butter", "1,5 kg Mehl", "3x Wasser" – not "2 - 3 Eier".
+const LEADING_AMOUNT = /^(\d+(?:[.,]\d+)?)(\s*)(?:(g|ml|kg|l|x)(?=\s))?(\s+(?![-–]).*)$/i;
 const titleSuffix = document.title.slice(document.title.indexOf(' · '));
 
 const state = {
@@ -590,8 +590,9 @@ function shopRow(l, it) {
   }));
   if (editing) return h('li', { className: cls }, box, h('div', { className: 'shop-editing' }, shopEdit(l, it), moveForm(l, it)));
   // A grid: tick, text and − amount + in a row, the note and "für …" below across the width.
-  const text = h('button', { type: 'button', className: 'todo-text', onclick: () => startEdit(l, it) }, it.text);
-  return h('li', { className: cls }, box, text, stepper(l, it) || h('span'), shopMeta(it));
+  const amount = amountOf(it.text);
+  const text = h('button', { type: 'button', className: 'todo-text', onclick: () => startEdit(l, it) }, amount ? amount.label : it.text);
+  return h('li', { className: cls }, box, text, (amount && stepper(l, it, amount)) || h('span'), shopMeta(it));
 }
 
 function shopMeta(it) {
@@ -614,16 +615,30 @@ function stepUnit(value, unit) {
   return Number.isInteger(value) ? { up: 1, down: 1, min: 1 } : null;
 }
 
+// amountOf reads the amount an item starts with; the item shows without it,
+// the amount sits at − and +. "3x" and "3 x" are a factor of 3, and an item
+// without a number counts as 1. A number that is no amount ("7Up",
+// "2 - 3 Eier") gives null: the item stays as written.
+function amountOf(text) {
+  const m = text.match(LEADING_AMOUNT);
+  if (m) {
+    const unit = /^x$/i.test(m[3] || '') ? '' : (m[3] || '');
+    return { raw: m[1], value: Number(m[1].replace(',', '.')), unit, label: m[4].trim() || text,
+      write: (n) => `${n}${m[2]}${m[3] || ''}${m[4]}` };
+  }
+  if (/^\d/.test(text)) return null;
+  return { raw: '1', value: 1, unit: '', label: text, write: (n) => (n === '1' ? text : `${n} ${text}`) };
+}
+
 // stepper changes the amount an item starts with, to the next step of its unit.
-function stepper(l, it) {
-  const m = it.text.match(LEADING_AMOUNT);
-  const value = m && Number(m[1].replace(',', '.'));
-  const step = m && stepUnit(value, m[3]);
+function stepper(l, it, a) {
+  const { value } = a;
+  const step = stepUnit(value, a.unit);
   if (!step) return null;
-  const comma = m[1].includes(',') || document.documentElement.lang !== 'en';
+  const comma = a.raw.includes(',') || document.documentElement.lang !== 'en';
   const write = (v) => {
     const n = String(Math.round(v * 100) / 100);
-    return `${comma ? n.replace('.', ',') : n}${m[2]}${m[3] || ''}${m[4]}`;
+    return a.write(comma ? n.replace('.', ',') : n);
   };
   const up = Math.floor(value / step.up + 1e-9) * step.up + step.up;
   const down = Math.ceil(value / step.down - 1e-9) * step.down - step.down;
@@ -633,7 +648,7 @@ function stepper(l, it) {
   return h('div', { className: 'shop-stepper' },
     h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': `${msg.less}: ${it.text}`, disabled: value <= step.min, onclick: set(Math.max(down, step.min)) }, '−'),
     typing ? amountField(save) : h('button', { type: 'button', className: 'btn btn-quiet btn-sm shop-amount',
-      'aria-label': `${msg.edit_amount}: ${it.text}`, onclick: () => startAmount(it, m[1]) }, m[1]),
+      'aria-label': `${msg.edit_amount}: ${it.text}`, onclick: () => startAmount(it, a.raw) }, a.unit ? `${a.raw} ${a.unit}` : a.raw),
     h('button', { type: 'button', className: 'btn btn-quiet btn-sm', 'aria-label': `${msg.more}: ${it.text}`, onclick: set(up) }, '+'));
 }
 
