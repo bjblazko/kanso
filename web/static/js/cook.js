@@ -16,6 +16,20 @@ function save() {
   try { localStorage.setItem(key, JSON.stringify(ticked)); } catch { /* private mode: nothing to remember */ }
 }
 
+// progress fills the bar over the steps, the same as a to-do list's.
+function progress() {
+  const bar = root.querySelector('.todo-progress');
+  if (!bar) return;
+  const steps = boxes.filter((b) => b.closest('.cook-steps'));
+  const done = steps.filter((b) => b.checked).length;
+  const percent = steps.length ? Math.floor((100 * done) / steps.length) : 0;
+  const meter = bar.querySelector('.todo-meter');
+  meter.dataset.state = done === 0 ? 'empty' : (done === steps.length ? 'full' : 'partial');
+  meter.setAttribute('aria-valuenow', percent);
+  meter.querySelector('.todo-meter-fill').style.width = `${percent}%`;
+  bar.querySelector('.todo-percent').textContent = bar.dataset.percent.replace('{n}', percent);
+}
+
 let lock = null;
 
 async function keepAwake() {
@@ -27,13 +41,15 @@ if (root) {
   const ticked = load();
   for (const box of boxes) {
     box.checked = ticked.has(box.dataset.tick);
-    box.addEventListener('change', save);
+    box.addEventListener('change', () => { save(); progress(); });
   }
+  progress();
   const reset = root.querySelector('[data-reset]');
   reset.hidden = false;
   reset.addEventListener('click', () => {
     for (const box of boxes) box.checked = false;
     save();
+    progress();
   });
   keepAwake();
   document.addEventListener('visibilitychange', () => { if (!lock || lock.released) keepAwake(); });

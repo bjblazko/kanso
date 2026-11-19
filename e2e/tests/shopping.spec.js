@@ -44,7 +44,7 @@ test('shopping list: amounts with − and + in sensible steps, a note, filled fr
   await shows('2 kg Mehl');
 
   await add('1 l Milch');
-  await page.getByRole('button', { name: '1 l Milch', exact: true }).click();
+  await item(page, '1 l Milch').getByRole('button', { name: 'Milch', exact: true }).click();
   await page.getByLabel('Notiz').fill('laktosefrei, sonst Hafermilch');
   await page.getByLabel('Notiz').press('Enter');
   await expect(item(page, '1 l Milch')).toContainText('laktosefrei, sonst Hafermilch');
@@ -93,12 +93,12 @@ test('shopping list: an item not got moves to another list and adds up there', a
   await add('200 g Mehl');
   await add('1 Brokkoli');
 
-  await page.getByRole('button', { name: '200 g Mehl', exact: true }).click();
+  await item(page, '200 g Mehl').getByRole('button', { name: 'Mehl', exact: true }).click();
   await page.getByLabel('Auf andere Liste').selectOption({ label: market });
   await page.getByRole('button', { name: 'Verschieben' }).click();
   await expect(page.getByRole('checkbox', { name: '200 g Mehl' })).toHaveCount(0);
 
-  await page.getByRole('button', { name: '1 Brokkoli', exact: true }).click();
+  await item(page, '1 Brokkoli').getByRole('button', { name: 'Brokkoli', exact: true }).click();
   await page.getByLabel('Auf andere Liste').selectOption({ index: (await page.locator('#shop-move option').count()) - 1 }); // the new list
   await page.getByRole('button', { name: 'Verschieben' }).click();
   await expect(page.getByRole('checkbox', { name: '1 Brokkoli' })).toHaveCount(0);
@@ -109,4 +109,45 @@ test('shopping list: an item not got moves to another list and adds up there', a
   await page.goto('/todos');
   await page.getByRole('link', { name: /^Einkauf \d/ }).first().click();
   await expect(page.getByRole('checkbox', { name: '1 Brokkoli' })).toBeVisible();
+});
+
+test('shopping list: the amount sits at − and +, also for "3x", and an item without one counts as 1', async ({ page }) => {
+  await signIn(page, { sub: 'sina', name: 'Sina', admin: true });
+  const name = unique('Getränke');
+  await page.goto('/todos');
+  await page.getByLabel('Neue Liste').fill(name);
+  await page.getByRole('button', { name: 'Einkaufsliste anlegen' }).click();
+  const add = async (text) => {
+    await page.getByLabel('Was fehlt?').fill(text);
+    await page.getByLabel('Was fehlt?').press('Enter');
+    await expect(page.getByRole('checkbox', { name: text })).toBeVisible();
+  };
+  const shows = async (text, label, amount) => {
+    await expect(item(page, text).locator('.todo-text')).toHaveText(label);
+    await expect(item(page, text).locator('.shop-amount')).toHaveText(amount);
+  };
+  const more = (text) => item(page, text).getByRole('button', { name: 'Eins mehr' }).click();
+
+  await add('Bier Alkoholfrei');
+  await shows('Bier Alkoholfrei', 'Bier Alkoholfrei', '1');
+  await expect(item(page, 'Bier Alkoholfrei').getByRole('button', { name: 'Eins weniger' })).toBeDisabled();
+  await more('Bier Alkoholfrei');
+  await shows('2 Bier Alkoholfrei', 'Bier Alkoholfrei', '2');
+
+  await add('3x Wasser');
+  await shows('3x Wasser', 'Wasser', '3');
+  await more('3x Wasser');
+  await shows('4x Wasser', 'Wasser', '4');
+  await add('3 x Saft');
+  await more('3 x Saft');
+  await shows('4 x Saft', 'Saft', '4');
+
+  await add('250 g Butter');
+  await shows('250 g Butter', 'Butter', '250 g');
+
+  await add('7Up');
+  await expect(item(page, '7Up').locator('.todo-text')).toHaveText('7Up');
+  await expect(item(page, '7Up').getByRole('button', { name: 'Eins mehr' })).toHaveCount(0);
+  await add('2 - 3 Eier');
+  await expect(item(page, '2 - 3 Eier').getByRole('button', { name: 'Eins mehr' })).toHaveCount(0);
 });
