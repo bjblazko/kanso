@@ -7,6 +7,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-11-19
+
+### Fixed
+
+- The installed app's system bars follow the theme: the pages say they support light and dark and give a theme colour for each, and the manifest's colours are the dark theme's instead of a light background.
+
 ## [0.11.0] - 2026-11-19
 
 ### Added
