@@ -86,7 +86,10 @@ func TestManifest(t *testing.T) {
 func TestLayoutLinksManifestAndIcon(t *testing.T) {
 	ts := newTestServer(t)
 	_, body := get(t, ts.client(t, "anna", "Anna", false), ts.URL+"/")
-	for _, want := range []string{`<link rel="manifest" href="/manifest.webmanifest">`, `rel="apple-touch-icon"`, `<meta name="theme-color"`} {
+	for _, want := range []string{`<link rel="manifest" href="/manifest.webmanifest">`, `rel="apple-touch-icon"`,
+		`<meta name="color-scheme" content="light dark">`,
+		`<meta name="theme-color" media="(prefers-color-scheme: light)" content="#F4F4F0">`,
+		`<meta name="theme-color" media="(prefers-color-scheme: dark)" content="#161718">`} {
 		if !strings.Contains(body, want) {
 			t.Errorf("layout lacks %s", want)
 		}
@@ -113,5 +116,16 @@ func TestCapturePageLoadsOfflineScript(t *testing.T) {
 	_, body := get(t, ts.client(t, "anna", "Anna", false), ts.URL+"/notes/new")
 	if !strings.Contains(body, `src="/static/js/capture.js?v=`) || !strings.Contains(body, `data-login-url="/auth/login?next=%2Fnotes%2Fnew"`) {
 		t.Error("capture page lacks its script or login link")
+	}
+}
+
+// The system bars of the installed app follow the dark theme, not a light default.
+func TestManifestColorsAreDark(t *testing.T) {
+	ts := newTestServer(t)
+	_, body := get(t, http.DefaultClient, ts.URL+"/manifest.webmanifest")
+	for _, want := range []string{`"background_color":"#161718"`, `"theme_color":"#161718"`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("manifest lacks %s: %s", want, body)
+		}
 	}
 }

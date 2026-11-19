@@ -11,11 +11,10 @@ import (
 	"github.com/bjblazko/kanso/internal/auth"
 )
 
-// Colours of the light theme (tokens.css) for the browser chrome.
-const (
-	themeBackground = "#F4F4F0"
-	themeColor      = "#1E1F21"
-)
+// themeDark is the background of the dark theme (tokens.css). The manifest has
+// no light and dark, and the installed app's system bars should not flash
+// light in a dark room; the pages' theme-color follows the system.
+const themeDark = "#161718"
 
 // precacheList is what the service worker keeps on the device: the files the
 // capture, task capture and to-do pages need, with the same fingerprinted URLs the pages use.
@@ -62,7 +61,7 @@ func (s *Server) manifest(w http.ResponseWriter, _ *http.Request) {
 	v := view{version: s.version}
 	m := map[string]any{
 		"name": "Hüpattl! Kanso", "short_name": "Kanso", "start_url": "/notes/new", "scope": "/",
-		"display": "standalone", "background_color": themeBackground, "theme_color": themeColor,
+		"display": "standalone", "background_color": themeDark, "theme_color": themeDark,
 		"icons": []manifestIcon{
 			{Src: v.Asset("icons/icon-192.png"), Sizes: "192x192", Type: "image/png", Purpose: "any maskable"},
 			{Src: v.Asset("icons/icon-512.png"), Sizes: "512x512", Type: "image/png", Purpose: "any maskable"},
