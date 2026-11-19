@@ -151,3 +151,37 @@ test('shopping list: the amount sits at − and +, also for "3x", and an item wi
   await add('2 - 3 Eier');
   await expect(item(page, '2 - 3 Eier').getByRole('button', { name: 'Eins mehr' })).toHaveCount(0);
 });
+
+test('shopping list on a phone: a compact − amount +, words not broken, the stepper below the text when very narrow', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 });
+  await signIn(page, { sub: 'sina', name: 'Sina', admin: true });
+  await page.goto('/todos');
+  await page.getByLabel('Neue Liste').fill(unique('Schmal'));
+  await page.getByRole('button', { name: 'Einkaufsliste anlegen' }).click();
+  for (const t of ['Rinderbouillon', '1,5 kg Mehl']) {
+    await page.getByLabel('Was fehlt?').fill(t);
+    await page.getByLabel('Was fehlt?').press('Enter');
+    await expect(page.getByRole('checkbox', { name: t })).toBeVisible();
+  }
+  await expect(page.locator('#todos-status')).toHaveText(''); // synced: no more redraws
+  await page.evaluate(() => document.fonts.ready); // measured in IBM Plex, not the wider fallback
+  const row = item(page, 'Rinderbouillon');
+  const lines = () => row.locator('.todo-text').evaluate((el) => { const r = document.createRange(); r.selectNodeContents(el); return r.getClientRects().length; });
+  const box = async (sel) => row.locator(sel).boundingBox();
+  await expect.poll(async () => (await box('.shop-stepper'))?.width).toBeLessThanOrEqual(140);
+  await expect.poll(lines).toBe(1); // "Rinderbouillon" on one line next to the stepper
+  const amount = item(page, '1,5 kg Mehl').locator('.shop-amount');
+  await expect(amount).toHaveText('1,5 kg');
+  await expect.poll(() => amount.evaluate((el) => { const r = document.createRange(); r.selectNodeContents(el); return r.getBoundingClientRect().width <= el.clientWidth; })).toBe(true);
+
+  await page.setViewportSize({ width: 340, height: 800 }); // a narrow phone: still beside, still one line
+  await expect.poll(lines).toBe(1);
+
+  await page.setViewportSize({ width: 320, height: 800 });
+  await expect.poll(async () => {
+    const t = await box('.todo-text');
+    const st = await box('.shop-stepper');
+    return st.y >= t.y + t.height - 1; // below the text, not beside it
+  }).toBe(true);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+});

@@ -526,14 +526,20 @@ html { scroll-padding-top: 9rem; }
 
 .shop-meta { margin: 0; display: flex; flex-wrap: wrap; gap: 0 var(--space-3); }
 .shop-note { color: var(--fg); }
-.shop-stepper { display: flex; gap: var(--space-2); flex: none; }
-.shop-stepper .btn { min-width: var(--target-min); }
+/* − amount + as one joined group: one frame, no gaps, so the item's name keeps
+   the room on a phone. Touch targets reach 44 px through the row height. */
+.shop-stepper { display: flex; flex: none; }
+.shop-stepper > * { margin-left: -1px; }
+.shop-stepper > :first-child { margin-left: 0; }
+.shop-stepper .btn { min-width: 2.25rem; padding: 0; border-radius: 0; }
+.shop-stepper > .btn:first-child { border-radius: var(--radius-md) 0 0 var(--radius-md); }
+.shop-stepper > .btn:last-child { border-radius: 0 var(--radius-md) var(--radius-md) 0; }
 .shop-edit { flex: 1; display: flex; flex-direction: column; gap: var(--space-2); }
 .todo-shop-link { display: inline-flex; gap: var(--space-2); align-items: center; }
-/* One fixed width for the amount (four digits and a comma), so − amount + line up in every row. */
+/* One fixed width for the amount ("1,5 kg", "250 g"), so − amount + line up in every row. */
 .shop-amount, .shop-amount-form .todo-edit {
-  box-sizing: border-box; width: 4.5rem; min-width: 0;
-  padding: 0 var(--space-3); font-variant-numeric: tabular-nums; text-align: center;
+  box-sizing: border-box; width: 4rem; min-width: 0; border-radius: 0;
+  padding: 0 var(--space-1); font-variant-numeric: tabular-nums; text-align: center; white-space: nowrap;
 }
 .shop-amount-form .todo-edit { height: var(--control-h-sm); }
 
@@ -605,7 +611,14 @@ html { scroll-padding-top: 9rem; }
 .todo-new .field { grid-column: 1 / -1; min-width: 0; }
 
 /* Shopping items: tick, text and − amount + in one row; note and "für …" below across the width. */
-.shop-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; column-gap: var(--space-1); padding-bottom: var(--space-1); }
+.shop-item { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-2); padding-bottom: var(--space-1); }
+/* Names break between words, a single long word by syllables – never "Rinderbo|uillon". */
+.shop-item .todo-text { overflow-wrap: break-word; hyphens: auto; }
+/* Very narrow: − amount + below the name, so the name keeps the whole width. */
+@media (max-width: 21em) {
+  .shop-item { grid-template-columns: auto minmax(0, 1fr); }
+  .shop-item .shop-stepper { grid-column: 2; justify-self: start; margin-bottom: var(--space-2); }
+}
 .shop-item .shop-meta { grid-column: 2 / -1; }
 .shop-item .shop-editing { grid-column: 2 / -1; display: flex; flex-direction: column; gap: var(--space-4); }
 .shop-move { padding-top: var(--space-3); border-top: 1px solid var(--line); }
