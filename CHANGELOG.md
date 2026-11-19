@@ -7,6 +7,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.11.2] - 2026-11-19
+
+### Fixed
+
+- On a phone, − amount + on a shopping item is one compact group, so names like "Rinderbouillon" keep their line; names no longer break inside a word (a long word is hyphenated), and on very narrow screens − amount + moves below the name.
+
 ## [0.11.1] - 2026-11-19
 
 ### Fixed
