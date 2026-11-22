@@ -120,6 +120,7 @@ test('a family board: capture onto it, another member takes the task', async ({ 
   await page.getByRole('button', { name: 'Speichern' }).click();
   await page.getByRole('link', { name: boardName }).click();
   await expect(card(page, 'waiting', title)).toContainText('wartet auf: Antwort Hort');
+  await expect(card(page, 'waiting', title).locator(`.face[title="${ben}"]`)).toBeVisible();
 });
 
 test('a note becomes a task', async ({ page }) => {

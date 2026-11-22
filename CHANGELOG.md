@@ -7,6 +7,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.11.3] - 2026-11-22
+
+### Changed
+
+- A task taken on a group board shows who took it as a round picture with their initials below; the full name appears on hover. The task page shows the picture next to the name.
+
 ## [0.11.2] - 2026-11-19
 
 ### Fixed
