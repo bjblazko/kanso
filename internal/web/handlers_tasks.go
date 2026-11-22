@@ -30,6 +30,8 @@ type card struct {
 	DueClass string
 	// Claimed names who took the task, "dir" for the viewer; "" when nobody.
 	Claimed string
+	// Claimant is who took the task, shown by picture; nil when nobody.
+	Claimant *face
 }
 
 // column is a Kanban column or a matrix quadrant.
@@ -135,6 +137,9 @@ func (s *Server) cards(v view, ts []tasks.Task, now time.Time) []card {
 	for _, t := range ts {
 		c := card{Task: t, Due: tasks.DueOf(t.Meta.Due, now)}
 		c.DueText, c.DueClass = dueText(v, t.Meta.Due, c.Due), dueClass[c.Due]
+		if t.Meta.Claimed != "" {
+			c.Claimant = s.face(t.Meta.Claimed)
+		}
 		switch t.Meta.Claimed {
 		case "":
 		case v.User.Sub:

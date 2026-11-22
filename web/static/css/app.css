@@ -392,6 +392,14 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
   font: 600 var(--text-xs)/1 var(--font-mono); text-decoration: none; color: var(--fg-2);
 }
 .card-meta { flex-basis: 100%; margin: 0; display: flex; flex-wrap: wrap; gap: 0 var(--space-3); }
+/* face: someone by picture, initials below, full name as title; on cards top right. */
+.face { display: inline-flex; flex-direction: column; align-items: center; gap: var(--space-1); align-self: flex-start; cursor: default; }
+.face .avatar { width: 1.75rem; height: 1.75rem; }
+.face .avatar-none .icon { width: 16px; height: 16px; }
+.face-initials { font: 500 var(--text-xs)/1 var(--font-sans); color: var(--fg-2); }
+.face-row { display: flex; align-items: center; gap: var(--space-2); }
+.face-row .avatar { width: 1.75rem; height: 1.75rem; }
+.face-row .avatar-none .icon { width: 16px; height: 16px; }
 .due-overdue { color: var(--warning-ink); font-weight: 500; }
 .due-soon { color: var(--time-ink); font-weight: 500; }
 /* Task form: "worauf" only while Wartet is chosen; hidden, its value is still sent. */
