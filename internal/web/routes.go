@@ -90,6 +90,8 @@ func (s *Server) taskRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /tasks/b/{board}/{task}", s.saveTask)
 	mux.HandleFunc("POST /tasks/b/{board}/{task}/claim", s.claimTask)
 	mux.HandleFunc("POST /tasks/b/{board}/{task}/move", s.moveTask)
+	mux.HandleFunc("POST /tasks/b/{board}/{task}/attachments", s.uploadTaskAttachment)
+	mux.HandleFunc("GET /tasks/b/{board}/{task}/attachments/{name}", s.serveTaskAttachment)
 	mux.HandleFunc("GET /tasks/b/{board}/{task}/delete", s.confirmDeleteTask)
 	mux.HandleFunc("POST /tasks/b/{board}/{task}/delete", s.deleteTask)
 }

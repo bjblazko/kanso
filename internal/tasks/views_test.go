@@ -117,10 +117,10 @@ func TestFromNoteLikeNoteTitles(t *testing.T) {
 	}
 	body := "![](attachments/a.jpg)\n\nKind anmelden\nMail an den Hort\n\n![](attachments/b.jpg)\n"
 	title, rest = FromNote(body)
-	if title != "Kind anmelden" || strings.Contains(rest, "attachments/") || !strings.Contains(rest, "Mail an den Hort") {
+	if title != "Kind anmelden" || rest != "![](attachments/a.jpg)\n\nMail an den Hort\n\n![](attachments/b.jpg)\n" {
 		t.Fatalf("photos: %q, %q", title, rest)
 	}
-	if title, rest := FromNote("![](attachments/a.jpg)\n"); title != "" || rest != "" {
+	if title, rest := FromNote("![](attachments/a.jpg)\n"); title != "" || rest != "![](attachments/a.jpg)\n" {
 		t.Fatalf("photo only: %q, %q", title, rest)
 	}
 	if title, _ := FromNote("#\nEinkauf\n"); title != "Einkauf" {

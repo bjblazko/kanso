@@ -1,7 +1,7 @@
 {{define "content"}}{{$d := .Data}}{{$t := $d.Task}}{{$url := printf "/tasks/b/%s/%s" $t.Board $t.Meta.ID}}<div class="editor-page">
 <form method="post" action="{{$url}}" class="editor task-form" id="editor"
-      data-save-url="{{$url}}" data-view-url="{{$url}}" data-preview-key="task" data-preview-id="{{$t.Board}}/{{$t.Meta.ID}}"
-      data-msg-conflict="{{.T "tasks.conflict"}}" data-msg-failed="{{.T "page.save_failed"}}" data-msg-leave="{{.T "editor.unsaved"}}">
+      data-save-url="{{$url}}" data-view-url="{{$url}}" data-upload-url="{{$url}}/attachments" data-preview-key="task" data-preview-id="{{$t.Board}}/{{$t.Meta.ID}}"
+      data-msg-conflict="{{.T "tasks.conflict"}}" data-msg-failed="{{.T "page.save_failed"}}" data-msg-upload-failed="{{.T "editor.upload_failed"}}" data-msg-leave="{{.T "editor.unsaved"}}">
   <input type="hidden" name="csrf" value="{{.CSRF}}">
   <input type="hidden" name="version" value="{{$d.Version}}">
   <h1>{{.T "tasks.edit"}}</h1>
@@ -28,6 +28,11 @@
     <div class="field pane-source" id="pane-source" role="tabpanel" aria-labelledby="tab-source">
       <label for="body">{{.T "tasks.text"}}</label>
       <textarea id="body" name="body" rows="12" spellcheck="true">{{$t.Body}}</textarea>
+      <div class="upload">
+        <label class="btn btn-quiet btn-sm" for="file">{{.T "editor.attach"}}</label>
+        <input class="visually-hidden" type="file" id="file" multiple>
+        <span class="hint">{{.T "editor.attach_hint"}}</span>
+      </div>
     </div>
     <div class="pane-preview" role="tabpanel" aria-labelledby="tab-preview" aria-live="polite">
       <span class="pane-label" aria-hidden="true">{{.T "editor.preview"}}</span>
