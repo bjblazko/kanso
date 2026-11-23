@@ -22,7 +22,7 @@ type taskView struct {
 	Private   bool
 	// Note is shown only to the task's author: "link", "gone" or "".
 	Note       string
-	AuthorName string
+	Author *face
 }
 
 type taskEdit struct {
@@ -58,7 +58,7 @@ func (s *Server) showTask(w http.ResponseWriter, r *http.Request) {
 	}
 	v := s.newView(r, "", nil)
 	tv := taskView{Card: s.cards(v, []tasks.Task{t}, time.Now())[0], BoardName: boardName(v, b), HTML: html, Info: info,
-		Private: b.Private(), Note: s.noteState(v, t), AuthorName: s.userName(t.Meta.Author)}
+		Private: b.Private(), Note: s.noteState(v, t), Author: s.face(t.Meta.Author)}
 	v.Title, v.Data, v.Here = t.Meta.Title, tv, tasksHere
 	v.Audience = ptr(s.boardAudience(v, b))
 	s.render(w, r, http.StatusOK, "task_view", v)

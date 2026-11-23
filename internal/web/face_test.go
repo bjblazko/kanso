@@ -42,3 +42,18 @@ func TestCardShowsClaimantAvatar(t *testing.T) {
 		t.Error("task page: no avatar with full name")
 	}
 }
+
+func TestCardShowsAuthorAvatarWhenUnclaimed(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna Becker", false)
+	tk := addTask(t, ts, "anna", tasks.New{Title: "Zählerstand melden"})
+	_, body := get(t, anna, ts.URL+"/tasks/b/"+tk.Board)
+	for _, want := range []string{`class="face" title="Anna Becker"`, `aria-hidden="true">AB<`, `<span class="visually-hidden">von Anna Becker</span>`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("board: missing %q", want)
+		}
+	}
+	if _, body := get(t, anna, ts.URL+taskURL(tk)); !strings.Contains(body, `title="Anna Becker"`) {
+		t.Error("task page: no author avatar")
+	}
+}

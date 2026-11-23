@@ -18,11 +18,11 @@
   <div><dt>{{.T "tasks.column"}}</dt><dd>{{.T (printf "tasks.status.%s" $t.Meta.Status)}}{{if and (eq (print $t.Meta.Status) "waiting") $t.Meta.WaitingFor}} · {{.T "tasks.waiting_for" $t.Meta.WaitingFor}}{{end}}</dd></div>
   {{if or $t.Meta.Urgent $t.Meta.Important}}<div><dt>{{.T "tasks.priority"}}</dt><dd>{{if $t.Meta.Urgent}}{{.T "tasks.urgent"}}{{end}}{{if and $t.Meta.Urgent $t.Meta.Important}}, {{end}}{{if $t.Meta.Important}}{{.T "tasks.important"}}{{end}}</dd></div>{{end}}
   {{if $d.Card.DueText}}<div><dt>{{.T "tasks.due"}}</dt><dd><span class="due{{with $d.Card.DueClass}} due-{{.}}{{end}}">{{$d.Card.DueText}}</span></dd></div>{{end}}
-  {{if $d.Card.Claimed}}<div><dt>{{.T "tasks.taken"}}</dt><dd class="face-row"><span title="{{$d.Card.Claimant.Name}}">{{template "face-avatar" $d.Card.Claimant}}</span><span>{{$d.Card.Claimed}}</span></dd></div>{{end}}
+  {{if $d.Card.Claimed}}<div><dt>{{.T "tasks.taken"}}</dt><dd class="face-row"><span title="{{$d.Card.Face.Name}}">{{template "face-avatar" $d.Card.Face}}</span><span>{{$d.Card.Claimed}}</span></dd></div>{{end}}
   {{if eq $d.Note "link"}}<div><dt>{{.T "tasks.from_note"}}</dt><dd><a href="/notes/{{$t.Meta.Note}}">{{.T "tasks.open_note"}}</a></dd></div>{{end}}
   {{if eq $d.Note "gone"}}<div><dt>{{.T "tasks.from_note"}}</dt><dd>{{.T "tasks.note_gone"}}</dd></div>{{end}}
 </dl>
 {{if $t.Body}}<div class="prose">{{$d.HTML}}</div>{{end}}
-<p class="meta">{{.T "tasks.created_by" $d.AuthorName ($t.Meta.Created.Local.Format "02.01.2006 15:04")}} · {{.T "tasks.updated_at" ($t.Meta.Updated.Local.Format "02.01.2006 15:04")}}</p>
+<p class="meta face-row"><span title="{{$d.Author.Name}}">{{template "face-avatar" $d.Author}}</span><span>{{.T "tasks.created_by" $d.Author.Name ($t.Meta.Created.Local.Format "02.01.2006 15:04")}} · {{.T "tasks.updated_at" ($t.Meta.Updated.Local.Format "02.01.2006 15:04")}}</span></p>
 </article>{{end}}
 {{define "scripts"}}{{if .Data.Info.HasMermaid}}<script type="module" src="{{.Asset "js/mermaid-loader.js"}}" data-mermaid-src="{{.Asset "vendor/mermaid/mermaid.esm.min.mjs"}}"></script>{{end}}{{end}}
