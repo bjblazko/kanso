@@ -7,6 +7,8 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-11-23
+
 ### Added
 
 - Tasks have attachments: upload photos and files in the task editor, as in notes. A note turned into a task brings its photos along, and they move with the task to another board (ADR-019).
