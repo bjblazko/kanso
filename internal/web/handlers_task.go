@@ -21,7 +21,7 @@ type taskView struct {
 	Info      markdown.Info
 	Private   bool
 	// Note is shown only to the task's author: "link", "gone" or "".
-	Note       string
+	Note   string
 	Author *face
 }
 
