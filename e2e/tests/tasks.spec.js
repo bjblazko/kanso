@@ -27,7 +27,7 @@ test('capture on the phone lands on the board', async ({ page }) => {
   await page.getByRole('link', { name: 'Zum Board' }).click();
   const c = card(page, 'open', title);
   await expect(c.locator('.due')).toHaveText('heute');
-  await expect(c.locator('abbr')).toHaveText(/^D/);
+  await expect(c.locator('.card-tag-urgent')).toHaveText('dringend');
 });
 
 test.describe('offline', () => {
@@ -72,7 +72,7 @@ test.describe('desktop', () => {
     await card(page, 'later', title).dragTo(page.locator('.board-col[data-key="do_now"]'));
     await expect(card(page, 'do_now', title)).toBeVisible();
     await page.getByRole('link', { name: 'Kanban' }).click();
-    await expect(card(page, 'doing', title).locator('abbr')).toHaveCount(2);
+    await expect(card(page, 'doing', title).locator('.card-tag')).toHaveText(['dringend', 'wichtig']);
   });
 });
 

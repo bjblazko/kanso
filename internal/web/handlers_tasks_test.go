@@ -224,3 +224,18 @@ func TestBoardAudience(t *testing.T) {
 		t.Fatalf("audience missing:\n%s", body)
 	}
 }
+
+func TestCardLabels(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	tk := addTask(t, ts, "anna", tasks.New{Title: "Steuer", Urgent: true, Important: true})
+	_, body := get(t, anna, ts.URL+"/tasks/b/"+tk.Board)
+	for _, want := range []string{`class="card-tag card-tag-urgent">dringend<`, `class="card-tag">wichtig<`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("missing %q", want)
+		}
+	}
+	if strings.Contains(body, `<abbr title="Dringend`) || strings.Contains(body, "card-marks") {
+		t.Error("old D/W marks still there")
+	}
+}

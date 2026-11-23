@@ -378,21 +378,30 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 }
 .cards { min-height: var(--space-8); }
 .list-plain .card {
-  display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-2);
-  margin-bottom: var(--space-2); padding: var(--space-2) var(--space-3);
-  border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--bg);
+  position: relative; display: flex; flex-direction: column; gap: var(--space-2);
+  margin-bottom: var(--space-2); padding: var(--space-3);
+  border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--bg);
 }
+.list-plain .card:hover { background: color-mix(in srgb, var(--fg) 4%, var(--bg)); }
 .card[draggable="true"] { cursor: grab; }
-.card.dragging { opacity: 0.62; }
-.card-title { flex: 1; min-width: 0; overflow-wrap: anywhere; color: var(--fg); }
-.card-marks { display: inline-flex; gap: var(--space-1); }
-.card-marks abbr {
-  display: inline-flex; align-items: center; justify-content: center; min-width: 1.25rem; height: 1.25rem;
+.card.dragging { opacity: 0.62; box-shadow: var(--shadow-float); }
+/* The whole card opens the task: the title's link covers it. */
+.card-title { overflow-wrap: anywhere; color: var(--fg); font-weight: 500; text-decoration: none; }
+.card-title::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.card-title:focus-visible { outline: none; }
+.card-title:focus-visible::after { box-shadow: var(--focus-ring); }
+.card-tags { display: flex; flex-wrap: wrap; gap: var(--space-1); margin: 0; }
+.card-tag {
+  display: inline-flex; align-items: center; height: 1.25rem; padding: 0 var(--space-2);
   border: 1px solid var(--line-strong); border-radius: var(--radius-sm);
-  font: 600 var(--text-xs)/1 var(--font-mono); text-decoration: none; color: var(--fg-2);
+  font: 500 var(--text-xs)/1 var(--font-sans); color: var(--fg);
 }
-.card-meta { flex-basis: 100%; margin: 0; display: flex; flex-wrap: wrap; gap: 0 var(--space-3); }
-/* face: someone by picture, initials below, full name as title; on cards top right. */
+.card-tag-urgent { color: var(--warning-ink); border-color: var(--warning-ink); }
+.card-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-3); }
+.card-meta { margin: 0; display: flex; flex-wrap: wrap; gap: 0 var(--space-3); }
+/* Above the covering link, so its name shows on hover. */
+.card .face { position: relative; z-index: 1; margin-left: auto; align-self: auto; }
+/* face: someone by picture, initials below, full name as title; on cards bottom right. */
 .face { display: inline-flex; flex-direction: column; align-items: center; gap: var(--space-1); align-self: flex-start; cursor: default; }
 .face .avatar { width: 1.75rem; height: 1.75rem; }
 .face .avatar-none .icon { width: 16px; height: 16px; }
