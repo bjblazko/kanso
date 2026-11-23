@@ -29,6 +29,9 @@ decisions in [ADRs](adr/). Done items are removed here and noted in the CHANGELO
 
 ## Follow-ups from reviews
 
+- Reports: task attachments (`boards/<board>/attachments/<task>/`, ADR-019)
+  are not listed under "Verwaiste Medien"; the storage treemap counts them
+  only as part of the boards.
 
 - Shopping: sums round to the nearest step, not up (250 g + 12 g → 260 g);
   the unit word of the first amount is kept ("3 Dose Tomaten"); `Apply`

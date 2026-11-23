@@ -36,7 +36,7 @@ Desktop wird in Ruhe nachgearbeitet: Text ergänzen, in **Kanban** den Stand und
 - Spalten pro Board konfigurieren (Nutzer: feste Spalten).
 - Boards offline ansehen oder bearbeiten; offline geht nur das Erfassen. *(meine Entscheidung)*
 - Manuelles Umsortieren innerhalb einer Spalte oder eines Quadranten. *(meine Entscheidung)*
-- Anhänge an Aufgaben; Fotos bleiben in der verlinkten Notiz. *(meine Entscheidung)*
+- ~~Anhänge an Aufgaben; Fotos bleiben in der verlinkten Notiz.~~ Abgelöst durch ADR-019. *(meine Entscheidung)*
 - Aufgaben in der Suche. *(meine Entscheidung; kann später kommen)*
 - Unteraufgaben, Etiketten, Kommentare.
 
@@ -243,7 +243,7 @@ Per Mail an hort@… – Formular hängt an der Notiz.
 - Kein manuelles Sortieren; Reihenfolge nach Fälligkeit, dann neueste.
 - „Diese Woche“ = kommender Sonntag.
 - Matrix zeigt keine erledigten Aufgaben.
-- Keine Anhänge an Aufgaben; Fotos bleiben in der Notiz.
+- ~~Keine Anhänge an Aufgaben; Fotos bleiben in der Notiz.~~ Abgelöst durch ADR-019 (2026-11-23).
 - Übernehmen ohne Sperre; jede:r darf eine übernommene Aufgabe neu übernehmen.
 - Unbekanntes Board beim Hochladen → Mein Board.
 - Gruppen-Boards legen nur Admins an; Admins sehen deren Aufgaben nur als Gruppenmitglied.

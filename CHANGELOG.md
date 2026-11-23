@@ -7,6 +7,14 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Tasks have attachments: upload photos and files in the task editor, as in notes. A note turned into a task brings its photos along, and they move with the task to another board (ADR-019).
+
+### Changed
+
+- Board cards look like cards: the whole card opens the task, "dringend" and "wichtig" appear as words instead of D and W, and at the bottom right the round picture with initials shows who took the task, or else who wrote it, on every board.
+
 ## [0.11.3] - 2026-11-22
 
 ### Changed
