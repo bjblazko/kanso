@@ -76,3 +76,10 @@ func at(s string) time.Time {
 	}
 	return t
 }
+
+// gitStatus returns the porcelain status of the repository.
+func gitStatus(t *testing.T, s *Store) (string, error) {
+	t.Helper()
+	out, err := exec.Command("git", "-C", s.dataDir, "status", "--porcelain").Output()
+	return strings.TrimSpace(string(out)), err
+}

@@ -244,7 +244,11 @@ func (s *Store) Delete(a Actor, boardID, taskID string) error {
 		if err := os.Remove(filepath.Join(s.dataDir, rel)); err != nil {
 			return err
 		}
-		return s.repo.Commit(a.Author, commitMsg(t, "gelöscht"), rel)
+		files, err := s.removeAttachments(boardID, taskID)
+		if err != nil {
+			return err
+		}
+		return s.repo.Commit(a.Author, commitMsg(t, "gelöscht"), append(files, rel)...)
 	})
 }
 
@@ -264,6 +268,9 @@ func (s *Store) Move(a Actor, fromBoard, taskID, toBoard string) (Task, error) {
 		t.Board = to.ID
 		out = t
 		if err := s.repo.Move(a.Author, s.taskRel(fromBoard, taskID), s.taskRel(to.ID, taskID), commitMsg(t, "verschoben")); err != nil {
+			return err
+		}
+		if err := s.moveAttachments(a, t, fromBoard); err != nil {
 			return err
 		}
 		return s.releaseOnPrivate(a, to, &out)
