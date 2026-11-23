@@ -129,7 +129,7 @@ form.addEventListener('submit', save);
 for (const tab of form.querySelectorAll('[role="tab"]')) {
   tab.addEventListener('click', () => selectTab(tab.id.replace('tab-', '')));
 }
-if (uploadUrl) { // tasks have no attachments
+if (uploadUrl) {
   document.getElementById('file').addEventListener('change', (e) => uploadFiles([...e.target.files]));
   body.addEventListener('paste', (e) => {
     const files = filesFrom(e.clipboardData);

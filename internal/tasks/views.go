@@ -116,16 +116,17 @@ func DueOf(due string, now time.Time) DueState {
 
 // FromNote splits a note into a task subject and text. The subject is the
 // first line of text as notes name it (no heading or list mark, at most 200
-// characters); the text is what follows. The note's photo links are left out:
-// the photos stay with the note, which the task links to.
+// characters); the text is what follows, the note's photo links included:
+// the photos are copied to the task.
 func FromNote(body string) (title, rest string) {
 	var kept []string
 	for line := range strings.SplitSeq(body, "\n") {
 		switch {
-		case isPhoto(line):
-		case title == "":
+		case title != "" || isPhoto(line):
+			kept = append(kept, line)
+		case strings.TrimSpace(line) != "":
 			title = subjectOf(line)
-		default:
+		case len(kept) > 0: // a blank line after photos keeps them apart from the text
 			kept = append(kept, line)
 		}
 	}

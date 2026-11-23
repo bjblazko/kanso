@@ -130,7 +130,7 @@ func TestNoteOffersTaskAgainWhenGone(t *testing.T) {
 	}
 }
 
-func TestNoteToTaskDropsPhotoLinks(t *testing.T) {
+func TestNoteToTaskCopiesPhotos(t *testing.T) {
 	ts := newTestServer(t)
 	anna := ts.client(t, "anna", "Anna", false)
 	n, _, err := ts.deps.Notes.Create("anna", "", "Zettel vom Hort\nbitte ausfüllen\n", []notes.Upload{{Name: "zettel.png", R: bytes.NewReader([]byte("png"))}}, 1<<20)
@@ -139,8 +139,14 @@ func TestNoteToTaskDropsPhotoLinks(t *testing.T) {
 	}
 	board, id := turnIntoTask(t, ts, anna, n)
 	tk, _ := ts.deps.Tasks.Get(taskActor(ts, "anna"), board, id)
-	if tk.Meta.Title != "Zettel vom Hort" || strings.Contains(tk.Body, "attachments/") || !strings.Contains(tk.Body, "bitte ausfüllen") {
+	if tk.Meta.Title != "Zettel vom Hort" || !strings.Contains(tk.Body, "![](attachments/zettel.png)") || !strings.Contains(tk.Body, "bitte ausfüllen") {
 		t.Fatalf("task %q %q", tk.Meta.Title, tk.Body)
+	}
+	if resp, body := get(t, anna, ts.URL+taskURL(tk)+"/attachments/zettel.png"); resp.StatusCode != http.StatusOK || body != "png\n" { // get reads line by line
+		t.Fatalf("photo on task: %d %q", resp.StatusCode, body)
+	}
+	if got, _ := ts.deps.Notes.Get("anna", n.Meta.ID); len(got.Attachments) != 1 {
+		t.Fatalf("note lost its photo: %v", got.Attachments)
 	}
 }
 

@@ -65,6 +65,10 @@ func (s *Server) noteToTask(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
+	if err := s.copyNotePhotos(r, n, t); err != nil {
+		s.serverError(w, r, err)
+		return
+	}
 	if err := s.Notes.LinkTask(n.Owner, n.Meta.ID, t.Board+"/"+t.Meta.ID); err != nil {
 		s.serverError(w, r, err)
 		return
@@ -74,7 +78,7 @@ func (s *Server) noteToTask(w http.ResponseWriter, r *http.Request) {
 
 func taskFromNote(v view, n notes.Note, board string) tasks.New {
 	title, rest := tasks.FromNote(n.Body)
-	if title == "" { // only photos: the subject is the note's name; the photos stay with the note
+	if title == "" { // only photos: the subject is the note's name
 		title = noteTitle(v, n)
 	}
 	return tasks.New{Board: board, Title: title, Body: rest, Note: n.Meta.ID}

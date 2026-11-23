@@ -1,7 +1,7 @@
 # Hüpattl! Kanso — Architecture (arc42)
 
 **Created:** 2026-10-26
-**Updated:** 2026-11-17
+**Updated:** 2026-11-23
 
 ## 1. Introduction and Goals
 
@@ -73,7 +73,7 @@ leaves the host.
 | `internal/markdown` | Safe Markdown rendering |
 | `internal/notes` | Private notes per person, outside Git |
 | `internal/todos` | Shareable to-do lists outside Git, changed by operations |
-| `internal/tasks` | Private and group boards of tasks in Git; Kanban and Eisenhower views |
+| `internal/tasks` | Private and group boards of tasks in Git, with attachments per task next to the board ([ADR-019](../adr/019-task-attachments-next-to-the-board.md)); Kanban and Eisenhower views |
 | `internal/recipes` | Reads recipe pages (ingredients, groups, steps), scales and formats amounts; pure, no files ([ADR-010](../adr/010-recipes-are-wiki-pages.md)) |
 | `internal/shopping` | Plans and applies filling a shopping list from a recipe, adding up amounts ([ADR-011](../adr/011-shopping-lists-are-lists.md)) |
 | `internal/mealplan` | Group cooking plans: a file per ISO week in Git with meals per day ([ADR-012](../adr/012-meal-plans-belong-to-groups.md)) |
@@ -240,6 +240,7 @@ Kopia jobs.
 | [016](../adr/016-one-cookbook-space.md) | One cookbook space holds the recipes |
 | [017](../adr/017-generated-recipes-guard-the-prompt.md) | Generated recipes: fixed choices, data blocks, parser gate |
 | [018](../adr/018-start-page-summary-from-visits-and-reports.md) | Start page summary: window from visits in the state directory, built on the reports |
+| [019](../adr/019-task-attachments-next-to-the-board.md) | Task attachments next to the board, copied from a note turned into a task |
 
 ## 10. Quality Requirements
 

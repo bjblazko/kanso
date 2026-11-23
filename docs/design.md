@@ -37,8 +37,8 @@ Kanso follows `huepattl-rams-design`. Tokens are copied verbatim into
 | Note capture | Write something down, now. The field fills the screen, buttons sit below it; "Speichern" is the only accent. |
 | Notes list | Find a note to sort. |
 | Note → wiki page | Choose where the note goes. |
-| Board | See where each task stands and pick the next one. Tabs Kanban and Matrix are links; "Neue Aufgabe" is the only accent. Due words: overdue red, today/tomorrow yellow, always as a word. |
-| Task | Read a task and act on it: Bearbeiten is the accent; Übernehmen/Freigeben (group boards only) secondary; delete last. |
+| Board | See where each task stands and pick the next one. Tabs Kanban and Matrix are links; "Neue Aufgabe" is the only accent. Due words: overdue red, today/tomorrow yellow, always as a word. Cards: surface `--bg` on the column, 4 px radius, the whole card is the link (title covers it), labels "dringend" (red ink and border) and "wichtig" (neutral) on top, foot with due/waiting left and the face (claimant, else author: round picture, initials below, full name on hover) right; a shadow only while dragging. |
+| Task | Read a task and act on it: Bearbeiten is the accent; Übernehmen/Freigeben (group boards only) secondary; delete last. The picture of whoever took it sits beside "Übernommen", the author's beside "Angelegt von". The editor uploads attachments like the note editor. |
 | Task editor | Change a task. Column as radio buttons; "Worauf wartest du?" appears only while Wartet is chosen (CSS `:has`, value kept); text with source/preview like the wiki editor, no attachments. |
 | Task capture | Write a task down, now: subject (focused), board, urgent/important, due as one-tap choices; "Speichern" is the only accent. Choices wrap on narrow phones instead of a segment row. |
 | Page sharing | Decide who else may read or change this one page: list of shares, add form, hint "Gilt auch für N Unterseiten", inherited shares and the space's readers below. |

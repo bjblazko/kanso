@@ -14,7 +14,13 @@ import (
 
 func upload(t *testing.T, ts *testServer, c *http.Client, id, filename, content string) (*http.Response, map[string]string) {
 	t.Helper()
-	_, page := get(t, c, ts.URL+"/p/"+id)
+	return uploadTo(t, ts, c, "/p/"+id, filename, content)
+}
+
+// uploadTo posts a file to base+"/attachments" with the CSRF token of the page at base.
+func uploadTo(t *testing.T, ts *testServer, c *http.Client, base, filename, content string) (*http.Response, map[string]string) {
+	t.Helper()
+	_, page := get(t, c, ts.URL+base)
 	var body bytes.Buffer
 	mw := multipart.NewWriter(&body)
 	fw, _ := mw.CreateFormFile("file", filename)
@@ -24,7 +30,7 @@ func upload(t *testing.T, ts *testServer, c *http.Client, id, filename, content 
 	if err := mw.Close(); err != nil {
 		t.Fatal(err)
 	}
-	req, _ := http.NewRequest("POST", ts.URL+"/p/"+id+"/attachments", &body)
+	req, _ := http.NewRequest("POST", ts.URL+base+"/attachments", &body)
 	req.Header.Set("Content-Type", mw.FormDataContentType())
 	req.Header.Set("Origin", ts.URL)
 	req.Header.Set("X-CSRF-Token", between(page, `<meta name="csrf" content="`, `"`))

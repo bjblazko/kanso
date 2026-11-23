@@ -2,6 +2,12 @@
 import { test, expect } from '@playwright/test';
 import { signIn, unique } from './helpers.js';
 
+// A tiny valid PNG (1×1 pixel).
+const PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+  'base64',
+);
+
 /** Fills the capture form and saves; due is the label of a quick choice. */
 async function capture(page, title, { urgent = false, important = false, due = null, board = null } = {}) {
   await page.getByLabel('Betreff').fill(title);
@@ -27,7 +33,7 @@ test('capture on the phone lands on the board', async ({ page }) => {
   await page.getByRole('link', { name: 'Zum Board' }).click();
   const c = card(page, 'open', title);
   await expect(c.locator('.due')).toHaveText('heute');
-  await expect(c.locator('abbr')).toHaveText(/^D/);
+  await expect(c.locator('.card-tag-urgent')).toHaveText('dringend');
 });
 
 test.describe('offline', () => {
@@ -72,7 +78,7 @@ test.describe('desktop', () => {
     await card(page, 'later', title).dragTo(page.locator('.board-col[data-key="do_now"]'));
     await expect(card(page, 'do_now', title)).toBeVisible();
     await page.getByRole('link', { name: 'Kanban' }).click();
-    await expect(card(page, 'doing', title).locator('abbr')).toHaveCount(2);
+    await expect(card(page, 'doing', title).locator('.card-tag')).toHaveText(['dringend', 'wichtig']);
   });
 });
 
@@ -128,6 +134,7 @@ test('a note becomes a task', async ({ page }) => {
   await page.goto('/notes/new');
   const subject = unique('Kind anmelden');
   await page.getByLabel('Notiz', { exact: true }).fill(`${subject}\nMail an den Hort`);
+  await page.locator('#pick').setInputFiles({ name: 'tasche.png', mimeType: 'image/png', buffer: PNG });
   await page.getByRole('button', { name: 'Speichern' }).click();
   await expect(page.getByRole('status')).toHaveText('Gespeichert');
   await page.goto('/notes');
@@ -136,7 +143,10 @@ test('a note becomes a task', async ({ page }) => {
   await page.getByRole('link', { name: 'Als Aufgabe …' }).click();
   await page.getByRole('button', { name: 'Aufgabe anlegen' }).click();
   await expect(page.getByLabel('Betreff')).toHaveValue(subject);
-  await expect(page.getByLabel('Text', { exact: true })).toHaveValue(/^Mail an den Hort\n?$/);
+  await expect(page.getByLabel('Text', { exact: true })).toHaveValue(/Mail an den Hort/);
+  await expect(page.getByLabel('Text', { exact: true })).toHaveValue(/!\[[^\]]*\]\(attachments\/tasche\.png\)/);
+  await page.getByRole('button', { name: 'Speichern' }).click();
+  await expect(page.locator('.prose img')).toHaveJSProperty('naturalWidth', 1);
 
   await page.goto('/notes');
   await page.getByRole('link', { name: subject }).click();
