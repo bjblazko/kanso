@@ -7,6 +7,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.15.1] - 2026-11-24
+
+### Fixed
+
+- Meditations said "ließ sich nicht laden" in a browser that had used 0.14: scripts loaded their modules (such as the meditation planner) without the release in the address, so the browser kept last release's module, which is cached for a year. Module imports now carry the release like every other asset link.
+
 ## [0.15.0] - 2026-11-24
 
 ### Added

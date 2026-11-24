@@ -277,3 +277,23 @@ func TestViewportWithoutCover(t *testing.T) {
 		t.Fatal(between(body, `<meta name="viewport"`, ">"))
 	}
 }
+
+// A module's imports carry the asset version, like the page's own links:
+// otherwise a browser keeps last version's module for a year (immutable).
+func TestModuleImportsAreVersioned(t *testing.T) {
+	ts := newTestServer(t)
+	_, page := get(t, http.DefaultClient, ts.URL+"/sw.js")
+	version := between(page, `const VERSION = "`, `"`)
+	resp, body := get(t, http.DefaultClient, ts.URL+"/static/js/meditation.js?v="+version)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("status %d", resp.StatusCode)
+	}
+	for _, want := range []string{`from './gong.js?v=` + version + `'`, `from './meditation-plan.js?v=` + version + `'`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("missing %q in\n%s", want, body[:300])
+		}
+	}
+	if _, body := get(t, http.DefaultClient, ts.URL+"/static/js/sounds.js"); !strings.Contains(body, `from './soundscape.js?v=`+version+`'`) {
+		t.Error("sounds.js imports soundscape.js without a version")
+	}
+}
