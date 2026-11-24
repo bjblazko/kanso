@@ -7,6 +7,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.15.2] - 2026-11-24
+
+### Fixed
+
+- 0.15.1's fix did not reach browsers that had 0.15.0: the asset version was a hash of the static files alone, which had not changed, so the old cached scripts stayed in use. The version now includes the release, so every release gets new asset URLs.
+
 ## [0.15.1] - 2026-11-24
 
 ### Fixed
