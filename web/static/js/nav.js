@@ -11,3 +11,6 @@ nav?.addEventListener('toggle', () => {
   const value = nav.open ? 'open' : 'closed';
   document.cookie = `kanso_sidenav=${value}; Path=/; Max-Age=31536000; SameSite=Lax`;
 });
+
+// "Drucken" in a toolbar: the browser's own print dialog, which can also save a PDF.
+document.addEventListener('click', (e) => { if (e.target.closest('[data-print]')) window.print(); });

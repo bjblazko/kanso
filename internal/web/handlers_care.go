@@ -280,3 +280,11 @@ func (s *Server) careBetweenNote(w http.ResponseWriter, r *http.Request) {
 	}
 	http.Redirect(w, r, "/notes/"+n.Meta.ID, http.StatusSeeOther)
 }
+
+// careSounds plays noise and a soft chord made in the browser, endless or
+// with a sleep timer (sounds.js); the server only serves the page.
+func (s *Server) careSounds(w http.ResponseWriter, r *http.Request) {
+	v := s.newView(r, "", nil)
+	v.Title = v.T("sounds.title")
+	s.render(w, r, http.StatusOK, "care_sounds", v)
+}
