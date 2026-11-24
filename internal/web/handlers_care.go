@@ -32,6 +32,7 @@ type carePage struct {
 	Suggestions []careTip
 	Empty       bool
 	Exercises   []careExercise
+	Meditations []careMeditationLink
 }
 
 func tipIn(t selfcare.Tip, lang string) careTip {
@@ -65,6 +66,7 @@ func (s *Server) carePage(w http.ResponseWriter, r *http.Request) {
 	for _, e := range selfcare.Exercises() {
 		d.Exercises = append(d.Exercises, exerciseIn(e, v.Lang))
 	}
+	d.Meditations = meditationLinks(v.Lang)
 	v.Data = d
 	s.render(w, r, http.StatusOK, "care", v)
 }
@@ -117,4 +119,70 @@ func careNoteBody(e careExercise, r *http.Request, now time.Time) string {
 		return ""
 	}
 	return e.Title + " – " + now.Format("02.01.2006") + "\n\n" + b.String()
+}
+
+// meditationLine is one spoken line: its text, the pause after it and its
+// clip per voice.
+type meditationLine struct {
+	Text  string
+	Pause float64
+	Fill  bool
+	Clips []meditationClip
+}
+
+type meditationClip struct{ Voice, URL string }
+
+type meditationPage struct {
+	ID, Title, Lead string
+	Minutes         int
+	Bell            float64
+	Voices          []careChoice
+	Lines           []meditationLine
+}
+
+func (s *Server) meditationView(v view, m selfcare.Meditation) meditationPage {
+	d := meditationPage{ID: m.ID, Title: m.Title.In(v.Lang), Lead: m.Lead.In(v.Lang), Minutes: m.Minutes, Bell: selfcare.Bell}
+	lang := "de"
+	if v.Lang == "en" {
+		lang = "en"
+	}
+	for i, vc := range selfcare.Voices() {
+		d.Voices = append(d.Voices, careChoice{Key: vc.ID, Label: vc.In(v.Lang), Current: i == 0})
+	}
+	for i, l := range m.Lines {
+		line := meditationLine{Text: l.In(v.Lang), Pause: l.Pause, Fill: l.Fill}
+		for _, vc := range selfcare.Voices() {
+			line.Clips = append(line.Clips, meditationClip{Voice: vc.ID, URL: v.Asset(m.AudioPath(vc.ID, lang, i))})
+		}
+		d.Lines = append(d.Lines, line)
+	}
+	return d
+}
+
+// careMeditation is a guided meditation: the page plays one clip per line
+// with the pauses between them (meditation.js).
+func (s *Server) careMeditation(w http.ResponseWriter, r *http.Request) {
+	m, ok := selfcare.MeditationByID(r.PathValue("id"))
+	if !ok {
+		s.notFound(w, r)
+		return
+	}
+	v := s.newView(r, "", nil)
+	d := s.meditationView(v, m)
+	v.Title, v.Data = d.Title, d
+	s.render(w, r, http.StatusOK, "care_meditation", v)
+}
+
+// careMeditationLink is a meditation in the Selfcare overview.
+type careMeditationLink struct {
+	ID, Title, Lead string
+	Minutes         int
+}
+
+func meditationLinks(lang string) []careMeditationLink {
+	var out []careMeditationLink
+	for _, m := range selfcare.Meditations() {
+		out = append(out, careMeditationLink{ID: m.ID, Title: m.Title.In(lang), Lead: m.Lead.In(lang), Minutes: m.Minutes})
+	}
+	return out
 }

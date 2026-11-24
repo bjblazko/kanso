@@ -21,6 +21,13 @@
   <ul class="care-tips list-plain">{{range .}}<li><strong>{{.Title}}</strong><br>{{.Body}}</li>{{end}}</ul>{{end}}
 </section>
 
+<section aria-labelledby="care-meditations">
+  <h2 id="care-meditations">{{.T "care.meditations"}}</h2>
+  <ul class="care-exercise-list list-plain">{{range $d.Meditations}}
+    <li><a href="/care/m/{{.ID}}">{{.Title}}</a> <span class="meta">· {{$.T "care.minutes" .Minutes}}</span><br><span class="meta">{{.Lead}}</span></li>{{end}}
+  </ul>
+</section>
+
 <section aria-labelledby="care-exercises">
   <h2 id="care-exercises">{{.T "care.exercises"}}</h2>
   <ul class="care-exercise-list list-plain">{{range $d.Exercises}}

@@ -3,7 +3,10 @@
 package selfcare
 
 // Text is one piece of copy in German and English.
-type Text struct{ De, En string }
+type Text struct {
+	De string `json:"de"`
+	En string `json:"en"`
+}
 
 // In returns the text in lang; German is the default.
 func (t Text) In(lang string) string {
@@ -126,6 +129,6 @@ var exercises = []Exercise{
 			{"Was würde dir jetzt guttun, klein oder groß?", "What would do you good now, small or big?"},
 			{"Heute sage ich Nein zu … verschiebe … bitte um Hilfe bei … nehme mir zehn Minuten für …", "Today I say no to … put off … ask for help with … take ten minutes for …"}}},
 	{ID: "good", Kind: "note", Title: Text{"Eine gute Sache", "One good thing"},
-		Lead: Text{"Eine Zeile über etwas, das heute gut war. Kein Tagebuch, eine Zeile.", "One line about something that was good today. Not a diary, one line."},
+		Lead:  Text{"Eine Zeile über etwas, das heute gut war. Kein Tagebuch, eine Zeile.", "One line about something that was good today. Not a diary, one line."},
 		Steps: []Text{{"Was war heute gut, gelungen oder schön?", "What was good, went well or was lovely today?"}}},
 }

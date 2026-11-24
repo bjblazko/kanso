@@ -16,6 +16,7 @@ func (s *Server) shellRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /focus", s.focusPage)
 	mux.HandleFunc("GET /care", s.carePage)
 	mux.HandleFunc("GET /care/{id}", s.careExercise)
+	mux.HandleFunc("GET /care/m/{id}", s.careMeditation)
 	mux.HandleFunc("POST /care/{id}/note", s.careNote)
 	mux.HandleFunc("GET /reports", s.reportsIndex)
 	mux.HandleFunc("GET /reports/{tab}", s.reportsPage)

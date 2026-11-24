@@ -7,6 +7,10 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Selfcare: two guided meditations, „Ankommen“ (5 minutes) and „Körperreise“ (10 minutes), spoken by Lyra or Orion in the UI language, with a gong and the text to read along. They are small clips per sentence, which the page plays with the pauses (ADR-023).
+
 ## [0.13.0] - 2026-11-24
 
 ### Added

@@ -63,3 +63,21 @@ func TestCareNote(t *testing.T) {
 		t.Errorf("note from a steps exercise: %d", resp.StatusCode)
 	}
 }
+
+func TestCareMeditation(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	if _, body := get(t, anna, ts.URL+"/care"); !strings.Contains(body, `href="/care/m/arrive"`) || !strings.Contains(body, "10 Minuten") {
+		t.Error("meditations missing on /care")
+	}
+	_, body := get(t, anna, ts.URL+"/care/m/arrive")
+	for _, want := range []string{`data-minutes="5"`, `value="lyra" checked`, `value="orion"`, `data-clip-lyra="/static/audio/meditation/lyra/de/arrive-01.mp3?v=`,
+		`data-clip-orion="/static/audio/meditation/orion/de/arrive-13.mp3?v=`, "data-fill", ">05:00<", "js/meditation.js"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("missing %q", want)
+		}
+	}
+	if resp, _ := get(t, anna, ts.URL+"/care/m/nope"); resp.StatusCode != http.StatusNotFound {
+		t.Errorf("unknown meditation: %d", resp.StatusCode)
+	}
+}
