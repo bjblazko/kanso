@@ -37,10 +37,18 @@ type Own struct {
 	ID    string `yaml:"id"`
 	Title string `yaml:"title"`
 	Body  string `yaml:"body,omitempty"`
+	// Kind is "calm" (first aid), "lift" (between two things) or "both".
+	Kind string `yaml:"kind,omitempty"`
 }
 
-// Tip makes the idea a first-aid step like the built-in ones.
-func (o Own) Tip() Tip { return Tip{ID: "own-" + o.ID, Title: Text{De: o.Title}, Body: Text{De: o.Body}, Gentle: true} }
+// Kinds an idea can be, in the order the form offers them.
+var Kinds = []string{"calm", "lift", "both"}
+
+// Tip makes the idea a step like the built-in ones.
+func (o Own) Tip() Tip {
+	return Tip{ID: "own-" + o.ID, Title: Text{De: o.Title}, Body: Text{De: o.Body},
+		Gentle: o.Kind != "lift", Lift: o.Kind == "lift" || o.Kind == "both"}
+}
 
 // Store keeps the ideas, one file per person.
 type Store struct {
@@ -73,17 +81,17 @@ func (s *Store) Own(sub string) []Own {
 	return out
 }
 
-// Add keeps a new idea for sub.
-func (s *Store) Add(sub, title, body string) error {
+// Add keeps a new idea for sub; kind is one of Kinds.
+func (s *Store) Add(sub, title, body, kind string) error {
 	title, body = strings.TrimSpace(title), strings.TrimSpace(body)
-	if title == "" || utf8.RuneCountInString(title) > maxOwnTitle || utf8.RuneCountInString(body) > maxOwnBody {
+	if title == "" || utf8.RuneCountInString(title) > maxOwnTitle || utf8.RuneCountInString(body) > maxOwnBody || !slices.Contains(Kinds, kind) {
 		return ErrInvalid
 	}
 	return s.change(sub, func(own []Own) ([]Own, error) {
 		if len(own) >= maxOwn {
 			return nil, ErrInvalid
 		}
-		return append(own, Own{ID: store.NewID(), Title: title, Body: body}), nil
+		return append(own, Own{ID: store.NewID(), Title: title, Body: body, Kind: kind}), nil
 	})
 }
 

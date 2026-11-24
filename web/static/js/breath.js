@@ -7,12 +7,24 @@ const rounds = 6;
 const phases = [[out.dataset.in, 4], [out.dataset.out, 6]];
 let timer = null;
 
-function label(text) { button.querySelector('span').textContent = text; }
+const bar = document.getElementById('breath-meter');
+
+/** In-breath fills the bar, out-breath empties it, one second at a time. */
+function meter(share, mode) {
+  bar.firstElementChild.style.width = `${Math.round(share * 100)}%`;
+  bar.dataset.state = mode;
+}
+
+function label(text) {
+  button.querySelector(':scope > span:last-child').textContent = text;
+  button.dataset.running = String(text === button.dataset.stop);
+}
 
 function stop(message = '') {
   clearTimeout(timer);
   timer = null;
   out.textContent = message;
+  meter(0, 'idle');
   label(button.dataset.start);
 }
 
@@ -21,6 +33,7 @@ function step(round, phase, second) {
   if (round > rounds) { stop(out.dataset.done); return; }
   const [word, length] = phases[phase];
   out.textContent = `${word} ${second} · ${out.dataset.round.replace('%d', round)}`;
+  meter(phase === 0 ? second / length : 1 - second / length, 'running');
   timer = setTimeout(() => {
     if (second < length) step(round, phase, second + 1);
     else if (phase === 0) step(round, 1, 1);

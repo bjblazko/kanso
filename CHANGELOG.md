@@ -7,7 +7,18 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-11-24
+
 ### Added
+
+- Selfcare starts with four ways in — Zwischendurch, Kurz durchatmen, Wie geht's mir?, Zeit für mich — and an explicit "Mir geht es gerade gar nicht gut", which puts help from outside first.
+- Zwischendurch: a short step between two things. Close what is done, do something small and lifting for yourself, then arrive at what comes next (with "Fokus-Runde starten"); the answers can be saved as a note.
+- A reminder: after 30/60/90 minutes with Kanso open (60 by default, off possible, per device), a quiet bar suggests Zwischendurch, with a notification if the tab is in the background. It waits during a Fokus round or a meditation.
+- The battery check jumps to its suggestions and offers a matching exercise or meditation.
+- Own first-aid ideas per person (calming, lifting or both), mixed into the random steps; private and outside the history.
+- Abendrückblick: three questions at the end of the day, as a note on request.
+- Time bars: Fokus, meditations and breathing show their progress as a slim bar under the time (yellow while time passes, neutral when paused; while breathing it fills with the in-breath and empties with the out-breath). Start buttons show a stop or pause icon while running.
+- Fokus: a soft gong at the end of a phase, a lifting Selfcare step in each break, and a "Gedanken-Parkplatz" for what comes up during a round, saved as a note on request.
 
 - Selfcare: two guided meditations, „Ankommen“ (5 minutes) and „Körperreise“ (10 minutes), spoken by Lyra or Orion in the UI language, with a gong and the text to read along. They are small clips per sentence, which the page plays with the pauses (ADR-023).
 

@@ -375,6 +375,41 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .med-text li { margin-bottom: var(--space-2); }
 .med-text li.med-current { font-weight: 600; }
 
+/* Selfcare: the four ways in, as tiles; one explicit way for a bad moment. */
+.care-ways ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--space-3); margin: 0 0 var(--space-3); max-width: 48rem; }
+.care-ways li { border: 0; padding: 0; }
+.care-ways a { display: flex; flex-direction: column; gap: var(--space-1); height: 100%; padding: var(--space-4);
+  border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg); color: var(--fg); text-decoration: none; }
+.care-ways a:hover { background: var(--hover-overlay); }
+.care-ways span { color: var(--fg-2); font-size: var(--text-sm); }
+.care-sos { margin: 0 0 var(--space-8); }
+.care-practice { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-4); }
+.care-between-steps { max-width: 40rem; padding-left: var(--space-5); }
+.care-between-steps > li { margin-bottom: var(--space-6); }
+.care-between-steps h2 { font-size: var(--text-lg); margin: 0 0 var(--space-2); }
+.care-between-steps textarea { width: 100%; }
+/* The reminder: a quiet bar, never a dialog. */
+.nudge { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); max-width: var(--container);
+  margin: 0 0 var(--space-4); padding: var(--space-3) var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--bg-2); }
+.nudge span { flex: 1; min-width: 12rem; }
+.nudge[hidden] { display: none; }
+
+/* Start/stop buttons carry both icons; the running state shows the right one. */
+[data-running] > .when-idle, [data-running] > .when-running { display: contents; }
+[data-running="true"] > .when-idle, [data-running="false"] > .when-running { display: none; }
+
+/* Timers (Fokus, meditation, breathing): a slim bar under the time. Yellow
+   means time passing while it runs; paused it turns neutral. Screen readers
+   get the same as a progressbar. */
+.time-meter { display: block; height: var(--space-2); max-width: 40rem; margin: 0 0 var(--space-4); overflow: hidden;
+  border-radius: var(--radius-sm); background: var(--line); }
+.time-meter-fill { display: block; height: 100%; width: 0; background: var(--time); transition: width var(--dur) linear; }
+.time-meter[data-state="paused"] .time-meter-fill { background: var(--fg-3); }
+.time-meter[data-state="idle"] .time-meter-fill { background: var(--fg-3); }
+/* Breathing: the bar fills with the in-breath and empties with the out-breath, a second at a time. */
+.breath-meter .time-meter-fill { transition: width 1s linear; }
+@media (prefers-reduced-motion: reduce) { .time-meter-fill, .breath-meter .time-meter-fill { transition: none; } }
+
 /* Groups: one section per group, separated by a hairline. */
 .group-new { align-items: start; }
 .group-new .field { flex: 1; min-width: 12rem; }

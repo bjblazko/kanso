@@ -1,6 +1,6 @@
 {{define "content"}}{{$d := .Data}}<header class="screen-head">
 <div class="page-toolbar" role="toolbar" aria-label="{{$d.Title}}">
-  {{if eq $d.Kind "breath"}}<button class="btn btn-primary btn-sm" type="button" id="breath-toggle" data-start="{{.T "care.breath_start"}}" data-stop="{{.T "care.breath_stop"}}">{{template "icon" "play"}}<span>{{.T "care.breath_start"}}</span></button>{{end}}
+  {{if eq $d.Kind "breath"}}<button class="btn btn-primary btn-sm" type="button" id="breath-toggle" data-start="{{.T "care.breath_start"}}" data-stop="{{.T "care.breath_stop"}}" data-running="false"><span class="when-idle">{{template "icon" "play"}}</span><span class="when-running">{{template "icon" "stop"}}</span><span>{{.T "care.breath_start"}}</span></button>{{end}}
   {{if eq $d.Kind "note"}}<button class="btn btn-primary btn-sm" type="submit" form="care-note">{{template "icon" "note"}}<span>{{.T "care.save_note"}}</span></button>{{end}}
 </div>
 <nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/care">{{.T "care.title"}}</a></nav>
@@ -12,7 +12,8 @@
   {{range $i, $s := $d.Steps}}<div class="field"><label for="a{{$i}}">{{$s}}</label><textarea id="a{{$i}}" name="a{{$i}}" rows="2"></textarea></div>
   {{end}}<p class="meta">{{.T "care.note_hint"}}</p>
 </form>{{else}}<ol class="care-steps">{{range $d.Steps}}<li>{{.}}</li>{{end}}</ol>{{end}}
-{{if eq $d.Kind "breath"}}<p class="care-breath" id="breath" aria-live="polite"
+{{if eq $d.Kind "breath"}}<span class="time-meter breath-meter" id="breath-meter" aria-hidden="true" data-state="idle"><span class="time-meter-fill"></span></span>
+<p class="care-breath" id="breath" aria-live="polite"
   data-in="{{.T "care.in"}}" data-out="{{.T "care.out"}}" data-done="{{.T "care.breath_done"}}" data-round="{{.T "care.round"}}"></p>{{end}}
 </div>{{end}}
 {{define "scripts"}}{{if eq .Data.Kind "breath"}}<script type="module" src="{{.Asset "js/breath.js"}}"></script>{{end}}{{end}}

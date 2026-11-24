@@ -35,6 +35,7 @@ function save() {
 
 const full = (phase) => state.minutes[phase] * 60000;
 const running = () => state.endsAt !== null;
+const paused = () => !running() && state.left !== null;
 const remaining = () => (running() ? state.endsAt - Date.now() : state.left ?? full(state.phase));
 
 function clock(ms) {
@@ -78,6 +79,7 @@ function next() {
   if (state.phase === 'focus') {
     state.phase = state.round >= rounds ? 'long' : 'short';
     state.tip = Math.floor(Math.random() * tips.length);
+    window.KansoNudge?.reset(); // the break is the step between
   } else {
     state.round = state.phase === 'long' ? 1 : state.round + 1;
     state.phase = 'focus';
@@ -118,6 +120,14 @@ function setMinutes(phase, input) {
 
 // ---- Drawing ----------------------------------------------------------------
 
+/** Sets a time bar to share (0…1) and its state: running, paused or idle. */
+function meter(bar, share, mode) {
+  const pct = Math.round(Math.min(Math.max(share, 0), 1) * 100);
+  bar.firstElementChild.style.width = `${pct}%`;
+  bar.setAttribute('aria-valuenow', String(pct));
+  bar.dataset.state = mode;
+}
+
 function notifyText() {
   if (!('Notification' in window)) return text.notifyOff;
   return { granted: text.notifyOn, denied: text.notifyOff }[Notification.permission] ?? text.notifyAsk;
@@ -129,12 +139,12 @@ function render() {
   el('focus-phase').textContent = phaseName;
   el('focus-round').textContent = text.round.replace('%d', state.round);
   el('focus-time').textContent = left;
-  const paused = !running() && state.left !== null;
-  const label = running() ? text.pause : paused ? text.resume : text.start;
+  meter(el('focus-meter'), 1 - remaining() / full(state.phase), running() ? 'running' : paused() ? 'paused' : 'idle');
+  const label = running() ? text.pause : paused() ? text.resume : text.start;
   const toggleButton = el('focus-toggle');
-  toggleButton.querySelector('span').textContent = label;
-  toggleButton.querySelector('use, svg')?.classList.toggle('is-running', running());
-  document.title = running() || paused ? `${left} · ${phaseName}` : pageTitle;
+  toggleButton.querySelector(':scope > span:last-child').textContent = label;
+  toggleButton.dataset.running = String(running());
+  document.title = running() || paused() ? `${left} · ${phaseName}` : pageTitle;
   el('focus-notify').textContent = notifyText();
   for (const p of phases) el(`focus-minutes-${p}`).value = state.minutes[p];
   showBreak();

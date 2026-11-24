@@ -20,7 +20,9 @@ test('breathing counts along and stops after six rounds', async ({ page }) => {
   await page.goto('/care/breathe');
   await page.getByRole('button', { name: 'Mitzählen' }).click();
   await expect(page.locator('#breath')).toHaveText('Einatmen 1 · Runde 1 von 6');
-  await page.clock.runFor(4000);
+  await page.clock.runFor(3000);
+  await expect(page.locator('#breath-meter .time-meter-fill')).toHaveAttribute('style', /width: 100%/);
+  await page.clock.runFor(1000);
   await expect(page.locator('#breath')).toHaveText('Ausatmen 1 · Runde 1 von 6');
   await page.clock.runFor(60_000);
   await expect(page.locator('#breath')).toHaveText(/^Fertig/);
@@ -68,8 +70,12 @@ test('a meditation loads the chosen voice, counts down and can be ended', async 
   expect(asked.length).toBe(13);
   expect(asked.every((p) => p.startsWith('/static/audio/meditation/orion/de/'))).toBe(true);
   await expect(page.locator('#med-now')).toHaveText(/^Willkommen/, { timeout: 10_000 });
+  await expect(page.locator('#med-meter')).toHaveAttribute('data-state', 'running');
+  await expect(page.locator('#med-toggle .when-running')).toBeVisible(); // a stop icon, not play
+  await expect(page.locator('#med-toggle .when-idle')).toBeHidden();
   await page.getByRole('button', { name: 'Beenden' }).click();
   await expect(page.locator('#med-time')).toHaveText('05:00');
+  await expect(page.locator('#med-meter')).toHaveAttribute('aria-valuenow', '0');
   await expect(page.getByLabel(/Lyra/)).toBeEnabled();
 });
 

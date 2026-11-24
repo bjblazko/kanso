@@ -46,6 +46,8 @@ test('a focus round rings, notifies and waits at the break', async ({ page }) =>
   await page.clock.fastForward('10:00');
   await expect(time(page)).toHaveText('15:00');
   await expect(page).toHaveTitle(/^15:00 · Fokus/);
+  await expect(page.locator('#focus-meter')).toHaveAttribute('aria-valuenow', '40');
+  await expect(page.locator('#focus-meter')).toHaveAttribute('data-state', 'running');
   await page.clock.fastForward('15:01');
   await expect(phase(page)).toHaveText('Kurze Pause');
   await expect(time(page)).toHaveText('05:00');
@@ -83,6 +85,7 @@ test('a reload keeps the running time', async ({ page }) => {
   await page.clock.fastForward('05:00');
   await expect(time(page)).toHaveText('15:00');
   await expect(page.getByRole('button', { name: 'Weiter' })).toBeVisible();
+  await expect(page.locator('#focus-meter')).toHaveAttribute('data-state', 'paused');
 });
 
 test('after four focus rounds comes the long break; reset starts over', async ({ page }) => {

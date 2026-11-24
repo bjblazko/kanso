@@ -20,8 +20,10 @@ func (t Text) In(lang string) string {
 type Tip struct {
 	ID          string
 	Title, Body Text
-	// Gentle tips ask almost nothing; they are what an empty battery gets.
+	// Gentle tips ask almost nothing; they are first aid and what an empty battery gets.
 	Gentle bool
+	// Lift tips wake you up a little: a good step between two things (Zwischendurch).
+	Lift bool
 }
 
 // Exercise is a guided practice reached on purpose: an intro and steps.
@@ -36,58 +38,58 @@ type Exercise struct {
 var tips = []Tip{
 	{"window", Text{"Ans Fenster", "To the window"}, Text{
 		"Öffne ein Fenster, atme dreimal tief durch die Nase ein und schau eine Minute so weit nach draußen, wie es geht. Das Handy bleibt liegen.",
-		"Open a window, breathe in deeply through your nose three times and look as far outside as you can for a minute. Leave the phone where it is."}, true},
+		"Open a window, breathe in deeply through your nose three times and look as far outside as you can for a minute. Leave the phone where it is."}, true, true},
 	{"water", Text{"Ein Glas Wasser", "A glass of water"}, Text{
 		"Hol dir ein Glas Wasser und trink es langsam, Schluck für Schluck.",
-		"Get a glass of water and drink it slowly, sip by sip."}, true},
+		"Get a glass of water and drink it slowly, sip by sip."}, true, true},
 	{"shoulders", Text{"Schultern runter", "Shoulders down"}, Text{
 		"Zieh die Schultern zu den Ohren, halte kurz und lass sie fallen. Dreimal. Dann den Kiefer locker lassen.",
-		"Pull your shoulders up to your ears, hold for a moment and let them drop. Three times. Then let your jaw go loose."}, true},
+		"Pull your shoulders up to your ears, hold for a moment and let them drop. Three times. Then let your jaw go loose."}, true, true},
 	{"slow", Text{"Etwas langsam tun", "Do one thing slowly"}, Text{
 		"Such dir eine Kleinigkeit und mach sie halb so schnell wie sonst: Hände waschen, Tee eingießen, eine Treppe gehen.",
-		"Pick a small thing and do it at half your usual speed: washing your hands, pouring tea, taking the stairs."}, false},
+		"Pick a small thing and do it at half your usual speed: washing your hands, pouring tea, taking the stairs."}, false, false},
 	{"song", Text{"Ein Lied", "One song"}, Text{
 		"Mach ein Lied an, das dich verlässlich aufrichtet, und tu drei Minuten lang nichts anderes. Mitsummen erlaubt.",
-		"Put on a song that reliably lifts you and do nothing else for three minutes. Humming along is allowed."}, false},
+		"Put on a song that reliably lifts you and do nothing else for three minutes. Humming along is allowed."}, false, true},
 	{"see", Text{"Fünf Dinge sehen", "See five things"}, Text{
 		"Benenne leise fünf Dinge, die du gerade siehst, jeweils mit ihrer Farbe.",
-		"Quietly name five things you can see right now, each with its colour."}, true},
+		"Quietly name five things you can see right now, each with its colour."}, true, false},
 	{"walk", Text{"Einmal um den Block", "Around the block"}, Text{
 		"Zieh Schuhe an und geh fünf Minuten raus, ohne Ziel und ohne Kopfhörer.",
-		"Put on your shoes and go out for five minutes, with no goal and no headphones."}, false},
+		"Put on your shoes and go out for five minutes, with no goal and no headphones."}, false, true},
 	{"good", Text{"Eine gute Sache", "One good thing"}, Text{
 		"Schreib einen Satz auf, was heute schon gut war. Ein Satz genügt.",
-		"Write down one sentence about something that went well today. One sentence is enough."}, false},
+		"Write down one sentence about something that went well today. One sentence is enough."}, false, true},
 	{"stretch", Text{"Strecken", "Stretch"}, Text{
 		"Steh auf, streck die Arme so hoch es geht, dann lass den Oberkörper locker nach vorn hängen. Langsam wieder aufrichten.",
-		"Stand up, reach your arms as high as you can, then let your upper body hang loosely forward. Roll up slowly."}, false},
+		"Stand up, reach your arms as high as you can, then let your upper body hang loosely forward. Roll up slowly."}, false, true},
 	{"breath", Text{"Länger aus als ein", "Out longer than in"}, Text{
 		"Atme bis vier ein und bis sechs aus. Sechsmal.",
-		"Breathe in for four and out for six. Six times."}, true},
+		"Breathe in for four and out for six. Six times."}, true, false},
 	{"hands", Text{"Warme Hände", "Warm hands"}, Text{
 		"Reib die Handflächen kräftig aneinander, bis sie warm sind, und leg sie dir über die Augen oder in den Nacken.",
-		"Rub your palms together hard until they are warm, then rest them over your eyes or on your neck."}, true},
+		"Rub your palms together hard until they are warm, then rest them over your eyes or on your neck."}, true, false},
 	{"tidy", Text{"Eine Ecke Ordnung", "One tidy corner"}, Text{
 		"Räum genau eine kleine Fläche auf, etwa den Platz direkt vor dir. Mehr nicht.",
-		"Tidy exactly one small area, such as the space right in front of you. Nothing more."}, false},
+		"Tidy exactly one small area, such as the space right in front of you. Nothing more."}, false, true},
 	{"message", Text{"Jemandem schreiben", "Message someone"}, Text{
 		"Schick einer Person, die dir guttut, eine kurze Nachricht. Ein Anlass ist nicht nötig.",
-		"Send a short message to someone who is good for you. No reason needed."}, false},
+		"Send a short message to someone who is good for you. No reason needed."}, false, true},
 	{"no", Text{"Ein Nein für heute", "One no for today"}, Text{
 		"Such dir eine Sache aus, die heute nicht mehr passieren muss, und streich sie.",
-		"Pick one thing that does not have to happen today any more, and cross it off."}, true},
+		"Pick one thing that does not have to happen today any more, and cross it off."}, true, false},
 	{"tenyears", Text{"In zehn Jahren?", "In ten years?"}, Text{
 		"Frag dich: Werde ich mich in zehn Jahren daran erinnern? Wenn nicht: Wie viel Kraft soll es heute bekommen?",
-		"Ask yourself: will I remember this in ten years? If not, how much energy should it get today?"}, false},
+		"Ask yourself: will I remember this in ten years? If not, how much energy should it get today?"}, false, false},
 	{"friend", Text{"Wie zu einem Freund", "As to a friend"}, Text{
 		"Was würdest du einem guten Freund in deiner Lage sagen? Sag es dir selbst, gern halblaut.",
-		"What would you say to a good friend in your place? Say it to yourself, out loud if you like."}, false},
+		"What would you say to a good friend in your place? Say it to yourself, out loud if you like."}, false, false},
 	{"feet", Text{"Füße spüren", "Feel your feet"}, Text{
 		"Stell beide Füße fest auf den Boden, spür Fersen und Zehen und drück sie zehn Sekunden sanft nach unten.",
-		"Put both feet firmly on the floor, feel your heels and toes and press them gently down for ten seconds."}, true},
+		"Put both feet firmly on the floor, feel your heels and toes and press them gently down for ten seconds."}, true, false},
 	{"cold", Text{"Kaltes Wasser", "Cold water"}, Text{
 		"Halt die Handgelenke eine halbe Minute unter kaltes Wasser.",
-		"Hold your wrists under cold water for half a minute."}, true},
+		"Hold your wrists under cold water for half a minute."}, true, false},
 }
 
 var exercises = []Exercise{

@@ -3,6 +3,7 @@
 package web
 
 import (
+	"cmp"
 	"errors"
 	"math/rand/v2"
 	"net/http"
@@ -38,6 +39,26 @@ type carePage struct {
 	Exercises   []careExercise
 	Meditations []careMeditationLink
 	Own         []selfcare.Own
+	Practice    *careLink // the exercise or meditation that suits the chosen level
+}
+
+// careLink is a way to an exercise or a meditation.
+type careLink struct{ Href, Title string }
+
+func practiceFor(l selfcare.Level, lang string) *careLink {
+	id, med := l.Practice()
+	if med {
+		m, ok := selfcare.MeditationByID(id)
+		if !ok {
+			return nil
+		}
+		return &careLink{Href: "/care/m/" + id, Title: m.Title.In(lang)}
+	}
+	e, ok := selfcare.ExerciseByID(id)
+	if !ok {
+		return nil
+	}
+	return &careLink{Href: "/care/" + id, Title: e.Title.In(lang)}
 }
 
 func tipIn(t selfcare.Tip, lang string) careTip {
@@ -64,9 +85,9 @@ func (s *Server) carePage(w http.ResponseWriter, r *http.Request) {
 	for _, o := range d.Own {
 		pool = append(pool, o.Tip())
 	}
-	d.Tip = tipIn(selfcare.PickFrom(pool, rand.IntN, q.Get("after")), v.Lang)
+	d.Tip = tipIn(selfcare.PickFrom(selfcare.Only(pool, false), rand.IntN, q.Get("after")), v.Lang)
 	if l, ok := selfcare.LevelByKey(q.Get("level")); ok {
-		d.Level, d.Empty = l.Key, l.Empty()
+		d.Level, d.Empty, d.Practice = l.Key, l.Empty(), practiceFor(l, v.Lang)
 		for _, t := range l.Suggestions() {
 			d.Suggestions = append(d.Suggestions, tipIn(t, v.Lang))
 		}
@@ -201,7 +222,7 @@ func meditationLinks(lang string) []careMeditationLink {
 // careOwnAdd keeps one more of the person's own first-aid ideas.
 func (s *Server) careOwnAdd(w http.ResponseWriter, r *http.Request) {
 	u, _ := auth.UserFrom(r.Context())
-	err := s.SelfCare.Add(u.Sub, r.PostFormValue("title"), r.PostFormValue("body"))
+	err := s.SelfCare.Add(u.Sub, r.PostFormValue("title"), r.PostFormValue("body"), cmp.Or(r.PostFormValue("kind"), "calm"))
 	if errors.Is(err, selfcare.ErrInvalid) {
 		s.fail(w, r, http.StatusBadRequest, "care.own_invalid")
 		return
@@ -220,4 +241,42 @@ func (s *Server) careOwnDelete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, "/care#care-own", http.StatusSeeOther)
+}
+
+// careBetween is a short step between two things: close what is done, do
+// something small for yourself, then arrive at what comes next.
+func (s *Server) careBetween(w http.ResponseWriter, r *http.Request) {
+	v := s.newView(r, "", nil)
+	v.Title = v.T("care.between")
+	u, _ := auth.UserFrom(r.Context())
+	pool := selfcare.Tips()
+	for _, o := range s.SelfCare.Own(u.Sub) {
+		pool = append(pool, o.Tip())
+	}
+	var tips []careTip
+	for _, t := range selfcare.Only(pool, true) {
+		tips = append(tips, tipIn(t, v.Lang))
+	}
+	first := rand.IntN(len(tips))
+	tips[0], tips[first] = tips[first], tips[0]
+	v.Data = tips
+	s.render(w, r, http.StatusOK, "care_between", v)
+}
+
+// careBetweenNote keeps what was done and what comes next as a private note.
+func (s *Server) careBetweenNote(w http.ResponseWriter, r *http.Request) {
+	v := s.newView(r, "", nil)
+	e := careExercise{Title: v.T("care.between"), Steps: []string{v.T("care.between_done"), v.T("care.between_next")}}
+	body := careNoteBody(e, r, time.Now())
+	if body == "" {
+		http.Redirect(w, r, "/care/between", http.StatusSeeOther)
+		return
+	}
+	u, _ := auth.UserFrom(r.Context())
+	n, _, err := s.Notes.Create(u.Sub, "", body, nil, 0)
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	http.Redirect(w, r, "/notes/"+n.Meta.ID, http.StatusSeeOther)
 }

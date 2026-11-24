@@ -1,0 +1,25 @@
+{{define "content"}}{{$tips := .Data}}<header class="screen-head">
+<div class="page-toolbar" role="toolbar" aria-label="{{.T "care.between"}}">
+  <a class="btn btn-primary btn-sm" href="/focus">{{template "icon" "timer"}}<span>{{.T "care.between_focus"}}</span></a>
+  <button class="btn btn-quiet btn-sm" type="submit" form="care-between">{{template "icon" "note"}}<span class="tb-label">{{.T "focus.park_save"}}</span></button>
+</div>
+<nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/care">{{.T "care.title"}}</a></nav>
+<h1>{{.T "care.between"}}</h1></header>
+<div class="content care" id="between">
+<p class="care-body">{{.T "care.between_intro"}}</p>
+<form id="care-between" method="post" action="/care/between/note">
+<input type="hidden" name="csrf" value="{{.CSRF}}">
+<ol class="care-between-steps">
+  <li><h2>{{.T "care.between_close"}}</h2>
+    <div class="field"><label for="a0">{{.T "care.between_done"}}</label><textarea id="a0" name="a0" rows="2"></textarea></div></li>
+  <li><h2>{{.T "care.between_you"}}</h2>
+    {{with index $tips 0}}<section class="care-now" aria-live="polite"><h3 id="between-tip-title">{{.Title}}</h3><p class="care-body" id="between-tip-body">{{.Body}}</p>
+    <p><button class="btn btn-secondary btn-sm" type="button" id="between-another" hidden>{{$.T "care.another"}}</button></p></section>{{end}}
+    <template id="between-tips">{{range $tips}}<li data-title="{{.Title}}">{{.Body}}</li>{{end}}</template></li>
+  <li><h2>{{.T "care.between_arrive"}}</h2>
+    <div class="field"><label for="a1">{{.T "care.between_next"}}</label><textarea id="a1" name="a1" rows="2"></textarea></div></li>
+</ol>
+<p class="meta">{{.T "care.between_hint"}}</p>
+</form>
+</div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/between.js"}}"></script>{{end}}

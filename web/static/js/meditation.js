@@ -21,7 +21,20 @@ const clock = (s) => {
   return `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
 };
 
-function label(text) { toggle.querySelector('span').textContent = text; }
+const bar = document.getElementById('med-meter');
+
+/** The bar under the time: share of the meditation done (0…1). */
+function meter(share, mode) {
+  const pct = Math.round(Math.min(Math.max(share, 0), 1) * 100);
+  bar.firstElementChild.style.width = `${pct}%`;
+  bar.setAttribute('aria-valuenow', String(pct));
+  bar.dataset.state = mode;
+}
+
+function label(text) {
+  toggle.querySelector(':scope > span:last-child').textContent = text;
+  toggle.dataset.running = String(text === toggle.dataset.stop);
+}
 
 function voice() { return root.querySelector('input[name="voice"]:checked').value; }
 
@@ -54,6 +67,7 @@ function show() {
   const { t0, p } = session.schedule;
   const elapsed = session.ctx.currentTime - t0;
   timeEl.textContent = clock(p.total - elapsed);
+  meter(elapsed / p.total, 'running');
   let current = -1;
   p.starts.forEach((s, i) => { if (elapsed >= s) current = i; });
   lines.forEach((li, i) => li.classList.toggle('med-current', i === current));
@@ -72,6 +86,7 @@ async function start() {
     const buffers = await load(ctx, voice());
     if (session?.ctx !== ctx) return; // stopped while loading
     session.schedule = schedule(ctx, buffers);
+    busy(Date.now() + session.schedule.p.total * 1000);
     session.lock = await navigator.wakeLock?.request('screen').catch(() => null);
     if ('mediaSession' in navigator) navigator.mediaSession.metadata = new MediaMetadata({ title: document.title });
     session.tick = setInterval(show, 250);
@@ -81,8 +96,15 @@ async function start() {
   }
 }
 
+/** Tells the reminder (nudge.js) in every tab to wait until the meditation is over. */
+function busy(until) {
+  const key = `kanso.busy.${document.querySelector('.rail')?.dataset.user}`;
+  try { if (until) localStorage.setItem(key, String(until)); else localStorage.removeItem(key); } catch { /* private mode */ }
+}
+
 function stop(message = '') {
   if (!session) return;
+  busy(0);
   clearInterval(session.tick);
   session.ctx.close();
   session.lock?.release?.();
@@ -91,6 +113,7 @@ function stop(message = '') {
   root.querySelectorAll('input[name="voice"]').forEach((r) => { r.disabled = false; });
   lines.forEach((li) => li.classList.remove('med-current'));
   timeEl.textContent = clock(minutes * 60);
+  meter(0, 'idle');
   nowEl.textContent = message;
 }
 
