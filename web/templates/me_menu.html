@@ -1,0 +1,14 @@
+{{define "content"}}<div class="content">
+<h1>{{.T "menu.title"}}</h1>
+<p class="meta">{{.T "menu.intro"}}</p>
+<ul class="menu-parts" id="menu-parts" data-up="{{.T "menu.up"}}" data-down="{{.T "menu.down"}}">
+  {{range .Rail}}<li data-key="{{.Key}}">
+    <label class="choice"><input type="checkbox" checked{{if eq .Key "start"}} disabled{{end}}>{{template "icon" .Icon}}<span>{{.Label}}</span></label>
+    <button class="btn btn-quiet btn-sm" type="button" data-move="-1" aria-label="{{$.T "menu.up" .Label}}">↑</button>
+    <button class="btn btn-quiet btn-sm" type="button" data-move="1" aria-label="{{$.T "menu.down" .Label}}">↓</button>
+  </li>
+  {{end}}</ul>
+<p class="meta">{{.T "menu.start_stays"}}</p>
+<button class="btn btn-secondary" type="button" id="menu-reset">{{.T "menu.reset"}}</button>
+</div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/menu-settings.js"}}"></script>{{end}}

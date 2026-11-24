@@ -12,6 +12,7 @@ func (s *Server) shellRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /about/licenses", s.showAbout) // older links: the licenses are part of "Über Kanso"
 	mux.HandleFunc("POST /me/lang", s.setLang)
 	mux.HandleFunc("GET /me/shared", s.sharedPage)
+	mux.HandleFunc("GET /me/menu", s.menuPage)
 	mux.HandleFunc("GET /reports", s.reportsIndex)
 	mux.HandleFunc("GET /reports/{tab}", s.reportsPage)
 	mux.HandleFunc("GET /avatar/{sub}", s.avatar)
