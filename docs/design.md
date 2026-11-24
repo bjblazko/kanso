@@ -145,3 +145,5 @@ boards have nothing to share.
 - **Icons:** Lucide is not used (every dependency needs approval). Kanso
   draws its few icons itself, in the same style: line icons, 1.5 px stroke at
   24 px, round caps and joins, `currentColor`.
+
+**Print:** a page prints as its content only — screen head reduced to the title with a hairline, black on white, Plex as on screen at 11 pt; menus, toolbars, buttons, forms, the reminder and the footer are left out. "Drucken" is a quiet toolbar button on wiki pages, recipes, notes and tasks.
