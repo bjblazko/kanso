@@ -1,6 +1,6 @@
 # 022 — Selfcare Keeps Nothing and Points to Help
 
-**Status:** Proposed
+**Status:** Accepted
 **Created:** 2026-11-24
 **Updated:** 2026-11-24
 

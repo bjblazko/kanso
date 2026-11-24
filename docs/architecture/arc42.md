@@ -244,7 +244,7 @@ Kopia jobs.
 | [019](../adr/019-task-attachments-next-to-the-board.md) | Task attachments next to the board, copied from a note turned into a task |
 | [020](../adr/020-menu-settings-per-device-in-the-browser.md) | Menu settings per device in localStorage, applied before drawing |
 | [021](../adr/021-notifications-only-from-an-open-tab.md) | Notifications only from an open tab, no Web Push |
-| [022](../adr/022-selfcare-keeps-nothing.md) | Selfcare keeps nothing and points to help (proposed) |
+| [022](../adr/022-selfcare-keeps-nothing.md) | Selfcare keeps nothing and points to help |
 
 ## 10. Quality Requirements
 
