@@ -72,7 +72,7 @@ func TestCareMeditation(t *testing.T) {
 	}
 	_, body := get(t, anna, ts.URL+"/care/m/arrive")
 	for _, want := range []string{`data-minutes="5"`, `value="lyra" checked`, `value="orion"`, `data-clip-lyra="/static/audio/meditation/lyra/de/arrive-01.mp3?v=`,
-		`data-clip-orion="/static/audio/meditation/orion/de/arrive-13.mp3?v=`, "data-fill", ">05:00<", "js/meditation.js"} {
+		`data-clip-orion="/static/audio/meditation/orion/de/arrive-13.mp3?v=`, ">05:00<", "js/meditation.js"} {
 		if !strings.Contains(body, want) {
 			t.Errorf("missing %q", want)
 		}

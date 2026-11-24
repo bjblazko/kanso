@@ -4,7 +4,7 @@
 </div>
 <nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/care">{{.T "care.title"}}</a></nav>
 <h1>{{$d.Title}}</h1></header>
-<div class="content care meditation" id="meditation" data-minutes="{{$d.Minutes}}" data-bell="{{$d.Bell}}"
+<div class="content care meditation" id="meditation" data-minutes="{{$d.Minutes}}" data-bell="{{$d.Bell}}"{{if $d.QuietEnd}} data-quiet-end{{end}}
      data-loading="{{.T "care.med_loading"}}" data-done="{{.T "care.med_done"}}" data-failed="{{.T "care.med_failed"}}">
 <p class="care-body">{{$d.Lead}} <span class="meta">· {{.T "care.minutes" $d.Minutes}}</span></p>
 <fieldset class="field-set"><legend>{{.T "care.voice"}}</legend><div class="choices">
@@ -15,7 +15,7 @@
 <p class="med-now" id="med-now" aria-live="polite"></p>
 <p class="meta">{{.T "care.med_hint"}}</p>
 <details class="med-text"><summary>{{.T "care.med_text"}}</summary>
-<ol id="med-lines">{{range $d.Lines}}<li data-pause="{{.Pause}}"{{if .Fill}} data-fill{{end}}{{range .Clips}} data-clip-{{.Voice}}="{{.URL}}"{{end}}>{{.Text}}</li>{{end}}</ol>
+<ol id="med-lines">{{range $d.Lines}}<li data-pause="{{.Pause}}"{{range .Clips}} data-clip-{{.Voice}}="{{.URL}}"{{end}}>{{.Text}}</li>{{end}}</ol>
 </details>
 </div>{{end}}
 {{define "scripts"}}<script type="module" src="{{.Asset "js/meditation.js"}}"></script>{{end}}

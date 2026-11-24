@@ -158,7 +158,6 @@ func careNoteBody(e careExercise, r *http.Request, now time.Time) string {
 type meditationLine struct {
 	Text  string
 	Pause float64
-	Fill  bool
 	Clips []meditationClip
 }
 
@@ -168,12 +167,13 @@ type meditationPage struct {
 	ID, Title, Lead string
 	Minutes         int
 	Bell            float64
+	QuietEnd        bool
 	Voices          []careChoice
 	Lines           []meditationLine
 }
 
 func (s *Server) meditationView(v view, m selfcare.Meditation) meditationPage {
-	d := meditationPage{ID: m.ID, Title: m.Title.In(v.Lang), Lead: m.Lead.In(v.Lang), Minutes: m.Minutes, Bell: selfcare.Bell}
+	d := meditationPage{ID: m.ID, Title: m.Title.In(v.Lang), Lead: m.Lead.In(v.Lang), Minutes: m.Minutes, Bell: selfcare.Bell, QuietEnd: m.QuietEnd}
 	lang := "de"
 	if v.Lang == "en" {
 		lang = "en"
@@ -182,7 +182,7 @@ func (s *Server) meditationView(v view, m selfcare.Meditation) meditationPage {
 		d.Voices = append(d.Voices, careChoice{Key: vc.ID, Label: vc.In(v.Lang), Current: i == 0})
 	}
 	for i, l := range m.Lines {
-		line := meditationLine{Text: l.In(v.Lang), Pause: l.Pause, Fill: l.Fill}
+		line := meditationLine{Text: l.In(v.Lang), Pause: l.Pause}
 		for _, vc := range selfcare.Voices() {
 			line.Clips = append(line.Clips, meditationClip{Voice: vc.ID, URL: v.Asset(m.AudioPath(vc.ID, lang, i))})
 		}

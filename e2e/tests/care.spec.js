@@ -38,11 +38,15 @@ test('a check-in becomes a private note on request', async ({ page }) => {
   await expect(page.locator('main')).toContainText('Der Umzug');
 });
 
-test('meditation plan: the fill pause makes up the minutes', async ({ page }) => {
+test('meditation plan: the time left over is shared among the pauses', async ({ page }) => {
   await signIn(page, { sub: 'carl', name: 'Carl' });
   await page.goto('/care');
-  const p = await page.evaluate(async () => (await import('/static/js/meditation-plan.js')).plan([10, 20, 5], [4, 6, 2], 1, 1, 6));
-  expect(p).toEqual({ starts: [6, 20, 47], endBell: 54, total: 60 });
+  const p = await page.evaluate(async () => (await import('/static/js/meditation-plan.js')).plan([10, 20, 5], [4, 6, 2], 1, 6));
+  // 59 s of their own, 1 s left over, shared 4:6:2 among the pauses
+  expect(p.starts[0]).toBe(6);
+  expect(p.starts[1]).toBeCloseTo(20 + 1 / 3, 6);
+  expect(p.starts[2]).toBeCloseTo(46 + 5 / 6, 6);
+  expect(p.total).toBeCloseTo(60, 6);
 });
 
 /** A short silent WAV, so the player has something to decode without the real clips. */
