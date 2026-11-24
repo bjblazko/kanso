@@ -1,80 +1,15 @@
-{{define "content"}}{{$d := .Data}}<header class="screen-head">
+{{define "content"}}<header class="screen-head">
 <div class="page-toolbar" role="toolbar" aria-label="{{.T "care.title"}}">
   <a class="btn btn-primary btn-sm" href="/care/between">{{template "icon" "heart"}}<span>{{.T "care.between"}}</span></a>
 </div>
 <h1>{{.T "care.title"}}</h1></header>
 <div class="content care">
-{{if $d.Empty}}{{template "care-help" .}}{{end}}
+<p class="care-body">{{.T "care.question"}}</p>
 <nav class="care-ways" aria-label="{{.T "care.ways"}}"><ul class="list-plain">
   <li><a href="/care/between"><strong>{{.T "care.between"}}</strong><span>{{.T "care.between_lead"}}</span></a></li>
-  <li><a href="#care-now"><strong>{{.T "care.calm"}}</strong><span>{{.T "care.calm_lead"}}</span></a></li>
-  <li><a href="#care-battery"><strong>{{.T "care.how"}}</strong><span>{{.T "care.how_lead"}}</span></a></li>
-  <li><a href="#care-meditations"><strong>{{.T "care.me_time"}}</strong><span>{{.T "care.me_time_lead"}}</span></a></li>
+  <li><a href="/care/me"><strong>{{.T "care.me_time"}}</strong><span>{{.T "care.me_time_lead"}}</span></a></li>
+  <li><a href="/care/sos" class="care-way-sos"><strong>{{.T "care.sos_title"}}</strong><span>{{.T "care.sos_lead"}}</span></a></li>
 </ul></nav>
-<p class="care-sos"><a class="btn btn-secondary" href="/care?level=10#care-help">{{.T "care.sos"}}</a></p>
-
-<section class="care-now" aria-labelledby="care-now">
-  <p class="care-eyebrow">{{if $d.Tip.Own}}{{.T "care.first_aid_own"}}{{else}}{{.T "care.first_aid"}}{{end}}</p>
-  <h2 id="care-now">{{$d.Tip.Title}}</h2>
-  <p class="care-body">{{$d.Tip.Body}}</p>
-  <p><a class="btn btn-secondary btn-sm" href="/care?after={{$d.Tip.ID}}{{with $d.Level}}&amp;level={{.}}{{end}}#care-now">{{.T "care.another"}}</a></p>
-</section>
-
-<section aria-labelledby="care-battery">
-  <h2 id="care-battery">{{.T "care.battery"}}</h2>
-  <ul class="care-levels list-plain">{{range $d.Levels}}
-    <li><a href="/care?level={{.Key}}#care-suggest"{{if .Current}} aria-current="true"{{end}}><span class="care-level-num">{{.Key}} %</span> {{.Label}}</a></li>{{end}}
-  </ul>
-  <p class="meta">{{.T "care.battery_hint"}}</p>
-  {{with $d.Suggestions}}<h3 id="care-suggest" tabindex="-1">{{$.T "care.for_level"}}</h3>
-  <ul class="care-tips list-plain">{{range .}}<li><strong>{{.Title}}</strong><br>{{.Body}}</li>{{end}}</ul>{{end}}
-  {{with $d.Practice}}<p class="care-practice">{{$.T "care.practice"}} <a class="btn btn-secondary btn-sm" href="{{.Href}}">{{.Title}}</a></p>{{end}}
-</section>
-
-<section aria-labelledby="care-meditations">
-  <h2 id="care-meditations">{{.T "care.meditations"}}</h2>
-  <ul class="care-exercise-list list-plain">
-    <li><a href="/care/sounds">{{.T "sounds.title"}}</a> <span class="meta">· {{.T "sounds.short"}}</span><br><span class="meta">{{.T "sounds.list_lead"}}</span></li>{{range $d.Meditations}}
-    <li><a href="/care/m/{{.ID}}">{{.Title}}</a> <span class="meta">· {{$.T "care.minutes" .Minutes}}</span><br><span class="meta">{{.Lead}}</span></li>{{end}}
-  </ul>
-</section>
-
-<section aria-labelledby="care-exercises">
-  <h2 id="care-exercises">{{.T "care.exercises"}}</h2>
-  <ul class="care-exercise-list list-plain">{{range $d.Exercises}}
-    <li><a href="/care/{{.ID}}">{{.Title}}</a><br><span class="meta">{{.Lead}}</span></li>{{end}}
-  </ul>
-</section>
-<section aria-labelledby="care-own">
-  <h2 id="care-own">{{.T "care.own"}}</h2>
-  <p class="meta">{{.T "care.own_intro"}}</p>
-  {{with $d.Own}}<ul class="care-tips list-plain">{{range .}}<li class="care-own-row"><div><strong>{{.Title}}</strong>{{with .Body}}<br>{{.}}{{end}}</div>
-    <form method="post" action="/care/own/{{.ID}}/delete"><input type="hidden" name="csrf" value="{{$.CSRF}}">
-      <button class="btn btn-quiet btn-sm" type="submit" aria-label="{{$.T "care.own_delete" .Title}}">{{template "icon" "trash"}}</button></form></li>{{end}}</ul>{{end}}
-  <form class="care-own-new" method="post" action="/care/own">
-    <input type="hidden" name="csrf" value="{{.CSRF}}">
-    <div class="field"><label for="own-title">{{.T "care.own_title"}}</label><input id="own-title" name="title" required maxlength="80" placeholder="{{.T "care.own_example"}}"></div>
-    <div class="field"><label for="own-body">{{.T "care.own_body"}}</label><input id="own-body" name="body" maxlength="300"></div>
-    <div class="field"><label for="own-kind">{{.T "care.own_kind"}}</label><select id="own-kind" name="kind">
-      <option value="calm">{{.T "care.kind_calm"}}</option><option value="lift">{{.T "care.kind_lift"}}</option><option value="both">{{.T "care.kind_both"}}</option></select></div>
-    <button class="btn btn-secondary" type="submit">{{.T "care.own_add"}}</button>
-  </form>
-</section>
-<section aria-labelledby="care-nudge">
-  <h2 id="care-nudge">{{.T "care.nudge"}}</h2>
-  <div class="field"><label for="nudge-every">{{.T "care.nudge_label"}}</label><select id="nudge-every">
-    <option value="0">{{.T "care.nudge_off"}}</option><option value="30">{{.T "care.nudge_min" 30}}</option>
-    <option value="60" selected>{{.T "care.nudge_min" 60}}</option><option value="90">{{.T "care.nudge_min" 90}}</option></select></div>
-  <p class="meta">{{.T "care.nudge_hint"}}</p>
-</section>
-{{if not $d.Empty}}{{template "care-help" .}}{{end}}
+<p class="meta care-small-help">{{.T "care.help_short"}} <a href="tel:08001110111">0800 111 0 111</a> · {{.T "care.help_emergency"}} <a href="tel:112">112</a></p>
+<p class="meta"><a href="/care/settings">{{.T "care.settings_link"}}</a></p>
 </div>{{end}}
-{{define "care-help"}}<aside class="care-help" aria-labelledby="care-help">
-  <h2 id="care-help">{{.T "care.help_title"}}</h2>
-  {{if .Data.Empty}}<p>{{.T "care.empty"}}</p>{{end}}
-  <p>{{.T "care.help"}}</p>
-  <ul class="list-plain care-phones">
-    <li>{{.T "care.help_phone"}} <a href="tel:08001110111">0800 111 0 111</a> · <a href="tel:08001110222">0800 111 0 222</a></li>
-    <li>{{.T "care.help_emergency"}} <a href="tel:112">112</a></li>
-  </ul>
-</aside>{{end}}

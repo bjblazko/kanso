@@ -347,13 +347,6 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .care-eyebrow { margin: 0; color: var(--fg-2); font-size: var(--text-sm); font-weight: 500; }
 .care-now h2 { margin: var(--space-2) 0; }
 .care-body { font-size: var(--text-lg); max-width: 40rem; }
-.care-levels { display: flex; flex-direction: column; gap: var(--space-1); max-width: 32rem; }
-.care-levels li { border: 0; padding: 0; }
-.care-levels a { display: flex; gap: var(--space-3); align-items: center; min-height: var(--target-min); padding: 0 var(--space-3);
-  border: 1px solid var(--line); border-radius: var(--radius-md); color: var(--fg); text-decoration: none; }
-.care-levels a:hover { background: var(--hover-overlay); }
-.care-levels a[aria-current="true"] { border-color: var(--fg); font-weight: 500; }
-.care-level-num { min-width: 3.5rem; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--fg-2); }
 .care-tips li, .care-exercise-list li { padding: var(--space-3) 0; border-bottom: 1px solid var(--line); max-width: 40rem; }
 .care-exercise-list a { font-weight: 500; }
 .care-own-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
@@ -379,14 +372,14 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .med-text li.med-current { font-weight: 600; }
 
 /* Selfcare: the four ways in, as tiles; one explicit way for a bad moment. */
-.care-ways ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--space-3); margin: 0 0 var(--space-3); max-width: 48rem; }
+.care-ways ul { display: grid; grid-template-columns: 1fr; gap: var(--space-3); margin: 0 0 var(--space-3); max-width: 48rem; }
 .care-ways li { border: 0; padding: 0; }
 .care-ways a { display: flex; flex-direction: column; gap: var(--space-1); height: 100%; padding: var(--space-4);
   border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg); color: var(--fg); text-decoration: none; }
 .care-ways a:hover { background: var(--hover-overlay); }
 .care-ways span { color: var(--fg-2); font-size: var(--text-sm); }
-.care-sos { margin: 0 0 var(--space-8); }
-.care-practice { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-4); }
+.care-way-sos { border-color: var(--line-strong) !important; }
+.care-small-help { margin-top: var(--space-6); }
 .care-between-steps { max-width: 40rem; padding-left: var(--space-5); }
 .care-between-steps > li { margin-bottom: var(--space-6); }
 .care-between-steps h2 { font-size: var(--text-lg); margin: 0 0 var(--space-2); }

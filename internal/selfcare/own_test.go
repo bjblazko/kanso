@@ -78,7 +78,7 @@ func TestPickFromIncludesOwn(t *testing.T) {
 	}
 }
 
-func TestOnlyAndPractice(t *testing.T) {
+func TestOnly(t *testing.T) {
 	for _, tp := range Only(Tips(), true) {
 		if !tp.Lift {
 			t.Errorf("%s is not lifting", tp.ID)
@@ -86,14 +86,5 @@ func TestOnlyAndPractice(t *testing.T) {
 	}
 	if len(Only(Tips(), true)) < 6 || len(Only(Tips(), false)) < 6 {
 		t.Fatal("too few tips of a kind")
-	}
-	for _, l := range Levels {
-		id, med := l.Practice()
-		if _, ok := MeditationByID(id); med && !ok {
-			t.Errorf("level %s: no meditation %q", l.Key, id)
-		}
-		if _, ok := ExerciseByID(id); !med && !ok {
-			t.Errorf("level %s: no exercise %q", l.Key, id)
-		}
 	}
 }

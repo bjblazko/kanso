@@ -30,37 +30,6 @@ type careExercise struct {
 	Steps                 []string
 }
 
-type carePage struct {
-	Tip         careTip
-	Levels      []careChoice
-	Level       string // chosen battery level, "" before any
-	Suggestions []careTip
-	Empty       bool
-	Exercises   []careExercise
-	Meditations []careMeditationLink
-	Own         []selfcare.Own
-	Practice    *careLink // the exercise or meditation that suits the chosen level
-}
-
-// careLink is a way to an exercise or a meditation.
-type careLink struct{ Href, Title string }
-
-func practiceFor(l selfcare.Level, lang string) *careLink {
-	id, med := l.Practice()
-	if med {
-		m, ok := selfcare.MeditationByID(id)
-		if !ok {
-			return nil
-		}
-		return &careLink{Href: "/care/m/" + id, Title: m.Title.In(lang)}
-	}
-	e, ok := selfcare.ExerciseByID(id)
-	if !ok {
-		return nil
-	}
-	return &careLink{Href: "/care/" + id, Title: e.Title.In(lang)}
-}
-
 func tipIn(t selfcare.Tip, lang string) careTip {
 	return careTip{ID: t.ID, Title: t.Title.In(lang), Body: t.Body.In(lang), Own: strings.HasPrefix(t.ID, "own-")}
 }
@@ -73,34 +42,52 @@ func exerciseIn(e selfcare.Exercise, lang string) careExercise {
 	return out
 }
 
-// carePage shows a random first-aid step, the battery check and the
-// exercises. Nothing the person picks here is stored.
+// carePage asks what the person needs now: a short pause, time for
+// themselves, or help because it is too much. Nothing they pick is stored.
 func (s *Server) carePage(w http.ResponseWriter, r *http.Request) {
 	v := s.newView(r, "", nil)
 	v.Title = v.T("care.title")
-	q := r.URL.Query()
+	s.render(w, r, http.StatusOK, "care", v)
+}
+
+// careSOS is for when it is too much: help from outside first, then one
+// calming step (built-in or the person's own) and the way to breathe.
+func (s *Server) careSOS(w http.ResponseWriter, r *http.Request) {
+	v := s.newView(r, "", nil)
+	v.Title = v.T("care.sos_title")
 	u, _ := auth.UserFrom(r.Context())
-	d := carePage{Own: s.SelfCare.Own(u.Sub)}
 	pool := selfcare.Tips()
-	for _, o := range d.Own {
+	for _, o := range s.SelfCare.Own(u.Sub) {
 		pool = append(pool, o.Tip())
 	}
-	d.Tip = tipIn(selfcare.PickFrom(selfcare.Only(pool, false), rand.IntN, q.Get("after")), v.Lang)
-	if l, ok := selfcare.LevelByKey(q.Get("level")); ok {
-		d.Level, d.Empty, d.Practice = l.Key, l.Empty(), practiceFor(l, v.Lang)
-		for _, t := range l.Suggestions() {
-			d.Suggestions = append(d.Suggestions, tipIn(t, v.Lang))
-		}
-	}
-	for _, l := range selfcare.Levels {
-		d.Levels = append(d.Levels, careChoice{Key: l.Key, Label: l.Label.In(v.Lang), Current: l.Key == d.Level})
-	}
+	v.Data = tipIn(selfcare.PickFrom(selfcare.Only(pool, false), rand.IntN, r.URL.Query().Get("after")), v.Lang)
+	s.render(w, r, http.StatusOK, "care_sos", v)
+}
+
+type careMePage struct {
+	Meditations []careMeditationLink
+	Exercises   []careExercise
+}
+
+// careMe is time for oneself: meditations, sounds and exercises.
+func (s *Server) careMe(w http.ResponseWriter, r *http.Request) {
+	v := s.newView(r, "", nil)
+	v.Title = v.T("care.me_time")
+	d := careMePage{Meditations: meditationLinks(v.Lang)}
 	for _, e := range selfcare.Exercises() {
 		d.Exercises = append(d.Exercises, exerciseIn(e, v.Lang))
 	}
-	d.Meditations = meditationLinks(v.Lang)
 	v.Data = d
-	s.render(w, r, http.StatusOK, "care", v)
+	s.render(w, r, http.StatusOK, "care_me", v)
+}
+
+// careSettings holds the person's own ideas and the reminder.
+func (s *Server) careSettings(w http.ResponseWriter, r *http.Request) {
+	v := s.newView(r, "", nil)
+	v.Title = v.T("care.settings")
+	u, _ := auth.UserFrom(r.Context())
+	v.Data = s.SelfCare.Own(u.Sub)
+	s.render(w, r, http.StatusOK, "care_settings", v)
 }
 
 func (s *Server) careExercise(w http.ResponseWriter, r *http.Request) {
@@ -231,7 +218,7 @@ func (s *Server) careOwnAdd(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
-	http.Redirect(w, r, "/care#care-own", http.StatusSeeOther)
+	http.Redirect(w, r, "/care/settings#care-own", http.StatusSeeOther)
 }
 
 func (s *Server) careOwnDelete(w http.ResponseWriter, r *http.Request) {
@@ -240,7 +227,7 @@ func (s *Server) careOwnDelete(w http.ResponseWriter, r *http.Request) {
 		s.serverError(w, r, err)
 		return
 	}
-	http.Redirect(w, r, "/care#care-own", http.StatusSeeOther)
+	http.Redirect(w, r, "/care/settings#care-own", http.StatusSeeOther)
 }
 
 // careBetween is a short step between two things: close what is done, do

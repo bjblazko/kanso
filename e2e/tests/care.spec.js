@@ -2,15 +2,17 @@
 import { test, expect } from '@playwright/test';
 import { signIn } from './helpers.js';
 
-test('first aid offers another idea; an empty battery puts help first', async ({ page }) => {
+test('three ways in; "zu viel" puts help first and offers another calming step', async ({ page }) => {
   await signIn(page, { sub: 'carl', name: 'Carl' });
   await page.goto('/care');
+  await expect(page.locator('.care-ways a')).toHaveCount(3);
+  await page.getByRole('link', { name: /Es ist gerade zu viel/ }).click();
+  await expect(page).toHaveURL(/\/care\/sos$/);
+  await expect(page.locator('.care > :nth-child(2)')).toHaveClass(/care-help/);
+  await expect(page.getByRole('link', { name: '0800 111 0 111' })).toHaveAttribute('href', 'tel:08001110111');
   const first = await page.locator('#care-now').textContent();
   await page.getByRole('link', { name: 'Andere Idee' }).click();
   await expect(page.locator('#care-now')).not.toHaveText(first);
-  await page.getByRole('link', { name: /Leer/ }).click();
-  await expect(page.locator('.care > :first-child')).toHaveClass(/care-help/);
-  await expect(page.getByRole('link', { name: '0800 111 0 111' })).toHaveAttribute('href', 'tel:08001110111');
 });
 
 test('breathing counts along and stops after six rounds', async ({ page }) => {
@@ -85,7 +87,7 @@ test('a meditation loads the chosen voice, counts down and can be ended', async 
 
 test('own ideas: add, see in first aid, delete', async ({ page }) => {
   await signIn(page, { sub: 'ida', name: 'Ida' });
-  await page.goto('/care');
+  await page.goto('/care/settings');
   const idea = `Katze streicheln ${Date.now()}`;
   await page.getByLabel('Idee', { exact: true }).fill(idea);
   await page.getByRole('button', { name: 'Hinzufügen' }).click();

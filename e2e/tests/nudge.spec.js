@@ -6,7 +6,7 @@ async function at(page) {
   await page.clock.install({ time: new Date('2026-11-24T08:00:00') });
   await page.clock.pauseAt(new Date('2026-11-24T08:00:01'));
   await signIn(page, { sub: 'nina', name: 'Nina' });
-  await page.goto('/care');
+  await page.goto('/care/settings');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
 }
@@ -48,7 +48,7 @@ test('no reminder while a Fokus round runs, none when switched off', async ({ pa
 test('in between: three steps, another idea keeps what was typed, a note on request', async ({ page }) => {
   await signIn(page, { sub: 'nina', name: 'Nina' });
   await page.goto('/care');
-  await page.getByRole('link', { name: /Zwischendurch/ }).first().click();
+  await page.getByRole('link', { name: /Kurze Pause/ }).first().click();
   await expect(page).toHaveURL(/\/care\/between$/);
   await page.getByLabel('Was hast du gerade geschafft?').fill('Steuer fertig');
   const first = await page.locator('#between-tip-title').textContent();

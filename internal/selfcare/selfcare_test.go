@@ -46,26 +46,9 @@ func TestContentComplete(t *testing.T) {
 			}
 		}
 	}
-	for _, l := range Levels {
-		if got := l.Suggestions(); len(got) != len(l.tips) {
-			t.Errorf("level %s names an unknown tip", l.Key)
-		}
-	}
 }
 
-func TestLevels(t *testing.T) {
-	l, ok := LevelByKey("10")
-	if !ok || !l.Empty() {
-		t.Fatal("empty battery must point to help first")
-	}
-	for _, tp := range l.Suggestions() {
-		if !tp.Gentle {
-			t.Errorf("empty battery suggests %q, which is not gentle", tp.ID)
-		}
-	}
-	if _, ok := LevelByKey("x"); ok {
-		t.Fatal("unknown level found")
-	}
+func TestText(t *testing.T) {
 	if (Text{"Hallo", "Hello"}).In("en") != "Hello" || (Text{"Hallo", ""}).In("en") != "Hallo" {
 		t.Fatal("In")
 	}
