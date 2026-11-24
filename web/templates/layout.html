@@ -6,6 +6,8 @@
 {{- else}}<span class="meta tb-audience">{{if .Private}}{{template "icon" "lock"}}{{else}}{{template "icon" "users"}}{{end}}<span class="tb-audience-text">{{.Text}}</span></span>{{end}}{{end}}{{end}}
 {{/* avatar is the person's picture, round, or a placeholder until there is one. */}}
 {{define "avatar"}}{{if .AvatarVersion}}<img class="avatar" src="/avatar/{{.User.Sub}}?v={{.AvatarVersion}}" alt="">{{else}}<span class="avatar avatar-none">{{template "icon" "user"}}</span>{{end}}{{end}}
+{{/* rail-link is one part of Kanso in the rail or under "Mehr". */}}
+{{define "rail-link"}}<a href="{{.Href}}"{{if .Current}} aria-current="true"{{end}}>{{template "icon" .Icon}}<span>{{.Label}}</span></a>{{end}}
 {{/* face-avatar is someone else's picture, round, or a placeholder; takes a face. */}}
 {{define "face-avatar"}}{{if .AvatarVersion}}<img class="avatar" src="/avatar/{{.Sub}}?v={{.AvatarVersion}}" alt="">{{else}}<span class="avatar avatar-none">{{template "icon" "user"}}</span>{{end}}{{end}}
 {{/* face is someone by picture with their initials below; the full name shows on hover. */}}
@@ -48,6 +50,7 @@
         </div>
       </form>
       <ul class="navlist menu-links">
+        <li><a href="/me/menu">{{template "icon" "settings"}}<span>{{.T "menu.title"}}</span></a></li>
         <li><a href="/me/shared">{{template "icon" "users"}}<span>{{.T "me.shared"}}</span></a></li>
         <li><a href="/reports">{{template "icon" "chart"}}<span>{{.T "reports.title"}}</span></a></li>
         {{if .Admin}}<li><a href="/admin/spaces">{{template "icon" "folder"}}<span>{{.T "admin.spaces"}}</span></a></li>
@@ -65,17 +68,21 @@
   </details>
 </header>
 <div class="shell{{if eq .Module "wiki"}} shell-wiki{{if .SideFolded}} shell-folded{{end}}{{end}}">
-  {{/* The parts of Kanso (ADR-005): what the page is. Only parts that exist are listed. */}}
-  <nav class="rail" aria-label="{{.T "app.short"}}">
-    <ul>
-      <li><a href="/"{{if eq .Module "start"}} aria-current="true"{{end}}>{{template "icon" "home"}}<span>{{.T "nav.start"}}</span></a></li>
-      <li><a href="/notes"{{if eq .Module "notes"}} aria-current="true"{{end}}>{{template "icon" "note"}}<span>{{.T "nav.notes"}}</span></a></li>
-      <li><a href="/todos"{{if eq .Module "todos"}} aria-current="true"{{end}}>{{template "icon" "check"}}<span>{{.T "nav.todos"}}</span></a></li>
-      <li><a href="/tasks"{{if eq .Module "tasks"}} aria-current="true"{{end}}>{{template "icon" "board"}}<span>{{.T "nav.tasks"}}</span></a></li>
-      <li><a href="/wiki"{{if eq .Module "wiki"}} aria-current="true"{{end}}>{{template "icon" "book"}}<span>{{.T "nav.wiki"}}</span></a></li>
-      <li><a href="/recipes"{{if eq .Module "kitchen"}} aria-current="true"{{end}}>{{template "icon" "pot"}}<span>{{.T "nav.kitchen"}}</span></a></li>
+  {{/* The parts of Kanso (ADR-005): what the page is, in the person's order (ADR-020). */}}
+  <nav class="rail" aria-label="{{.T "app.short"}}" data-user="{{.User.Sub}}">
+    <ul class="rail-bar">
+      {{range .Rail}}<li data-key="{{.Key}}">{{template "rail-link" .}}</li>
+      {{end}}<li class="rail-more"><details>
+        <summary>{{template "icon" "more"}}<span>{{.T "nav.more"}}</span></summary>
+        <ul class="rail-more-list">
+          {{range .Rail}}<li data-key="{{.Key}}">{{template "rail-link" .}}</li>
+          {{end}}<li class="rail-more-settings"><a href="/me/menu">{{template "icon" "settings"}}<span>{{.T "menu.title"}}</span></a></li>
+        </ul>
+      </details></li>
     </ul>
   </nav>
+  {{/* Applies the person's menu settings (ADR-020) before the page is drawn: no defer. */}}
+  <script src="{{.Asset "js/menu.js"}}"></script>
   {{if eq .Module "wiki"}}{{/* What is in the wiki: its spaces and the open space's pages. */}}
   <nav class="sidenav" aria-label="{{.T "nav.spaces"}}">
     <details class="sidenav-fold"{{if not .SideFolded}} open{{end}}>
