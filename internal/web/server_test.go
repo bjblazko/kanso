@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"testing/fstest"
 	"time"
 
 	"github.com/bjblazko/kanso/internal/ai"
@@ -295,5 +296,17 @@ func TestModuleImportsAreVersioned(t *testing.T) {
 	}
 	if _, body := get(t, http.DefaultClient, ts.URL+"/static/js/sounds.js"); !strings.Contains(body, `from './soundscape.js?v=`+version+`'`) {
 		t.Error("sounds.js imports soundscape.js without a version")
+	}
+}
+
+// The asset version changes with every release, not only when a static file
+// does: the server rewrites scripts (module imports), so the same files can
+// be served differently by another release.
+func TestAssetVersionFollowsRelease(t *testing.T) {
+	files := fstest.MapFS{"js/a.js": {Data: []byte("x")}}
+	one, err1 := hashFS(files, "0.15.1")
+	two, err2 := hashFS(files, "0.15.2")
+	if err1 != nil || err2 != nil || one == two || len(one) != 12 {
+		t.Fatalf("%q %q %v %v", one, two, err1, err2)
 	}
 }

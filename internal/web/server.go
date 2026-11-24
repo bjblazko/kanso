@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/bjblazko/kanso/internal/ai"
+	"github.com/bjblazko/kanso/internal/buildinfo"
 	"github.com/bjblazko/kanso/internal/selfcare"
 	"html/template"
 	"io/fs"
@@ -92,7 +93,7 @@ func New(d Deps) (*Server, error) {
 			return shopping.Join(dst, it, lang, time.Now())
 		}
 	}
-	if s.version, err = hashFS(static); err != nil {
+	if s.version, err = hashFS(static, buildinfo.Version); err != nil {
 		return nil, err
 	}
 	if s.pages, err = parsePages(); err != nil {
@@ -166,9 +167,12 @@ func starRow(rating int) []star {
 	return row
 }
 
-// hashFS fingerprints the static files for cache-busting URLs.
-func hashFS(fsys fs.FS) (string, error) {
+// hashFS names the assets of a release: the release and every static file,
+// so a new release gets new URLs even where only the server changed how it
+// serves them.
+func hashFS(fsys fs.FS, release string) (string, error) {
 	h := sha256.New()
+	h.Write([]byte(release + "\n"))
 	err := fs.WalkDir(fsys, ".", func(p string, d fs.DirEntry, err error) error {
 		if err != nil || d.IsDir() {
 			return err
