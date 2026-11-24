@@ -336,6 +336,8 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .focus-phase { margin: var(--space-2) 0 0; color: var(--fg-2); font-weight: 500; }
 .focus-time { margin: var(--space-2) 0 var(--space-4); font: 500 var(--text-3xl)/1 var(--font-mono); font-variant-numeric: tabular-nums; }
 .focus-settings { margin: var(--space-6) 0 var(--space-2); }
+.focus-break { margin-bottom: var(--space-4); }
+.focus-park textarea { width: 100%; max-width: 40rem; }
 .focus-settings .form-row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
 .focus-settings .field { width: 9rem; }
 

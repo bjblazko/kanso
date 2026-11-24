@@ -53,6 +53,23 @@ test('a focus round rings, notifies and waits at the break', async ({ page }) =>
   expect(await page.evaluate(() => window.__beeps)).toBeGreaterThan(0);
   await expect(page.getByRole('button', { name: 'Start' })).toBeVisible();
   await expect(page.locator('#focus-notify')).toHaveText('Am Ende: Ton und Benachrichtigung.');
+  await expect(page.locator('#focus-break')).toBeVisible();
+  await expect(page.locator('#focus-break-title')).not.toBeEmpty();
+  await page.getByRole('button', { name: 'Überspringen' }).click();
+  await expect(page.locator('#focus-break')).toBeHidden();
+});
+
+test('parked thoughts stay on the device and become a note', async ({ page }) => {
+  await open(page, 'granted');
+  await expect(page.getByRole('button', { name: 'Als Notiz' })).toBeDisabled();
+  await page.getByLabel('Gedanken-Parkplatz').fill('Zahnarzt anrufen');
+  await page.reload();
+  await expect(page.getByLabel('Gedanken-Parkplatz')).toHaveValue('Zahnarzt anrufen');
+  await page.getByRole('button', { name: 'Als Notiz' }).click();
+  await expect(page).toHaveURL(/\/focus\?saved=/);
+  await expect(page.getByLabel('Gedanken-Parkplatz')).toHaveValue('');
+  await page.getByRole('link', { name: 'Gespeichert – zur Notiz' }).click();
+  await expect(page.locator('main')).toContainText('Zahnarzt anrufen');
 });
 
 test('a reload keeps the running time', async ({ page }) => {

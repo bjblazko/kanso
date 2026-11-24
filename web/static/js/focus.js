@@ -3,6 +3,8 @@
 // after four rounds. It counts against an end time, so a throttled background
 // tab and a reload stay exact. Settings and the running phase stay on this
 // device (localStorage); the end rings in this tab only (ADR-021).
+import { gong } from './gong.js';
+
 const root = document.getElementById('focus');
 const user = document.querySelector('.rail')?.dataset.user ?? '';
 const key = `kanso.focus.${user}`;
@@ -42,23 +44,11 @@ function clock(ms) {
 
 // ---- What the person hears and sees at the end -------------------------------
 
-/** Three short tones from the browser itself; no sound file. */
+/** The same soft gong as the meditations: rung twice, a breath apart. */
 function ring() {
   if (!audio) return;
-  const t = audio.currentTime;
-  for (let i = 0; i < 3; i += 1) {
-    const osc = audio.createOscillator();
-    const gain = audio.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = 880;
-    gain.gain.setValueAtTime(0.0001, t + i * 0.35);
-    gain.gain.exponentialRampToValueAtTime(0.3, t + i * 0.35 + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.35 + 0.25);
-    osc.connect(gain);
-    gain.connect(audio.destination);
-    osc.start(t + i * 0.35);
-    osc.stop(t + i * 0.35 + 0.3);
-  }
+  gong(audio, audio.currentTime + 0.05, 5);
+  gong(audio, audio.currentTime + 2.5, 5, 0.7);
 }
 
 function notify(body) {
@@ -82,9 +72,12 @@ function prepare() {
 
 // ---- Phases -----------------------------------------------------------------
 
+const tips = [...document.getElementById('focus-tips').content.children];
+
 function next() {
   if (state.phase === 'focus') {
     state.phase = state.round >= rounds ? 'long' : 'short';
+    state.tip = Math.floor(Math.random() * tips.length);
   } else {
     state.round = state.phase === 'long' ? 1 : state.round + 1;
     state.phase = 'focus';
@@ -144,7 +137,34 @@ function render() {
   document.title = running() || paused ? `${left} · ${phaseName}` : pageTitle;
   el('focus-notify').textContent = notifyText();
   for (const p of phases) el(`focus-minutes-${p}`).value = state.minutes[p];
+  showBreak();
 }
+
+/** In a break: one of Selfcare's first-aid steps, the same until the break ends. */
+function showBreak() {
+  const tip = tips[state.tip ?? 0];
+  el('focus-break').hidden = state.phase === 'focus' || !tip;
+  if (!tip) return;
+  el('focus-break-title').textContent = tip.dataset.title;
+  el('focus-break-body').textContent = tip.textContent;
+}
+
+// ---- Parked thoughts: kept on this device until saved as a note -----------------
+
+const park = el('focus-park-text');
+const parkKey = `${key}.park`;
+
+function parked() {
+  el('focus-park-save').disabled = park.value.trim() === '';
+  try { localStorage.setItem(parkKey, park.value); } catch { /* private mode */ }
+}
+
+try { park.value = localStorage.getItem(parkKey) ?? ''; } catch { /* private mode */ }
+park.addEventListener('input', parked);
+el('focus-park').addEventListener('submit', () => {
+  try { localStorage.removeItem(parkKey); } catch { /* private mode */ }
+});
+el('focus-park-save').disabled = park.value.trim() === '';
 
 function tick() {
   if (running() && remaining() <= 0) finish();
