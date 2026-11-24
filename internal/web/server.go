@@ -12,6 +12,7 @@ import (
 	"html/template"
 	"io/fs"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -185,7 +186,7 @@ func (s *Server) Handler() http.Handler {
 	mux := http.NewServeMux()
 	s.Auth.Routes(mux)
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, _ *http.Request) { _, _ = fmt.Fprint(w, "ok") })
-	mux.Handle("GET /static/", http.StripPrefix("/static/", cacheForever(http.FileServerFS(s.static))))
+	mux.Handle("GET /static/", http.StripPrefix("/static/", cacheForever(s.staticFiles())))
 	mux.HandleFunc("GET /sw.js", s.serviceWorker)
 	mux.HandleFunc("GET /manifest.webmanifest", s.manifest)
 	app := http.NewServeMux()
@@ -215,6 +216,28 @@ func securityHeaders(next http.Handler) http.Handler {
 		h.Set("X-Content-Type-Options", "nosniff")
 		h.Set("Referrer-Policy", "same-origin")
 		next.ServeHTTP(w, r)
+	})
+}
+
+// moduleImport is a relative import between Kanso's own scripts.
+var moduleImport = regexp.MustCompile(`from '\./([A-Za-z0-9_-]+\.js)'`)
+
+// staticFiles serves the static files; scripts get their imports versioned
+// like the page's own links, so a cached module never outlives its release.
+func (s *Server) staticFiles() http.Handler {
+	files := http.FileServerFS(s.static)
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.HasSuffix(r.URL.Path, ".js") {
+			files.ServeHTTP(w, r)
+			return
+		}
+		src, err := fs.ReadFile(s.static, r.URL.Path)
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/javascript; charset=utf-8")
+		_, _ = w.Write(moduleImport.ReplaceAll(src, []byte("from './$1?v="+s.version+"'")))
 	})
 }
 
