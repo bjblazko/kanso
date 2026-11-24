@@ -155,5 +155,6 @@ var modules = []struct {
 	{"tasks", []string{"/tasks/"}},
 	{"kitchen", []string{"/recipes/", "/mealplan/"}},
 	{"focus", []string{"/focus/"}},
+	{"care", []string{"/care/"}},
 	{"wiki", []string{"/wiki/", "/s/", "/p/", "/admin/spaces/"}},
 }

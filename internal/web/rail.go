@@ -19,6 +19,7 @@ var railParts = []struct{ key, href, icon, label string }{
 	{"wiki", "/wiki", "book", "nav.wiki"},
 	{"kitchen", "/recipes", "pot", "nav.kitchen"},
 	{"focus", "/focus", "timer", "nav.focus"},
+	{"care", "/care", "heart", "nav.care"},
 }
 
 // Rail lists the parts for the page, the current one marked.
