@@ -13,6 +13,7 @@ func (s *Server) shellRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("POST /me/lang", s.setLang)
 	mux.HandleFunc("GET /me/shared", s.sharedPage)
 	mux.HandleFunc("GET /me/menu", s.menuPage)
+	mux.HandleFunc("GET /focus", s.focusPage)
 	mux.HandleFunc("GET /reports", s.reportsIndex)
 	mux.HandleFunc("GET /reports/{tab}", s.reportsPage)
 	mux.HandleFunc("GET /avatar/{sub}", s.avatar)
