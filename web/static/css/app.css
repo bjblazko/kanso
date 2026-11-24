@@ -332,6 +332,13 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .menu-parts .choice { flex: 1; display: flex; align-items: center; gap: var(--space-2); }
 .menu-parts .icon { color: var(--fg-2); }
 
+/* Fokus: the remaining time is the page; numbers in Plex Mono (tabular). */
+.focus-phase { margin: var(--space-2) 0 0; color: var(--fg-2); font-weight: 500; }
+.focus-time { margin: var(--space-2) 0 var(--space-4); font: 500 var(--text-3xl)/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.focus-settings { margin: var(--space-6) 0 var(--space-2); }
+.focus-settings .form-row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
+.focus-settings .field { width: 9rem; }
+
 /* Groups: one section per group, separated by a hairline. */
 .group-new { align-items: start; }
 .group-new .field { flex: 1; min-width: 12rem; }

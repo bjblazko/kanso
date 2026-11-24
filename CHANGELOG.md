@@ -7,6 +7,11 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Menu settings: each person chooses which parts of Kanso the menu shows and in which order, on each device ("Menü anpassen"; ADR-020). On phones more than five parts become four and "Mehr", and on wide screens the menu scrolls.
+- Fokus, a Pomodoro timer: 25/5 minutes and a long break after four rounds. The durations can be changed, and the end of a phase brings a tone and, if allowed, a notification from the open tab (ADR-021).
+
 ## [0.12.0] - 2026-11-23
 
 ### Added

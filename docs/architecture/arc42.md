@@ -1,7 +1,7 @@
 # Hüpattl! Kanso — Architecture (arc42)
 
 **Created:** 2026-10-26
-**Updated:** 2026-11-23
+**Updated:** 2026-11-24
 
 ## 1. Introduction and Goals
 
@@ -215,7 +215,7 @@ Kopia jobs.
 - **Internationalisation:** keys in `internal/i18n/{de,en}.yaml`; a test keeps
   both files in step.
 - **Design:** `huepattl-rams-design`; project deviations in `docs/design.md`.
-- **Navigation:** a rail of parts (notes, wiki, …) and a side bar for the content of the current part ([ADR-005](../adr/005-navigation-parts-and-content.md)); every part has its own URL.
+- **Navigation:** a rail of parts (notes, wiki, …) and a side bar for the content of the current part ([ADR-005](../adr/005-navigation-parts-and-content.md)); every part has its own URL; each person orders and hides parts per device ([ADR-020](../adr/020-menu-settings-per-device-in-the-browser.md)). Alerts come only from an open tab ([ADR-021](../adr/021-notifications-only-from-an-open-tab.md)).
 
 ## 9. Architecture Decisions
 
@@ -241,6 +241,8 @@ Kopia jobs.
 | [017](../adr/017-generated-recipes-guard-the-prompt.md) | Generated recipes: fixed choices, data blocks, parser gate |
 | [018](../adr/018-start-page-summary-from-visits-and-reports.md) | Start page summary: window from visits in the state directory, built on the reports |
 | [019](../adr/019-task-attachments-next-to-the-board.md) | Task attachments next to the board, copied from a note turned into a task |
+| [020](../adr/020-menu-settings-per-device-in-the-browser.md) | Menu settings per device in localStorage, applied before drawing |
+| [021](../adr/021-notifications-only-from-an-open-tab.md) | Notifications only from an open tab, no Web Push |
 
 ## 10. Quality Requirements
 
