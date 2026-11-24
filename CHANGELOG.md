@@ -7,6 +7,12 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-24
+
+### Added
+
+- Selfcare › Klänge: white, pink or brown noise, waves, and a calm floating chord with quiet chimes, all made in the browser with no sound files. Endless, or with a sleep timer (15–90 minutes) that fades out in the last minute; volume per layer; an optional "Bildschirm anlassen". The choices stay on the device, and the reminder keeps quiet while it plays.
+
 ## [0.14.0] - 2026-11-24
 
 ### Added

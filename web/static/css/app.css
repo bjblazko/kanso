@@ -372,6 +372,9 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .med-time { margin: var(--space-4) 0 var(--space-2); font: 500 var(--text-3xl)/1 var(--font-mono); font-variant-numeric: tabular-nums; }
 .med-now { min-height: 3em; font-size: var(--text-lg); max-width: 40rem; color: var(--fg-2); }
 .med-text ol { max-width: 40rem; }
+.sounds input[type="range"] { width: min(20rem, 100%); }
+.sounds .field-set { margin-bottom: var(--space-5); }
+.time-meter[hidden] { display: none; }
 .med-text li { margin-bottom: var(--space-2); }
 .med-text li.med-current { font-weight: 600; }
 

@@ -33,7 +33,8 @@
 
 <section aria-labelledby="care-meditations">
   <h2 id="care-meditations">{{.T "care.meditations"}}</h2>
-  <ul class="care-exercise-list list-plain">{{range $d.Meditations}}
+  <ul class="care-exercise-list list-plain">
+    <li><a href="/care/sounds">{{.T "sounds.title"}}</a> <span class="meta">· {{.T "sounds.short"}}</span><br><span class="meta">{{.T "sounds.list_lead"}}</span></li>{{range $d.Meditations}}
     <li><a href="/care/m/{{.ID}}">{{.Title}}</a> <span class="meta">· {{$.T "care.minutes" .Minutes}}</span><br><span class="meta">{{.Lead}}</span></li>{{end}}
   </ul>
 </section>

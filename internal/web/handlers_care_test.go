@@ -151,3 +151,17 @@ func TestNudgeBarOnEveryPage(t *testing.T) {
 		t.Fatal("nudge bar or script missing")
 	}
 }
+
+func TestCareSounds(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	if _, body := get(t, anna, ts.URL+"/care"); !strings.Contains(body, `href="/care/sounds"`) {
+		t.Error("sounds not linked from /care")
+	}
+	_, body := get(t, anna, ts.URL+"/care/sounds")
+	for _, want := range []string{`name="noise" value="waves"`, `id="sleep-timer"`, `id="sounds-meter"`, "js/sounds.js", `data-running="false"`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("missing %q", want)
+		}
+	}
+}
