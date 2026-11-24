@@ -38,6 +38,8 @@ type Meditation struct {
 	Title   Text   `json:"title"`
 	Lead    Text   `json:"lead"`
 	Lines   []Line `json:"lines"`
+	// QuietEnd leaves out the closing gong, so falling asleep is not disturbed.
+	QuietEnd bool `json:"quiet_end"`
 }
 
 var meditationData struct {
