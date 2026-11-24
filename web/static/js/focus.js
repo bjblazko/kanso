@@ -3,6 +3,8 @@
 // after four rounds. It counts against an end time, so a throttled background
 // tab and a reload stay exact. Settings and the running phase stay on this
 // device (localStorage); the end rings in this tab only (ADR-021).
+import { gong } from './gong.js';
+
 const root = document.getElementById('focus');
 const user = document.querySelector('.rail')?.dataset.user ?? '';
 const key = `kanso.focus.${user}`;
@@ -33,6 +35,7 @@ function save() {
 
 const full = (phase) => state.minutes[phase] * 60000;
 const running = () => state.endsAt !== null;
+const paused = () => !running() && state.left !== null;
 const remaining = () => (running() ? state.endsAt - Date.now() : state.left ?? full(state.phase));
 
 function clock(ms) {
@@ -42,23 +45,11 @@ function clock(ms) {
 
 // ---- What the person hears and sees at the end -------------------------------
 
-/** Three short tones from the browser itself; no sound file. */
+/** The same soft gong as the meditations: rung twice, a breath apart. */
 function ring() {
   if (!audio) return;
-  const t = audio.currentTime;
-  for (let i = 0; i < 3; i += 1) {
-    const osc = audio.createOscillator();
-    const gain = audio.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = 880;
-    gain.gain.setValueAtTime(0.0001, t + i * 0.35);
-    gain.gain.exponentialRampToValueAtTime(0.3, t + i * 0.35 + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.35 + 0.25);
-    osc.connect(gain);
-    gain.connect(audio.destination);
-    osc.start(t + i * 0.35);
-    osc.stop(t + i * 0.35 + 0.3);
-  }
+  gong(audio, audio.currentTime + 0.05, 5);
+  gong(audio, audio.currentTime + 2.5, 5, 0.7);
 }
 
 function notify(body) {
@@ -82,9 +73,13 @@ function prepare() {
 
 // ---- Phases -----------------------------------------------------------------
 
+const tips = [...document.getElementById('focus-tips').content.children];
+
 function next() {
   if (state.phase === 'focus') {
     state.phase = state.round >= rounds ? 'long' : 'short';
+    state.tip = Math.floor(Math.random() * tips.length);
+    window.KansoNudge?.reset(); // the break is the step between
   } else {
     state.round = state.phase === 'long' ? 1 : state.round + 1;
     state.phase = 'focus';
@@ -125,6 +120,14 @@ function setMinutes(phase, input) {
 
 // ---- Drawing ----------------------------------------------------------------
 
+/** Sets a time bar to share (0…1) and its state: running, paused or idle. */
+function meter(bar, share, mode) {
+  const pct = Math.round(Math.min(Math.max(share, 0), 1) * 100);
+  bar.firstElementChild.style.width = `${pct}%`;
+  bar.setAttribute('aria-valuenow', String(pct));
+  bar.dataset.state = mode;
+}
+
 function notifyText() {
   if (!('Notification' in window)) return text.notifyOff;
   return { granted: text.notifyOn, denied: text.notifyOff }[Notification.permission] ?? text.notifyAsk;
@@ -136,15 +139,42 @@ function render() {
   el('focus-phase').textContent = phaseName;
   el('focus-round').textContent = text.round.replace('%d', state.round);
   el('focus-time').textContent = left;
-  const paused = !running() && state.left !== null;
-  const label = running() ? text.pause : paused ? text.resume : text.start;
+  meter(el('focus-meter'), 1 - remaining() / full(state.phase), running() ? 'running' : paused() ? 'paused' : 'idle');
+  const label = running() ? text.pause : paused() ? text.resume : text.start;
   const toggleButton = el('focus-toggle');
-  toggleButton.querySelector('span').textContent = label;
-  toggleButton.querySelector('use, svg')?.classList.toggle('is-running', running());
-  document.title = running() || paused ? `${left} · ${phaseName}` : pageTitle;
+  toggleButton.querySelector(':scope > span:last-child').textContent = label;
+  toggleButton.dataset.running = String(running());
+  document.title = running() || paused() ? `${left} · ${phaseName}` : pageTitle;
   el('focus-notify').textContent = notifyText();
   for (const p of phases) el(`focus-minutes-${p}`).value = state.minutes[p];
+  showBreak();
 }
+
+/** In a break: one of Selfcare's first-aid steps, the same until the break ends. */
+function showBreak() {
+  const tip = tips[state.tip ?? 0];
+  el('focus-break').hidden = state.phase === 'focus' || !tip;
+  if (!tip) return;
+  el('focus-break-title').textContent = tip.dataset.title;
+  el('focus-break-body').textContent = tip.textContent;
+}
+
+// ---- Parked thoughts: kept on this device until saved as a note -----------------
+
+const park = el('focus-park-text');
+const parkKey = `${key}.park`;
+
+function parked() {
+  el('focus-park-save').disabled = park.value.trim() === '';
+  try { localStorage.setItem(parkKey, park.value); } catch { /* private mode */ }
+}
+
+try { park.value = localStorage.getItem(parkKey) ?? ''; } catch { /* private mode */ }
+park.addEventListener('input', parked);
+el('focus-park').addEventListener('submit', () => {
+  try { localStorage.removeItem(parkKey); } catch { /* private mode */ }
+});
+el('focus-park-save').disabled = park.value.trim() === '';
 
 function tick() {
   if (running() && remaining() <= 0) finish();

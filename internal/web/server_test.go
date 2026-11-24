@@ -4,6 +4,7 @@ package web
 
 import (
 	"bufio"
+	"github.com/bjblazko/kanso/internal/selfcare"
 	"net/http"
 	"net/http/cookiejar"
 	"net/http/httptest"
@@ -89,7 +90,11 @@ func buildTestDeps(t *testing.T, cfg config.Config) Deps {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, Notes: ns, Todos: td, Tasks: tasks.NewStore(cfg.DataDir, repo), MealPlans: mealplan.NewStore(cfg.DataDir, repo), AI: ai.NewStore(cfg.StateDir), Visits: visits.NewStore(cfg.StateDir), Fetch: recipeimport.NewTestFetcher(),
+	sc, err := selfcare.NewStore(cfg.DataDir, repo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return Deps{Cfg: cfg, Auth: a, I18n: bundle, Users: us, Repo: repo, Spaces: sp, Wiki: wk, Notes: ns, Todos: td, SelfCare: sc, Tasks: tasks.NewStore(cfg.DataDir, repo), MealPlans: mealplan.NewStore(cfg.DataDir, repo), AI: ai.NewStore(cfg.StateDir), Visits: visits.NewStore(cfg.StateDir), Fetch: recipeimport.NewTestFetcher(),
 		MD: markdown.New(), Locks: wiki.NewLocks(5*time.Minute, time.Now), Search: buildIndex(wk, ns)}
 }
 

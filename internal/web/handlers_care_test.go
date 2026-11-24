@@ -63,3 +63,91 @@ func TestCareNote(t *testing.T) {
 		t.Errorf("note from a steps exercise: %d", resp.StatusCode)
 	}
 }
+
+func TestCareMeditation(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	if _, body := get(t, anna, ts.URL+"/care"); !strings.Contains(body, `href="/care/m/arrive"`) || !strings.Contains(body, "10 Minuten") {
+		t.Error("meditations missing on /care")
+	}
+	_, body := get(t, anna, ts.URL+"/care/m/arrive")
+	for _, want := range []string{`data-minutes="5"`, `value="lyra" checked`, `value="orion"`, `data-clip-lyra="/static/audio/meditation/lyra/de/arrive-01.mp3?v=`,
+		`data-clip-orion="/static/audio/meditation/orion/de/arrive-13.mp3?v=`, "data-fill", ">05:00<", "js/meditation.js"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("missing %q", want)
+		}
+	}
+	if resp, _ := get(t, anna, ts.URL+"/care/m/nope"); resp.StatusCode != http.StatusNotFound {
+		t.Errorf("unknown meditation: %d", resp.StatusCode)
+	}
+}
+
+func TestCareOwnIdeas(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	ben := ts.client(t, "ben", "Ben", false)
+	resp, _ := postTaskForm(t, ts, anna, "/care/own", url.Values{"title": {"Hund knuddeln"}, "body": {"Fünf Minuten"}}, "")
+	if resp.Header.Get("Location") != "/care#care-own" {
+		t.Fatalf("add: %d %q", resp.StatusCode, resp.Header.Get("Location"))
+	}
+	if _, body := get(t, anna, ts.URL+"/care"); !strings.Contains(body, "<strong>Hund knuddeln</strong>") {
+		t.Fatal("own idea not listed")
+	}
+	if _, body := get(t, ben, ts.URL+"/care"); strings.Contains(body, "<strong>Hund knuddeln</strong>") {
+		t.Fatal("ben sees anna's idea")
+	}
+	if resp, _ := postTaskForm(t, ts, anna, "/care/own", url.Values{"title": {" "}}, ""); resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("blank idea: %d", resp.StatusCode)
+	}
+	id := ts.deps.SelfCare.Own("anna")[0].ID
+	postTaskForm(t, ts, anna, "/care/own/"+id+"/delete", url.Values{}, "")
+	if len(ts.deps.SelfCare.Own("anna")) != 0 {
+		t.Fatal("not deleted")
+	}
+}
+
+func TestCareEveningReview(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	if _, body := get(t, anna, ts.URL+"/care/evening"); !strings.Contains(body, "Wofür bin ich heute dankbar?") || !strings.Contains(body, `form="care-note"`) {
+		t.Fatal("evening review missing")
+	}
+}
+
+func TestCareWaysAndBetween(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	_, body := get(t, anna, ts.URL+"/care")
+	for _, want := range []string{`class="care-ways"`, `href="/care?level=10#care-help"`, `id="nudge-every"`, `href="/care?level=25#care-suggest"`} {
+		if !strings.Contains(body, want) {
+			t.Errorf("care: missing %q", want)
+		}
+	}
+	if _, body := get(t, anna, ts.URL+"/care?level=50"); !strings.Contains(body, `href="/care/senses"`) || !strings.Contains(body, "Passt dazu:") {
+		t.Error("no practice for half battery")
+	}
+	if _, body := get(t, anna, ts.URL+"/care?level=75"); !strings.Contains(body, `class="btn btn-secondary btn-sm" href="/care/m/arrive"`) {
+		t.Error("no meditation for 75 %")
+	}
+	_, body = get(t, anna, ts.URL+"/care/between")
+	for _, want := range []string{"Was hast du gerade geschafft?", `id="between-tips"`, `href="/focus"`, "js/between.js"} {
+		if !strings.Contains(body, want) {
+			t.Errorf("between: missing %q", want)
+		}
+	}
+	resp, _ := postTaskForm(t, ts, anna, "/care/between/note", url.Values{"a0": {"Steuer fertig"}, "a1": {"Einkaufen"}}, "")
+	loc := resp.Header.Get("Location")
+	n, err := ts.deps.Notes.Get("anna", strings.TrimPrefix(loc, "/notes/"))
+	if err != nil || !strings.HasPrefix(n.Body, "Zwischendurch – ") || !strings.Contains(n.Body, "Steuer fertig") {
+		t.Fatalf("note %q %v", n.Body, err)
+	}
+}
+
+func TestNudgeBarOnEveryPage(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	_, body := get(t, anna, ts.URL+"/notes")
+	if !strings.Contains(body, `id="nudge" role="status" hidden`) || !strings.Contains(body, `js/nudge.js?v=`) {
+		t.Fatal("nudge bar or script missing")
+	}
+}

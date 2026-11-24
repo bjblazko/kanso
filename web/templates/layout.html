@@ -99,10 +99,18 @@
     </details>
   </nav>{{end}}
   <main class="main" id="main">
+    {{/* A quiet suggestion after a while at it (nudge.js); never shown without JavaScript. */}}
+    <div class="nudge" id="nudge" role="status" hidden data-title="{{.T "app.short"}}" data-body="{{.T "nudge.text"}}">
+      <span>{{.T "nudge.text"}}</span>
+      <a class="btn btn-secondary btn-sm" href="/care/between">{{.T "care.between"}}</a>
+      <button class="btn btn-quiet btn-sm" type="button" data-nudge="later">{{.T "nudge.later"}}</button>
+      <button class="btn btn-quiet btn-sm" type="button" data-nudge="close">{{.T "nudge.close"}}</button>
+    </div>
     {{template "content" .}}
     <footer class="footer">Hüpattl! Kanso {{.AppVersion}} · <a href="/about">{{.T "about.title"}}</a></footer>
   </main>
 </div>
+<script src="{{.Asset "js/nudge.js"}}" defer></script>
 <script type="module" src="{{.Asset "js/nav.js"}}"></script>
 {{block "scripts" .}}{{end}}
 </body>

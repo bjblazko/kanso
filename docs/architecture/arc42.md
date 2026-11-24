@@ -73,7 +73,7 @@ leaves the host.
 | `internal/markdown` | Safe Markdown rendering |
 | `internal/notes` | Private notes per person, outside Git |
 | `internal/todos` | Shareable to-do lists outside Git, changed by operations |
-| `internal/selfcare` | First-aid steps, battery levels and guided exercises as fixed content; nothing stored ([ADR-022](../adr/022-selfcare-keeps-nothing.md)) |
+| `internal/selfcare` | First-aid steps, battery levels and guided exercises as fixed content; nothing stored ([ADR-022](../adr/022-selfcare-keeps-nothing.md)); guided meditations as spoken clips per line ([ADR-023](../adr/023-meditations-as-spoken-clips-timed-by-the-page.md)) |
 | `internal/tasks` | Private and group boards of tasks in Git, with attachments per task next to the board ([ADR-019](../adr/019-task-attachments-next-to-the-board.md)); Kanban and Eisenhower views |
 | `internal/recipes` | Reads recipe pages (ingredients, groups, steps), scales and formats amounts; pure, no files ([ADR-010](../adr/010-recipes-are-wiki-pages.md)) |
 | `internal/shopping` | Plans and applies filling a shopping list from a recipe, adding up amounts ([ADR-011](../adr/011-shopping-lists-are-lists.md)) |
@@ -245,6 +245,7 @@ Kopia jobs.
 | [020](../adr/020-menu-settings-per-device-in-the-browser.md) | Menu settings per device in localStorage, applied before drawing |
 | [021](../adr/021-notifications-only-from-an-open-tab.md) | Notifications only from an open tab, no Web Push |
 | [022](../adr/022-selfcare-keeps-nothing.md) | Selfcare keeps nothing and points to help |
+| [023](../adr/023-meditations-as-spoken-clips-timed-by-the-page.md) | Meditations as small spoken clips per line, timed by the page |
 
 ## 10. Quality Requirements
 

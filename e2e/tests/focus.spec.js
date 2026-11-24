@@ -46,6 +46,8 @@ test('a focus round rings, notifies and waits at the break', async ({ page }) =>
   await page.clock.fastForward('10:00');
   await expect(time(page)).toHaveText('15:00');
   await expect(page).toHaveTitle(/^15:00 · Fokus/);
+  await expect(page.locator('#focus-meter')).toHaveAttribute('aria-valuenow', '40');
+  await expect(page.locator('#focus-meter')).toHaveAttribute('data-state', 'running');
   await page.clock.fastForward('15:01');
   await expect(phase(page)).toHaveText('Kurze Pause');
   await expect(time(page)).toHaveText('05:00');
@@ -53,6 +55,23 @@ test('a focus round rings, notifies and waits at the break', async ({ page }) =>
   expect(await page.evaluate(() => window.__beeps)).toBeGreaterThan(0);
   await expect(page.getByRole('button', { name: 'Start' })).toBeVisible();
   await expect(page.locator('#focus-notify')).toHaveText('Am Ende: Ton und Benachrichtigung.');
+  await expect(page.locator('#focus-break')).toBeVisible();
+  await expect(page.locator('#focus-break-title')).not.toBeEmpty();
+  await page.getByRole('button', { name: 'Überspringen' }).click();
+  await expect(page.locator('#focus-break')).toBeHidden();
+});
+
+test('parked thoughts stay on the device and become a note', async ({ page }) => {
+  await open(page, 'granted');
+  await expect(page.getByRole('button', { name: 'Als Notiz' })).toBeDisabled();
+  await page.getByLabel('Gedanken-Parkplatz').fill('Zahnarzt anrufen');
+  await page.reload();
+  await expect(page.getByLabel('Gedanken-Parkplatz')).toHaveValue('Zahnarzt anrufen');
+  await page.getByRole('button', { name: 'Als Notiz' }).click();
+  await expect(page).toHaveURL(/\/focus\?saved=/);
+  await expect(page.getByLabel('Gedanken-Parkplatz')).toHaveValue('');
+  await page.getByRole('link', { name: 'Gespeichert – zur Notiz' }).click();
+  await expect(page.locator('main')).toContainText('Zahnarzt anrufen');
 });
 
 test('a reload keeps the running time', async ({ page }) => {
@@ -66,6 +85,7 @@ test('a reload keeps the running time', async ({ page }) => {
   await page.clock.fastForward('05:00');
   await expect(time(page)).toHaveText('15:00');
   await expect(page.getByRole('button', { name: 'Weiter' })).toBeVisible();
+  await expect(page.locator('#focus-meter')).toHaveAttribute('data-state', 'paused');
 });
 
 test('after four focus rounds comes the long break; reset starts over', async ({ page }) => {

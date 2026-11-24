@@ -1,0 +1,21 @@
+{{define "content"}}{{$d := .Data}}<header class="screen-head">
+<div class="page-toolbar" role="toolbar" aria-label="{{$d.Title}}">
+  <button class="btn btn-primary btn-sm" type="button" id="med-toggle" data-start="{{.T "care.med_start"}}" data-stop="{{.T "care.med_stop"}}" data-running="false"><span class="when-idle">{{template "icon" "play"}}</span><span class="when-running">{{template "icon" "stop"}}</span><span>{{.T "care.med_start"}}</span></button>
+</div>
+<nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/care">{{.T "care.title"}}</a></nav>
+<h1>{{$d.Title}}</h1></header>
+<div class="content care meditation" id="meditation" data-minutes="{{$d.Minutes}}" data-bell="{{$d.Bell}}"
+     data-loading="{{.T "care.med_loading"}}" data-done="{{.T "care.med_done"}}" data-failed="{{.T "care.med_failed"}}">
+<p class="care-body">{{$d.Lead}} <span class="meta">· {{.T "care.minutes" $d.Minutes}}</span></p>
+<fieldset class="field-set"><legend>{{.T "care.voice"}}</legend><div class="choices">
+  {{range $d.Voices}}<label class="choice"><input type="radio" name="voice" value="{{.Key}}"{{if .Current}} checked{{end}}> {{.Label}}</label>{{end}}
+</div></fieldset>
+<p class="med-time" id="med-time" role="timer" aria-live="off">{{printf "%02d" $d.Minutes}}:00</p>
+<span class="time-meter" id="med-meter" role="progressbar" aria-label="{{.T "focus.progress"}}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-state="idle"><span class="time-meter-fill"></span></span>
+<p class="med-now" id="med-now" aria-live="polite"></p>
+<p class="meta">{{.T "care.med_hint"}}</p>
+<details class="med-text"><summary>{{.T "care.med_text"}}</summary>
+<ol id="med-lines">{{range $d.Lines}}<li data-pause="{{.Pause}}"{{if .Fill}} data-fill{{end}}{{range .Clips}} data-clip-{{.Voice}}="{{.URL}}"{{end}}>{{.Text}}</li>{{end}}</ol>
+</details>
+</div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/meditation.js"}}"></script>{{end}}

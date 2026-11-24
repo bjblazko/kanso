@@ -6,22 +6,27 @@
 // for. It is no substitute for help, and the page says where help is.
 package selfcare
 
-import "slices"
+import (
+	"slices"
+	"strings"
+)
 
 // Level is one answer to "how full is your battery?".
 type Level struct {
 	Key   string
 	Label Text
 	tips  []string
+	// practice is the exercise or meditation ("m:<id>") that suits the level.
+	practice string
 }
 
 // Levels go from full to empty.
 var Levels = []Level{
-	{"100", Text{"Voll – klar und stabil", "Full – clear and steady"}, []string{"good", "walk", "message", "song"}},
-	{"75", Text{"Gut – aber wachsam", "Good – but watchful"}, []string{"slow", "stretch", "song", "tidy"}},
-	{"50", Text{"Halb – dünnhäutig", "Half – thin-skinned"}, []string{"window", "breath", "see", "tenyears"}},
-	{"25", Text{"Knapp – ich funktioniere nur noch", "Low – just functioning"}, []string{"water", "shoulders", "feet", "no"}},
-	{"10", Text{"Leer – es geht kaum noch", "Empty – barely coping"}, []string{"water", "breath", "cold", "no"}},
+	{"100", Text{"Voll – klar und stabil", "Full – clear and steady"}, []string{"good", "walk", "message", "song"}, "evening"},
+	{"75", Text{"Gut – aber wachsam", "Good – but watchful"}, []string{"slow", "stretch", "song", "tidy"}, "m:arrive"},
+	{"50", Text{"Halb – dünnhäutig", "Half – thin-skinned"}, []string{"window", "breath", "see", "tenyears"}, "senses"},
+	{"25", Text{"Knapp – ich funktioniere nur noch", "Low – just functioning"}, []string{"water", "shoulders", "feet", "no"}, "breathe"},
+	{"10", Text{"Leer – es geht kaum noch", "Empty – barely coping"}, []string{"water", "breath", "cold", "no"}, "breathe"},
 }
 
 // Tips are all first-aid steps.
@@ -59,12 +64,27 @@ func (l Level) Suggestions() []Tip {
 	return out
 }
 
+// Practice is the exercise or meditation that suits the level; meditation
+// tells which of the two id names.
+func (l Level) Practice() (id string, meditation bool) {
+	id, meditation = strings.CutPrefix(l.practice, "m:")
+	return id, meditation
+}
+
+// Only keeps the tips of one kind: lifting ones for a step between two
+// things, calming ones for first aid.
+func Only(pool []Tip, lift bool) []Tip {
+	return slices.DeleteFunc(slices.Clone(pool), func(t Tip) bool {
+		if lift {
+			return !t.Lift
+		}
+		return !t.Gentle
+	})
+}
+
 // Empty tells whether the level calls for help from outside first.
 func (l Level) Empty() bool { return l.Key == "10" }
 
-// Pick returns a random tip other than the one shown before; n(k) must return
-// a number in [0, k), e.g. rand.IntN.
-func Pick(n func(int) int, before string) Tip {
-	pool := slices.DeleteFunc(slices.Clone(tips), func(t Tip) bool { return t.ID == before })
-	return pool[n(len(pool))]
-}
+// Pick returns a random built-in tip other than the one shown before; n(k)
+// must return a number in [0, k), e.g. rand.IntN.
+func Pick(n func(int) int, before string) Tip { return PickFrom(tips, n, before) }

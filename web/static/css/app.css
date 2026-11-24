@@ -336,6 +336,8 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .focus-phase { margin: var(--space-2) 0 0; color: var(--fg-2); font-weight: 500; }
 .focus-time { margin: var(--space-2) 0 var(--space-4); font: 500 var(--text-3xl)/1 var(--font-mono); font-variant-numeric: tabular-nums; }
 .focus-settings { margin: var(--space-6) 0 var(--space-2); }
+.focus-break { margin-bottom: var(--space-4); }
+.focus-park textarea { width: 100%; max-width: 40rem; }
 .focus-settings .form-row { display: flex; flex-wrap: wrap; gap: var(--space-3); }
 .focus-settings .field { width: 9rem; }
 
@@ -354,6 +356,10 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .care-level-num { min-width: 3.5rem; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--fg-2); }
 .care-tips li, .care-exercise-list li { padding: var(--space-3) 0; border-bottom: 1px solid var(--line); max-width: 40rem; }
 .care-exercise-list a { font-weight: 500; }
+.care-own-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
+.care-own-row form { margin: 0; }
+.care-own-new { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--space-3); max-width: 40rem; }
+.care-own-new .field { flex: 1; min-width: 12rem; margin: 0; }
 .care-steps li { margin-bottom: var(--space-3); font-size: var(--text-lg); max-width: 40rem; }
 .care-breath { font: 500 var(--text-2xl)/1.3 var(--font-sans); min-height: 1.3em; }
 .care-form textarea { width: 100%; max-width: 40rem; }
@@ -361,6 +367,48 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .care-help h2 { margin-top: 0; }
 .care-phones li { padding: var(--space-1) 0; }
 .care-phones a { font-weight: 600; }
+
+/* Meditation: remaining time large, the line being spoken below it; the text to read along folded. */
+.med-time { margin: var(--space-4) 0 var(--space-2); font: 500 var(--text-3xl)/1 var(--font-mono); font-variant-numeric: tabular-nums; }
+.med-now { min-height: 3em; font-size: var(--text-lg); max-width: 40rem; color: var(--fg-2); }
+.med-text ol { max-width: 40rem; }
+.med-text li { margin-bottom: var(--space-2); }
+.med-text li.med-current { font-weight: 600; }
+
+/* Selfcare: the four ways in, as tiles; one explicit way for a bad moment. */
+.care-ways ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--space-3); margin: 0 0 var(--space-3); max-width: 48rem; }
+.care-ways li { border: 0; padding: 0; }
+.care-ways a { display: flex; flex-direction: column; gap: var(--space-1); height: 100%; padding: var(--space-4);
+  border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg); color: var(--fg); text-decoration: none; }
+.care-ways a:hover { background: var(--hover-overlay); }
+.care-ways span { color: var(--fg-2); font-size: var(--text-sm); }
+.care-sos { margin: 0 0 var(--space-8); }
+.care-practice { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-4); }
+.care-between-steps { max-width: 40rem; padding-left: var(--space-5); }
+.care-between-steps > li { margin-bottom: var(--space-6); }
+.care-between-steps h2 { font-size: var(--text-lg); margin: 0 0 var(--space-2); }
+.care-between-steps textarea { width: 100%; }
+/* The reminder: a quiet bar, never a dialog. */
+.nudge { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); max-width: var(--container);
+  margin: 0 0 var(--space-4); padding: var(--space-3) var(--space-4); border: 1px solid var(--line-strong); border-radius: var(--radius-md); background: var(--bg-2); }
+.nudge span { flex: 1; min-width: 12rem; }
+.nudge[hidden] { display: none; }
+
+/* Start/stop buttons carry both icons; the running state shows the right one. */
+[data-running] > .when-idle, [data-running] > .when-running { display: contents; }
+[data-running="true"] > .when-idle, [data-running="false"] > .when-running { display: none; }
+
+/* Timers (Fokus, meditation, breathing): a slim bar under the time. Yellow
+   means time passing while it runs; paused it turns neutral. Screen readers
+   get the same as a progressbar. */
+.time-meter { display: block; height: var(--space-2); max-width: 40rem; margin: 0 0 var(--space-4); overflow: hidden;
+  border-radius: var(--radius-sm); background: var(--line); }
+.time-meter-fill { display: block; height: 100%; width: 0; background: var(--time); transition: width var(--dur) linear; }
+.time-meter[data-state="paused"] .time-meter-fill { background: var(--fg-3); }
+.time-meter[data-state="idle"] .time-meter-fill { background: var(--fg-3); }
+/* Breathing: the bar fills with the in-breath and empties with the out-breath, a second at a time. */
+.breath-meter .time-meter-fill { transition: width 1s linear; }
+@media (prefers-reduced-motion: reduce) { .time-meter-fill, .breath-meter .time-meter-fill { transition: none; } }
 
 /* Groups: one section per group, separated by a hairline. */
 .group-new { align-items: start; }

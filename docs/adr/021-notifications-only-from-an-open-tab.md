@@ -26,4 +26,6 @@ the device, so a throttled background tab and a reload stay exact.
 ## Consequences
 
 - A closed tab or a sleeping phone does not ring. Fokus says so on its page.
+- The Selfcare reminder (nudge.js) follows the same rule: a bar in the page,
+  and a notification only from an open background tab.
 - The "Offline and Web Push" feature shrinks to offline use.
