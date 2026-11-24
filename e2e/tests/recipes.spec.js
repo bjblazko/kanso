@@ -23,7 +23,7 @@ test('recipe: create, find by tag, cook with more servings, tick off', async ({ 
   await expect(page).toHaveURL(/\/p\/[a-z2-7]{12}$/);
 
   // A recipe lives in the kitchen: no spaces bar, back to the recipes, not in the space's tree.
-  await expect(page.locator('nav.rail').getByRole('link', { name: 'Küche' })).toHaveAttribute('aria-current', 'true');
+  await expect(page.locator('.rail-bar > li[data-key="kitchen"] > a')).toHaveAttribute('aria-current', 'true'); // under Mehr on phones
   await expect(page.locator('.breadcrumb').getByRole('link', { name: 'Rezepte' })).toBeVisible();
   await page.goto('/wiki');
   await expect(page.locator('main').getByRole('link', { name: space, exact: true })).toHaveCount(0); // the cookbook is not in the wiki

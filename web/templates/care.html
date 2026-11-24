@@ -1,0 +1,40 @@
+{{define "content"}}{{$d := .Data}}<header class="screen-head">
+<div class="page-toolbar" role="toolbar" aria-label="{{.T "care.title"}}">
+  <a class="btn btn-primary btn-sm" href="/care?after={{$d.Tip.ID}}{{with $d.Level}}&amp;level={{.}}{{end}}">{{template "icon" "heart"}}<span>{{.T "care.another"}}</span></a>
+</div>
+<h1>{{.T "care.title"}}</h1></header>
+<div class="content care">
+{{if $d.Empty}}{{template "care-help" .}}{{end}}
+<section class="care-now" aria-labelledby="care-now">
+  <p class="care-eyebrow">{{.T "care.first_aid"}}</p>
+  <h2 id="care-now">{{$d.Tip.Title}}</h2>
+  <p class="care-body">{{$d.Tip.Body}}</p>
+</section>
+
+<section aria-labelledby="care-battery">
+  <h2 id="care-battery">{{.T "care.battery"}}</h2>
+  <ul class="care-levels list-plain">{{range $d.Levels}}
+    <li><a href="/care?level={{.Key}}"{{if .Current}} aria-current="true"{{end}}><span class="care-level-num">{{.Key}} %</span> {{.Label}}</a></li>{{end}}
+  </ul>
+  <p class="meta">{{.T "care.battery_hint"}}</p>
+  {{with $d.Suggestions}}<h3>{{$.T "care.for_level"}}</h3>
+  <ul class="care-tips list-plain">{{range .}}<li><strong>{{.Title}}</strong><br>{{.Body}}</li>{{end}}</ul>{{end}}
+</section>
+
+<section aria-labelledby="care-exercises">
+  <h2 id="care-exercises">{{.T "care.exercises"}}</h2>
+  <ul class="care-exercise-list list-plain">{{range $d.Exercises}}
+    <li><a href="/care/{{.ID}}">{{.Title}}</a><br><span class="meta">{{.Lead}}</span></li>{{end}}
+  </ul>
+</section>
+{{if not $d.Empty}}{{template "care-help" .}}{{end}}
+</div>{{end}}
+{{define "care-help"}}<aside class="care-help" aria-labelledby="care-help">
+  <h2 id="care-help">{{.T "care.help_title"}}</h2>
+  {{if .Data.Empty}}<p>{{.T "care.empty"}}</p>{{end}}
+  <p>{{.T "care.help"}}</p>
+  <ul class="list-plain care-phones">
+    <li>{{.T "care.help_phone"}} <a href="tel:08001110111">0800 111 0 111</a> · <a href="tel:08001110222">0800 111 0 222</a></li>
+    <li>{{.T "care.help_emergency"}} <a href="tel:112">112</a></li>
+  </ul>
+</aside>{{end}}

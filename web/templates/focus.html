@@ -1,0 +1,24 @@
+{{define "content"}}<header class="screen-head">
+<div class="page-toolbar" role="toolbar" aria-label="{{.T "focus.controls"}}">
+  <button class="btn btn-primary btn-sm" type="button" id="focus-toggle">{{template "icon" "play"}}<span>{{.T "focus.start"}}</span></button>
+  <button class="btn btn-quiet btn-sm" type="button" id="focus-skip">{{template "icon" "skip"}}<span class="tb-label">{{.T "focus.skip"}}</span></button>
+  <span class="tb-sep" aria-hidden="true"></span>
+  <button class="btn btn-quiet btn-sm" type="button" id="focus-reset">{{template "icon" "history"}}<span class="tb-label">{{.T "focus.reset"}}</span></button>
+</div>
+<h1>{{.T "focus.title"}}</h1></header>
+<div class="content focus" id="focus"
+     data-start="{{.T "focus.start"}}" data-pause="{{.T "focus.pause"}}" data-resume="{{.T "focus.resume"}}"
+     data-phase-focus="{{.T "focus.phase_focus"}}" data-phase-short="{{.T "focus.phase_short"}}" data-phase-long="{{.T "focus.phase_long"}}"
+     data-round="{{.T "focus.round"}}" data-done-focus="{{.T "focus.done_focus"}}" data-done-break="{{.T "focus.done_break"}}"
+     data-notify-on="{{.T "focus.notify_on"}}" data-notify-off="{{.T "focus.notify_off"}}" data-notify-ask="{{.T "focus.notify_ask"}}">
+  <p class="focus-phase"><span id="focus-phase">{{.T "focus.phase_focus"}}</span> · <span id="focus-round">{{.T "focus.round" 1}}</span></p>
+  <p class="focus-time" id="focus-time" role="timer" aria-live="off">25:00</p>
+  <p class="meta" id="focus-notify">{{.T "focus.notify_ask"}}</p>
+  <fieldset class="field-set focus-settings"><legend>{{.T "focus.minutes"}}</legend><div class="form-row">
+    <div class="field"><label for="focus-minutes-focus">{{.T "focus.phase_focus"}}</label><input id="focus-minutes-focus" type="number" min="1" max="120" value="25" inputmode="numeric"></div>
+    <div class="field"><label for="focus-minutes-short">{{.T "focus.phase_short"}}</label><input id="focus-minutes-short" type="number" min="1" max="120" value="5" inputmode="numeric"></div>
+    <div class="field"><label for="focus-minutes-long">{{.T "focus.phase_long"}}</label><input id="focus-minutes-long" type="number" min="1" max="120" value="15" inputmode="numeric"></div>
+  </div></fieldset>
+  <p class="meta">{{.T "focus.hint"}}</p>
+</div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/focus.js"}}"></script>{{end}}

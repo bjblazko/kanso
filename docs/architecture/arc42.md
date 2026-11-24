@@ -1,7 +1,7 @@
 # Hüpattl! Kanso — Architecture (arc42)
 
 **Created:** 2026-10-26
-**Updated:** 2026-11-23
+**Updated:** 2026-11-24
 
 ## 1. Introduction and Goals
 
@@ -73,6 +73,7 @@ leaves the host.
 | `internal/markdown` | Safe Markdown rendering |
 | `internal/notes` | Private notes per person, outside Git |
 | `internal/todos` | Shareable to-do lists outside Git, changed by operations |
+| `internal/selfcare` | First-aid steps, battery levels and guided exercises as fixed content; nothing stored ([ADR-022](../adr/022-selfcare-keeps-nothing.md)) |
 | `internal/tasks` | Private and group boards of tasks in Git, with attachments per task next to the board ([ADR-019](../adr/019-task-attachments-next-to-the-board.md)); Kanban and Eisenhower views |
 | `internal/recipes` | Reads recipe pages (ingredients, groups, steps), scales and formats amounts; pure, no files ([ADR-010](../adr/010-recipes-are-wiki-pages.md)) |
 | `internal/shopping` | Plans and applies filling a shopping list from a recipe, adding up amounts ([ADR-011](../adr/011-shopping-lists-are-lists.md)) |
@@ -215,7 +216,7 @@ Kopia jobs.
 - **Internationalisation:** keys in `internal/i18n/{de,en}.yaml`; a test keeps
   both files in step.
 - **Design:** `huepattl-rams-design`; project deviations in `docs/design.md`.
-- **Navigation:** a rail of parts (notes, wiki, …) and a side bar for the content of the current part ([ADR-005](../adr/005-navigation-parts-and-content.md)); every part has its own URL.
+- **Navigation:** a rail of parts (notes, wiki, …) and a side bar for the content of the current part ([ADR-005](../adr/005-navigation-parts-and-content.md)); every part has its own URL; each person orders and hides parts per device ([ADR-020](../adr/020-menu-settings-per-device-in-the-browser.md)). Alerts come only from an open tab ([ADR-021](../adr/021-notifications-only-from-an-open-tab.md)).
 
 ## 9. Architecture Decisions
 
@@ -241,6 +242,9 @@ Kopia jobs.
 | [017](../adr/017-generated-recipes-guard-the-prompt.md) | Generated recipes: fixed choices, data blocks, parser gate |
 | [018](../adr/018-start-page-summary-from-visits-and-reports.md) | Start page summary: window from visits in the state directory, built on the reports |
 | [019](../adr/019-task-attachments-next-to-the-board.md) | Task attachments next to the board, copied from a note turned into a task |
+| [020](../adr/020-menu-settings-per-device-in-the-browser.md) | Menu settings per device in localStorage, applied before drawing |
+| [021](../adr/021-notifications-only-from-an-open-tab.md) | Notifications only from an open tab, no Web Push |
+| [022](../adr/022-selfcare-keeps-nothing.md) | Selfcare keeps nothing and points to help |
 
 ## 10. Quality Requirements
 

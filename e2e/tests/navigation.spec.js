@@ -3,19 +3,28 @@ import { test, expect } from '@playwright/test';
 import { signIn, unique, createSpace } from './helpers.js';
 
 const modules = (page) => page.getByRole('navigation', { name: 'Kanso' });
+/** A part's link in the bar, whether it is shown there or (on phones) under "Mehr". */
+const part = (page, key) => page.locator(`.rail-bar > li[data-key="${key}"] > a`);
+
+/** Opens a part from the bar, or from "Mehr" when it is not in the bar on a phone. */
+async function open(page, name) {
+  const link = modules(page).getByRole('link', { name, exact: true }).locator('visible=true');
+  if (await link.count() === 0) await page.getByText('Mehr', { exact: true }).click();
+  await modules(page).getByRole('link', { name, exact: true }).locator('visible=true').click();
+}
 
 test('the module bar names each part of Kanso and marks the current one', async ({ page }) => {
   await signIn(page, { sub: 'mona', name: 'Mona' });
   await page.goto('/notes');
-  await expect(modules(page).getByRole('link', { name: 'Notizen' })).toHaveAttribute('aria-current', 'true');
-  await expect(modules(page).getByRole('link', { name: 'Wiki' })).not.toHaveAttribute('aria-current', 'true');
-  await modules(page).getByRole('link', { name: 'Wiki' }).click();
+  await expect(part(page, 'notes')).toHaveAttribute('aria-current', 'true');
+  await expect(part(page, 'wiki')).not.toHaveAttribute('aria-current', 'true');
+  await open(page, 'Wiki');
   await expect(page).toHaveURL(/\/wiki$/);
-  await expect(modules(page).getByRole('link', { name: 'Wiki' })).toHaveAttribute('aria-current', 'true');
-  await modules(page).getByRole('link', { name: 'Start' }).click();
+  await expect(part(page, 'wiki')).toHaveAttribute('aria-current', 'true');
+  await open(page, 'Start');
   await expect(page).toHaveURL(/\/$/);
-  await expect(modules(page).getByRole('link', { name: 'Start' })).toHaveAttribute('aria-current', 'true');
-  await expect(modules(page).getByRole('link', { name: 'Wiki' })).not.toHaveAttribute('aria-current', 'true');
+  await expect(part(page, 'start')).toHaveAttribute('aria-current', 'true');
+  await expect(part(page, 'wiki')).not.toHaveAttribute('aria-current', 'true');
 });
 
 test('wiki spaces appear only in the wiki, under their own heading', async ({ page }) => {
