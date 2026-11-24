@@ -8,6 +8,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/bjblazko/kanso/internal/ai"
+	"github.com/bjblazko/kanso/internal/selfcare"
 	"html/template"
 	"io/fs"
 	"net/http"
@@ -45,6 +46,8 @@ type Deps struct {
 	Notes  *notes.Store
 	Todos  *todos.Store
 	Tasks  *tasks.Store
+	// SelfCare keeps each person's own first-aid ideas.
+	SelfCare *selfcare.Store
 	// MealPlans are the groups' cooking plans (ADR-012).
 	MealPlans *mealplan.Store
 	// AI is the registered language model (ADR-013); Fetch loads recipe pages.

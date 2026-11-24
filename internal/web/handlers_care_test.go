@@ -81,3 +81,35 @@ func TestCareMeditation(t *testing.T) {
 		t.Errorf("unknown meditation: %d", resp.StatusCode)
 	}
 }
+
+func TestCareOwnIdeas(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	ben := ts.client(t, "ben", "Ben", false)
+	resp, _ := postTaskForm(t, ts, anna, "/care/own", url.Values{"title": {"Hund knuddeln"}, "body": {"Fünf Minuten"}}, "")
+	if resp.Header.Get("Location") != "/care#care-own" {
+		t.Fatalf("add: %d %q", resp.StatusCode, resp.Header.Get("Location"))
+	}
+	if _, body := get(t, anna, ts.URL+"/care"); !strings.Contains(body, "<strong>Hund knuddeln</strong>") {
+		t.Fatal("own idea not listed")
+	}
+	if _, body := get(t, ben, ts.URL+"/care"); strings.Contains(body, "<strong>Hund knuddeln</strong>") {
+		t.Fatal("ben sees anna's idea")
+	}
+	if resp, _ := postTaskForm(t, ts, anna, "/care/own", url.Values{"title": {" "}}, ""); resp.StatusCode != http.StatusBadRequest {
+		t.Errorf("blank idea: %d", resp.StatusCode)
+	}
+	id := ts.deps.SelfCare.Own("anna")[0].ID
+	postTaskForm(t, ts, anna, "/care/own/"+id+"/delete", url.Values{}, "")
+	if len(ts.deps.SelfCare.Own("anna")) != 0 {
+		t.Fatal("not deleted")
+	}
+}
+
+func TestCareEveningReview(t *testing.T) {
+	ts := newTestServer(t)
+	anna := ts.client(t, "anna", "Anna", false)
+	if _, body := get(t, anna, ts.URL+"/care/evening"); !strings.Contains(body, "Wofür bin ich heute dankbar?") || !strings.Contains(body, `form="care-note"`) {
+		t.Fatal("evening review missing")
+	}
+}

@@ -72,3 +72,14 @@ test('a meditation loads the chosen voice, counts down and can be ended', async 
   await expect(page.locator('#med-time')).toHaveText('05:00');
   await expect(page.getByLabel(/Lyra/)).toBeEnabled();
 });
+
+test('own ideas: add, see in first aid, delete', async ({ page }) => {
+  await signIn(page, { sub: 'ida', name: 'Ida' });
+  await page.goto('/care');
+  const idea = `Katze streicheln ${Date.now()}`;
+  await page.getByLabel('Idee', { exact: true }).fill(idea);
+  await page.getByRole('button', { name: 'Hinzufügen' }).click();
+  await expect(page.locator('.care-own-row strong')).toContainText([idea]);
+  await page.getByRole('button', { name: `„${idea}“ löschen` }).click();
+  await expect(page.locator('.care-own-row')).toHaveCount(0);
+});

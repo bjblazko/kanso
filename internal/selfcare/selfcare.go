@@ -62,9 +62,6 @@ func (l Level) Suggestions() []Tip {
 // Empty tells whether the level calls for help from outside first.
 func (l Level) Empty() bool { return l.Key == "10" }
 
-// Pick returns a random tip other than the one shown before; n(k) must return
-// a number in [0, k), e.g. rand.IntN.
-func Pick(n func(int) int, before string) Tip {
-	pool := slices.DeleteFunc(slices.Clone(tips), func(t Tip) bool { return t.ID == before })
-	return pool[n(len(pool))]
-}
+// Pick returns a random built-in tip other than the one shown before; n(k)
+// must return a number in [0, k), e.g. rand.IntN.
+func Pick(n func(int) int, before string) Tip { return PickFrom(tips, n, before) }

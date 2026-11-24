@@ -3,6 +3,7 @@
 package web
 
 import (
+	"errors"
 	"math/rand/v2"
 	"net/http"
 	"strings"
@@ -13,7 +14,10 @@ import (
 )
 
 // careTip is a first-aid step in the page language.
-type careTip struct{ ID, Title, Body string }
+type careTip struct {
+	ID, Title, Body string
+	Own             bool // the person's own idea
+}
 
 type careChoice struct {
 	Key, Label string
@@ -33,10 +37,11 @@ type carePage struct {
 	Empty       bool
 	Exercises   []careExercise
 	Meditations []careMeditationLink
+	Own         []selfcare.Own
 }
 
 func tipIn(t selfcare.Tip, lang string) careTip {
-	return careTip{ID: t.ID, Title: t.Title.In(lang), Body: t.Body.In(lang)}
+	return careTip{ID: t.ID, Title: t.Title.In(lang), Body: t.Body.In(lang), Own: strings.HasPrefix(t.ID, "own-")}
 }
 
 func exerciseIn(e selfcare.Exercise, lang string) careExercise {
@@ -53,7 +58,13 @@ func (s *Server) carePage(w http.ResponseWriter, r *http.Request) {
 	v := s.newView(r, "", nil)
 	v.Title = v.T("care.title")
 	q := r.URL.Query()
-	d := carePage{Tip: tipIn(selfcare.Pick(rand.IntN, q.Get("after")), v.Lang)}
+	u, _ := auth.UserFrom(r.Context())
+	d := carePage{Own: s.SelfCare.Own(u.Sub)}
+	pool := selfcare.Tips()
+	for _, o := range d.Own {
+		pool = append(pool, o.Tip())
+	}
+	d.Tip = tipIn(selfcare.PickFrom(pool, rand.IntN, q.Get("after")), v.Lang)
 	if l, ok := selfcare.LevelByKey(q.Get("level")); ok {
 		d.Level, d.Empty = l.Key, l.Empty()
 		for _, t := range l.Suggestions() {
@@ -185,4 +196,28 @@ func meditationLinks(lang string) []careMeditationLink {
 		out = append(out, careMeditationLink{ID: m.ID, Title: m.Title.In(lang), Lead: m.Lead.In(lang), Minutes: m.Minutes})
 	}
 	return out
+}
+
+// careOwnAdd keeps one more of the person's own first-aid ideas.
+func (s *Server) careOwnAdd(w http.ResponseWriter, r *http.Request) {
+	u, _ := auth.UserFrom(r.Context())
+	err := s.SelfCare.Add(u.Sub, r.PostFormValue("title"), r.PostFormValue("body"))
+	if errors.Is(err, selfcare.ErrInvalid) {
+		s.fail(w, r, http.StatusBadRequest, "care.own_invalid")
+		return
+	}
+	if err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	http.Redirect(w, r, "/care#care-own", http.StatusSeeOther)
+}
+
+func (s *Server) careOwnDelete(w http.ResponseWriter, r *http.Request) {
+	u, _ := auth.UserFrom(r.Context())
+	if err := s.SelfCare.Delete(u.Sub, r.PathValue("id")); err != nil {
+		s.serverError(w, r, err)
+		return
+	}
+	http.Redirect(w, r, "/care#care-own", http.StatusSeeOther)
 }
