@@ -1,0 +1,16 @@
+{{define "content"}}{{$t := .Data}}<header class="screen-head">
+<div class="page-toolbar" role="toolbar" aria-label="{{.T "care.sos_title"}}">
+  <a class="btn btn-primary btn-sm" href="/care/breathe">{{template "icon" "play"}}<span>{{.T "care.sos_breathe"}}</span></a>
+</div>
+<nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/care">{{.T "care.title"}}</a></nav>
+<h1>{{.T "care.sos_title"}}</h1></header>
+<div class="content care">
+<p class="care-body">{{.T "care.sos_intro"}}</p>
+{{template "care-help" .}}
+<section class="care-now" aria-labelledby="care-now">
+  <p class="care-eyebrow">{{if $t.Own}}{{.T "care.first_aid_own"}}{{else}}{{.T "care.first_aid"}}{{end}}</p>
+  <h2 id="care-now">{{$t.Title}}</h2>
+  <p class="care-body">{{$t.Body}}</p>
+  <p><a class="btn btn-secondary btn-sm" href="/care/sos?after={{$t.ID}}#care-now">{{.T "care.another"}}</a></p>
+</section>
+</div>{{end}}

@@ -1,56 +1,497 @@
 {
   "voices": [
-    {"id": "lyra", "de": "Lyra (weibliche Stimme)", "en": "Lyra (female voice)"},
-    {"id": "orion", "de": "Orion (männliche Stimme)", "en": "Orion (male voice)"}
+    {
+      "id": "lyra",
+      "de": "Lyra (weibliche Stimme)",
+      "en": "Lyra (female voice)"
+    },
+    {
+      "id": "orion",
+      "de": "Orion (männliche Stimme)",
+      "en": "Orion (male voice)"
+    }
   ],
   "meditations": [
     {
       "id": "arrive",
       "minutes": 5,
-      "title": {"de": "Meditation: Ankommen", "en": "Meditation: Arriving"},
-      "lead": {"de": "Fünf Minuten mit dem Atem, um anzukommen. Mit Stimme, Gong am Anfang und am Ende.", "en": "Five minutes with the breath, to arrive. Spoken, with a gong at the start and the end."},
+      "title": {
+        "de": "Meditation: Ankommen",
+        "en": "Meditation: Arriving"
+      },
+      "lead": {
+        "de": "Fünf Minuten mit dem Atem, um anzukommen. Mit Stimme, Gong am Anfang und am Ende.",
+        "en": "Five minutes with the breath, to arrive. Spoken, with a gong at the start and the end."
+      },
       "lines": [
-        {"pause": 4, "de": "Willkommen. Nimm dir die nächsten fünf Minuten nur für dich.", "en": "Welcome. Take the next five minutes just for yourself."},
-        {"pause": 8, "de": "Setz oder leg dich so hin, dass du eine Weile bequem bleiben kannst. Wenn du magst, schließ die Augen. Oder lass den Blick weich auf einen Punkt vor dir sinken.", "en": "Sit or lie down so that you can stay comfortable for a while. Close your eyes if you like. Or let your gaze rest softly on a point in front of you."},
-        {"pause": 10, "de": "Spür, wo dein Körper getragen wird. Der Boden unter den Füßen. Die Sitzfläche. Die Lehne im Rücken.", "en": "Feel where your body is being held. The floor under your feet. The seat. The backrest behind you."},
-        {"pause": 8, "de": "Du musst gerade nichts tun. Nichts erreichen. Nur hier sein.", "en": "You don't have to do anything right now. Nothing to achieve. Just be here."},
-        {"pause": 12, "de": "Lenk deine Aufmerksamkeit zum Atem. Du musst ihn nicht verändern. Beobachte nur, wie er kommt und geht.", "en": "Bring your attention to your breath. You don't need to change it. Just notice how it comes and goes."},
-        {"pause": 15, "de": "Spür, wie die Luft beim Einatmen kühl durch die Nase strömt. Und beim Ausatmen ein wenig wärmer wieder hinaus.", "en": "Feel the air flowing in through your nose, cool as you breathe in. And a little warmer as it flows out again."},
-        {"pause": 20, "de": "Wenn du magst, lass das Ausatmen ein wenig länger werden als das Einatmen. Ganz ohne Anstrengung.", "en": "If you like, let the out-breath become a little longer than the in-breath. Without any effort."},
-        {"pause": 25, "de": "Gedanken werden kommen. Das ist in Ordnung. Bemerke sie, wie Wolken am Himmel, und kehr freundlich zum Atem zurück.", "en": "Thoughts will come. That's all right. Notice them, like clouds in the sky, and kindly return to the breath."},
-        {"pause": 30, "de": "Wo spürst du den Atem jetzt am deutlichsten? Im Bauch, in der Brust, an der Nase? Bleib einfach dort.", "en": "Where do you feel the breath most clearly now? In your belly, your chest, your nose? Simply stay there."},
-        {"pause": 20, "fill": true, "de": "Bleib noch ein paar Atemzüge bei dir.", "en": "Stay with yourself for a few more breaths."},
-        {"pause": 8, "de": "Langsam kommen wir zum Ende. Nimm wahr, wie es dir jetzt geht, ohne es bewerten zu müssen.", "en": "Slowly we are coming to the end. Notice how you feel now, without having to judge it."},
-        {"pause": 6, "de": "Beweg sanft die Finger und die Zehen. Atme einmal tief ein. Und wieder aus.", "en": "Gently move your fingers and toes. Take one deep breath in. And out again."},
-        {"pause": 3, "de": "Wenn du so weit bist, öffne die Augen. Danke, dass du dir diese Zeit genommen hast.", "en": "When you are ready, open your eyes. Thank you for taking this time."}
+        {
+          "pause": 4,
+          "de": "Willkommen. Nimm dir die nächsten fünf Minuten nur für dich.",
+          "en": "Welcome. Take the next five minutes just for yourself."
+        },
+        {
+          "pause": 8,
+          "de": "Setz oder leg dich so hin, dass du eine Weile bequem bleiben kannst. Wenn du magst, schließ die Augen. Oder lass den Blick weich auf einen Punkt vor dir sinken.",
+          "en": "Sit or lie down so that you can stay comfortable for a while. Close your eyes if you like. Or let your gaze rest softly on a point in front of you."
+        },
+        {
+          "pause": 10,
+          "de": "Spür, wo dein Körper getragen wird. Der Boden unter den Füßen. Die Sitzfläche. Die Lehne im Rücken.",
+          "en": "Feel where your body is being held. The floor under your feet. The seat. The backrest behind you."
+        },
+        {
+          "pause": 8,
+          "de": "Du musst gerade nichts tun. Nichts erreichen. Nur hier sein.",
+          "en": "You don't have to do anything right now. Nothing to achieve. Just be here."
+        },
+        {
+          "pause": 12,
+          "de": "Lenk deine Aufmerksamkeit zum Atem. Du musst ihn nicht verändern. Beobachte nur, wie er kommt und geht.",
+          "en": "Bring your attention to your breath. You don't need to change it. Just notice how it comes and goes."
+        },
+        {
+          "pause": 15,
+          "de": "Spür, wie die Luft beim Einatmen kühl durch die Nase strömt. Und beim Ausatmen ein wenig wärmer wieder hinaus.",
+          "en": "Feel the air flowing in through your nose, cool as you breathe in. And a little warmer as it flows out again."
+        },
+        {
+          "pause": 20,
+          "de": "Wenn du magst, lass das Ausatmen ein wenig länger werden als das Einatmen. Ganz ohne Anstrengung.",
+          "en": "If you like, let the out-breath become a little longer than the in-breath. Without any effort."
+        },
+        {
+          "pause": 25,
+          "de": "Gedanken werden kommen. Das ist in Ordnung. Bemerke sie, wie Wolken am Himmel, und kehr freundlich zum Atem zurück.",
+          "en": "Thoughts will come. That's all right. Notice them, like clouds in the sky, and kindly return to the breath."
+        },
+        {
+          "pause": 30,
+          "de": "Wo spürst du den Atem jetzt am deutlichsten? Im Bauch, in der Brust, an der Nase? Bleib einfach dort.",
+          "en": "Where do you feel the breath most clearly now? In your belly, your chest, your nose? Simply stay there."
+        },
+        {
+          "pause": 20,
+          "fill": true,
+          "de": "Bleib noch ein paar Atemzüge bei dir.",
+          "en": "Stay with yourself for a few more breaths."
+        },
+        {
+          "pause": 8,
+          "de": "Langsam kommen wir zum Ende. Nimm wahr, wie es dir jetzt geht, ohne es bewerten zu müssen.",
+          "en": "Slowly we are coming to the end. Notice how you feel now, without having to judge it."
+        },
+        {
+          "pause": 6,
+          "de": "Beweg sanft die Finger und die Zehen. Atme einmal tief ein. Und wieder aus.",
+          "en": "Gently move your fingers and toes. Take one deep breath in. And out again."
+        },
+        {
+          "pause": 3,
+          "de": "Wenn du so weit bist, öffne die Augen. Danke, dass du dir diese Zeit genommen hast.",
+          "en": "When you are ready, open your eyes. Thank you for taking this time."
+        }
       ]
     },
     {
       "id": "bodyscan",
       "minutes": 10,
-      "title": {"de": "Meditation: Körperreise", "en": "Meditation: Body journey"},
-      "lead": {"de": "Zehn Minuten einmal durch den ganzen Körper, von den Füßen bis zum Scheitel. Mit Stimme, Gong am Anfang und am Ende.", "en": "Ten minutes through your whole body, from your feet to the top of your head. Spoken, with a gong at the start and the end."},
+      "title": {
+        "de": "Meditation: Körperreise",
+        "en": "Meditation: Body journey"
+      },
+      "lead": {
+        "de": "Zehn Minuten einmal durch den ganzen Körper, von den Füßen bis zum Scheitel. Mit Stimme, Gong am Anfang und am Ende.",
+        "en": "Ten minutes through your whole body, from your feet to the top of your head. Spoken, with a gong at the start and the end."
+      },
       "lines": [
-        {"pause": 4, "de": "Willkommen zu dieser Körperreise. In den nächsten zehn Minuten wanderst du mit deiner Aufmerksamkeit einmal durch deinen ganzen Körper.", "en": "Welcome to this body journey. Over the next ten minutes, your attention will travel once through your whole body."},
-        {"pause": 8, "de": "Leg oder setz dich bequem hin. Schließ die Augen, wenn es sich gut anfühlt.", "en": "Lie down or sit comfortably. Close your eyes if that feels good."},
-        {"pause": 15, "de": "Atme ein paarmal etwas tiefer als sonst. Und lass den Atem dann wieder von selbst fließen.", "en": "Take a few breaths that are a little deeper than usual. And then let the breath flow on its own again."},
-        {"pause": 8, "de": "Es gibt hier nichts richtig oder falsch zu machen. Du nimmst nur wahr, was da ist. Wärme, Kühle, Kribbeln, Druck. Oder auch gar nichts.", "en": "There is nothing to do right or wrong here. You simply notice what is there. Warmth, coolness, tingling, pressure. Or nothing at all."},
-        {"pause": 25, "de": "Beginne bei deinen Füßen. Spür die Zehen, die Fußsohlen, die Fersen. Wie fühlen sie sich gerade an?", "en": "Begin with your feet. Feel your toes, the soles of your feet, your heels. How do they feel right now?"},
-        {"pause": 25, "de": "Wandere weiter zu den Unterschenkeln und den Knien. Wenn du Spannung bemerkst, lass sie mit dem nächsten Ausatmen ein wenig los.", "en": "Move on to your lower legs and your knees. If you notice tension, let a little of it go with the next out-breath."},
-        {"pause": 25, "de": "Jetzt die Oberschenkel und das Becken. Spür das Gewicht, mit dem du aufliegst. Lass dich tragen.", "en": "Now your thighs and your hips. Feel the weight with which you rest. Let yourself be held."},
-        {"pause": 30, "de": "Weiter zum Bauch. Beobachte, wie er sich beim Atmen hebt und senkt. Ganz von selbst.", "en": "On to your belly. Notice how it rises and falls with the breath. All by itself."},
-        {"pause": 25, "de": "Der Rücken. Vom unteren Rücken langsam hinauf bis zwischen die Schulterblätter. Gib ihm Raum.", "en": "Your back. From the lower back slowly up to between your shoulder blades. Give it space."},
-        {"pause": 25, "de": "Die Brust. Vielleicht spürst du den Herzschlag. Vielleicht nur den Atem. Beides ist gut.", "en": "Your chest. Perhaps you feel your heartbeat. Perhaps only the breath. Both are fine."},
-        {"pause": 25, "de": "Die Schultern. Hier sammelt sich oft viel. Lass sie mit dem Ausatmen sinken, ein kleines Stück.", "en": "Your shoulders. A lot tends to gather here. Let them sink a little with the out-breath."},
-        {"pause": 25, "de": "Die Oberarme, die Ellbogen, die Unterarme. Bis in die Hände und die Fingerspitzen.", "en": "Your upper arms, your elbows, your forearms. All the way into your hands and fingertips."},
-        {"pause": 20, "de": "Der Nacken und der Hals. Lass den Kopf schwer werden.", "en": "Your neck and throat. Let your head become heavy."},
-        {"pause": 25, "de": "Das Gesicht. Der Kiefer darf locker sein, die Zähne leicht auseinander. Die Stirn wird weit und glatt. Die Augen ruhen.", "en": "Your face. Your jaw can be loose, your teeth slightly apart. Your forehead grows wide and smooth. Your eyes rest."},
-        {"pause": 30, "de": "Und jetzt spür deinen Körper als Ganzes. Von den Füßen bis zum Scheitel. Atmend. Lebendig. Hier.", "en": "And now feel your body as a whole. From your feet to the top of your head. Breathing. Alive. Here."},
-        {"pause": 40, "fill": true, "de": "Wenn Gedanken kommen, ist das in Ordnung. Kehr einfach zum Gefühl des ganzen Körpers zurück.", "en": "If thoughts come, that's all right. Simply return to the feeling of your whole body."},
-        {"pause": 6, "de": "Wir kommen langsam zum Ende dieser Reise.", "en": "Slowly we are coming to the end of this journey."},
-        {"pause": 10, "de": "Vertief den Atem ein wenig. Beweg die Finger und die Zehen. Vielleicht magst du dich strecken.", "en": "Deepen your breath a little. Move your fingers and toes. Perhaps you'd like to stretch."},
-        {"pause": 3, "de": "Öffne die Augen, wenn du so weit bist. Und nimm etwas von dieser Ruhe mit in deinen Tag.", "en": "Open your eyes when you are ready. And take some of this calm with you into your day."}
+        {
+          "pause": 4,
+          "de": "Willkommen zu dieser Körperreise. In den nächsten zehn Minuten wanderst du mit deiner Aufmerksamkeit einmal durch deinen ganzen Körper.",
+          "en": "Welcome to this body journey. Over the next ten minutes, your attention will travel once through your whole body."
+        },
+        {
+          "pause": 8,
+          "de": "Leg oder setz dich bequem hin. Schließ die Augen, wenn es sich gut anfühlt.",
+          "en": "Lie down or sit comfortably. Close your eyes if that feels good."
+        },
+        {
+          "pause": 15,
+          "de": "Atme ein paarmal etwas tiefer als sonst. Und lass den Atem dann wieder von selbst fließen.",
+          "en": "Take a few breaths that are a little deeper than usual. And then let the breath flow on its own again."
+        },
+        {
+          "pause": 8,
+          "de": "Es gibt hier nichts richtig oder falsch zu machen. Du nimmst nur wahr, was da ist. Wärme, Kühle, Kribbeln, Druck. Oder auch gar nichts.",
+          "en": "There is nothing to do right or wrong here. You simply notice what is there. Warmth, coolness, tingling, pressure. Or nothing at all."
+        },
+        {
+          "pause": 25,
+          "de": "Beginne bei deinen Füßen. Spür die Zehen, die Fußsohlen, die Fersen. Wie fühlen sie sich gerade an?",
+          "en": "Begin with your feet. Feel your toes, the soles of your feet, your heels. How do they feel right now?"
+        },
+        {
+          "pause": 25,
+          "de": "Wandere weiter zu den Unterschenkeln und den Knien. Wenn du Spannung bemerkst, lass sie mit dem nächsten Ausatmen ein wenig los.",
+          "en": "Move on to your lower legs and your knees. If you notice tension, let a little of it go with the next out-breath."
+        },
+        {
+          "pause": 25,
+          "de": "Jetzt die Oberschenkel und das Becken. Spür das Gewicht, mit dem du aufliegst. Lass dich tragen.",
+          "en": "Now your thighs and your hips. Feel the weight with which you rest. Let yourself be held."
+        },
+        {
+          "pause": 30,
+          "de": "Weiter zum Bauch. Beobachte, wie er sich beim Atmen hebt und senkt. Ganz von selbst.",
+          "en": "On to your belly. Notice how it rises and falls with the breath. All by itself."
+        },
+        {
+          "pause": 25,
+          "de": "Der Rücken. Vom unteren Rücken langsam hinauf bis zwischen die Schulterblätter. Gib ihm Raum.",
+          "en": "Your back. From the lower back slowly up to between your shoulder blades. Give it space."
+        },
+        {
+          "pause": 25,
+          "de": "Die Brust. Vielleicht spürst du den Herzschlag. Vielleicht nur den Atem. Beides ist gut.",
+          "en": "Your chest. Perhaps you feel your heartbeat. Perhaps only the breath. Both are fine."
+        },
+        {
+          "pause": 25,
+          "de": "Die Schultern. Hier sammelt sich oft viel. Lass sie mit dem Ausatmen sinken, ein kleines Stück.",
+          "en": "Your shoulders. A lot tends to gather here. Let them sink a little with the out-breath."
+        },
+        {
+          "pause": 25,
+          "de": "Die Oberarme, die Ellbogen, die Unterarme. Bis in die Hände und die Fingerspitzen.",
+          "en": "Your upper arms, your elbows, your forearms. All the way into your hands and fingertips."
+        },
+        {
+          "pause": 20,
+          "de": "Der Nacken und der Hals. Lass den Kopf schwer werden.",
+          "en": "Your neck and throat. Let your head become heavy."
+        },
+        {
+          "pause": 25,
+          "de": "Das Gesicht. Der Kiefer darf locker sein, die Zähne leicht auseinander. Die Stirn wird weit und glatt. Die Augen ruhen.",
+          "en": "Your face. Your jaw can be loose, your teeth slightly apart. Your forehead grows wide and smooth. Your eyes rest."
+        },
+        {
+          "pause": 30,
+          "de": "Und jetzt spür deinen Körper als Ganzes. Von den Füßen bis zum Scheitel. Atmend. Lebendig. Hier.",
+          "en": "And now feel your body as a whole. From your feet to the top of your head. Breathing. Alive. Here."
+        },
+        {
+          "pause": 40,
+          "fill": true,
+          "de": "Wenn Gedanken kommen, ist das in Ordnung. Kehr einfach zum Gefühl des ganzen Körpers zurück.",
+          "en": "If thoughts come, that's all right. Simply return to the feeling of your whole body."
+        },
+        {
+          "pause": 6,
+          "de": "Wir kommen langsam zum Ende dieser Reise.",
+          "en": "Slowly we are coming to the end of this journey."
+        },
+        {
+          "pause": 10,
+          "de": "Vertief den Atem ein wenig. Beweg die Finger und die Zehen. Vielleicht magst du dich strecken.",
+          "en": "Deepen your breath a little. Move your fingers and toes. Perhaps you'd like to stretch."
+        },
+        {
+          "pause": 3,
+          "de": "Öffne die Augen, wenn du so weit bist. Und nimm etwas von dieser Ruhe mit in deinen Tag.",
+          "en": "Open your eyes when you are ready. And take some of this calm with you into your day."
+        }
       ]
+    },
+    {
+      "id": "pause",
+      "minutes": 3,
+      "title": {
+        "de": "Meditation: Kurze Pause",
+        "en": "Meditation: Short break"
+      },
+      "lead": {
+        "de": "Drei Minuten zwischen zwei Aufgaben, um kurz aufzutauchen.",
+        "en": "Three minutes between two tasks, to come up for air."
+      },
+      "lines": [
+        {
+          "pause": 4,
+          "de": "Leg kurz alles aus der Hand. Die nächsten drei Minuten gehören dir.",
+          "en": "Put everything down for a moment. The next three minutes are yours."
+        },
+        {
+          "pause": 8,
+          "de": "Setz dich aufrecht hin, die Füße am Boden. Lass die Schultern sinken.",
+          "en": "Sit upright, feet on the floor. Let your shoulders drop."
+        },
+        {
+          "pause": 12,
+          "de": "Atme einmal tief ein. Und lang wieder aus.",
+          "en": "Take one deep breath in. And a long breath out."
+        },
+        {
+          "pause": 20,
+          "de": "Spür, wie dein Atem jetzt von selbst weiterfließt. Ein und aus.",
+          "en": "Feel how your breath now flows on by itself. In and out.",
+          "fill": true
+        },
+        {
+          "pause": 15,
+          "de": "Was auch eben war, es darf jetzt kurz Pause haben. Du musst nichts festhalten.",
+          "en": "Whatever just happened can take a break now. You don't have to hold on to anything."
+        },
+        {
+          "pause": 8,
+          "de": "Bemerke, wie es dir gerade geht. Ohne etwas ändern zu wollen.",
+          "en": "Notice how you are right now. Without wanting to change anything."
+        },
+        {
+          "pause": 3,
+          "de": "Atme noch einmal tief. Und dann geh mit frischem Blick weiter.",
+          "en": "Breathe deeply once more. Then carry on with fresh eyes."
+        }
+      ]
+    },
+    {
+      "id": "calm",
+      "minutes": 5,
+      "title": {
+        "de": "Meditation: Zur Ruhe kommen",
+        "en": "Meditation: Settling down"
+      },
+      "lead": {
+        "de": "Fünf Minuten nach Ärger oder Streit, damit der Körper wieder ruhig werden darf.",
+        "en": "Five minutes after anger or an argument, so your body can settle again."
+      },
+      "lines": [
+        {
+          "pause": 4,
+          "de": "Etwas hat dich gerade aufgewühlt. Das ist in Ordnung. Du musst es jetzt nicht lösen.",
+          "en": "Something has just stirred you up. That's all right. You don't have to solve it now."
+        },
+        {
+          "pause": 8,
+          "de": "Such dir einen Platz, an dem du ein paar Minuten bleiben kannst. Setz dich, oder bleib stehen.",
+          "en": "Find a place where you can stay for a few minutes. Sit down, or stay standing."
+        },
+        {
+          "pause": 10,
+          "de": "Spür deine Füße auf dem Boden. Drück sie sanft nach unten. Der Boden trägt dich.",
+          "en": "Feel your feet on the floor. Press them gently down. The ground is holding you."
+        },
+        {
+          "pause": 12,
+          "de": "Wo im Körper spürst du den Ärger? Im Bauch, in der Brust, im Kiefer, in den Händen? Nur bemerken.",
+          "en": "Where in your body do you feel the anger? In your belly, chest, jaw, hands? Just notice."
+        },
+        {
+          "pause": 15,
+          "de": "Atme dorthin. Ein. Und lang wieder aus. Mit jedem Ausatmen darf ein wenig Druck gehen.",
+          "en": "Breathe into that place. In. And a long breath out. With each out-breath a little pressure can go."
+        },
+        {
+          "pause": 20,
+          "de": "Öffne die Hände, wenn sie gefaustet sind. Lass den Kiefer locker. Die Stirn wird weich.",
+          "en": "Open your hands if they are clenched. Let your jaw go loose. Your forehead softens."
+        },
+        {
+          "pause": 25,
+          "de": "Die Gedanken wollen vielleicht noch weiterstreiten. Lass sie reden. Du kehrst zum Atem zurück.",
+          "en": "Your thoughts may still want to argue. Let them talk. You return to your breath.",
+          "fill": true
+        },
+        {
+          "pause": 15,
+          "de": "Hinter Ärger steckt oft etwas, das dir wichtig ist. Was könnte das sein? Du musst es nur ahnen.",
+          "en": "Behind anger there is often something that matters to you. What might it be? You only need to sense it."
+        },
+        {
+          "pause": 8,
+          "de": "Atme noch zwei, drei Mal ruhig ein und aus.",
+          "en": "Breathe in and out calmly two or three more times."
+        },
+        {
+          "pause": 3,
+          "de": "Wenn du so weit bist, kehr zurück. Mit etwas mehr Ruhe als vorhin.",
+          "en": "When you are ready, come back. With a little more calm than before."
+        }
+      ]
+    },
+    {
+      "id": "kindness",
+      "minutes": 10,
+      "title": {
+        "de": "Meditation: Freundlichkeit",
+        "en": "Meditation: Kindness"
+      },
+      "lead": {
+        "de": "Zehn Minuten, um dir selbst und anderen ein wenig Wärme zu schenken.",
+        "en": "Ten minutes to give yourself and others a little warmth."
+      },
+      "lines": [
+        {
+          "pause": 4,
+          "de": "Willkommen. In dieser Meditation geht es um Freundlichkeit, zuerst mit dir selbst.",
+          "en": "Welcome. This meditation is about kindness, starting with yourself."
+        },
+        {
+          "pause": 8,
+          "de": "Mach es dir bequem und schließ die Augen, wenn du magst.",
+          "en": "Make yourself comfortable and close your eyes if you like."
+        },
+        {
+          "pause": 15,
+          "de": "Atme ein paarmal ruhig ein und aus. Lass den Atem dann von selbst gehen.",
+          "en": "Breathe in and out calmly a few times. Then let the breath go by itself."
+        },
+        {
+          "pause": 12,
+          "de": "Leg, wenn es sich gut anfühlt, eine Hand auf dein Herz oder auf den Bauch. Spür die Wärme deiner Hand.",
+          "en": "If it feels good, place a hand on your heart or your belly. Feel the warmth of your hand."
+        },
+        {
+          "pause": 20,
+          "de": "Sag dir innerlich, langsam: Möge es mir gut gehen. Möge ich in Frieden sein.",
+          "en": "Say inwardly, slowly: May I be well. May I be at peace."
+        },
+        {
+          "pause": 20,
+          "de": "Möge ich freundlich mit mir sein. Auch an schwierigen Tagen.",
+          "en": "May I be kind to myself. Even on difficult days."
+        },
+        {
+          "pause": 15,
+          "de": "Wenn sich das ungewohnt anfühlt, ist das in Ordnung. Freundlichkeit darf wachsen.",
+          "en": "If this feels unfamiliar, that's all right. Kindness is allowed to grow."
+        },
+        {
+          "pause": 20,
+          "de": "Denk jetzt an einen Menschen, den du gern hast. Stell ihn dir vor, wie er lächelt.",
+          "en": "Now think of someone you like. Picture them smiling."
+        },
+        {
+          "pause": 20,
+          "de": "Wünsch ihm innerlich: Möge es dir gut gehen. Mögest du in Frieden sein.",
+          "en": "Wish them inwardly: May you be well. May you be at peace."
+        },
+        {
+          "pause": 20,
+          "de": "Und jetzt einen Menschen, den du kaum kennst. Vielleicht jemand von heute, im Laden oder auf der Straße.",
+          "en": "And now someone you hardly know. Perhaps someone from today, in a shop or on the street."
+        },
+        {
+          "pause": 20,
+          "de": "Auch ihm: Möge es dir gut gehen. Mögest du in Frieden sein.",
+          "en": "To them as well: May you be well. May you be at peace."
+        },
+        {
+          "pause": 30,
+          "de": "Lass die Wünsche jetzt weiter werden. An alle Menschen in deiner Nähe. An alle, die es gerade schwer haben.",
+          "en": "Now let the wishes grow wider. To everyone near you. To everyone who is having a hard time right now.",
+          "fill": true
+        },
+        {
+          "pause": 20,
+          "de": "Und zum Schluss wieder zu dir. Möge es mir gut gehen. Möge ich in Frieden sein.",
+          "en": "And finally back to yourself. May I be well. May I be at peace."
+        },
+        {
+          "pause": 8,
+          "de": "Spür noch einen Moment nach, wie es dir jetzt geht.",
+          "en": "Take a moment to feel how you are now."
+        },
+        {
+          "pause": 3,
+          "de": "Wenn du so weit bist, öffne die Augen. Nimm etwas von dieser Wärme mit.",
+          "en": "When you are ready, open your eyes. Take some of this warmth with you."
+        }
+      ]
+    },
+    {
+      "id": "sleep",
+      "minutes": 15,
+      "title": {
+        "de": "Meditation: Einschlafen",
+        "en": "Meditation: Falling asleep"
+      },
+      "lead": {
+        "de": "Fünfzehn Minuten im Liegen, die immer leiser werden. Am Ende kein Gong, damit du einfach weiterschlafen kannst.",
+        "en": "Fifteen minutes lying down, growing ever quieter. No gong at the end, so you can simply sleep on."
+      },
+      "lines": [
+        {
+          "pause": 6,
+          "de": "Leg dich bequem hin, so wie du gleich schlafen möchtest. Das Licht ist aus, der Tag ist vorbei.",
+          "en": "Lie down comfortably, the way you want to fall asleep. The light is off, the day is done."
+        },
+        {
+          "pause": 10,
+          "de": "Du musst jetzt nichts mehr tun. Nicht einmal einschlafen. Nur liegen und atmen.",
+          "en": "You don't have to do anything now. Not even fall asleep. Just lie here and breathe."
+        },
+        {
+          "pause": 15,
+          "de": "Spür, wie die Matratze dich trägt. Lass dich mit jedem Ausatmen ein wenig schwerer werden.",
+          "en": "Feel the mattress holding you. With each out-breath, let yourself grow a little heavier."
+        },
+        {
+          "pause": 20,
+          "de": "Atme ein. Und lang aus. Und noch einmal. Ein. Und lang aus.",
+          "en": "Breathe in. And a long breath out. And once more. In. And a long breath out."
+        },
+        {
+          "pause": 25,
+          "de": "Deine Füße werden schwer und warm. Deine Beine sinken in die Matratze.",
+          "en": "Your feet grow heavy and warm. Your legs sink into the mattress."
+        },
+        {
+          "pause": 25,
+          "de": "Dein Bauch wird weich. Dein Rücken darf loslassen.",
+          "en": "Your belly softens. Your back can let go."
+        },
+        {
+          "pause": 25,
+          "de": "Deine Arme liegen schwer neben dir. Die Hände sind ganz ruhig.",
+          "en": "Your arms lie heavy beside you. Your hands are completely still."
+        },
+        {
+          "pause": 25,
+          "de": "Dein Gesicht entspannt sich. Der Kiefer ist locker. Die Augen ruhen.",
+          "en": "Your face relaxes. Your jaw is loose. Your eyes rest."
+        },
+        {
+          "pause": 30,
+          "de": "Wenn Gedanken an den Tag kommen, lass sie vorbeiziehen. Sie haben bis morgen Zeit.",
+          "en": "If thoughts about the day come, let them drift by. They can wait until tomorrow."
+        },
+        {
+          "pause": 40,
+          "de": "Stell dir einen ruhigen Ort vor. Einen Strand am Abend, einen Wald, ein warmes Zimmer. Was immer dir guttut.",
+          "en": "Picture a quiet place. A beach in the evening, a forest, a warm room. Whatever does you good."
+        },
+        {
+          "pause": 40,
+          "de": "Du bist dort sicher. Es ist warm, es ist still. Nichts wird von dir erwartet.",
+          "en": "You are safe there. It is warm and quiet. Nothing is expected of you."
+        },
+        {
+          "pause": 60,
+          "de": "Dein Atem wird langsamer. Ganz von selbst.",
+          "en": "Your breath grows slower. All by itself.",
+          "fill": true
+        },
+        {
+          "pause": 45,
+          "de": "Du darfst jetzt einschlafen. Oder einfach weiter ruhen.",
+          "en": "You may fall asleep now. Or simply keep resting."
+        },
+        {
+          "pause": 3,
+          "de": "Gute Nacht.",
+          "en": "Good night."
+        }
+      ],
+      "quiet_end": true
     }
   ]
 }

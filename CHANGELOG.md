@@ -7,6 +7,20 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-11-24
+
+### Added
+
+- Four more guided meditations: „Kurze Pause“ (3 minutes), „Zur Ruhe kommen“ (5), „Freundlichkeit“ (10) and „Einschlafen“ (15, with no closing gong).
+
+- Print: pages print as their content alone (no menus, toolbars or buttons), and wiki pages, recipes, notes and tasks have a "Drucken" button; the print dialog can also save a PDF.
+- Selfcare › Klänge: white, pink or brown noise, waves, and a calm floating chord with quiet chimes, all made in the browser with no sound files. Endless, or with a sleep timer (15–90 minutes) that fades out in the last minute; volume per layer; an optional "Bildschirm anlassen". The choices stay on the device, and the reminder keeps quiet while it plays.
+
+### Changed
+
+- Selfcare is simpler: one question, „Was brauchst du gerade?“, with three answers. „Kurze Pause“ (the step between two things), „Zeit für mich“ (meditations, sounds, exercises) and „Es ist gerade zu viel“, a page of its own with help from outside first, one calming step and breathing. Own ideas and the reminder moved to „Selfcare einstellen“. The separate battery check is gone; its question lives on in the Check-in exercise.
+- Meditations share the time left over among all their pauses, so no single silence grows long.
+
 ## [0.14.0] - 2026-11-24
 
 ### Added

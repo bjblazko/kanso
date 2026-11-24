@@ -1,0 +1,30 @@
+{{define "content"}}<header class="screen-head">
+<div class="page-toolbar" role="toolbar" aria-label="{{.T "sounds.title"}}">
+  <button class="btn btn-primary btn-sm" type="button" id="sounds-toggle" data-start="{{.T "sounds.start"}}" data-stop="{{.T "sounds.stop"}}" data-running="false"><span class="when-idle">{{template "icon" "play"}}</span><span class="when-running">{{template "icon" "stop"}}</span><span>{{.T "sounds.start"}}</span></button>
+</div>
+<nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/care">{{.T "care.title"}}</a></nav>
+<h1>{{.T "sounds.title"}}</h1></header>
+<div class="content care sounds" id="sounds" data-endless="{{.T "sounds.endless_now"}}">
+<p class="care-body">{{.T "sounds.lead"}}</p>
+<fieldset class="field-set"><legend>{{.T "sounds.noise"}}</legend><div class="choices">
+  <label class="choice"><input type="radio" name="noise" value=""> {{.T "sounds.none"}}</label>
+  <label class="choice"><input type="radio" name="noise" value="white"> {{.T "sounds.white"}}</label>
+  <label class="choice"><input type="radio" name="noise" value="pink" checked> {{.T "sounds.pink"}}</label>
+  <label class="choice"><input type="radio" name="noise" value="brown"> {{.T "sounds.brown"}}</label>
+  <label class="choice"><input type="radio" name="noise" value="waves"> {{.T "sounds.waves"}}</label>
+</div>
+<div class="field"><label for="noise-volume">{{.T "sounds.volume"}}</label><input id="noise-volume" type="range" min="0" max="1" step="0.05" value="0.6"></div>
+</fieldset>
+<fieldset class="field-set"><legend>{{.T "sounds.space"}}</legend>
+<label class="choice"><input type="checkbox" id="drone" checked> {{.T "sounds.drone"}}</label>
+<div class="field"><label for="drone-volume">{{.T "sounds.volume"}}</label><input id="drone-volume" type="range" min="0" max="1" step="0.05" value="0.5"></div>
+</fieldset>
+<div class="field"><label for="sleep-timer">{{.T "sounds.timer"}}</label><select id="sleep-timer">
+  <option value="0">{{.T "sounds.endless"}}</option><option value="15">{{.T "care.minutes" 15}}</option><option value="30" selected>{{.T "care.minutes" 30}}</option>
+  <option value="45">{{.T "care.minutes" 45}}</option><option value="60">{{.T "care.minutes" 60}}</option><option value="90">{{.T "care.minutes" 90}}</option></select></div>
+<label class="choice"><input type="checkbox" id="awake"> {{.T "sounds.awake"}}</label>
+<p class="med-time" id="sounds-time" role="timer" aria-live="off">30:00</p>
+<span class="time-meter" id="sounds-meter" role="progressbar" aria-label="{{.T "focus.progress"}}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-state="idle"><span class="time-meter-fill"></span></span>
+<p class="meta">{{.T "sounds.hint"}}</p>
+</div>{{end}}
+{{define "scripts"}}<script type="module" src="{{.Asset "js/sounds.js"}}"></script>{{end}}

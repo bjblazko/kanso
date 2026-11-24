@@ -6,6 +6,7 @@
   {{else}}<a class="btn btn-quiet btn-sm" href="/notes/{{$id}}/task">{{template "icon" "board"}}<span class="tb-label">{{.T "notes.to_task"}}</span></a>{{end}}
   <span class="tb-sep" aria-hidden="true"></span>
   <a class="btn btn-quiet btn-sm tb-danger" href="/notes/{{$id}}/delete">{{template "icon" "trash"}}<span class="tb-label">{{.T "notes.delete"}}</span></a>
+  {{template "tb-print" .}}
   <span class="tb-grow"></span>
   {{template "tb-audience" .Audience}}
 </div>

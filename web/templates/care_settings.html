@@ -1,0 +1,27 @@
+{{define "content"}}<header class="screen-head">
+<nav class="breadcrumb" aria-label="{{.T "page.path"}}"><a href="/care">{{.T "care.title"}}</a></nav>
+<h1>{{.T "care.settings"}}</h1></header>
+<div class="content care">
+<section aria-labelledby="care-own">
+  <h2 id="care-own">{{.T "care.own"}}</h2>
+  <p class="meta">{{.T "care.own_intro"}}</p>
+  {{with .Data}}<ul class="care-tips list-plain">{{range .}}<li class="care-own-row"><div><strong>{{.Title}}</strong>{{with .Body}}<br>{{.}}{{end}}</div>
+    <form method="post" action="/care/own/{{.ID}}/delete"><input type="hidden" name="csrf" value="{{$.CSRF}}">
+      <button class="btn btn-quiet btn-sm" type="submit" aria-label="{{$.T "care.own_delete" .Title}}">{{template "icon" "trash"}}</button></form></li>{{end}}</ul>{{end}}
+  <form class="care-own-new" method="post" action="/care/own">
+    <input type="hidden" name="csrf" value="{{.CSRF}}">
+    <div class="field"><label for="own-title">{{.T "care.own_title"}}</label><input id="own-title" name="title" required maxlength="80" placeholder="{{.T "care.own_example"}}"></div>
+    <div class="field"><label for="own-body">{{.T "care.own_body"}}</label><input id="own-body" name="body" maxlength="300"></div>
+    <div class="field"><label for="own-kind">{{.T "care.own_kind"}}</label><select id="own-kind" name="kind">
+      <option value="calm">{{.T "care.kind_calm"}}</option><option value="lift">{{.T "care.kind_lift"}}</option><option value="both">{{.T "care.kind_both"}}</option></select></div>
+    <button class="btn btn-secondary" type="submit">{{.T "care.own_add"}}</button>
+  </form>
+</section>
+<section aria-labelledby="care-nudge">
+  <h2 id="care-nudge">{{.T "care.nudge"}}</h2>
+  <div class="field"><label for="nudge-every">{{.T "care.nudge_label"}}</label><select id="nudge-every">
+    <option value="0">{{.T "care.nudge_off"}}</option><option value="30">{{.T "care.nudge_min" 30}}</option>
+    <option value="60" selected>{{.T "care.nudge_min" 60}}</option><option value="90">{{.T "care.nudge_min" 90}}</option></select></div>
+  <p class="meta">{{.T "care.nudge_hint"}}</p>
+</section>
+</div>{{end}}

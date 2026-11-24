@@ -9,7 +9,7 @@ import (
 )
 
 func TestMeditationsComplete(t *testing.T) {
-	if len(Voices()) < 2 || len(Meditations()) != 2 {
+	if len(Voices()) < 2 || len(Meditations()) < 2 {
 		t.Fatalf("voices %d, meditations %d", len(Voices()), len(Meditations()))
 	}
 	for _, m := range Meditations() {

@@ -103,6 +103,6 @@ test('notes: the actions of a note share one height', async ({ page }) => {
   await page.goto('/notes');
   await page.getByRole('link', { name: text }).click();
   const heights = await page.locator('.page-toolbar .btn').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
-  expect(heights).toHaveLength(4);
+  expect(heights).toHaveLength(5); // the four actions and Drucken
   expect(new Set(heights).size).toBe(1);
 });

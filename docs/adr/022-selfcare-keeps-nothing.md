@@ -2,7 +2,7 @@
 
 **Status:** Accepted
 **Created:** 2026-11-24
-**Updated:** 2026-11-24
+**Updated:** 2026-11-24 (battery check removed; SOS page)
 
 ## Context
 
@@ -14,12 +14,12 @@ meet someone in a real crisis.
 ## Decision
 
 The content is fixed in Go (`internal/selfcare`, German and English) and
-written for Kanso, not taken from other sources. Neither the battery answer
-nor the steps someone views are stored, not even on the device. Only when the
+written for Kanso, not taken from other sources. Nothing about how someone feels, or which steps they view, is stored, not
+even on the device (an earlier battery check worked the same way and was
+later folded into the Check-in exercise). Only when the
 person presses "Als Notiz speichern" do the answers of a check-in or "Eine
 gute Sache" become a private note. Every Selfcare page shows "Hilfe von
-außen" (TelefonSeelsorge and 112). With an empty battery, that block comes
-first.
+außen" (TelefonSeelsorge and 112). On "Es ist gerade zu viel" it comes first.
 
 ## Alternatives Considered
 

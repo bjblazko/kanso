@@ -347,13 +347,6 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .care-eyebrow { margin: 0; color: var(--fg-2); font-size: var(--text-sm); font-weight: 500; }
 .care-now h2 { margin: var(--space-2) 0; }
 .care-body { font-size: var(--text-lg); max-width: 40rem; }
-.care-levels { display: flex; flex-direction: column; gap: var(--space-1); max-width: 32rem; }
-.care-levels li { border: 0; padding: 0; }
-.care-levels a { display: flex; gap: var(--space-3); align-items: center; min-height: var(--target-min); padding: 0 var(--space-3);
-  border: 1px solid var(--line); border-radius: var(--radius-md); color: var(--fg); text-decoration: none; }
-.care-levels a:hover { background: var(--hover-overlay); }
-.care-levels a[aria-current="true"] { border-color: var(--fg); font-weight: 500; }
-.care-level-num { min-width: 3.5rem; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--fg-2); }
 .care-tips li, .care-exercise-list li { padding: var(--space-3) 0; border-bottom: 1px solid var(--line); max-width: 40rem; }
 .care-exercise-list a { font-weight: 500; }
 .care-own-row { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
@@ -372,18 +365,21 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--fg); }
 .med-time { margin: var(--space-4) 0 var(--space-2); font: 500 var(--text-3xl)/1 var(--font-mono); font-variant-numeric: tabular-nums; }
 .med-now { min-height: 3em; font-size: var(--text-lg); max-width: 40rem; color: var(--fg-2); }
 .med-text ol { max-width: 40rem; }
+.sounds input[type="range"] { width: min(20rem, 100%); }
+.sounds .field-set { margin-bottom: var(--space-5); }
+.time-meter[hidden] { display: none; }
 .med-text li { margin-bottom: var(--space-2); }
 .med-text li.med-current { font-weight: 600; }
 
 /* Selfcare: the four ways in, as tiles; one explicit way for a bad moment. */
-.care-ways ul { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--space-3); margin: 0 0 var(--space-3); max-width: 48rem; }
+.care-ways ul { display: grid; grid-template-columns: 1fr; gap: var(--space-3); margin: 0 0 var(--space-3); max-width: 48rem; }
 .care-ways li { border: 0; padding: 0; }
 .care-ways a { display: flex; flex-direction: column; gap: var(--space-1); height: 100%; padding: var(--space-4);
   border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg); color: var(--fg); text-decoration: none; }
 .care-ways a:hover { background: var(--hover-overlay); }
 .care-ways span { color: var(--fg-2); font-size: var(--text-sm); }
-.care-sos { margin: 0 0 var(--space-8); }
-.care-practice { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: var(--space-4); }
+.care-way-sos { border-color: var(--line-strong) !important; }
+.care-small-help { margin-top: var(--space-6); }
 .care-between-steps { max-width: 40rem; padding-left: var(--space-5); }
 .care-between-steps > li { margin-bottom: var(--space-6); }
 .care-between-steps h2 { font-size: var(--text-lg); margin: 0 0 var(--space-2); }
@@ -814,3 +810,28 @@ html { scroll-padding-top: 9rem; }
 .report-tip { position: fixed; pointer-events: none; z-index: 20; background: var(--fg); color: var(--bg); font-size: var(--text-xs);
   padding: var(--space-1) var(--space-2); border-radius: var(--radius-md); opacity: 0; transition: opacity 120ms ease-out; }
 @media (prefers-reduced-motion: reduce) { .report-tip { transition: none; } }
+
+/* ---- Print -----------------------------------------------------------------
+   The content alone, black on white: no menus, toolbars, buttons or forms.
+   The browser's print dialog also saves a PDF, so Kanso needs no PDF tool. */
+@media print {
+  @page { margin: 16mm 15mm; }
+  :root { --bg: #fff; --bg-2: #fff; --bg-3: #fff; --fg: #000; --fg-2: #333; --fg-3: #555; --line: #bbb; --line-strong: #888; }
+  html, body { background: #fff; color: #000; font-size: 11pt; }
+  body { padding: 0; }
+  .topbar, .rail, .sidenav, .page-toolbar, .nudge, .footer, .breadcrumb, .btn, button,
+  form, .tb-more, .audience, .time-meter, .rail-more, noscript, .skip-link { display: none !important; }
+  .shell, .shell-wiki { display: block; min-height: 0; }
+  .main, .content { margin: 0; padding: 0; max-width: none; }
+  .screen-head { position: static; margin: 0 0 6mm; padding: 0; border-bottom: 0.5pt solid #000; background: none; }
+  h1, h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+  p, li, blockquote, pre, table, figure, img, .card { break-inside: avoid; page-break-inside: avoid; }
+  img, svg, video { max-width: 100% !important; height: auto; }
+  pre, code { white-space: pre-wrap; word-break: break-word; background: none; border: 0.5pt solid #bbb; }
+  a { color: #000; text-decoration: underline; }
+  .prose a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9pt; color: #333; word-break: break-all; }
+  details > :not(summary) { display: block; }
+  table { border-collapse: collapse; }
+  th, td { border: 0.5pt solid #888; }
+}
+

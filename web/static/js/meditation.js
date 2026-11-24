@@ -49,8 +49,7 @@ async function load(ctx, who) {
 
 function schedule(ctx, buffers) {
   const pauses = lines.map((li) => Number(li.dataset.pause));
-  const fill = lines.findIndex((li) => 'fill' in li.dataset);
-  const p = plan(buffers.map((b) => b.duration), pauses, fill, minutes, bellLength);
+  const p = plan(buffers.map((b) => b.duration), pauses, minutes, bellLength);
   const t0 = ctx.currentTime + 0.3;
   gong(ctx, t0, bellLength);
   buffers.forEach((buffer, i) => {
@@ -59,7 +58,7 @@ function schedule(ctx, buffers) {
     src.connect(ctx.destination);
     src.start(t0 + p.starts[i]);
   });
-  gong(ctx, t0 + p.endBell, bellLength);
+  if (!('quietEnd' in root.dataset)) gong(ctx, t0 + p.endBell, bellLength); // no gong to wake a sleeper
   return { t0, p };
 }
 

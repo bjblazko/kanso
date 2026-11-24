@@ -6,6 +6,17 @@
 {{- else}}<span class="meta tb-audience">{{if .Private}}{{template "icon" "lock"}}{{else}}{{template "icon" "users"}}{{end}}<span class="tb-audience-text">{{.Text}}</span></span>{{end}}{{end}}{{end}}
 {{/* avatar is the person's picture, round, or a placeholder until there is one. */}}
 {{define "avatar"}}{{if .AvatarVersion}}<img class="avatar" src="/avatar/{{.User.Sub}}?v={{.AvatarVersion}}" alt="">{{else}}<span class="avatar avatar-none">{{template "icon" "user"}}</span>{{end}}{{end}}
+{{/* tb-print prints the page as it is, without menus and buttons (print styles in app.css). */}}
+{{define "tb-print"}}<button class="btn btn-quiet btn-sm" type="button" data-print>{{template "icon" "print"}}<span class="tb-label">{{.T "print.action"}}</span></button>{{end}}
+{{/* care-help says where help from outside is (ADR-022), on every Selfcare page. */}}
+{{define "care-help"}}<aside class="care-help" aria-labelledby="care-help">
+  <h2 id="care-help">{{.T "care.help_title"}}</h2>
+  <p>{{.T "care.help"}}</p>
+  <ul class="list-plain care-phones">
+    <li>{{.T "care.help_phone"}} <a href="tel:08001110111">0800 111 0 111</a> · <a href="tel:08001110222">0800 111 0 222</a></li>
+    <li>{{.T "care.help_emergency"}} <a href="tel:112">112</a></li>
+  </ul>
+</aside>{{end}}
 {{/* rail-link is one part of Kanso in the rail or under "Mehr". */}}
 {{define "rail-link"}}<a href="{{.Href}}"{{if .Current}} aria-current="true"{{end}}>{{template "icon" .Icon}}<span>{{.Label}}</span></a>{{end}}
 {{/* face-avatar is someone else's picture, round, or a placeholder; takes a face. */}}
